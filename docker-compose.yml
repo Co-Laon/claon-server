@@ -1,0 +1,11 @@
+version: "3"
+services:
+  media_service_database:
+    container_name: clraon_db
+    image: postgres:9.3
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "clraon_db"
+      POSTGRES_USER: "coraon_user"
+      POSTGRES_PASSWORD: "coraon_password"
