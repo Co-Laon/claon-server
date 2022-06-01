@@ -1,0 +1,34 @@
+package coLaon.ClaonBack.config;
+
+import org.springframework.context.annotation.Bean;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+
+public class SwaggerConfig {
+
+    private final String title = "Claon Service API";
+    private final String version = "1.0.0";
+    private final String description = "Climbing Project";
+
+    @Bean
+    public Docket api() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("coLaon.ClaonBack.web"))
+                .paths(PathSelectors.any())
+                .build();
+    }
+
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+                .title(this.title)
+                .version(this.version)
+                .description(this.description)
+                .build();
+    }
+}
