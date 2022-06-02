@@ -1,7 +1,7 @@
-package coLaon.ClaonBack.application.validator;
+package coLaon.ClaonBack.common.validator;
 
-import coLaon.ClaonBack.exception.ErrorCode;
-import coLaon.ClaonBack.exception.UnauthorizedException;
+import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 
 import java.util.UUID;
 

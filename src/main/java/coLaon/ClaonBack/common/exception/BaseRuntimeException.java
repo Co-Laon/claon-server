@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.exception;
+package coLaon.ClaonBack.common.exception;
 
 import lombok.Getter;
 

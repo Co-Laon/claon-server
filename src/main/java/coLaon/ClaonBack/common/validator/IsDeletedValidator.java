@@ -1,9 +1,9 @@
-package coLaon.ClaonBack.application.validator;
+package coLaon.ClaonBack.common.validator;
 
-import coLaon.ClaonBack.exception.BadRequestException;
-import coLaon.ClaonBack.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.BadRequestException;
+import coLaon.ClaonBack.common.exception.ErrorCode;
 
-public class IsDeletedValidator extends Validator{
+public class IsDeletedValidator extends Validator {
 
     private final Boolean isDeleted;
     private final String target;

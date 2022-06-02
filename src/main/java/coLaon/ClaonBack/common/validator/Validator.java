@@ -1,6 +1,4 @@
-package coLaon.ClaonBack.application.validator;
-
-import java.util.Optional;
+package coLaon.ClaonBack.common.validator;
 
 public abstract class Validator {
 
