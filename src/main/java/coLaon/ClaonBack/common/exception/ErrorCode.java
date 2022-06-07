@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.exception;
+package coLaon.ClaonBack.common.exception;
 
 public enum ErrorCode {
 
@@ -6,6 +6,9 @@ public enum ErrorCode {
      * 400 Bad Request
      */
     ROW_ALREADY_DELETED(40000),
+    ROW_ALREADY_EXIST(40001),
+    WRONG_ADDRESS(40002),
+    INVALID_FORMAT(40003),
     /**
      *  401 Unauthorized Error
      */
