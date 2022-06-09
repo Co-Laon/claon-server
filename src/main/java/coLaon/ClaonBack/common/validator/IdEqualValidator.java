@@ -22,7 +22,7 @@ public class IdEqualValidator extends Validator {
     @Override
     public void validate() {
         if (!srcId.equals(dstId)) {
-            throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "NO PERMISSION");
+            throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
         }
 
         if (this.next != null) {

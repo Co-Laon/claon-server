@@ -5,31 +5,43 @@ import lombok.Data;
 
 @Data
 public class UserResponseDto {
+    private String id;
     private String phoneNumber;
     private String email;
     private String nickname;
-    private String wideActiveArea;
-    private String narrowActiveArea;
+    private String metropolitanActiveArea;
+    private String basicLocalActiveArea;
     private String imagePath;
     private String instagramId;
 
-    private UserResponseDto(String phoneNumber, String email, String nickname, String wideActiveArea, String narrowActiveArea, String imagePath, String instagramId) {
+    private UserResponseDto(
+            String id,
+            String phoneNumber,
+            String email,
+            String nickname,
+            String metropolitanActiveArea,
+            String basicLocalActiveArea,
+            String imagePath,
+            String instagramId
+    ) {
+        this.id = id;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.nickname = nickname;
-        this.wideActiveArea = wideActiveArea;
-        this.narrowActiveArea = narrowActiveArea;
+        this.metropolitanActiveArea = metropolitanActiveArea;
+        this.basicLocalActiveArea = basicLocalActiveArea;
         this.imagePath = imagePath;
         this.instagramId = instagramId;
     }
 
     public static UserResponseDto from(User user) {
         return new UserResponseDto(
+                user.getId(),
                 user.getPhoneNumber(),
                 user.getEmail(),
                 user.getNickname(),
-                user.getWideActiveArea(),
-                user.getNarrowActiveArea(),
+                user.getMetropolitanActiveArea(),
+                user.getBasicLocalActiveArea(),
                 user.getImagePath(),
                 user.getInstagramId()
         );
