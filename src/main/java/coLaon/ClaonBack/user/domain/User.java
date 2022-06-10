@@ -12,7 +12,7 @@ import javax.persistence.Column;
 @Table(name = "tb_user")
 @NoArgsConstructor
 public class User extends BaseEntity {
-    @Column(name = "phoneNumber", nullable = false, unique = true)
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
     @Column(name = "email", nullable = false, unique = true)
     private String email;
@@ -20,10 +20,10 @@ public class User extends BaseEntity {
     private String password;
     @Column(name = "nickname", nullable = false, unique = true)
     private String nickname;
-    @Column(name = "wideActiveArea")
-    private String wideActiveArea;
-    @Column(name = "narrowActiveArea")
-    private String narrowActiveArea;
+    @Column(name = "metropolitan_active_area")
+    private String metropolitanActiveArea;
+    @Column(name = "basic_local_active_area")
+    private String basicLocalActiveArea;
     @Column(name = "image")
     private String imagePath;
     @Column(name = "instagramId")
@@ -31,13 +31,13 @@ public class User extends BaseEntity {
     @Column(name = "isDeleted")
     private Boolean isDeleted;
 
-    public User(
+    private User(
             String phoneNumber,
             String email,
             String password,
             String nickname,
-            String wideActiveArea,
-            String narrowActiveArea,
+            String metropolitanActiveArea,
+            String basicLocalActiveArea,
             String imagePath,
             String instagramId
     ) {
@@ -45,8 +45,8 @@ public class User extends BaseEntity {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
-        this.wideActiveArea = wideActiveArea;
-        this.narrowActiveArea = narrowActiveArea;
+        this.metropolitanActiveArea = metropolitanActiveArea;
+        this.basicLocalActiveArea = basicLocalActiveArea;
         this.imagePath = imagePath;
         this.instagramId = instagramId;
         this.isDeleted = false;
@@ -57,12 +57,21 @@ public class User extends BaseEntity {
             String email,
             String password,
             String nickname,
-            String wideActiveArea,
-            String narrowActiveArea,
+            String metropolitanActiveArea,
+            String basicLocalActiveArea,
             String imagePath,
             String instagramId
     )
     {
-        return new User(phoneNumber, email, password, nickname, wideActiveArea, narrowActiveArea, imagePath, instagramId);
+        return new User(
+                phoneNumber,
+                email,
+                password,
+                nickname,
+                metropolitanActiveArea,
+                basicLocalActiveArea,
+                imagePath,
+                instagramId
+        );
     }
 }

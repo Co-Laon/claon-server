@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.user.service;
 
-import coLaon.ClaonBack.common.domain.enums.Address;
+import coLaon.ClaonBack.common.domain.enums.BasicLocalArea;
+import coLaon.ClaonBack.common.domain.enums.MetropolitanArea;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.validator.PasswordFormatValidator;
@@ -24,7 +25,7 @@ public class UserService {
                 email -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 존재하는 EMAIL입니다."
+                            "이미 존재하는 이메일입니다."
                     );
                 }
         );
@@ -33,31 +34,30 @@ public class UserService {
                 nickname -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 존재하는 NICKNAME입니다."
+                            "이미 존재하는 닉네임입니다."
                     );
                 }
         );
-
-        Address.validateAddress(signUpRequestDto.getWideActiveArea(), signUpRequestDto.getNarrowActiveArea());
 
         if (signUpRequestDto.getPassword() != null) {
             Validator validator = new PasswordFormatValidator(signUpRequestDto.getPassword());
             validator.validate();
         }
 
-        return UserResponseDto.from(
-                userRepository.save(
-                        User.of(
-                                signUpRequestDto.getPhoneNumber(),
-                                signUpRequestDto.getEmail(),
-                                signUpRequestDto.getPassword(),
-                                signUpRequestDto.getNickname(),
-                                signUpRequestDto.getWideActiveArea(),
-                                signUpRequestDto.getNarrowActiveArea(),
-                                signUpRequestDto.getImagePath(),
-                                signUpRequestDto.getInstagramId()
-                        )
-                )
+        return UserResponseDto.from(userRepository.save(
+                User.of(
+                        signUpRequestDto.getPhoneNumber(),
+                        signUpRequestDto.getEmail(),
+                        signUpRequestDto.getPassword(),
+                        signUpRequestDto.getNickname(),
+                        MetropolitanArea.of(signUpRequestDto.getMetropolitanActiveArea()),
+                        BasicLocalArea.of(
+                                signUpRequestDto.getMetropolitanActiveArea(),
+                                signUpRequestDto.getBasicLocalActiveArea()
+                        ),
+                        signUpRequestDto.getImagePath(),
+                        signUpRequestDto.getInstagramId()
+                ))
         );
     }
 }
