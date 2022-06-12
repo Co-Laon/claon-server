@@ -1,20 +1,20 @@
 # CONTRIBUTING
 
-This Repository is the CLAON project Backend Repository of the Co-Raon team.
+This Repository is the CLAON project Backend Repository of the Co-Laon team.
 
 ## 1. Fork and Clone
 
-Please fork from `Co-Raon/claon-server` repository to your Github account,
+Please fork from `Co-Laon/claon-server` repository to your Github account,
 and contribute through your forked repository.
 
 Clone your forked repository.
 ```shell
-git clone https://www.github.com/{your account name}/claon-server
+git clone https://www.github.com/{your account name}/claon-server.git
 ```
 
 Configure Git to sync your fork with the original repository.
 ```shell
-git remote add upstream https://github.com/Co-Raon/claon-server.git
+git remote add upstream https://github.com/Co-Laon/claon-server.git
 ```
 
 ## 2. Make new branch
@@ -69,5 +69,5 @@ style: changes that do not affect the meaning of the code
 
 ## 4. Pull Request
 
-Create pull request at the `Co-Raon/claon-server` repository according to the PR Template.
+Create pull request at the `Co-Laon/claon-server` repository according to the PR Template.
 You can merge only when more than one team member approve.
