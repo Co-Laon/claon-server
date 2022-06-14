@@ -20,7 +20,10 @@ public class IsDeletedValidator extends Validator {
     @Override
     public void validate() {
         if (this.isDeleted) {
-            throw new BadRequestException(ErrorCode.ROW_ALREADY_DELETED, "DELETED " + this.target);
+            throw new BadRequestException(
+                    ErrorCode.ROW_ALREADY_DELETED,
+                    String.format("이미 삭제된 %s 입니다.", this.target)
+            );
         }
 
         if (this.next != null) {
