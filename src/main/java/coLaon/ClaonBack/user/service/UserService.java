@@ -50,16 +50,16 @@ public class UserService {
                 }
         );
 
-        if (signUpRequestDto.getPassword() != null) {
-            Validator validator = new PasswordFormatValidator(signUpRequestDto.getPassword());
+        signUpRequestDto.getPassword().ifPresent(password -> {
+            Validator validator = new PasswordFormatValidator(password);
             validator.validate();
-        }
+        });
 
         return UserResponseDto.from(userRepository.save(
                 User.of(
                         signUpRequestDto.getPhoneNumber(),
                         signUpRequestDto.getEmail(),
-                        signUpRequestDto.getPassword(),
+                        signUpRequestDto.getPassword().orElse(null),
                         signUpRequestDto.getNickname(),
                         MetropolitanArea.of(signUpRequestDto.getMetropolitanActiveArea()),
                         BasicLocalArea.of(
