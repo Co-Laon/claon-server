@@ -3,12 +3,15 @@ package coLaon.ClaonBack.user.domain;
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Column;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "tb_user")
 @NoArgsConstructor
 public class User extends BaseEntity {
@@ -30,6 +33,29 @@ public class User extends BaseEntity {
     private String instagramId;
     @Column(name = "isDeleted")
     private Boolean isDeleted;
+
+    private User(
+            String id,
+            String phoneNumber,
+            String email,
+            String password,
+            String nickname,
+            String metropolitanActiveArea,
+            String basicLocalActiveArea,
+            String imagePath,
+            String instagramId
+    ) {
+        super(id);
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.metropolitanActiveArea = metropolitanActiveArea;
+        this.basicLocalActiveArea = basicLocalActiveArea;
+        this.imagePath = imagePath;
+        this.instagramId = instagramId;
+        this.isDeleted = false;
+    }
 
     private User(
             String phoneNumber,
@@ -64,6 +90,31 @@ public class User extends BaseEntity {
     )
     {
         return new User(
+                phoneNumber,
+                email,
+                password,
+                nickname,
+                metropolitanActiveArea,
+                basicLocalActiveArea,
+                imagePath,
+                instagramId
+        );
+    }
+
+    public static User of(
+            String id,
+            String phoneNumber,
+            String email,
+            String password,
+            String nickname,
+            String metropolitanActiveArea,
+            String basicLocalActiveArea,
+            String imagePath,
+            String instagramId
+    )
+    {
+        return new User(
+                id,
                 phoneNumber,
                 email,
                 password,
