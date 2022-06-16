@@ -12,7 +12,17 @@ public enum ErrorCode {
     /**
      *  401 Unauthorized Error
      */
-    NOT_ACCESSIBLE(40100);
+    NOT_ACCESSIBLE(40100),
+    /**
+     *  500 Internal Server Error
+     */
+    INTERNAL_SERVER_ERROR(50000),
+    /**
+     *  503 Service Unavailable
+     */
+    UNAVAILABLE_MAIL_SERVER(50300),
+    
+    ;
 
     private final int code;
 
