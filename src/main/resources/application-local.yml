@@ -2,6 +2,9 @@ server:
   port: 8080
 
 spring:
+  config:
+    import: "optional:classpath:emailsender.yml"
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/claon_db
