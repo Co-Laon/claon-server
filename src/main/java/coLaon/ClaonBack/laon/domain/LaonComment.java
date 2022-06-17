@@ -26,25 +26,66 @@ public class LaonComment extends BaseEntity {
     @ManyToOne(targetEntity = LaonComment.class)
     @JoinColumn(name = "parent_comment_id")
     private LaonComment parentComment;
+    @ManyToOne(targetEntity = Laon.class)
+    @JoinColumn(name = "laon_id", nullable = false)
+    private Laon laon;
 
     private LaonComment(
             String content,
             User writer,
+            Laon laon,
             LaonComment parentComment
+
     ) {
         this.content = content;
+        this.isDeleted = false;
         this.writer = writer;
+        this.laon = laon;
+        this.parentComment = parentComment;
+    }
+
+    private LaonComment(
+            String id,
+            String content,
+            User writer,
+            Laon laon,
+            LaonComment parentComment
+
+    ) {
+        super(id);
+        this.content = content;
+        this.isDeleted = false;
+        this.writer = writer;
+        this.laon = laon;
         this.parentComment = parentComment;
     }
 
     public static LaonComment of(
             String content,
             User writer,
+            Laon laon,
             LaonComment parentComment
     ) {
         return new LaonComment(
                 content,
                 writer,
+                laon,
+                parentComment
+        );
+    }
+
+    public static LaonComment of(
+            String id,
+            String content,
+            User writer,
+            Laon laon,
+            LaonComment parentComment
+    ) {
+        return new LaonComment(
+                id,
+                content,
+                writer,
+                laon,
                 parentComment
         );
     }
