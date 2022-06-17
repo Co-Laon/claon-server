@@ -11,6 +11,7 @@ import coLaon.ClaonBack.user.domain.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
+import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
@@ -94,6 +95,19 @@ public class UserService {
         );
 
         return UserResponseDto.from(userRepository.save(user));
+    }
+
+    @Transactional
+    public PublicScopeResponseDto setPublicScope(String userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        user.changePublicScope();
+        return PublicScopeResponseDto.from(userRepository.save(user).getIsPrivate());
     }
 }
 
