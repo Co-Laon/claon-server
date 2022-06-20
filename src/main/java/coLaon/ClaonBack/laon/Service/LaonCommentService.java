@@ -40,7 +40,12 @@ public class LaonCommentService {
         return CommentResponseDto.from(laonCommentRepository.save(
                 LaonComment.of(commentRequestDto.getContent(), writer, laon,
                         commentRequestDto.getParentCommentId() != null ?
-                                laonCommentRepository.findById(commentRequestDto.getParentCommentId()).orElseThrow(RuntimeException::new) : null)
+                                laonCommentRepository.findById(commentRequestDto.getParentCommentId()).orElseThrow(
+                                        () -> new BadRequestException(
+                                                ErrorCode.ROW_DOES_NOT_EXIST,
+                                                "부모 댓글이 없습니다"
+                                        )
+                                ) : null)
                 )
         );
     }

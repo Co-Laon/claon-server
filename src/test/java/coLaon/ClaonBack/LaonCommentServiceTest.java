@@ -125,5 +125,4 @@ public class LaonCommentServiceTest {
             assertThat(commentResponseDto.getContent()).isEqualTo("testchildContent1");
         }
     }
-
 }
