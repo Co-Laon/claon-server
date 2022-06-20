@@ -11,7 +11,7 @@ public class CommentResponseDto {
     private String parentcommentId;
     private String laonId;
 
-    public CommentResponseDto(
+    private CommentResponseDto(
             String commentId,
             String content,
             Boolean isDeleted,
