@@ -30,7 +30,7 @@ public class CommentResponseDto {
                 laonComment.getId(),
                 laonComment.getContent(),
                 laonComment.getIsDeleted(),
-                laonComment.getParentComment().getId(),
+                laonComment.getParentComment()!= null ? laonComment.getParentComment().getId() : null,
                 laonComment.getLaon().getId()
         );
     }
