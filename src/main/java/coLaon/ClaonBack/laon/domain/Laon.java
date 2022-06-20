@@ -4,7 +4,6 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -53,6 +52,26 @@ public class Laon extends BaseEntity {
         this.writer = writer;
     }
 
+    private Laon(String id,
+                String centerName,
+                String wallName,
+                String holdInfo,
+                String videoUrl,
+                String videoThumbnailUrl,
+                String content,
+                User writer
+    ) {
+        super(id);
+        this.centerName = centerName;
+        this.wallName = wallName;
+        this.holdInfo = holdInfo;
+        this.videoUrl = videoUrl;
+        this.videoThumbnailUrl = videoThumbnailUrl;
+        this.content = content;
+        this.isDeleted = false;
+        this.writer = writer;
+    }
+
     public static Laon of(
             String centerName,
             String wallName,
@@ -63,6 +82,28 @@ public class Laon extends BaseEntity {
             User writer
     ) {
         return new Laon(
+                centerName,
+                wallName,
+                holdInfo,
+                videoUrl,
+                videoThumbnailUrl,
+                content,
+                writer
+        );
+    }
+
+    public static Laon of(
+            String id,
+            String centerName,
+            String wallName,
+            String holdInfo,
+            String videoUrl,
+            String videoThumbnailUrl,
+            String content,
+            User writer
+    ) {
+        return new Laon(
+                id,
                 centerName,
                 wallName,
                 holdInfo,

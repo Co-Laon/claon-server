@@ -9,6 +9,7 @@ public enum ErrorCode {
     ROW_ALREADY_EXIST(40001),
     WRONG_ADDRESS(40002),
     INVALID_FORMAT(40003),
+    ROW_DOES_NOT_EXIST(40004),
     /**
      *  401 Unauthorized Error
      */

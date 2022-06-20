@@ -4,7 +4,6 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -33,6 +32,7 @@ public class LaonComment extends BaseEntity {
             LaonComment parentComment
     ) {
         this.content = content;
+        this.isDeleted = false;
         this.writer = writer;
         this.parentComment = parentComment;
     }

@@ -4,7 +4,6 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -31,11 +30,33 @@ public class LaonLike extends BaseEntity {
         this.laon = laon;
     }
 
+    private LaonLike(
+            String id,
+            User liker,
+            Laon laon
+    ) {
+        super(id);
+        this.liker = liker;
+        this.laon = laon;
+    }
+
     public static LaonLike of(
             User liker,
             Laon laon
     ) {
         return new LaonLike(
+                liker,
+                laon
+        );
+    }
+
+    public static LaonLike of(
+            String id,
+            User liker,
+            Laon laon
+    ) {
+        return new LaonLike(
+                id,
                 liker,
                 laon
         );

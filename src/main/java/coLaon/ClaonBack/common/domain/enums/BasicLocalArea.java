@@ -2,7 +2,6 @@ package coLaon.ClaonBack.common.domain.enums;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
-
 import java.util.Arrays;
 import java.util.List;
 
