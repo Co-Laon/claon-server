@@ -21,7 +21,7 @@ import javax.validation.Valid;
 @RequestMapping("/api/v1/laon")
 public class LaonController {
     private final LaonService laonService;
-    private LaonCommentService laonCommentService;
+    private final LaonCommentService laonCommentService;
 
     @PostMapping("/like")
     @ResponseStatus(value = HttpStatus.CREATED)
