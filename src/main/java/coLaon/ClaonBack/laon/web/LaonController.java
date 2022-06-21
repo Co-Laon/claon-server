@@ -2,10 +2,7 @@ package coLaon.ClaonBack.laon.web;
 
 import coLaon.ClaonBack.laon.Service.LaonCommentService;
 import coLaon.ClaonBack.laon.Service.LaonService;
-import coLaon.ClaonBack.laon.dto.CommentRequestDto;
-import coLaon.ClaonBack.laon.dto.CommentResponseDto;
-import coLaon.ClaonBack.laon.dto.LikeRequestDto;
-import coLaon.ClaonBack.laon.dto.LikeResponseDto;
+import coLaon.ClaonBack.laon.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,5 +34,13 @@ public class LaonController {
             @RequestHeader(value = "userId") String userId,
             @RequestBody @Valid CommentRequestDto commentRequestDto) {
         return this.laonCommentService.createComment(userId, commentRequestDto);
+    }
+
+    @PostMapping("/{id}")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public LaonResponseDto createLaon(
+            @RequestHeader(value = "userId") String userId,
+            @RequestBody @Valid LaonCreateRequestDto laonCreateRequestDto){
+        return this.laonService.createLaon(userId, laonCreateRequestDto);
     }
 }
