@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.laon.dto;
+package coLaon.ClaonBack.post.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,5 +10,5 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class LikeRequestDto {
     @NotNull
-    private String laonId;
+    private String postId;
 }

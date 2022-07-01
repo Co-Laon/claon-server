@@ -35,30 +35,30 @@ public class AuthServiceTest {
     void setUp() {
         this.user = User.of(
                 "test",
-                "01012341234",
                 "test@gmail.com",
-                "test1234!!",
+                "123456789",
                 "test",
                 "경기도",
                 "성남시",
                 "",
+                "123456",
                 "test"
         );
     }
 
     @Test
-    @DisplayName("Success case for sign up with password")
-    void successSignUpWithPassword() {
+    @DisplayName("Success case for sign up")
+    void successSignUp() {
         try (MockedStatic<User> mockedUser = mockStatic(User.class)) {
             // given
             SignUpRequestDto signUpRequestDto = new SignUpRequestDto(
-                    "01012341234",
                     "test@gmail.com",
-                    "test1234!!",
+                    "123456789",
                     "test",
                     "경기도",
                     "성남시",
                     "",
+                    "123456",
                     "test"
             );
 
@@ -66,13 +66,13 @@ public class AuthServiceTest {
             given(this.userRepository.findByNickname("test")).willReturn(Optional.empty());
 
             given(User.of(
-                    "01012341234",
                     "test@gmail.com",
-                    "test1234!!",
+                    "123456789",
                     "test",
                     "경기도",
                     "성남시",
                     "",
+                    "123456",
                     "test")).willReturn(this.user);
 
             given(this.userRepository.save(this.user)).willReturn(this.user);
@@ -83,77 +83,8 @@ public class AuthServiceTest {
             // then
             assertThat(userResponseDto).isNotNull();
             assertThat(userResponseDto)
-                    .extracting("id", "phoneNumber", "email", "nickname")
-                    .contains("test", "01012341234", "test@gmail.com", "test");
+                    .extracting("id", "email", "nickname")
+                    .contains("test", "test@gmail.com", "test");
         }
-    }
-
-    @Test
-    @DisplayName("Success case for sign up without password")
-    void successSignUpWithoutPassword() {
-        try (MockedStatic<User> mockedUser = mockStatic(User.class)) {
-            // given
-            SignUpRequestDto signUpRequestDto = new SignUpRequestDto(
-                    "01012341234",
-                    "test@gmail.com",
-                    null,
-                    "test",
-                    "경기도",
-                    "성남시",
-                    "",
-                    "test"
-            );
-
-            given(this.userRepository.findByEmail("test@gmail.com")).willReturn(Optional.empty());
-            given(this.userRepository.findByNickname("test")).willReturn(Optional.empty());
-
-            this.user.setPassword(null);
-            given(User.of(
-                    "01012341234",
-                    "test@gmail.com",
-                    null,
-                    "test",
-                    "경기도",
-                    "성남시",
-                    "",
-                    "test")).willReturn(this.user);
-
-            given(this.userRepository.save(this.user)).willReturn(this.user);
-
-            // when
-            UserResponseDto userResponseDto = this.userService.signUp(signUpRequestDto);
-
-            // then
-            assertThat(userResponseDto).isNotNull();
-            assertThat(userResponseDto)
-                    .extracting("id", "phoneNumber", "email", "nickname")
-                    .contains("test", "01012341234", "test@gmail.com", "test");
-        }
-    }
-
-    @Test
-    @DisplayName("Invalid password format for sign up")
-    void failSignUpPasswordFormatInvalid() {
-        // given
-        SignUpRequestDto signUpRequestDto = new SignUpRequestDto(
-                "01012341234",
-                "test@gmail.com",
-                "test1234",
-                "test",
-                "경기도",
-                "성남시",
-                "",
-                "test"
-        );
-
-        given(this.userRepository.findByEmail("test@gmail.com")).willReturn(Optional.empty());
-        given(this.userRepository.findByNickname("test")).willReturn(Optional.empty());
-
-        // when
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> this.userService.signUp(signUpRequestDto));
-
-        // then
-        assertThat(exception).isInstanceOf(BadRequestException.class);
-        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_FORMAT);
     }
 }

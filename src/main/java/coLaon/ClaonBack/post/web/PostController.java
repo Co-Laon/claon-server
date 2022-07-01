@@ -1,11 +1,11 @@
-package coLaon.ClaonBack.laon.web;
+package coLaon.ClaonBack.post.web;
 
-import coLaon.ClaonBack.laon.Service.LaonCommentService;
-import coLaon.ClaonBack.laon.Service.LaonService;
-import coLaon.ClaonBack.laon.dto.CommentRequestDto;
-import coLaon.ClaonBack.laon.dto.CommentResponseDto;
-import coLaon.ClaonBack.laon.dto.LikeRequestDto;
-import coLaon.ClaonBack.laon.dto.LikeResponseDto;
+import coLaon.ClaonBack.post.Service.PostCommentService;
+import coLaon.ClaonBack.post.Service.PostService;
+import coLaon.ClaonBack.post.dto.CommentRequestDto;
+import coLaon.ClaonBack.post.dto.CommentResponseDto;
+import coLaon.ClaonBack.post.dto.LikeRequestDto;
+import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,17 +18,17 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/laon")
-public class LaonController {
-    private final LaonService laonService;
-    private LaonCommentService laonCommentService;
+@RequestMapping("/api/v1/post")
+public class PostController {
+    private final PostService postService;
+    private final PostCommentService postCommentService;
 
     @PostMapping("/like")
     @ResponseStatus(value = HttpStatus.CREATED)
     public LikeResponseDto createLike(
             @RequestHeader(value = "userId") String userId,
             @RequestBody @Valid LikeRequestDto likeRequestDto) {
-        return this.laonService.createLike(userId, likeRequestDto);
+        return this.postService.createLike(userId, likeRequestDto);
     }
 
     @PostMapping("/comment")
@@ -36,6 +36,6 @@ public class LaonController {
     public CommentResponseDto createComment(
             @RequestHeader(value = "userId") String userId,
             @RequestBody @Valid CommentRequestDto commentRequestDto) {
-        return this.laonCommentService.createComment(userId, commentRequestDto);
+        return this.postCommentService.createComment(userId, commentRequestDto);
     }
 }

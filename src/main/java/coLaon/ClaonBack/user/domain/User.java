@@ -14,12 +14,10 @@ import javax.persistence.Column;
 @Table(name = "tb_user")
 @NoArgsConstructor
 public class User extends BaseEntity {
-    @Column(name = "phone_number", nullable = false, unique = true)
-    private String phoneNumber;
     @Column(name = "email", nullable = false, unique = true)
     private String email;
-    @Column(name = "password")
-    private String password;
+    @Column(name = "oauth_id", nullable = false, unique = true)
+    private String oAuthId;
     @Column(name = "nickname", nullable = false, unique = true)
     private String nickname;
     @Column(name = "metropolitan_active_area")
@@ -28,100 +26,101 @@ public class User extends BaseEntity {
     private String basicLocalActiveArea;
     @Column(name = "image")
     private String imagePath;
-    @Column(name = "instagramId")
-    private String instagramId;
-    @Column(name = "isDeleted")
+    @Column(name = "instagram_oauth_id")
+    private String instagramOAuthId;
+    @Column(name = "instagram_user_name")
+    private String instagramUserName;
+    @Column(name = "is_deleted")
     private Boolean isDeleted;
 
     private User(
             String id,
-            String phoneNumber,
             String email,
-            String password,
+            String oAuthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
             String imagePath,
-            String instagramId
+            String instagramOAuthId,
+            String instagramUserName
     ) {
         super(id);
-        this.phoneNumber = phoneNumber;
         this.email = email;
-        this.password = password;
+        this.oAuthId = oAuthId;
         this.nickname = nickname;
         this.metropolitanActiveArea = metropolitanActiveArea;
         this.basicLocalActiveArea = basicLocalActiveArea;
         this.imagePath = imagePath;
-        this.instagramId = instagramId;
+        this.instagramOAuthId = instagramOAuthId;
+        this.instagramUserName = instagramUserName;
         this.isDeleted = false;
     }
 
     private User(
-            String phoneNumber,
             String email,
-            String password,
+            String oAuthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
             String imagePath,
-            String instagramId
+            String instagramOAuthId,
+            String instagramUserName
     ) {
-        this.phoneNumber = phoneNumber;
         this.email = email;
-        this.password = password;
+        this.oAuthId = oAuthId;
         this.nickname = nickname;
         this.metropolitanActiveArea = metropolitanActiveArea;
         this.basicLocalActiveArea = basicLocalActiveArea;
         this.imagePath = imagePath;
-        this.instagramId = instagramId;
+        this.instagramOAuthId = instagramOAuthId;
+        this.instagramUserName = instagramUserName;
         this.isDeleted = false;
     }
 
     public static User of(
-            String phoneNumber,
             String email,
-            String password,
+            String oAuthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
             String imagePath,
-            String instagramId
-    )
-    {
+            String instagramOAuthId,
+            String instagramUsername
+    ) {
         return new User(
-                phoneNumber,
                 email,
-                password,
+                oAuthId,
                 nickname,
                 metropolitanActiveArea,
                 basicLocalActiveArea,
                 imagePath,
-                instagramId
+                instagramOAuthId,
+                instagramUsername
         );
     }
 
     public static User of(
             String id,
-            String phoneNumber,
             String email,
-            String password,
+            String oAuthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
             String imagePath,
-            String instagramId
+            String instagramOAuthId,
+            String instagramUserName
     )
     {
         return new User(
                 id,
-                phoneNumber,
                 email,
-                password,
+                oAuthId,
                 nickname,
                 metropolitanActiveArea,
                 basicLocalActiveArea,
                 imagePath,
-                instagramId
+                instagramOAuthId,
+                instagramUserName
         );
     }
 }

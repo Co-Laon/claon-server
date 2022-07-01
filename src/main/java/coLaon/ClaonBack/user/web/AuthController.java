@@ -21,12 +21,6 @@ import javax.validation.Valid;
 public class AuthController {
     private final UserService userService;
 
-    @GetMapping("/email/{email}/duplicate-check")
-    @ResponseStatus(value = HttpStatus.OK)
-    public DuplicatedCheckResponseDto emailDuplicatedCheck(@PathVariable String email) {
-        return this.userService.emailDuplicatedCheck(email);
-    }
-
     @GetMapping("/nickname/{nickname}/duplicate-check")
     @ResponseStatus(value = HttpStatus.OK)
     public DuplicatedCheckResponseDto nicknameDuplicatedCheck(@PathVariable String nickname) {
