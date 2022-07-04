@@ -3,7 +3,7 @@ package coLaon.ClaonBack.post.Service;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.post.domain.LaonLike;
+import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.repository.LaonLikeRepository;
@@ -38,7 +38,7 @@ public class LaonService {
         );
 
         return LikeResponseDto.from(laonLikeRepository.save(
-                LaonLike.of(liker, post))
+                PostLike.of(liker, post))
         );
     }
 }

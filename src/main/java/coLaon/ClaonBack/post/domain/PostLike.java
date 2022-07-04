@@ -11,18 +11,18 @@ import javax.persistence.Table;
 
 @Entity
 @Getter
-@Table(name = "tb_laon_like")
+@Table(name = "tb_post_like")
 @NoArgsConstructor
-public class LaonLike extends BaseEntity {
+public class PostLike extends BaseEntity {
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User liker;
 
     @ManyToOne(targetEntity = Post.class)
-    @JoinColumn(name = "laon_id", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    private LaonLike(
+    private PostLike(
             User liker,
             Post post
     ) {
@@ -30,7 +30,7 @@ public class LaonLike extends BaseEntity {
         this.post = post;
     }
 
-    private LaonLike(
+    private PostLike(
             String id,
             User liker,
             Post post
@@ -40,22 +40,22 @@ public class LaonLike extends BaseEntity {
         this.post = post;
     }
 
-    public static LaonLike of(
+    public static PostLike of(
             User liker,
             Post post
     ) {
-        return new LaonLike(
+        return new PostLike(
                 liker,
                 post
         );
     }
 
-    public static LaonLike of(
+    public static PostLike of(
             String id,
             User liker,
             Post post
     ) {
-        return new LaonLike(
+        return new PostLike(
                 id,
                 liker,
                 post

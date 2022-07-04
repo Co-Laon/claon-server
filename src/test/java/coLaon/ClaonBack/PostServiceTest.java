@@ -2,7 +2,7 @@ package coLaon.ClaonBack;
 
 import coLaon.ClaonBack.post.Service.LaonService;
 import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.post.domain.LaonLike;
+import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.repository.LaonLikeRepository;
@@ -36,7 +36,7 @@ public class PostServiceTest {
     @InjectMocks
     LaonService laonService;
 
-    private LaonLike laonLike;
+    private PostLike postLike;
     private User user;
     private Post post;
 
@@ -65,7 +65,7 @@ public class PostServiceTest {
                 user
         );
 
-        this.laonLike = LaonLike.of(
+        this.postLike = PostLike.of(
                 "testLaonLikeId",
                 user,
                 post
@@ -75,16 +75,16 @@ public class PostServiceTest {
     @Test
     @DisplayName("Success case for create like")
     void successCreateLike() {
-        try (MockedStatic<LaonLike> mockedLaonLike = mockStatic(LaonLike.class)) {
+        try (MockedStatic<PostLike> mockedLaonLike = mockStatic(PostLike.class)) {
             //given
             LikeRequestDto likeRequestDto = new LikeRequestDto("testLaonId");
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
             given(this.postRepository.findById("testLaonId")).willReturn(Optional.of(post));
 
-            given(LaonLike.of(user, post)).willReturn(laonLike);
+            given(PostLike.of(user, post)).willReturn(postLike);
 
-            given(this.laonLikeRepository.save(this.laonLike)).willReturn(laonLike);
+            given(this.laonLikeRepository.save(this.postLike)).willReturn(postLike);
             //when
             LikeResponseDto likeResponseDto = this.laonService.createLike("testUserId", likeRequestDto);
 
