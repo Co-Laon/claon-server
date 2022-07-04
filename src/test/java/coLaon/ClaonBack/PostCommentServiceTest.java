@@ -83,6 +83,7 @@ public class PostCommentServiceTest {
         );
 
         this.childPostComment = PostComment.of(
+                "testChildId1",
                 "testChildContent1",
                 writer,
                 post,
@@ -90,8 +91,8 @@ public class PostCommentServiceTest {
         );
 
         this.childPostComment2 = PostComment.of(
-                "testchildId2",
-                "testchildContent2",
+                "testChildId2",
+                "testChildContent2",
                 writer,
                 post,
                 postComment
@@ -106,8 +107,8 @@ public class PostCommentServiceTest {
         );
 
         this.childPostComment3 = PostComment.of(
-                "testchildId3",
-                "testchildContent3",
+                "testChildId3",
+                "testChildContent3",
                 writer,
                 post,
                 postComment2
@@ -160,7 +161,7 @@ public class PostCommentServiceTest {
     @Test
     @DisplayName("Success case for find parent comments")
     void successFindParentComments() {
-        try (MockedStatic<PostComment> mockedLaonComment = mockStatic(PostComment.class)) {
+        try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             //given
             given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
 
@@ -185,7 +186,7 @@ public class PostCommentServiceTest {
     @Test
     @DisplayName("Success case for find child comments")
     void successFindChildComments() {
-        try (MockedStatic<PostComment> mockedLaonComment = mockStatic(PostComment.class)) {
+        try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             //given
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
             ArrayList<PostComment> children = new ArrayList<PostComment>(Arrays.asList(childPostComment, childPostComment2));
@@ -202,7 +203,7 @@ public class PostCommentServiceTest {
     @Test
     @DisplayName("Success case for update comment")
     void successUpdateComment() {
-        try (MockedStatic<PostComment> mockedLaonComment = mockStatic(PostComment.class)) {
+        try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             //given
             CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("testCommentId","updateContent","testPostId");
 
@@ -221,14 +222,14 @@ public class PostCommentServiceTest {
     @Test
     @DisplayName("Success case for delete comment")
     void successDeleteComment() {
-        try (MockedStatic<PostComment> mockedLaonComment = mockStatic(PostComment.class)) {
+        try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             //given
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
-            given(this.postCommentRepository.findById("testchildId1")).willReturn(Optional.of(childPostComment));
+            given(this.postCommentRepository.findById("testChildId1")).willReturn(Optional.of(childPostComment));
 
             given(this.postCommentRepository.save(childPostComment)).willReturn(childPostComment);
             //when
-            CommentResponseDto commentResponseDto = this.postCommentService.deleteComment("testchildId1", "testUserId");
+            CommentResponseDto commentResponseDto = this.postCommentService.deleteComment("testChildId1", "testUserId");
             //then
             assertThat(commentResponseDto).isNotNull();
             assertThat(commentResponseDto.getIsDeleted()).isEqualTo(true);

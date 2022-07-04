@@ -5,8 +5,8 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
 import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
-import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
 import coLaon.ClaonBack.post.dto.CommentResponseDto;
+import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
 import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
 import coLaon.ClaonBack.post.repository.PostCommentRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
@@ -28,15 +28,14 @@ public class PostCommentService {
     private final PostRepository postRepository;
 
     @Transactional
-    public CommentResponseDto createComment(String userId, CommentCreateRequestDto commentRequestDto) {
+    public CommentResponseDto createComment(String userId, CommentCreateRequestDto commentCreateRequestDto) {
         User writer = userRepository.findById(userId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "유저 정보가 없습니다."
                 )
         );
-
-        Post post = postRepository.findById(commentRequestDto.getPostId()).orElseThrow(
+        Post post = postRepository.findById(commentCreateRequestDto.getPostId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "등반 정보가 없습니다."
@@ -44,9 +43,9 @@ public class PostCommentService {
         );
 
         return CommentResponseDto.from(postCommentRepository.save(
-                PostComment.of(commentRequestDto.getContent(), writer, post,
-                        commentRequestDto.getParentCommentId() != null ?
-                                postCommentRepository.findById(commentRequestDto.getParentCommentId()).orElseThrow(
+                PostComment.of(commentCreateRequestDto.getContent(), writer, post,
+                        commentCreateRequestDto.getParentCommentId() != null ?
+                                postCommentRepository.findById(commentCreateRequestDto.getParentCommentId()).orElseThrow(
                                         () -> new BadRequestException(
                                                 ErrorCode.ROW_DOES_NOT_EXIST,
                                                 "부모 댓글이 없습니다"
@@ -67,7 +66,6 @@ public class PostCommentService {
         List<CommentFindResponseDto> result = new ArrayList<>();
 
         postCommentRepository.findByPostAndParentCommentIsNullOrderByCreatedAt(post).forEach(parent -> {
-            System.out.println(parent.getContent());
             CommentFindResponseDto parentCommentDto = CommentFindResponseDto.from(parent);
             postCommentRepository.findFirst3ByParentCommentIdOrderByCreatedAt(
                     parentCommentDto.getCommentId()).forEach(child -> {
@@ -144,4 +142,3 @@ public class PostCommentService {
         return CommentResponseDto.from(postCommentRepository.save(postComment));
     }
 }
-
