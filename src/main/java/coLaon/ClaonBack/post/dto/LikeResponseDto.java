@@ -9,13 +9,13 @@ import lombok.Data;
 public class LikeResponseDto {
     private String id;
     private String userId;
-    private String laonId;
+    private String postId;
     private String likeNumber;
 
     public LikeResponseDto(String id, User liker, Post post) {
         this.id = id;
         this.userId = liker.getId();
-        this.laonId = post.getId();
+        this.postId = post.getId();
     }
 
     public static LikeResponseDto from(LaonLike like) {
