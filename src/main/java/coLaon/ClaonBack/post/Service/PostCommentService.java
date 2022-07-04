@@ -130,12 +130,6 @@ public class PostCommentService {
                         "유저 정보가 없습니다."
                 )
         );
-        Post post = postRepository.findById(commentUpdateRequestDto.getPostId()).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
-                )
-        );
         PostComment postComment = postCommentRepository.findById(commentUpdateRequestDto.getCommentId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,

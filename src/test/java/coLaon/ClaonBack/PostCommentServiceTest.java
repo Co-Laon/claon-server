@@ -209,7 +209,6 @@ public class PostCommentServiceTest {
             //given
             CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("testCommentId","updateContent","testLaonId");
 
-            given(this.postRepository.findById("testLaonId")).willReturn(Optional.of(post));
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
