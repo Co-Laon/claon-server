@@ -6,7 +6,7 @@ import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
-import coLaon.ClaonBack.post.repository.LaonLikeRepository;
+import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -16,10 +16,10 @@ import javax.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class LaonService {
+public class PostService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-    private final LaonLikeRepository laonLikeRepository;
+    private final PostLikeRepository postLikeRepository;
 
     @Transactional
     public LikeResponseDto createLike(String userId, LikeRequestDto likeRequestDto) {
@@ -30,14 +30,14 @@ public class LaonService {
                 )
         );
 
-        Post post = postRepository.findById(likeRequestDto.getLaonId()).orElseThrow(
+        Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "등반 정보가 없습니다."
                 )
         );
 
-        return LikeResponseDto.from(laonLikeRepository.save(
+        return LikeResponseDto.from(postLikeRepository.save(
                 PostLike.of(liker, post))
         );
     }

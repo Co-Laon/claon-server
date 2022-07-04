@@ -4,11 +4,16 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -17,100 +22,81 @@ import javax.persistence.Table;
 public class Post extends BaseEntity {
     @Column(name = "center_name", nullable = false)
     private String centerName;
-    @Column(name = "wall_name")
-    private String wallName;
     @Column(name = "hold_info")
     private String holdInfo;
-    @Column(name = "video_url", nullable = false)
-    private String videoUrl;
-    @Column(name = "video_thumbnail_url")
-    private String videoThumbnailUrl;
-    @Column(name = "content")
+    @Column(name = "content", length = 500)
     private String content;
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User writer;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    Set<PostContents> contentsSet;
 
     private Post(
             String centerName,
-            String wallName,
             String holdInfo,
-            String videoUrl,
-            String videoThumbnailUrl,
             String content,
-            User writer
+            User writer,
+            Set<PostContents> contentsSet
     ) {
         this.centerName = centerName;
-        this.wallName = wallName;
         this.holdInfo = holdInfo;
-        this.videoUrl = videoUrl;
-        this.videoThumbnailUrl = videoThumbnailUrl;
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
+        this.contentsSet = contentsSet;
     }
 
-    private Post(String id,
-                 String centerName,
-                 String wallName,
-                 String holdInfo,
-                 String videoUrl,
-                 String videoThumbnailUrl,
-                 String content,
-                 User writer
+    private Post(
+            String id,
+            String centerName,
+            String holdInfo,
+            String content,
+            User writer,
+            Set<PostContents> contentsSet
     ) {
         super(id);
         this.centerName = centerName;
-        this.wallName = wallName;
         this.holdInfo = holdInfo;
-        this.videoUrl = videoUrl;
-        this.videoThumbnailUrl = videoThumbnailUrl;
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
+        this.contentsSet = contentsSet;
     }
 
     public static Post of(
             String centerName,
-            String wallName,
             String holdInfo,
-            String videoUrl,
-            String videoThumbnailUrl,
             String content,
-            User writer
+            User writer,
+            Set<PostContents> contentsSet
     ) {
         return new Post(
                 centerName,
-                wallName,
                 holdInfo,
-                videoUrl,
-                videoThumbnailUrl,
                 content,
-                writer
+                writer,
+                contentsSet
         );
     }
 
     public static Post of(
             String id,
             String centerName,
-            String wallName,
             String holdInfo,
-            String videoUrl,
-            String videoThumbnailUrl,
             String content,
-            User writer
+            User writer,
+            Set<PostContents> contentsSet
     ) {
         return new Post(
                 id,
                 centerName,
-                wallName,
                 holdInfo,
-                videoUrl,
-                videoThumbnailUrl,
                 content,
-                writer
+                writer,
+                contentsSet
         );
     }
 }

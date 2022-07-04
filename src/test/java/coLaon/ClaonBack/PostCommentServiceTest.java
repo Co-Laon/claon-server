@@ -3,6 +3,7 @@ package coLaon.ClaonBack;
 import coLaon.ClaonBack.post.Service.PostCommentService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
+import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
 import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
 import coLaon.ClaonBack.post.dto.CommentResponseDto;
@@ -27,7 +28,6 @@ import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +41,7 @@ public class PostCommentServiceTest {
 
     @InjectMocks
     PostCommentService postCommentService;
+
 
     private User writer;
     private Post post;
@@ -65,14 +66,12 @@ public class PostCommentServiceTest {
         );
 
         this.post = Post.of(
-                "testLaonId",
+                "testPostId",
                 "center1",
-                "wall",
                 "hold",
-                "testUrl",
-                null,
-                "test",
-                writer
+                "testContent",
+                writer,
+                null
         );
 
         this.postComment = PostComment.of(
@@ -84,8 +83,7 @@ public class PostCommentServiceTest {
         );
 
         this.childPostComment = PostComment.of(
-                "testchildId1",
-                "testchildContent1",
+                "testChildContent1",
                 writer,
                 post,
                 postComment
@@ -120,18 +118,18 @@ public class PostCommentServiceTest {
     @Test
     @DisplayName("Success case for create parent comment")
     void successCreateParentComment() {
-        try (MockedStatic<PostComment> mockedLaonComment = mockStatic(PostComment.class)) {
+        try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             //given
-            CommentCreateRequestDto commentCreateRequestDto = new CommentCreateRequestDto("testContent1", null, "testLaonId");
+            CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testContent1", null, "testPostId");
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
-            given(this.postRepository.findById("testLaonId")).willReturn(Optional.of(post));
+            given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
 
             given(PostComment.of("testContent1", this.writer, this.post, null)).willReturn(this.postComment);
 
             given(this.postCommentRepository.save(this.postComment)).willReturn(this.postComment);
             //when
-            CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", commentCreateRequestDto);
+            CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", commentRequestDto);
             //then
             assertThat(commentResponseDto).isNotNull();
             assertThat(commentResponseDto.getContent()).isEqualTo("testContent1");
@@ -141,31 +139,30 @@ public class PostCommentServiceTest {
     @Test
     @DisplayName("Success case for create child comment")
     void successCreateChildComment() {
-        try (MockedStatic<PostComment> mockedLaonComment = mockStatic(PostComment.class)) {
+        try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             //given
-            CommentCreateRequestDto commentCreateRequestDto = new CommentCreateRequestDto("testchildContent1", postComment.getId(), "testLaonId");
+            CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testChildContent1", postComment.getId(), "testPostId");
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
-            given(this.postRepository.findById("testLaonId")).willReturn(Optional.of(post));
+            given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
-            given(PostComment.of("testchildContent1", this.writer, this.post, postComment)).willReturn(this.childPostComment);
+            given(PostComment.of("testChildContent1", this.writer, this.post, postComment)).willReturn(this.childPostComment);
 
             given(this.postCommentRepository.save(this.childPostComment)).willReturn(this.childPostComment);
             //when
-            CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", commentCreateRequestDto);
+            CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", commentRequestDto);
             //then
             assertThat(commentResponseDto).isNotNull();
-            assertThat(commentResponseDto.getContent()).isEqualTo("testchildContent1");
+            assertThat(commentResponseDto.getContent()).isEqualTo("testChildContent1");
         }
     }
-
     @Test
     @DisplayName("Success case for find parent comments")
     void successFindParentComments() {
         try (MockedStatic<PostComment> mockedLaonComment = mockStatic(PostComment.class)) {
             //given
-            given(this.postRepository.findById("testLaonId")).willReturn(Optional.of(post));
+            given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
 
             ArrayList<PostComment> parents = new ArrayList<PostComment>(Arrays.asList(postComment, postComment2));
             ArrayList<PostComment> children1 = new ArrayList<PostComment>(Arrays.asList(childPostComment, childPostComment2));
@@ -175,7 +172,7 @@ public class PostCommentServiceTest {
             given(this.postCommentRepository.findFirst3ByParentCommentIdOrderByCreatedAt(postComment.getId())).willReturn(children1);
             given(this.postCommentRepository.findFirst3ByParentCommentIdOrderByCreatedAt(postComment2.getId())).willReturn(children2);
             //when
-            List<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testLaonId");
+            List<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testPostId");
             //then
             assertThat(CommentFindResponseDto).isNotNull();
             assertThat(CommentFindResponseDto.size()).isEqualTo(parents.size());
@@ -207,7 +204,7 @@ public class PostCommentServiceTest {
     void successUpdateComment() {
         try (MockedStatic<PostComment> mockedLaonComment = mockStatic(PostComment.class)) {
             //given
-            CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("testCommentId","updateContent","testLaonId");
+            CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("testCommentId","updateContent","testPostId");
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));

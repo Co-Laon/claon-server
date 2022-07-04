@@ -9,20 +9,20 @@ public class CommentResponseDto {
     private String content;
     private Boolean isDeleted;
     private String parentCommentId;
-    private String postId;
+    private String laonId;
 
     private CommentResponseDto(
             String commentId,
             String content,
             Boolean isDeleted,
             String parentCommentId,
-            String postId
+            String laonId
     ) {
         this.commentId = commentId;
         this.content = content;
         this.isDeleted = isDeleted;
         this.parentCommentId = parentCommentId;
-        this.postId = postId;
+        this.laonId = laonId;
     }
 
     public static CommentResponseDto from(PostComment postComment) {
@@ -34,4 +34,5 @@ public class CommentResponseDto {
                 postComment.getPost().getId()
         );
     }
+
 }

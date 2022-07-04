@@ -1,11 +1,11 @@
 package coLaon.ClaonBack;
 
-import coLaon.ClaonBack.post.Service.LaonService;
+import coLaon.ClaonBack.post.Service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
-import coLaon.ClaonBack.post.repository.LaonLikeRepository;
+import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -19,6 +19,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -31,10 +32,10 @@ public class PostServiceTest {
     @Mock
     PostRepository postRepository;
     @Mock
-    LaonLikeRepository laonLikeRepository;
+    PostLikeRepository postLikeRepository;
 
     @InjectMocks
-    LaonService laonService;
+    PostService postService;
 
     private PostLike postLike;
     private User user;
@@ -55,18 +56,16 @@ public class PostServiceTest {
         );
 
         this.post = Post.of(
-                "testLaonId",
+                "testPostId",
                 "center1",
-                "wall",
                 "hold",
-                "testUrl",
-                null,
-                "test",
-                user
+                "testContent",
+                user,
+                Set.of()
         );
 
         this.postLike = PostLike.of(
-                "testLaonLikeId",
+                "testPostLikeId",
                 user,
                 post
         );
@@ -75,22 +74,22 @@ public class PostServiceTest {
     @Test
     @DisplayName("Success case for create like")
     void successCreateLike() {
-        try (MockedStatic<PostLike> mockedLaonLike = mockStatic(PostLike.class)) {
+        try (MockedStatic<PostLike> mockedPostLike = mockStatic(PostLike.class)) {
             //given
-            LikeRequestDto likeRequestDto = new LikeRequestDto("testLaonId");
+            LikeRequestDto likeRequestDto = new LikeRequestDto("testPostId");
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-            given(this.postRepository.findById("testLaonId")).willReturn(Optional.of(post));
+            given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
 
             given(PostLike.of(user, post)).willReturn(postLike);
 
-            given(this.laonLikeRepository.save(this.postLike)).willReturn(postLike);
+            given(this.postLikeRepository.save(this.postLike)).willReturn(postLike);
             //when
-            LikeResponseDto likeResponseDto = this.laonService.createLike("testUserId", likeRequestDto);
+            LikeResponseDto likeResponseDto = this.postService.createLike("testUserId", likeRequestDto);
 
             //then
             assertThat(likeResponseDto).isNotNull();
-            assertThat(likeResponseDto.getId()).isEqualTo("testLaonLikeId");
+            assertThat(likeResponseDto.getId()).isEqualTo("testPostLikeId");
         }
     }
 }

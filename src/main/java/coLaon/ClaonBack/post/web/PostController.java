@@ -1,7 +1,7 @@
 package coLaon.ClaonBack.post.web;
 
 import coLaon.ClaonBack.post.Service.PostCommentService;
-import coLaon.ClaonBack.post.Service.LaonService;
+import coLaon.ClaonBack.post.Service.PostService;
 import coLaon.ClaonBack.post.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,9 +12,9 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/laon")
+@RequestMapping("/api/v1/post")
 public class PostController {
-    private final LaonService laonService;
+    private final PostService postService;
     private final PostCommentService postCommentService;
 
     @PostMapping("/like")
@@ -22,7 +22,7 @@ public class PostController {
     public LikeResponseDto createLike(
             @RequestHeader(value = "userId") String userId,
             @RequestBody @Valid LikeRequestDto likeRequestDto) {
-        return this.laonService.createLike(userId, likeRequestDto);
+        return this.postService.createLike(userId, likeRequestDto);
     }
 
     @PostMapping("/comment")
@@ -62,6 +62,4 @@ public class PostController {
             @RequestParam String commentId) {
         return this.postCommentService.deleteComment(commentId, userId);
     }
-
-
 }

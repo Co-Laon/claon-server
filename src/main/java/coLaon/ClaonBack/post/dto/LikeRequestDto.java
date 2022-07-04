@@ -10,5 +10,5 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class LikeRequestDto {
     @NotNull
-    private String laonId;
+    private String postId;
 }
