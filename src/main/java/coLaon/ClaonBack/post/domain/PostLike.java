@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.laon.domain;
+package coLaon.ClaonBack.post.domain;
 
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
@@ -11,54 +11,54 @@ import javax.persistence.Table;
 
 @Entity
 @Getter
-@Table(name = "tb_laon_like")
+@Table(name = "tb_post_like")
 @NoArgsConstructor
-public class LaonLike extends BaseEntity {
+public class PostLike extends BaseEntity {
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User liker;
 
-    @ManyToOne(targetEntity = Laon.class)
-    @JoinColumn(name = "laon_id", nullable = false)
-    private Laon laon;
+    @ManyToOne(targetEntity = Post.class)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
-    private LaonLike(
+    private PostLike(
             User liker,
-            Laon laon
+            Post post
     ) {
         this.liker = liker;
-        this.laon = laon;
+        this.post = post;
     }
 
-    private LaonLike(
+    private PostLike(
             String id,
             User liker,
-            Laon laon
+            Post post
     ) {
         super(id);
         this.liker = liker;
-        this.laon = laon;
+        this.post = post;
     }
 
-    public static LaonLike of(
+    public static PostLike of(
             User liker,
-            Laon laon
+            Post post
     ) {
-        return new LaonLike(
+        return new PostLike(
                 liker,
-                laon
+                post
         );
     }
 
-    public static LaonLike of(
+    public static PostLike of(
             String id,
             User liker,
-            Laon laon
+            Post post
     ) {
-        return new LaonLike(
+        return new PostLike(
                 id,
                 liker,
-                laon
+                post
         );
     }
 }

@@ -1,13 +1,13 @@
-package coLaon.ClaonBack.laon.Service;
+package coLaon.ClaonBack.post.Service;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
-import coLaon.ClaonBack.laon.domain.Laon;
-import coLaon.ClaonBack.laon.domain.LaonLike;
-import coLaon.ClaonBack.laon.dto.LikeRequestDto;
-import coLaon.ClaonBack.laon.dto.LikeResponseDto;
-import coLaon.ClaonBack.laon.repository.LaonLikeRepository;
-import coLaon.ClaonBack.laon.repository.LaonRepository;
+import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.post.domain.PostLike;
+import coLaon.ClaonBack.post.dto.LikeRequestDto;
+import coLaon.ClaonBack.post.dto.LikeResponseDto;
+import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +16,10 @@ import javax.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class LaonService {
+public class PostService {
     private final UserRepository userRepository;
-    private final LaonRepository laonRepository;
-    private final LaonLikeRepository laonLikeRepository;
+    private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
 
     @Transactional
     public LikeResponseDto createLike(String userId, LikeRequestDto likeRequestDto) {
@@ -30,15 +30,15 @@ public class LaonService {
                 )
         );
 
-        Laon laon = laonRepository.findById(likeRequestDto.getLaonId()).orElseThrow(
+        Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "등반 정보가 없습니다."
                 )
         );
 
-        return LikeResponseDto.from(laonLikeRepository.save(
-                LaonLike.of(liker, laon))
+        return LikeResponseDto.from(postLikeRepository.save(
+                PostLike.of(liker, post))
         );
     }
 }

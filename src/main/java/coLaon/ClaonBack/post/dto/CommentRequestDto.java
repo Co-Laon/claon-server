@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.laon.dto;
+package coLaon.ClaonBack.post.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,5 +17,5 @@ public class CommentRequestDto {
     private String content;
     private String parentCommentId;
     @NotNull
-    private String laonId;
+    private String postId;
 }
