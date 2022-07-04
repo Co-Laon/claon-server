@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.laon.domain;
+package coLaon.ClaonBack.post.domain;
 
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
@@ -12,9 +12,9 @@ import javax.persistence.Table;
 
 @Entity
 @Getter
-@Table(name = "tb_laon")
+@Table(name = "tb_post")
 @NoArgsConstructor
-public class Laon extends BaseEntity {
+public class Post extends BaseEntity {
     @Column(name = "center_name", nullable = false)
     private String centerName;
     @Column(name = "wall_name")
@@ -33,7 +33,7 @@ public class Laon extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User writer;
 
-    private Laon(
+    private Post(
             String centerName,
             String wallName,
             String holdInfo,
@@ -52,14 +52,14 @@ public class Laon extends BaseEntity {
         this.writer = writer;
     }
 
-    private Laon(String id,
-                String centerName,
-                String wallName,
-                String holdInfo,
-                String videoUrl,
-                String videoThumbnailUrl,
-                String content,
-                User writer
+    private Post(String id,
+                 String centerName,
+                 String wallName,
+                 String holdInfo,
+                 String videoUrl,
+                 String videoThumbnailUrl,
+                 String content,
+                 User writer
     ) {
         super(id);
         this.centerName = centerName;
@@ -72,7 +72,7 @@ public class Laon extends BaseEntity {
         this.writer = writer;
     }
 
-    public static Laon of(
+    public static Post of(
             String centerName,
             String wallName,
             String holdInfo,
@@ -81,7 +81,7 @@ public class Laon extends BaseEntity {
             String content,
             User writer
     ) {
-        return new Laon(
+        return new Post(
                 centerName,
                 wallName,
                 holdInfo,
@@ -92,7 +92,7 @@ public class Laon extends BaseEntity {
         );
     }
 
-    public static Laon of(
+    public static Post of(
             String id,
             String centerName,
             String wallName,
@@ -102,7 +102,7 @@ public class Laon extends BaseEntity {
             String content,
             User writer
     ) {
-        return new Laon(
+        return new Post(
                 id,
                 centerName,
                 wallName,

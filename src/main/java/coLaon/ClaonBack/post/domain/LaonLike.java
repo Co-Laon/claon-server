@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.laon.domain;
+package coLaon.ClaonBack.post.domain;
 
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
@@ -18,47 +18,47 @@ public class LaonLike extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User liker;
 
-    @ManyToOne(targetEntity = Laon.class)
+    @ManyToOne(targetEntity = Post.class)
     @JoinColumn(name = "laon_id", nullable = false)
-    private Laon laon;
+    private Post post;
 
     private LaonLike(
             User liker,
-            Laon laon
+            Post post
     ) {
         this.liker = liker;
-        this.laon = laon;
+        this.post = post;
     }
 
     private LaonLike(
             String id,
             User liker,
-            Laon laon
+            Post post
     ) {
         super(id);
         this.liker = liker;
-        this.laon = laon;
+        this.post = post;
     }
 
     public static LaonLike of(
             User liker,
-            Laon laon
+            Post post
     ) {
         return new LaonLike(
                 liker,
-                laon
+                post
         );
     }
 
     public static LaonLike of(
             String id,
             User liker,
-            Laon laon
+            Post post
     ) {
         return new LaonLike(
                 id,
                 liker,
-                laon
+                post
         );
     }
 }

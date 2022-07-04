@@ -1,6 +1,6 @@
-package coLaon.ClaonBack.laon.repository;
+package coLaon.ClaonBack.post.repository;
 
-import coLaon.ClaonBack.laon.domain.LaonLike;
+import coLaon.ClaonBack.post.domain.LaonLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

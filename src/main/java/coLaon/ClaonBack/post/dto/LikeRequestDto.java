@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.laon.dto;
+package coLaon.ClaonBack.post.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

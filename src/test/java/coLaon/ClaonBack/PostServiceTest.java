@@ -1,12 +1,12 @@
 package coLaon.ClaonBack;
 
-import coLaon.ClaonBack.laon.Service.LaonService;
-import coLaon.ClaonBack.laon.domain.Laon;
-import coLaon.ClaonBack.laon.domain.LaonLike;
-import coLaon.ClaonBack.laon.dto.LikeRequestDto;
-import coLaon.ClaonBack.laon.dto.LikeResponseDto;
-import coLaon.ClaonBack.laon.repository.LaonLikeRepository;
-import coLaon.ClaonBack.laon.repository.LaonRepository;
+import coLaon.ClaonBack.post.Service.LaonService;
+import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.post.domain.LaonLike;
+import coLaon.ClaonBack.post.dto.LikeRequestDto;
+import coLaon.ClaonBack.post.dto.LikeResponseDto;
+import coLaon.ClaonBack.post.repository.LaonLikeRepository;
+import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,18 +19,17 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
-public class LaonServiceTest {
+public class PostServiceTest {
     @Mock
     UserRepository userRepository;
     @Mock
-    LaonRepository laonRepository;
+    PostRepository postRepository;
     @Mock
     LaonLikeRepository laonLikeRepository;
 
@@ -39,7 +38,7 @@ public class LaonServiceTest {
 
     private LaonLike laonLike;
     private User user;
-    private Laon laon;
+    private Post post;
 
     @BeforeEach
     void setUp() {
@@ -55,7 +54,7 @@ public class LaonServiceTest {
                 "instagramId"
         );
 
-        this.laon = Laon.of(
+        this.post = Post.of(
                 "testLaonId",
                 "center1",
                 "wall",
@@ -69,7 +68,7 @@ public class LaonServiceTest {
         this.laonLike = LaonLike.of(
                 "testLaonLikeId",
                 user,
-                laon
+                post
         );
     }
 
@@ -81,9 +80,9 @@ public class LaonServiceTest {
             LikeRequestDto likeRequestDto = new LikeRequestDto("testLaonId");
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-            given(this.laonRepository.findById("testLaonId")).willReturn(Optional.of(laon));
+            given(this.postRepository.findById("testLaonId")).willReturn(Optional.of(post));
 
-            given(LaonLike.of(user, laon)).willReturn(laonLike);
+            given(LaonLike.of(user, post)).willReturn(laonLike);
 
             given(this.laonLikeRepository.save(this.laonLike)).willReturn(laonLike);
             //when

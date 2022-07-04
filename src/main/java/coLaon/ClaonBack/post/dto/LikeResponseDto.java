@@ -1,7 +1,7 @@
-package coLaon.ClaonBack.laon.dto;
+package coLaon.ClaonBack.post.dto;
 
-import coLaon.ClaonBack.laon.domain.Laon;
-import coLaon.ClaonBack.laon.domain.LaonLike;
+import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.post.domain.LaonLike;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Data;
 
@@ -12,13 +12,13 @@ public class LikeResponseDto {
     private String laonId;
     private String likeNumber;
 
-    public LikeResponseDto(String id, User liker, Laon laon) {
+    public LikeResponseDto(String id, User liker, Post post) {
         this.id = id;
         this.userId = liker.getId();
-        this.laonId = laon.getId();
+        this.laonId = post.getId();
     }
 
     public static LikeResponseDto from(LaonLike like) {
-        return new LikeResponseDto(like.getId(), like.getLiker(), like.getLaon());
+        return new LikeResponseDto(like.getId(), like.getLiker(), like.getPost());
     }
 }

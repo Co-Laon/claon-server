@@ -1,9 +1,11 @@
-package coLaon.ClaonBack.laon.domain;
+package coLaon.ClaonBack.post.domain;
 
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Where;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -12,9 +14,10 @@ import javax.persistence.Table;
 
 @Entity
 @Getter
-@Table(name = "tb_laon_comment")
+@Table(name = "tb_post_comment")
+@Where(clause = "is_deleted = false")
 @NoArgsConstructor
-public class LaonComment extends BaseEntity {
+public class PostComment extends BaseEntity {
     @Column(name = "content")
     private String content;
     @Column(name = "is_deleted", nullable = false)
@@ -22,70 +25,77 @@ public class LaonComment extends BaseEntity {
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User writer;
-    @ManyToOne(targetEntity = LaonComment.class)
+    @ManyToOne(targetEntity = PostComment.class)
     @JoinColumn(name = "parent_comment_id")
-    private LaonComment parentComment;
-    @ManyToOne(targetEntity = Laon.class)
-    @JoinColumn(name = "laon_id", nullable = false)
-    private Laon laon;
+    private PostComment parentComment;
+    @ManyToOne(targetEntity = Post.class)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
-    private LaonComment(
+    private PostComment(
             String content,
             User writer,
-            Laon laon,
-            LaonComment parentComment
+            Post post,
+            PostComment parentComment
 
     ) {
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
-        this.laon = laon;
+        this.post = post;
         this.parentComment = parentComment;
     }
 
-    private LaonComment(
+    private PostComment(
             String id,
             String content,
             User writer,
-            Laon laon,
-            LaonComment parentComment
+            Post post,
+            PostComment parentComment
 
     ) {
         super(id);
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
-        this.laon = laon;
+        this.post = post;
         this.parentComment = parentComment;
     }
 
-    public static LaonComment of(
+    public static PostComment of(
             String content,
             User writer,
-            Laon laon,
-            LaonComment parentComment
+            Post post,
+            PostComment parentComment
     ) {
-        return new LaonComment(
+        return new PostComment(
                 content,
                 writer,
-                laon,
+                post,
                 parentComment
         );
     }
 
-    public static LaonComment of(
+    public static PostComment of(
             String id,
             String content,
             User writer,
-            Laon laon,
-            LaonComment parentComment
+            Post post,
+            PostComment parentComment
     ) {
-        return new LaonComment(
+        return new PostComment(
                 id,
                 content,
                 writer,
-                laon,
+                post,
                 parentComment
         );
+    }
+
+    public void updateContent(String content){
+        this.content = content;
+    }
+    public void deleteContent(){
+        this.isDeleted = true;
     }
 }
