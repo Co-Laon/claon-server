@@ -8,6 +8,7 @@ import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -29,6 +30,14 @@ public class PostController {
             @RequestHeader(value = "userId") String userId,
             @RequestBody @Valid LikeRequestDto likeRequestDto) {
         return this.postService.createLike(userId, likeRequestDto);
+    }
+
+    @DeleteMapping("/like")
+    @ResponseStatus(value = HttpStatus.OK)
+    public LikeResponseDto deleteLike(
+            @RequestHeader(value = "userId") String userId,
+            @RequestBody @Valid LikeRequestDto likeRequestDto) {
+        return this.postService.deleteLike(userId, likeRequestDto);
     }
 
     @PostMapping("/comment")

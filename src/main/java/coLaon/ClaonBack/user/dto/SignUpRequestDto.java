@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 public class SignUpRequestDto {
     private String email;
     @NotBlank(message = "올바른 로그인 접근이 아닙니다.")
-    private String oAuthId;
+    private String oauthId;
     @NotBlank(message = "닉네임을 입력해주세요.")
     @Size(min = 2, max = 20, message = "닉네임은 2자에서 20자 입력 가능합니다.")
     private String nickname;
