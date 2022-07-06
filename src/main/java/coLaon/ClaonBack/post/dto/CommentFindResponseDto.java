@@ -6,6 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class CommentFindResponseDto {
@@ -25,7 +26,8 @@ public class CommentFindResponseDto {
             String postId,
             String writerId,
             LocalDateTime createdAt,
-            LocalDateTime updatedAt
+            LocalDateTime updatedAt,
+            List<ChildCommentResponseDto> children
     ) {
         this.commentId = commentId;
         this.content = content;
@@ -34,9 +36,10 @@ public class CommentFindResponseDto {
         this.writerId = writerId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.children = children;
     }
 
-    public static CommentFindResponseDto from(PostComment postComment) {
+    public static CommentFindResponseDto from(PostComment postComment, List<PostComment> childComments) {
         return new CommentFindResponseDto(
                 postComment.getId(),
                 postComment.getContent(),
@@ -44,7 +47,8 @@ public class CommentFindResponseDto {
                 postComment.getPost().getId(),
                 postComment.getWriter().getId(),
                 postComment.getCreatedAt(),
-                postComment.getUpdatedAt()
+                postComment.getUpdatedAt(),
+                childComments.stream().map(ChildCommentResponseDto::from).collect(Collectors.toList())
         );
     }
 }

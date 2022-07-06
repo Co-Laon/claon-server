@@ -65,19 +65,15 @@ public class PostCommentService {
                         "등반 정보가 없습니다."
                 )
         );
-        List<CommentFindResponseDto> result = new ArrayList<>();
 
-        postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(post).stream()
-                .map(CommentFindResponseDto::from)
-                .forEach(parent -> {
-                    postCommentRepository.findFirst3ByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(
-                            parent.getCommentId()).stream()
-                            .map(ChildCommentResponseDto::from)
-                            .forEach(child -> parent.getChildren().add(child));
-                    result.add(parent);
-                });
-
-        return result;
+        return postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(post)
+                .stream()
+                .map(parent ->
+                        CommentFindResponseDto.from(
+                                parent,
+                                postCommentRepository.findFirst3ByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(parent.getId())
+                        )
+                ).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
