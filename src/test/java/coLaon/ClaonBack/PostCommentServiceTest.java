@@ -1,13 +1,13 @@
 package coLaon.ClaonBack;
 
+import coLaon.ClaonBack.common.exception.BadRequestException;
+import coLaon.ClaonBack.common.exception.BaseRuntimeException;
+import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.Service.PostCommentService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
-import coLaon.ClaonBack.post.domain.PostContents;
-import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
-import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
-import coLaon.ClaonBack.post.dto.CommentResponseDto;
-import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
+import coLaon.ClaonBack.post.dto.*;
 import coLaon.ClaonBack.post.repository.PostCommentRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
@@ -26,8 +26,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,12 +48,14 @@ public class PostCommentServiceTest {
 
 
     private User writer;
+    private User writer2;
     private Post post;
     private PostComment postComment;
     private PostComment postComment2;
     private PostComment childPostComment;
     private PostComment childPostComment2;
     private PostComment childPostComment3;
+    private PostComment otherPostComment;
 
     @BeforeEach
     void setUp() {
@@ -63,6 +69,18 @@ public class PostCommentServiceTest {
                 "성남시",
                 "",
                 "instagramId"
+        );
+
+        this.writer2 = User.of(
+                "testUserId2",
+                "01012341235",
+                "test123@gmail.com",
+                "test2345!!",
+                "test2",
+                "경기도",
+                "성남시",
+                "",
+                "instagramId2"
         );
 
         this.post = Post.of(
@@ -158,6 +176,7 @@ public class PostCommentServiceTest {
             assertThat(commentResponseDto.getContent()).isEqualTo("testChildContent1");
         }
     }
+
     @Test
     @DisplayName("Success case for find parent comments")
     void successFindParentComments() {
@@ -169,9 +188,9 @@ public class PostCommentServiceTest {
             ArrayList<PostComment> children1 = new ArrayList<PostComment>(Arrays.asList(childPostComment, childPostComment2));
             ArrayList<PostComment> children2 = new ArrayList<PostComment>(Arrays.asList(childPostComment3));
 
-            given(this.postCommentRepository.findByPostAndParentCommentIsNullOrderByCreatedAt(post)).willReturn(parents);
-            given(this.postCommentRepository.findFirst3ByParentCommentIdOrderByCreatedAt(postComment.getId())).willReturn(children1);
-            given(this.postCommentRepository.findFirst3ByParentCommentIdOrderByCreatedAt(postComment2.getId())).willReturn(children2);
+            given(this.postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(post)).willReturn(parents);
+            given(this.postCommentRepository.findFirst3ByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(postComment.getId())).willReturn(children1);
+            given(this.postCommentRepository.findFirst3ByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(postComment2.getId())).willReturn(children2);
             //when
             List<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testPostId");
             //then
@@ -190,9 +209,9 @@ public class PostCommentServiceTest {
             //given
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
             ArrayList<PostComment> children = new ArrayList<PostComment>(Arrays.asList(childPostComment, childPostComment2));
-            given(this.postCommentRepository.findAllByParentCommentOrderByCreatedAt(postComment)).willReturn(children);
+            given(this.postCommentRepository.findAllByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment)).willReturn(children);
             //when
-            List<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testCommentId");
+            List<ChildCommentResponseDto> CommentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testCommentId");
             //then
             assertThat(CommentFindResponseDto).isNotNull();
             assertThat(CommentFindResponseDto.size()).isEqualTo(children.size());
@@ -205,17 +224,33 @@ public class PostCommentServiceTest {
     void successUpdateComment() {
         try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             //given
-            CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("testCommentId","updateContent","testPostId");
+            CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent","testPostId");
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
             given(this.postCommentRepository.save(postComment)).willReturn(postComment);
             //when
-            CommentResponseDto commentResponseDto = this.postCommentService.updateComment("testUserId", commentUpdateRequestDto);
+            CommentResponseDto commentResponseDto = this.postCommentService.updateComment("testUserId", "testCommentId", commentUpdateRequestDto);
             //then
             assertThat(commentResponseDto).isNotNull();
             assertThat(commentResponseDto.getContent()).isEqualTo("updateContent");
+        }
+    }
+
+    @Test
+    @DisplayName("Update comment by other user")
+    void FailIUpdateComment() {
+        try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
+            //given
+            CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent","testPostId");
+            given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(writer2));
+            given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
+            //when
+            assertThatThrownBy(() -> this.postCommentService.updateComment("testUserId2", "testCommentId", commentUpdateRequestDto))
+                    //then
+                    .isInstanceOf(UnauthorizedException.class)
+                    .hasMessage("접근 권한이 없습니다.");
         }
     }
 
@@ -235,4 +270,20 @@ public class PostCommentServiceTest {
             assertThat(commentResponseDto.getIsDeleted()).isEqualTo(true);
         }
     }
+
+    @Test
+    @DisplayName("Delete comment by other user")
+    void FailIDeleteComment() {
+        try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
+            //given
+            given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(writer2));
+            given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
+            //when
+            assertThatThrownBy(() -> this.postCommentService.deleteComment("testCommentId", "testUserId2"))
+                    //then
+                    .isInstanceOf(UnauthorizedException.class)
+                    .hasMessage("접근 권한이 없습니다.");
+        }
+    }
+
 }

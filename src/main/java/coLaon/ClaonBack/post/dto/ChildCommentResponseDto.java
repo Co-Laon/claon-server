@@ -4,11 +4,9 @@ import coLaon.ClaonBack.post.domain.PostComment;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
-public class CommentFindResponseDto {
+public class ChildCommentResponseDto {
     private String commentId;
     private String content;
     private Boolean isDeleted;
@@ -16,9 +14,8 @@ public class CommentFindResponseDto {
     private String writerId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<ChildCommentResponseDto> children = new ArrayList<>();
 
-    private CommentFindResponseDto(
+    private ChildCommentResponseDto(
             String commentId,
             String content,
             Boolean isDeleted,
@@ -36,8 +33,8 @@ public class CommentFindResponseDto {
         this.updatedAt = updatedAt;
     }
 
-    public static CommentFindResponseDto from(PostComment postComment) {
-        return new CommentFindResponseDto(
+    public static ChildCommentResponseDto from(PostComment postComment) {
+        return new ChildCommentResponseDto(
                 postComment.getId(),
                 postComment.getContent(),
                 postComment.getIsDeleted(),

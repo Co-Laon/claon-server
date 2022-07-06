@@ -4,7 +4,6 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,7 +14,6 @@ import javax.persistence.Table;
 @Entity
 @Getter
 @Table(name = "tb_post_comment")
-@Where(clause = "is_deleted = false")
 @NoArgsConstructor
 public class PostComment extends BaseEntity {
     @Column(name = "content")
@@ -95,7 +93,7 @@ public class PostComment extends BaseEntity {
     public void updateContent(String content){
         this.content = content;
     }
-    public void deleteContent(){
+    public void delete(){
         this.isDeleted = true;
     }
 }

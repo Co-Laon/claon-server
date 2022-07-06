@@ -5,7 +5,17 @@ import coLaon.ClaonBack.post.Service.PostService;
 import coLaon.ClaonBack.post.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -40,26 +50,27 @@ public class PostController {
         return this.postCommentService.findCommentsByPost(postId);
     }
 
-    @GetMapping(value = "/comment/child-comments", params = "parentId")
+    @GetMapping(value = "/comment/{parentId}/children")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<CommentFindResponseDto> findAllChildrenComment(
-            @RequestParam String parentId) {
+    public List<ChildCommentResponseDto> findAllChildrenComment(  //TODO: Pagination 추가
+            @PathVariable String parentId) {
         return this.postCommentService.findAllChildCommentsByParent(parentId);
     }
 
-    @PutMapping(value = "/comment")
+    @PutMapping(value = "/comment/{commentId}")
     @ResponseStatus(value = HttpStatus.OK)
     public CommentResponseDto updateComment(
             @RequestHeader(value = "userId") String userId,
+            @PathVariable String commentId,
             @RequestBody @Valid CommentUpdateRequestDto updateRequestDto) {
-        return this.postCommentService.updateComment(userId, updateRequestDto);
+        return this.postCommentService.updateComment(userId, commentId, updateRequestDto);
     }
 
-    @DeleteMapping(value = "/comment", params = "commentId")
+    @DeleteMapping(value = "/comment/{commentId}")
     @ResponseStatus(value = HttpStatus.OK)
     public CommentResponseDto deleteComment(
             @RequestHeader(value = "userId") String userId,
-            @RequestParam String commentId) {
+            @PathVariable String commentId) {
         return this.postCommentService.deleteComment(commentId, userId);
     }
 
