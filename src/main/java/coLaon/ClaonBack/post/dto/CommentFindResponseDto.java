@@ -4,20 +4,21 @@ import coLaon.ClaonBack.post.domain.PostComment;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
 public class CommentFindResponseDto {
-    private String commentId;
-    private String content;
-    private Boolean isDeleted;
-    private String postId;
-    private String writerId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private List<ChildCommentResponseDto> children = new ArrayList<>();
+    private final String commentId;
+    private final String content;
+    private final Boolean isDeleted;
+    private final String postId;
+    private final String writerId;
+    private final String writerNickname;
+    private final String writerProfile;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
+    private final List<ChildCommentResponseDto> children;
 
     private CommentFindResponseDto(
             String commentId,
@@ -25,6 +26,8 @@ public class CommentFindResponseDto {
             Boolean isDeleted,
             String postId,
             String writerId,
+            String writerNickname,
+            String writerProfile,
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
             List<ChildCommentResponseDto> children
@@ -34,6 +37,8 @@ public class CommentFindResponseDto {
         this.isDeleted = isDeleted;
         this.postId = postId;
         this.writerId = writerId;
+        this.writerNickname = writerNickname;
+        this.writerProfile = writerProfile;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.children = children;
@@ -46,6 +51,8 @@ public class CommentFindResponseDto {
                 postComment.getIsDeleted(),
                 postComment.getPost().getId(),
                 postComment.getWriter().getId(),
+                postComment.getWriter().getNickname(),
+                postComment.getWriter().getImagePath(),
                 postComment.getCreatedAt(),
                 postComment.getUpdatedAt(),
                 childComments.stream().map(ChildCommentResponseDto::from).collect(Collectors.toList())

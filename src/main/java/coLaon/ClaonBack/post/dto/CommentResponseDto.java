@@ -5,11 +5,11 @@ import lombok.Data;
 
 @Data
 public class CommentResponseDto {
-    private String commentId;
-    private String content;
-    private Boolean isDeleted;
-    private String parentCommentId;
-    private String postId;
+    private final String commentId;
+    private final String content;
+    private final Boolean isDeleted;
+    private final String parentCommentId;
+    private final String postId;
 
     private CommentResponseDto(
             String commentId,
