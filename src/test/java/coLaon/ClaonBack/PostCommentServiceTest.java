@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Set;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,13 +53,11 @@ public class PostCommentServiceTest {
     private PostComment childPostComment;
     private PostComment childPostComment2;
     private PostComment childPostComment3;
-    private PostComment otherPostComment;
 
     @BeforeEach
     void setUp() {
         this.writer = User.of(
                 "testUserId",
-                "01012341234",
                 "test@gmail.com",
                 "test1234!!",
                 "test",
@@ -72,7 +69,6 @@ public class PostCommentServiceTest {
 
         this.writer2 = User.of(
                 "testUserId2",
-                "01012341235",
                 "test123@gmail.com",
                 "test2345!!",
                 "test2",
@@ -183,9 +179,9 @@ public class PostCommentServiceTest {
             //given
             given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
 
-            ArrayList<PostComment> parents = new ArrayList<PostComment>(Arrays.asList(postComment, postComment2));
-            ArrayList<PostComment> children1 = new ArrayList<PostComment>(Arrays.asList(childPostComment, childPostComment2));
-            ArrayList<PostComment> children2 = new ArrayList<PostComment>(Arrays.asList(childPostComment3));
+            ArrayList<PostComment> parents = new ArrayList<>(Arrays.asList(postComment, postComment2));
+            ArrayList<PostComment> children1 = new ArrayList<>(Arrays.asList(childPostComment, childPostComment2));
+            ArrayList<PostComment> children2 = new ArrayList<>(List.of(childPostComment3));
 
             given(this.postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(post)).willReturn(parents);
             given(this.postCommentRepository.findFirst3ByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(postComment.getId())).willReturn(children1);
@@ -207,7 +203,7 @@ public class PostCommentServiceTest {
         try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             //given
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
-            ArrayList<PostComment> children = new ArrayList<PostComment>(Arrays.asList(childPostComment, childPostComment2));
+            ArrayList<PostComment> children = new ArrayList<>(Arrays.asList(childPostComment, childPostComment2));
             given(this.postCommentRepository.findAllByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment)).willReturn(children);
             //when
             List<ChildCommentResponseDto> CommentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testCommentId");
@@ -223,7 +219,7 @@ public class PostCommentServiceTest {
     void successUpdateComment() {
         try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             //given
-            CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent","testPostId");
+            CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent", "testPostId");
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
@@ -242,7 +238,7 @@ public class PostCommentServiceTest {
     void FailIUpdateComment() {
         try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             //given
-            CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent","testPostId");
+            CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent", "testPostId");
             given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(writer2));
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
             //when

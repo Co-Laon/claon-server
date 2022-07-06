@@ -90,10 +90,11 @@ public class PostComment extends BaseEntity {
         );
     }
 
-    public void updateContent(String content){
+    public void updateContent(String content) {
         this.content = content;
     }
-    public void delete(){
+
+    public void delete() {
         this.isDeleted = true;
     }
 }

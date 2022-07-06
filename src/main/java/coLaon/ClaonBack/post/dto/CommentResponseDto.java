@@ -30,7 +30,7 @@ public class CommentResponseDto {
                 postComment.getId(),
                 postComment.getContent(),
                 postComment.getIsDeleted(),
-                postComment.getParentComment()!= null ? postComment.getParentComment().getId() : null,
+                postComment.getParentComment() != null ? postComment.getParentComment().getId() : null,
                 postComment.getPost().getId()
         );
     }

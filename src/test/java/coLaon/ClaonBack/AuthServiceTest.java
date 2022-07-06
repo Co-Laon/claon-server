@@ -13,7 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
@@ -33,7 +35,6 @@ public class AuthServiceTest {
         this.user = User.of(
                 "test",
                 "test@gmail.com",
-                "123456789",
                 "test",
                 "경기도",
                 "성남시",
@@ -46,42 +47,28 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Success case for sign up")
     void successSignUp() {
-        try (MockedStatic<User> mockedUser = mockStatic(User.class)) {
-            // given
-            SignUpRequestDto signUpRequestDto = new SignUpRequestDto(
-                    "test@gmail.com",
-                    "123456789",
-                    "test",
-                    "경기도",
-                    "성남시",
-                    "",
-                    "123456",
-                    "test"
-            );
+        // given
+        SignUpRequestDto signUpRequestDto = new SignUpRequestDto(
+                "test",
+                "경기도",
+                "성남시",
+                "",
+                "123456",
+                "test"
+        );
 
-            given(this.userRepository.findByEmail("test@gmail.com")).willReturn(Optional.empty());
-            given(this.userRepository.findByNickname("test")).willReturn(Optional.empty());
+        given(this.userRepository.findById("test")).willReturn(Optional.of(this.user));
+        given(this.userRepository.findByNickname("test")).willReturn(Optional.empty());
 
-            given(User.of(
-                    "test@gmail.com",
-                    "123456789",
-                    "test",
-                    "경기도",
-                    "성남시",
-                    "",
-                    "123456",
-                    "test")).willReturn(this.user);
+        given(this.userRepository.save(this.user)).willReturn(this.user);
 
-            given(this.userRepository.save(this.user)).willReturn(this.user);
+        // when
+        UserResponseDto userResponseDto = this.userService.signUp(this.user.getId(), signUpRequestDto);
 
-            // when
-            UserResponseDto userResponseDto = this.userService.signUp(signUpRequestDto);
-
-            // then
-            assertThat(userResponseDto).isNotNull();
-            assertThat(userResponseDto)
-                    .extracting("id", "email", "nickname")
-                    .contains("test", "test@gmail.com", "test");
-        }
+        // then
+        assertThat(userResponseDto).isNotNull();
+        assertThat(userResponseDto)
+                .extracting("id", "email", "nickname")
+                .contains("test", "test@gmail.com", "test");
     }
 }

@@ -31,4 +31,6 @@ hs_err_pid*
 
 
 # CLAON secret property files
-src/main/resources/emailsender.yml
+!**/resources/
+**/resources/*
+!**/resources/application-*.yml

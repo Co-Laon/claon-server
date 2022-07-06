@@ -4,6 +4,7 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Column;
@@ -16,15 +17,13 @@ import javax.persistence.Column;
 public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
-    @Column(name = "oauth_id", nullable = false, unique = true)
-    private String oauthId;
-    @Column(name = "nickname", nullable = false, unique = true)
+    @Column(name = "nickname")
     private String nickname;
     @Column(name = "metropolitan_active_area")
     private String metropolitanActiveArea;
     @Column(name = "basic_local_active_area")
     private String basicLocalActiveArea;
-    @Column(name = "image")
+    @Column(name = "image_path")
     private String imagePath;
     @Column(name = "instagram_oauth_id")
     private String instagramOAuthId;
@@ -34,9 +33,14 @@ public class User extends BaseEntity {
     private Boolean isDeleted;
 
     private User(
+            String email
+    ) {
+        this.email = email;
+    }
+
+    private User(
             String id,
             String email,
-            String oauthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
@@ -46,7 +50,6 @@ public class User extends BaseEntity {
     ) {
         super(id);
         this.email = email;
-        this.oauthId = oauthId;
         this.nickname = nickname;
         this.metropolitanActiveArea = metropolitanActiveArea;
         this.basicLocalActiveArea = basicLocalActiveArea;
@@ -58,7 +61,6 @@ public class User extends BaseEntity {
 
     private User(
             String email,
-            String oauthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
@@ -67,7 +69,6 @@ public class User extends BaseEntity {
             String instagramUserName
     ) {
         this.email = email;
-        this.oauthId = oauthId;
         this.nickname = nickname;
         this.metropolitanActiveArea = metropolitanActiveArea;
         this.basicLocalActiveArea = basicLocalActiveArea;
@@ -78,43 +79,22 @@ public class User extends BaseEntity {
     }
 
     public static User of(
-            String email,
-            String oauthId,
-            String nickname,
-            String metropolitanActiveArea,
-            String basicLocalActiveArea,
-            String imagePath,
-            String instagramOAuthId,
-            String instagramUsername
+            String email
     ) {
-        return new User(
-                email,
-                oauthId,
-                nickname,
-                metropolitanActiveArea,
-                basicLocalActiveArea,
-                imagePath,
-                instagramOAuthId,
-                instagramUsername
-        );
+        return new User(email);
     }
 
     public static User of(
-            String id,
             String email,
-            String oauthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
             String imagePath,
             String instagramOAuthId,
             String instagramUserName
-    )
-    {
+    ) {
         return new User(
-                id,
                 email,
-                oauthId,
                 nickname,
                 metropolitanActiveArea,
                 basicLocalActiveArea,
@@ -122,5 +102,43 @@ public class User extends BaseEntity {
                 instagramOAuthId,
                 instagramUserName
         );
+    }
+
+    public static User of(
+            String id,
+            String email,
+            String nickname,
+            String metropolitanActiveArea,
+            String basicLocalActiveArea,
+            String imagePath,
+            String instagramOAuthId,
+            String instagramUserName
+    ) {
+        return new User(
+                id,
+                email,
+                nickname,
+                metropolitanActiveArea,
+                basicLocalActiveArea,
+                imagePath,
+                instagramOAuthId,
+                instagramUserName
+        );
+    }
+
+    public void signUp(
+            String nickname,
+            String metropolitanActiveArea,
+            String basicLocalActiveArea,
+            String imagePath,
+            String instagramOAuthId,
+            String instagramUserName
+    ) {
+        this.nickname = nickname;
+        this.metropolitanActiveArea = metropolitanActiveArea;
+        this.basicLocalActiveArea = basicLocalActiveArea;
+        this.imagePath = imagePath;
+        this.instagramOAuthId = instagramOAuthId;
+        this.instagramUserName = instagramUserName;
     }
 }

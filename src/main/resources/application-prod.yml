@@ -1,0 +1,6 @@
+server:
+  port: 8080
+
+spring:
+  config:
+    import: optional:classpath:email-config.yml, classpath:auth-config.yml, classpath:database-config.yml

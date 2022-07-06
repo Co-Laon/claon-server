@@ -3,6 +3,7 @@ package coLaon.ClaonBack.post.Service;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
 import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
@@ -18,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,9 +32,9 @@ public class PostCommentService {
     @Transactional
     public CommentResponseDto createComment(String userId, CommentCreateRequestDto commentCreateRequestDto) {
         User writer = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "유저 정보가 없습니다."
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
                 )
         );
         Post post = postRepository.findById(commentCreateRequestDto.getPostId()).orElseThrow(
@@ -45,14 +45,14 @@ public class PostCommentService {
         );
 
         return CommentResponseDto.from(postCommentRepository.save(
-                PostComment.of(commentCreateRequestDto.getContent(), writer, post,
-                        commentCreateRequestDto.getParentCommentId() != null ?
-                                postCommentRepository.findById(commentCreateRequestDto.getParentCommentId()).orElseThrow(
-                                        () -> new BadRequestException(
-                                                ErrorCode.ROW_DOES_NOT_EXIST,
-                                                "부모 댓글이 없습니다"
-                                        )
-                                ) : null)
+                        PostComment.of(commentCreateRequestDto.getContent(), writer, post,
+                                commentCreateRequestDto.getParentCommentId() != null ?
+                                        postCommentRepository.findById(commentCreateRequestDto.getParentCommentId()).orElseThrow(
+                                                () -> new BadRequestException(
+                                                        ErrorCode.ROW_DOES_NOT_EXIST,
+                                                        "부모 댓글이 없습니다."
+                                                )
+                                        ) : null)
                 )
         );
     }
@@ -92,9 +92,9 @@ public class PostCommentService {
     @Transactional
     public CommentResponseDto deleteComment(String commentId, String userId) {
         User writer = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "유저 정보가 없습니다."
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
                 )
         );
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
@@ -116,9 +116,9 @@ public class PostCommentService {
             CommentUpdateRequestDto commentUpdateRequestDto
     ) {
         User writer = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "유저 정보가 없습니다."
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
                 )
         );
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
