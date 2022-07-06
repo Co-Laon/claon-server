@@ -5,24 +5,24 @@ import lombok.Data;
 
 @Data
 public class CommentResponseDto {
-    private String commentId;
-    private String content;
-    private Boolean isDeleted;
-    private String parentCommentId;
-    private String laonId;
+    private final String commentId;
+    private final String content;
+    private final Boolean isDeleted;
+    private final String parentCommentId;
+    private final String postId;
 
     private CommentResponseDto(
             String commentId,
             String content,
             Boolean isDeleted,
             String parentCommentId,
-            String laonId
+            String postId
     ) {
         this.commentId = commentId;
         this.content = content;
         this.isDeleted = isDeleted;
         this.parentCommentId = parentCommentId;
-        this.laonId = laonId;
+        this.postId = postId;
     }
 
     public static CommentResponseDto from(PostComment postComment) {
@@ -34,5 +34,4 @@ public class CommentResponseDto {
                 postComment.getPost().getId()
         );
     }
-
 }

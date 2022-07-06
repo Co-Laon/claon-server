@@ -4,6 +4,7 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -87,5 +88,12 @@ public class PostComment extends BaseEntity {
                 post,
                 parentComment
         );
+    }
+
+    public void updateContent(String content){
+        this.content = content;
+    }
+    public void delete(){
+        this.isDeleted = true;
     }
 }
