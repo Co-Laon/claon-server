@@ -17,7 +17,7 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
     @Column(name = "oauth_id", nullable = false, unique = true)
-    private String oAuthId;
+    private String oauthId;
     @Column(name = "nickname", nullable = false, unique = true)
     private String nickname;
     @Column(name = "metropolitan_active_area")
@@ -36,7 +36,7 @@ public class User extends BaseEntity {
     private User(
             String id,
             String email,
-            String oAuthId,
+            String oauthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
@@ -46,7 +46,7 @@ public class User extends BaseEntity {
     ) {
         super(id);
         this.email = email;
-        this.oAuthId = oAuthId;
+        this.oauthId = oauthId;
         this.nickname = nickname;
         this.metropolitanActiveArea = metropolitanActiveArea;
         this.basicLocalActiveArea = basicLocalActiveArea;
@@ -58,7 +58,7 @@ public class User extends BaseEntity {
 
     private User(
             String email,
-            String oAuthId,
+            String oauthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
@@ -67,7 +67,7 @@ public class User extends BaseEntity {
             String instagramUserName
     ) {
         this.email = email;
-        this.oAuthId = oAuthId;
+        this.oauthId = oauthId;
         this.nickname = nickname;
         this.metropolitanActiveArea = metropolitanActiveArea;
         this.basicLocalActiveArea = basicLocalActiveArea;
@@ -79,7 +79,7 @@ public class User extends BaseEntity {
 
     public static User of(
             String email,
-            String oAuthId,
+            String oauthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
@@ -89,7 +89,7 @@ public class User extends BaseEntity {
     ) {
         return new User(
                 email,
-                oAuthId,
+                oauthId,
                 nickname,
                 metropolitanActiveArea,
                 basicLocalActiveArea,
@@ -102,7 +102,7 @@ public class User extends BaseEntity {
     public static User of(
             String id,
             String email,
-            String oAuthId,
+            String oauthId,
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
@@ -114,7 +114,7 @@ public class User extends BaseEntity {
         return new User(
                 id,
                 email,
-                oAuthId,
+                oauthId,
                 nickname,
                 metropolitanActiveArea,
                 basicLocalActiveArea,

@@ -1,7 +1,5 @@
 package coLaon.ClaonBack;
 
-import coLaon.ClaonBack.common.exception.BadRequestException;
-import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
@@ -17,7 +15,6 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 

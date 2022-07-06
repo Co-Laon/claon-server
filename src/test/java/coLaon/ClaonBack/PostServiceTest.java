@@ -17,10 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Optional;
 import java.util.Set;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
@@ -90,6 +88,26 @@ public class PostServiceTest {
             //then
             assertThat(likeResponseDto).isNotNull();
             assertThat(likeResponseDto.getId()).isEqualTo("testPostLikeId");
+        }
+    }
+
+    @Test
+    @DisplayName("Success case for delete like")
+    void successDeleteLike() {
+        try (MockedStatic<PostLike> mockedPostLike = mockStatic(PostLike.class)) {
+            //given
+            LikeRequestDto likeRequestDto = new LikeRequestDto("testPostId");
+
+            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+            given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+            given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(postLike);
+
+            //when
+            LikeResponseDto likeResponseDto = this.postService.deleteLike("testUserId", likeRequestDto);
+
+            //then
+            assertThat(likeResponseDto.getId()).isEqualTo("testPostLikeId");
+            assertThat(likeRequestDto.getPostId()).isEqualTo(likeResponseDto.getPostId());
         }
     }
 }

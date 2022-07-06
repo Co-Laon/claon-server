@@ -46,7 +46,7 @@ public class UserService {
         return UserResponseDto.from(userRepository.save(
                 User.of(
                         signUpRequestDto.getEmail(),
-                        signUpRequestDto.getOAuthId(),
+                        signUpRequestDto.getOauthId(),
                         signUpRequestDto.getNickname(),
                         MetropolitanArea.of(signUpRequestDto.getMetropolitanActiveArea()),
                         BasicLocalArea.of(

@@ -41,4 +41,25 @@ public class PostService {
                 PostLike.of(liker, post))
         );
     }
+
+    @Transactional
+    public LikeResponseDto deleteLike(String userId, LikeRequestDto likeRequestDto) {
+        User liker = userRepository.findById(userId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "유저 정보가 없습니다."
+                )
+        );
+
+        Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "등반 정보가 없습니다."
+                )
+        );
+
+        PostLike like = postLikeRepository.findByLikerAndPost(liker, post);
+        postLikeRepository.deleteById(like.getId());
+        return LikeResponseDto.from(like);
+    }
 }
