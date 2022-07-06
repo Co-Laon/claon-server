@@ -1,13 +1,14 @@
 package coLaon.ClaonBack;
 
-import coLaon.ClaonBack.common.exception.BadRequestException;
-import coLaon.ClaonBack.common.exception.BaseRuntimeException;
-import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.Service.PostCommentService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
-import coLaon.ClaonBack.post.dto.*;
+import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
+import coLaon.ClaonBack.post.dto.CommentResponseDto;
+import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
+import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
+import coLaon.ClaonBack.post.dto.ChildCommentResponseDto;
 import coLaon.ClaonBack.post.repository.PostCommentRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
@@ -27,11 +28,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
