@@ -3,19 +3,17 @@ package coLaon.ClaonBack.common.validator;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 
-import java.util.UUID;
-
 public class IdEqualValidator extends Validator {
 
-    private final UUID srcId;
-    private final UUID dstId;
+    private final String srcId;
+    private final String dstId;
 
-    public IdEqualValidator(UUID srcId, UUID dstId) {
+    public IdEqualValidator(String srcId, String dstId) {
         this.srcId = srcId;
         this.dstId = dstId;
     }
 
-    public static IdEqualValidator of(UUID srcId, UUID dstId) {
+    public static IdEqualValidator of(String srcId, String dstId) {
         return new IdEqualValidator(srcId, dstId);
     }
 
