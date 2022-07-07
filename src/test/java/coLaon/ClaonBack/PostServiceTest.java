@@ -17,8 +17,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.Optional;
 import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
@@ -42,8 +44,6 @@ public class PostServiceTest {
     @BeforeEach
     void setUp() {
         this.user = User.of(
-                "testUserId",
-                "01012341234",
                 "test@gmail.com",
                 "test1234!!",
                 "test",
@@ -78,8 +78,10 @@ public class PostServiceTest {
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
             given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+            given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.empty());
 
             given(PostLike.of(user, post)).willReturn(postLike);
+            given(this.postLikeRepository.countByPost_Id("testPostId")).willReturn(1);
 
             given(this.postLikeRepository.save(this.postLike)).willReturn(postLike);
             //when
@@ -87,7 +89,7 @@ public class PostServiceTest {
 
             //then
             assertThat(likeResponseDto).isNotNull();
-            assertThat(likeResponseDto.getId()).isEqualTo("testPostLikeId");
+            assertThat(likeResponseDto.getLikeNumber()).isEqualTo(1);
         }
     }
 
@@ -100,13 +102,13 @@ public class PostServiceTest {
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
             given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
-            given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(postLike);
+            given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.of(postLike));
 
             //when
             LikeResponseDto likeResponseDto = this.postService.deleteLike("testUserId", likeRequestDto);
 
             //then
-            assertThat(likeResponseDto.getId()).isEqualTo("testPostLikeId");
+            assertThat(likeResponseDto).isNotNull();
             assertThat(likeRequestDto.getPostId()).isEqualTo(likeResponseDto.getPostId());
         }
     }

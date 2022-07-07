@@ -21,7 +21,7 @@ public class SwaggerConfig {
         return new Docket(DocumentationType.OAS_30)
                 .useDefaultResponseMessages(false)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("coLaon.ClaonBack.web"))
+                .apis(RequestHandlerSelectors.basePackage("coLaon.ClaonBack"))
                 .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo());

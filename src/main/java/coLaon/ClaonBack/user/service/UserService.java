@@ -4,6 +4,7 @@ import coLaon.ClaonBack.common.domain.enums.BasicLocalArea;
 import coLaon.ClaonBack.common.domain.enums.MetropolitanArea;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
@@ -24,15 +25,17 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto signUp(SignUpRequestDto signUpRequestDto) {
-        this.userRepository.findByEmail(signUpRequestDto.getEmail()).ifPresent(
-                email -> {
-                    throw new BadRequestException(
-                            ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 존재하는 이메일입니다."
+    public UserResponseDto signUp(
+            String userId,
+            SignUpRequestDto signUpRequestDto
+    ) {
+        User user = this.userRepository.findById(userId).orElseThrow(
+                () -> {
+                    throw new UnauthorizedException(
+                            ErrorCode.USER_DOES_NOT_EXIST,
+                            "이용자를 찾을 수 없습니다."
                     );
-                }
-        );
+                });
 
         this.userRepository.findByNickname(signUpRequestDto.getNickname()).ifPresent(
                 nickname -> {
@@ -43,21 +46,19 @@ public class UserService {
                 }
         );
 
-        return UserResponseDto.from(userRepository.save(
-                User.of(
-                        signUpRequestDto.getEmail(),
-                        signUpRequestDto.getOauthId(),
-                        signUpRequestDto.getNickname(),
-                        MetropolitanArea.of(signUpRequestDto.getMetropolitanActiveArea()),
-                        BasicLocalArea.of(
-                                signUpRequestDto.getMetropolitanActiveArea(),
-                                signUpRequestDto.getBasicLocalActiveArea()
-                        ),
-                        signUpRequestDto.getImagePath(),
-                        signUpRequestDto.getInstagramOAuthId(),
-                        signUpRequestDto.getInstagramUserName()
-                ))
+        user.signUp(
+                signUpRequestDto.getNickname(),
+                MetropolitanArea.of(signUpRequestDto.getMetropolitanActiveArea()),
+                BasicLocalArea.of(
+                        signUpRequestDto.getMetropolitanActiveArea(),
+                        signUpRequestDto.getBasicLocalActiveArea()
+                ),
+                signUpRequestDto.getImagePath(),
+                signUpRequestDto.getInstagramOAuthId(),
+                signUpRequestDto.getInstagramUserName()
         );
+
+        return UserResponseDto.from(userRepository.save(user));
     }
 }
 

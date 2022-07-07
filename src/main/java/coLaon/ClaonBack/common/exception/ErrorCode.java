@@ -14,6 +14,9 @@ public enum ErrorCode {
      *  401 Unauthorized Error
      */
     NOT_ACCESSIBLE(40100),
+    INVALID_JWT(40101),
+    NOT_SIGN_IN(40102),
+    USER_DOES_NOT_EXIST(40103),
     /**
      *  500 Internal Server Error
      */
