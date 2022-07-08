@@ -34,3 +34,5 @@ hs_err_pid*
 !**/resources/
 **/resources/*
 !**/resources/application-*.yml
+
+start.sh
