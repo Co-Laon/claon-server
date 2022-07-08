@@ -1,7 +1,7 @@
 package coLaon.ClaonBack;
 
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
-import coLaon.ClaonBack.post.Service.PostCommentService;
+import coLaon.ClaonBack.post.service.PostCommentService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
 import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
@@ -187,8 +187,8 @@ public class PostCommentServiceTest {
         ArrayList<PostComment> children2 = new ArrayList<>(List.of(childPostComment3));
 
         given(this.postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(post)).willReturn(parents);
-        given(this.postCommentRepository.findFirst3ByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(postComment.getId())).willReturn(children1);
-        given(this.postCommentRepository.findFirst3ByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(postComment2.getId())).willReturn(children2);
+        given(this.postCommentRepository.findFirstThreeByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(postComment.getId())).willReturn(children1);
+        given(this.postCommentRepository.findFirstThreeByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(postComment2.getId())).willReturn(children2);
 
         // when
         List<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testPostId");
@@ -284,5 +284,4 @@ public class PostCommentServiceTest {
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("접근 권한이 없습니다.");
     }
-
 }

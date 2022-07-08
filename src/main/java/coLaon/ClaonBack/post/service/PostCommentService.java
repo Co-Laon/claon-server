@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.post.Service;
+package coLaon.ClaonBack.post.service;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -71,7 +71,7 @@ public class PostCommentService {
                 .map(parent ->
                         CommentFindResponseDto.from(
                                 parent,
-                                postCommentRepository.findFirst3ByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(parent.getId())
+                                postCommentRepository.findFirstThreeByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(parent.getId())
                         )
                 ).collect(Collectors.toList());
     }

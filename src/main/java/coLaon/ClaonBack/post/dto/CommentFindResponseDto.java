@@ -14,7 +14,7 @@ public class CommentFindResponseDto {
     private final Boolean isDeleted;
     private final String postId;
     private final String writerNickname;
-    private final String writerProfile;
+    private final String writerProfileImage;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
     private final List<ChildCommentResponseDto> children;
@@ -25,7 +25,7 @@ public class CommentFindResponseDto {
             Boolean isDeleted,
             String postId,
             String writerNickname,
-            String writerProfile,
+            String writerProfileImage,
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
             List<ChildCommentResponseDto> children
@@ -35,7 +35,7 @@ public class CommentFindResponseDto {
         this.isDeleted = isDeleted;
         this.postId = postId;
         this.writerNickname = writerNickname;
-        this.writerProfile = writerProfile;
+        this.writerProfileImage = writerProfileImage;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.children = children;

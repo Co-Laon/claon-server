@@ -1,8 +1,9 @@
 package coLaon.ClaonBack.post.web;
 
-import coLaon.ClaonBack.post.Service.PostCommentService;
-import coLaon.ClaonBack.post.Service.PostService;
+import coLaon.ClaonBack.post.service.PostCommentService;
+import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
+import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
-
 import javax.validation.Valid;
 import java.util.List;
 
@@ -50,6 +50,15 @@ public class PostController {
         return this.postService.deleteLike(userId, likeRequestDto);
     }
 
+    @GetMapping(value = "/posts/{postId}/like")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<LikeFindResponseDto> findAllLike(
+            @PathVariable String postId
+    ) {
+        // TODO: add pagination
+        return this.postService.findLikeByPost(postId);
+    }
+
     @PostMapping("/comment")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CommentResponseDto createComment(
@@ -61,7 +70,7 @@ public class PostController {
 
     @GetMapping(value = "/comment", params = "postId")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<CommentFindResponseDto> findAllParentComment(
+    public List<CommentFindResponseDto> findAllParentCommentAndThreeChildComment(
             @RequestParam String postId
     ) {
         return this.postCommentService.findCommentsByPost(postId);

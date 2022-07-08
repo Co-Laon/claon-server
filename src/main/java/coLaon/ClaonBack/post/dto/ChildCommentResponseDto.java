@@ -12,7 +12,7 @@ public class ChildCommentResponseDto {
     private final Boolean isDeleted;
     private final String postId;
     private final String writerNickname;
-    private final String writerProfile;
+    private final String writerProfileImage;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
@@ -22,7 +22,7 @@ public class ChildCommentResponseDto {
             Boolean isDeleted,
             String postId,
             String writerNickname,
-            String writerProfile,
+            String writerProfileImage,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -31,7 +31,7 @@ public class ChildCommentResponseDto {
         this.isDeleted = isDeleted;
         this.postId = postId;
         this.writerNickname = writerNickname;
-        this.writerProfile = writerProfile;
+        this.writerProfileImage = writerProfileImage;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

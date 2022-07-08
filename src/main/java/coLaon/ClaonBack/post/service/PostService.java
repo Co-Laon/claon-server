@@ -1,10 +1,11 @@
-package coLaon.ClaonBack.post.Service;
+package coLaon.ClaonBack.post.service;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostLike;
+import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
@@ -13,8 +14,10 @@ import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -82,5 +85,22 @@ public class PostService {
                 like,
                 postLikeRepository.countByPost_Id(like.getPost().getId())
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<LikeFindResponseDto> findLikeByPost(String postId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "등반 정보가 없습니다."
+                )
+        );
+
+        return postLikeRepository.findAllByPostOrderByCreatedAt(post)
+                .stream()
+                .map(like -> LikeFindResponseDto.from(
+                        like,
+                        postLikeRepository.countByPost_Id(post.getId())
+                )).collect(Collectors.toList());
     }
 }
