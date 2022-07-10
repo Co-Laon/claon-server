@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.config;
 
+import coLaon.ClaonBack.common.utils.CookieUtil;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,10 +21,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final OAuth2FailureHandler oAuth2FailureHandler;
     private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Value("${spring.jwt.access-token.cookie-name}")
@@ -64,17 +63,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
 
                 .and()
-                .addFilterBefore(new JwtAuthFilter(this.jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthFilter(this.jwtUtil, this.cookieUtil), UsernamePasswordAuthenticationFilter.class)
 
                 .logout()
                 .logoutUrl("/api/**/user/sign-out")
-                .deleteCookies(this.ACCESS_COOKIE_NAME, this.REFRESH_COOKIE_NAME)
-
-                .and()
-                .oauth2Login()
-                .successHandler(this.oAuth2SuccessHandler)
-                .failureHandler(this.oAuth2FailureHandler)
-                .userInfoEndpoint().userService(this.customOAuth2UserService);
+                .deleteCookies(this.ACCESS_COOKIE_NAME, this.REFRESH_COOKIE_NAME);
     }
 
     @Override

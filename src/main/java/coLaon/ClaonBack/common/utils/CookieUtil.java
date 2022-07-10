@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.common.utils;
 
+import coLaon.ClaonBack.config.dto.JwtDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,8 @@ import java.util.Optional;
 public class CookieUtil {
     @Value("${spring.jwt.access-token.cookie-name}")
     private String ACCESS_COOKIE_NAME;
+    @Value("${spring.jwt.refresh-token.cookie-name}")
+    private String REFRESH_COOKIE_NAME;
     @Value("${spring.jwt.access-token.expire-seconds}")
     private Integer ACCESS_TOKEN_EXPIRE_TIME;
     @Value("${spring.jwt.refresh-token.expire-seconds}")
@@ -37,6 +40,26 @@ public class CookieUtil {
         cookie.setSecure(true);
 
         res.addCookie(cookie);
+    }
+
+    public void addToken(HttpServletResponse response, JwtDto jwt) {
+        this.createCookie(response, jwt.getAccessToken(), this.ACCESS_COOKIE_NAME);
+        this.createCookie(response, jwt.getRefreshToken(), this.REFRESH_COOKIE_NAME);
+
+        jwt.getIsCompletedSignUp().ifPresent(
+                isCompletedSignUp -> {
+                    this.createCookie(response, jwt.getIsCompletedSignUp().toString(), "isCompletedSignUp");
+                }
+        );
+    }
+
+    public JwtDto resolveToken(HttpServletRequest request) {
+        return JwtDto.of(
+                this.getCookie(request, this.ACCESS_COOKIE_NAME)
+                        .orElse(null),
+                this.getCookie(request, this.REFRESH_COOKIE_NAME)
+                        .orElse(null)
+        );
     }
 
     public Optional<String> getCookie(

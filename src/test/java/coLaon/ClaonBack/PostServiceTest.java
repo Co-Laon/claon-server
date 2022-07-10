@@ -45,10 +45,11 @@ public class PostServiceTest {
     void setUp() {
         this.user = User.of(
                 "test@gmail.com",
-                "test1234!!",
+                "1234567890",
                 "test",
                 "경기도",
                 "성남시",
+                "",
                 "",
                 "instagramId"
         );
@@ -73,21 +74,22 @@ public class PostServiceTest {
     @DisplayName("Success case for create like")
     void successCreateLike() {
         try (MockedStatic<PostLike> mockedPostLike = mockStatic(PostLike.class)) {
-            //given
+            // given
             LikeRequestDto likeRequestDto = new LikeRequestDto("testPostId");
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
             given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
             given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.empty());
 
-            given(PostLike.of(user, post)).willReturn(postLike);
+            mockedPostLike.when(() -> PostLike.of(user, post)).thenReturn(postLike);
             given(this.postLikeRepository.countByPost_Id("testPostId")).willReturn(1);
 
             given(this.postLikeRepository.save(this.postLike)).willReturn(postLike);
-            //when
+
+            // when
             LikeResponseDto likeResponseDto = this.postService.createLike("testUserId", likeRequestDto);
 
-            //then
+            // then
             assertThat(likeResponseDto).isNotNull();
             assertThat(likeResponseDto.getLikeNumber()).isEqualTo(1);
         }
@@ -96,20 +98,18 @@ public class PostServiceTest {
     @Test
     @DisplayName("Success case for delete like")
     void successDeleteLike() {
-        try (MockedStatic<PostLike> mockedPostLike = mockStatic(PostLike.class)) {
-            //given
-            LikeRequestDto likeRequestDto = new LikeRequestDto("testPostId");
+        // given
+        LikeRequestDto likeRequestDto = new LikeRequestDto("testPostId");
 
-            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-            given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
-            given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.of(postLike));
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+        given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+        given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.of(postLike));
 
-            //when
-            LikeResponseDto likeResponseDto = this.postService.deleteLike("testUserId", likeRequestDto);
+        // when
+        LikeResponseDto likeResponseDto = this.postService.deleteLike("testUserId", likeRequestDto);
 
-            //then
-            assertThat(likeResponseDto).isNotNull();
-            assertThat(likeRequestDto.getPostId()).isEqualTo(likeResponseDto.getPostId());
-        }
+        // then
+        assertThat(likeResponseDto).isNotNull();
+        assertThat(likeRequestDto.getPostId()).isEqualTo(likeResponseDto.getPostId());
     }
 }
