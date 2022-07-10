@@ -2,9 +2,13 @@ package coLaon.ClaonBack;
 
 import coLaon.ClaonBack.post.Service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
+import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
+import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
@@ -33,6 +37,8 @@ public class PostServiceTest {
     PostRepository postRepository;
     @Mock
     PostLikeRepository postLikeRepository;
+    @Mock
+    PostContentsRepository postContentsRepository;
 
     @InjectMocks
     PostService postService;
@@ -40,6 +46,7 @@ public class PostServiceTest {
     private PostLike postLike;
     private User user;
     private Post post;
+    private PostContents postContents;
 
     @BeforeEach
     void setUp() {
@@ -67,7 +74,48 @@ public class PostServiceTest {
                 user,
                 post
         );
+
+        this.postContents = PostContents.of(
+                "testPostContentsId",
+                post,
+                "test.com/test.png"
+        );
     }
+
+    @Test
+    @DisplayName("Success case for create post")
+    void successCreatePost() {
+        try (MockedStatic<Post> mockedPost = mockStatic(Post.class)) {
+            //given
+            PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
+                    "center1",
+                    "hold",
+                    "testContent",
+                    Set.of(PostContents.of("test.com/test.png"))
+            );
+
+            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+            given(Post.of(
+                    postCreateRequestDto.getCenterName(),
+                    postCreateRequestDto.getHoldName(),
+                    postCreateRequestDto.getContent(),
+                    user,
+                    postCreateRequestDto.getContentsSet()
+            )).willReturn(post);
+
+            given(this.postRepository.save(this.post)).willReturn(post);
+
+            //when
+            PostResponseDto postResponseDto = this.postService.createPost("testUserId", postCreateRequestDto);
+            postCreateRequestDto.getContentsSet().forEach(postContentsRepository::save);
+
+            //then
+            assertThat(postResponseDto).isNotNull();
+            assertThat(postCreateRequestDto.getCenterName()).isEqualTo(postResponseDto.getCenterName());
+            assertThat(postCreateRequestDto.getContentsSet().size()).isEqualTo(1);
+        }
+    }
+
 
     @Test
     @DisplayName("Success case for create like")

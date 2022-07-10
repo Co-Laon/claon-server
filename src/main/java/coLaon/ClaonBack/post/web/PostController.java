@@ -9,6 +9,8 @@ import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
 import coLaon.ClaonBack.post.dto.CommentResponseDto;
 import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
 import coLaon.ClaonBack.post.dto.ChildCommentResponseDto;
+import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,6 +34,16 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
     private final PostCommentService postCommentService;
+
+    @PostMapping
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public PostResponseDto createPost(
+            @AuthenticationPrincipal String userId,
+            @RequestBody @Valid PostCreateRequestDto postCreateRequestDto
+    ) {
+        return this.postService.createPost(userId, postCreateRequestDto);
+    }
+
 
     @PostMapping("/like")
     @ResponseStatus(value = HttpStatus.CREATED)
