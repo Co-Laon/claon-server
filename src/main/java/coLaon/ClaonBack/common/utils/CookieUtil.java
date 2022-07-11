@@ -48,7 +48,7 @@ public class CookieUtil {
 
         jwt.getIsCompletedSignUp().ifPresent(
                 isCompletedSignUp -> {
-                    this.createCookie(response, jwt.getIsCompletedSignUp().toString(), "isCompletedSignUp");
+                    this.createCookie(response, isCompletedSignUp.toString(), "isCompletedSignUp");
                 }
         );
     }
