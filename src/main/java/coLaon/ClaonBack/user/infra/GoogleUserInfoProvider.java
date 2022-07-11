@@ -1,0 +1,54 @@
+package coLaon.ClaonBack.user.infra;
+
+import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.InternalServerErrorException;
+import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
+import coLaon.ClaonBack.user.service.OAuth2UserInfoProvider;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
+
+@Component
+@RequiredArgsConstructor
+public class GoogleUserInfoProvider implements OAuth2UserInfoProvider {
+    @Value("${spring.security.oauth2.registration.google.client-id}")
+    private String clientId;
+
+    private final NetHttpTransport netHttpTransport;
+    private final GsonFactory gsonFactory;
+
+    @Override
+    public OAuth2UserInfoDto getUserInfo(String code) {
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(this.netHttpTransport, this.gsonFactory)
+                .setAudience(Collections.singletonList(this.clientId))
+                .build();
+
+        // Verify it
+        GoogleIdToken idToken;
+        try {
+            idToken = verifier.verify(code);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new InternalServerErrorException(
+                    ErrorCode.INTERNAL_SERVER_ERROR,
+                    "구글 로그인에 실패했습니다."
+            );
+        }
+
+        if (idToken == null) {
+            throw new InternalServerErrorException(
+                    ErrorCode.INTERNAL_SERVER_ERROR,
+                    "구글 로그인에 실패했습니다."
+            );
+        }
+
+        return OAuth2UserInfoDto.of(idToken.getPayload().getSubject(), idToken.getPayload().getEmail());
+    }
+}
