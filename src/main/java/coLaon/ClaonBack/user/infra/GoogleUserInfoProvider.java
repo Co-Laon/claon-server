@@ -19,15 +19,12 @@ import java.util.Collections;
 @Component
 @RequiredArgsConstructor
 public class GoogleUserInfoProvider implements OAuth2UserInfoProvider {
-    @Value("${spring.security.oauth2.registration.google.client-id}")
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
-
-    private final NetHttpTransport netHttpTransport;
-    private final GsonFactory gsonFactory;
 
     @Override
     public OAuth2UserInfoDto getUserInfo(String code) {
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(this.netHttpTransport, this.gsonFactory)
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance())
                 .setAudience(Collections.singletonList(this.clientId))
                 .build();
 
