@@ -2,10 +2,10 @@ package coLaon.ClaonBack.user.service;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
-import coLaon.ClaonBack.user.domain.Follow;
+import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.dto.FollowResponseDto;
-import coLaon.ClaonBack.user.repository.FollowRepository;
+import coLaon.ClaonBack.user.dto.LaonResponseDto;
+import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,27 +13,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class FollowService {
+public class LaonService {
     private final UserRepository userRepository;
-    private final FollowRepository followRepository;
+    private final LaonRepository laonRepository;
 
     @Transactional
-    public FollowResponseDto follow(String followerId, String followingId) {
-        User follower = userRepository.findById(followerId).orElseThrow(
+    public LaonResponseDto laon(String laonId, String userId) {
+        User laon = userRepository.findById(laonId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "유저 정보가 없습니다."
                 )
         );
 
-        User following = userRepository.findById(followingId).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "유저 정보가 없습니다."
                 )
         );
 
-        followRepository.findByFollowerAndFollowing(follower, following).ifPresent(
+        laonRepository.findByLaonAndUser(laon, user).ifPresent(
                 follow -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
@@ -42,32 +42,32 @@ public class FollowService {
                 }
         );
 
-        return FollowResponseDto.from(followRepository.save(Follow.of(follower,following)));
+        return LaonResponseDto.from(laonRepository.save(Laon.of(laon,user)));
     }
 
     @Transactional
-    public FollowResponseDto unfollow(String followerId, String followingId) {
-        User follower = userRepository.findById(followerId).orElseThrow(
+    public LaonResponseDto unlaon(String laonId, String userId) {
+        User laon = userRepository.findById(laonId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "유저 정보가 없습니다."
                 )
         );
 
-        User following = userRepository.findById(followingId).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "유저 정보가 없습니다."
                 )
         );
 
-        Follow follow = followRepository.findByFollowerAndFollowing(follower, following).orElseThrow(
+        Laon laonRelation = laonRepository.findByLaonAndUser(laon, user).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "팔로우 관계가 아닙니다."
                 )
         );
-        followRepository.delete(follow);
-        return FollowResponseDto.from(follow);
+        laonRepository.delete(laonRelation);
+        return LaonResponseDto.from(laonRelation);
     }
 }

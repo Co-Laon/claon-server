@@ -1,9 +1,10 @@
 package coLaon.ClaonBack.user.web;
 
-import coLaon.ClaonBack.user.dto.FollowResponseDto;
-import coLaon.ClaonBack.user.service.FollowService;
+import coLaon.ClaonBack.user.dto.LaonResponseDto;
+import coLaon.ClaonBack.user.service.LaonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,23 +16,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/follow")
-public class FollowController {
-    private final FollowService followService;
+public class LaonController {
+    private final LaonService laonService;
 
     @PostMapping(value = "/{laonId}")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public FollowResponseDto follow(
-            @RequestHeader(value = "userId") String userId,
+    public LaonResponseDto laon(
+            @AuthenticationPrincipal String userId,
             @PathVariable String laonId) {
-        return this.followService.follow(userId, laonId);
+        return this.laonService.laon(laonId, userId);
     }
 
     @DeleteMapping(value = "/{laonId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public FollowResponseDto unfollow(
-            @RequestHeader(value = "userId") String userId,
+    public LaonResponseDto unlaon(
+            @AuthenticationPrincipal String userId,
             @PathVariable String laonId) {
-        return this.followService.unfollow(userId, laonId);
+        return this.laonService.unlaon(laonId, userId);
     }
 
 }

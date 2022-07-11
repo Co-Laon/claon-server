@@ -184,7 +184,7 @@ public class PostCommentServiceTest {
 
         ArrayList<PostComment> parents = new ArrayList<>(Arrays.asList(postComment, postComment2));
         ArrayList<PostComment> children1 = new ArrayList<>(Arrays.asList(childPostComment, childPostComment2));
-        ArrayList<PostComment> children2 = new ArrayList<>(List.of(childPostComment3));
+        ArrayList<PostComment> children2 = new ArrayList<>(Arrays.asList(childPostComment3));
 
         given(this.postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(post)).willReturn(parents);
         given(this.postCommentRepository.findFirst3ByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(postComment.getId())).willReturn(children1);
