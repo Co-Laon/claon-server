@@ -1,8 +1,9 @@
 package coLaon.ClaonBack;
 
-import coLaon.ClaonBack.post.Service.PostService;
+import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostLike;
+import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
@@ -18,6 +19,9 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,7 +42,9 @@ public class PostServiceTest {
     PostService postService;
 
     private PostLike postLike;
+    private PostLike postLike2;
     private User user;
+    private User user2;
     private Post post;
 
     @BeforeEach
@@ -54,6 +60,17 @@ public class PostServiceTest {
                 "instagramId"
         );
 
+        this.user2 = User.of(
+                "testUserId2",
+                "test123@gmail.com",
+                "test2345!!",
+                "test2",
+                "경기도",
+                "성남시",
+                "",
+                "instagramId2"
+        );
+
         this.post = Post.of(
                 "testPostId",
                 "center1",
@@ -66,6 +83,12 @@ public class PostServiceTest {
         this.postLike = PostLike.of(
                 "testPostLikeId",
                 user,
+                post
+        );
+
+        this.postLike2 = PostLike.of(
+                "testPostLikeId2",
+                user2,
                 post
         );
     }
@@ -111,5 +134,23 @@ public class PostServiceTest {
         // then
         assertThat(likeResponseDto).isNotNull();
         assertThat(likeRequestDto.getPostId()).isEqualTo(likeResponseDto.getPostId());
+    }
+
+    @Test
+    @DisplayName("Success case for find likes")
+    void successFindLikes() {
+        //given
+        given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+
+        ArrayList<PostLike> postLikes = new ArrayList<>(Arrays.asList(postLike, postLike2));
+
+        given(this.postLikeRepository.findAllByPostOrderByCreatedAt(post)).willReturn(postLikes);
+
+        //when
+        List<LikeFindResponseDto> likeFindResponseDto = this.postService.findLikeByPost("testPostId");
+
+        //then
+        assertThat(likeFindResponseDto.size()).isEqualTo(postLikes.size());
+        assertThat(likeFindResponseDto.contains(postLike));
     }
 }
