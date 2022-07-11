@@ -4,7 +4,6 @@ import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.dto.LaonResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,7 @@ public class LaonService {
     private final LaonRepository laonRepository;
 
     @Transactional
-    public LaonResponseDto laon(String laonId, String userId) {
+    public void createLaon(String laonId, String userId) {
         User laon = userRepository.findById(laonId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -33,20 +32,19 @@ public class LaonService {
                 )
         );
 
-        laonRepository.findByLaonAndUser(laon, user).ifPresent(
+        laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId()).ifPresent(
                 follow -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 팔로우한 관계입니다."
+                            "이미 라온 관계입니다."
                     );
                 }
         );
-
-        return LaonResponseDto.from(laonRepository.save(Laon.of(laon,user)));
+        laonRepository.save(Laon.of(laon,user));
     }
 
     @Transactional
-    public LaonResponseDto unlaon(String laonId, String userId) {
+    public void deleteLaon(String laonId, String userId) {
         User laon = userRepository.findById(laonId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -61,13 +59,12 @@ public class LaonService {
                 )
         );
 
-        Laon laonRelation = laonRepository.findByLaonAndUser(laon, user).orElseThrow(
+        Laon laonRelation = laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "팔로우 관계가 아닙니다."
+                        "라온 관계가 아닙니다."
                 )
         );
-        laonRepository.delete(laonRelation);
-        return LaonResponseDto.from(laonRelation);
+        laonRepository.deleteById(laonRelation.getId());
     }
 }

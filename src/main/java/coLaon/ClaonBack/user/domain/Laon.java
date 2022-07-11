@@ -15,11 +15,11 @@ import javax.persistence.Table;
 @NoArgsConstructor
 public class Laon extends BaseEntity {
     @ManyToOne
-    @JoinColumn(name = "laon")
+    @JoinColumn(name = "laon_id", nullable = false)
     private User laon;
 
     @ManyToOne
-    @JoinColumn(name = "user")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     private Laon(User laon, User user){

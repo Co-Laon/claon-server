@@ -3,7 +3,6 @@ package coLaon.ClaonBack;
 
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.dto.LaonResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import coLaon.ClaonBack.user.service.LaonService;
@@ -69,49 +68,36 @@ public class LaonServiceTest {
     }
 
     @Test
-    @DisplayName("Success case for follow")
-    void successFollow() {
-        try (MockedStatic<Laon> mockedFollow = mockStatic(Laon.class)) {
+    @DisplayName("Success case for create laon")
+    void successCreateLaon() {
+        try (MockedStatic<Laon> mockedLaon = mockStatic(Laon.class)) {
             //given
-
             given(this.userRepository.findById("laonId")).willReturn(Optional.of(laon));
             given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
             given(Laon.of(this.laon, this.user)).willReturn(this.laonRelation);
 
-
             given(this.laonRepository.save(this.laonRelation)).willReturn(this.laonRelation);
 
             //when
-            LaonResponseDto laonResponseDto = this.laonService.laon("laonId", "userId");
+            this.laonService.createLaon("laonId", "userId");
+
             //then
-            assertThat(laonResponseDto).isNotNull();
-            assertThat(laonResponseDto.getLaonId()).isEqualTo("laonId");
-            assertThat(laonResponseDto.getUserId()).isEqualTo("userId");
+            assertThat(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).isNotNull();
         }
     }
 
     @Test
-    @DisplayName("Success case for unfollow")
-    void successUnFollow() {
-        try (MockedStatic<Laon> mockedFollow = mockStatic(Laon.class)) {
+    @DisplayName("Success case for delete laon")
+    void successDeletelaon() {
             //given
-
             given(this.userRepository.findById("laonId")).willReturn(Optional.of(laon));
             given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-            given(this.laonRepository.findByLaonAndUser(this.laon, this.user)).willReturn(Optional.of(this.laonRelation));
+            given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.of(this.laonRelation));
 
             //when
-            LaonResponseDto laonResponseDto = this.laonService.unlaon("laonId", "userId");
+            this.laonService.deleteLaon("laonId", "userId");
+
             //then
-            assertThat(laonResponseDto).isNotNull();
-            assertThat(laonResponseDto.getLaonId()).isEqualTo("laonId");
-            assertThat(laonResponseDto.getUserId()).isEqualTo("userId");
-        }
+            assertThat(this.laonRepository.findAll()).isEmpty();
     }
-
-
-
-
-
 }
-

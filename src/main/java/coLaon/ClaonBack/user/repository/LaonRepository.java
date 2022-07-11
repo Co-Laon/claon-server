@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface LaonRepository extends JpaRepository<Laon, String> {
-    Optional<Laon> findByLaonAndUser(User laon, User user);
+    Optional<Laon> findByLaonIdAndUserId(String laonId, String userId);
 }
