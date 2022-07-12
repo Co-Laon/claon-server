@@ -1,6 +1,5 @@
 package coLaon.ClaonBack.config.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Optional;

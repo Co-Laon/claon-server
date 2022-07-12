@@ -18,7 +18,6 @@ public class PostLike extends BaseEntity {
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User liker;
-
     @ManyToOne(targetEntity = Post.class)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;

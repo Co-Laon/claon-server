@@ -11,7 +11,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
 public class SwaggerConfig {
-
     private final String title = "Claon Service API";
     private final String version = "1.0.0";
     private final String description = "Climbing Project";
