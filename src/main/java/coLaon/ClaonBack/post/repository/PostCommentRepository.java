@@ -12,4 +12,5 @@ public interface PostCommentRepository extends JpaRepository<PostComment, String
     List<PostComment> findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(Post post);
     List<PostComment> findFirstThreeByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(String postCommentId);
     List<PostComment> findAllByParentCommentAndIsDeletedFalseOrderByCreatedAt(PostComment postComment);
+    Long countAllByParentCommentId(String postCommentId);
 }

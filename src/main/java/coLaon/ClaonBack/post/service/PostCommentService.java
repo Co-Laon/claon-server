@@ -71,7 +71,8 @@ public class PostCommentService {
                 .map(parent ->
                         CommentFindResponseDto.from(
                                 parent,
-                                postCommentRepository.findFirstThreeByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(parent.getId())
+                                postCommentRepository.findFirstThreeByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(parent.getId()),
+                                postCommentRepository.countAllByParentCommentId(parent.getId())
                         )
                 ).collect(Collectors.toList());
     }
