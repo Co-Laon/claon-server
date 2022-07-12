@@ -52,6 +52,8 @@ public class PostCommentServiceTest {
     private PostComment childPostComment;
     private PostComment childPostComment2;
     private PostComment childPostComment3;
+    private PostComment childPostComment4;
+    private PostComment childPostComment5;
 
     @BeforeEach
     void setUp() {
@@ -127,6 +129,22 @@ public class PostCommentServiceTest {
                 post,
                 postComment2
         );
+
+        this.childPostComment4 = PostComment.of(
+                "testChildId4",
+                "testChildContent4",
+                writer,
+                post,
+                postComment
+        );
+
+        this.childPostComment5 = PostComment.of(
+                "testChildId5",
+                "testChildContent5",
+                writer,
+                post,
+                postComment
+        );
     }
 
     @Test
@@ -183,17 +201,21 @@ public class PostCommentServiceTest {
         given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
 
         ArrayList<PostComment> parents = new ArrayList<>(Arrays.asList(postComment, postComment2));
-        ArrayList<PostComment> children1 = new ArrayList<>(Arrays.asList(childPostComment, childPostComment2));
+        ArrayList<PostComment> children1 = new ArrayList<>(Arrays.asList(childPostComment, childPostComment2, childPostComment4, childPostComment5));
         ArrayList<PostComment> children2 = new ArrayList<>(Arrays.asList(childPostComment3));
 
         given(this.postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(post)).willReturn(parents);
         given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment)).willReturn(children1);
         given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment2)).willReturn(children2);
+        given(this.postCommentRepository.countAllByParentCommentId(postComment.getId())).willReturn((long) children1.size());
+        given(this.postCommentRepository.countAllByParentCommentId(postComment2.getId())).willReturn((long) children2.size());
 
         // when
         List<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testPostId");
 
         // then
+        assertThat(CommentFindResponseDto.get(0).getViewMore()).isTrue();
+        assertThat(CommentFindResponseDto.get(1).getViewMore()).isFalse();
         assertThat(CommentFindResponseDto).isNotNull();
         assertThat(CommentFindResponseDto.size()).isEqualTo(parents.size());
         assertThat(CommentFindResponseDto.get(0).getChildren().size()).isEqualTo(children1.size());

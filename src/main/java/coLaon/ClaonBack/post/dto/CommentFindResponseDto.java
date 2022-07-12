@@ -30,7 +30,8 @@ public class CommentFindResponseDto {
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
             List<ChildCommentResponseDto> children,
-            Boolean viewMore) {
+            Boolean viewMore
+    ) {
         this.commentId = commentId;
         this.content = content;
         this.isDeleted = isDeleted;
