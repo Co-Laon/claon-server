@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface PostCommentRepository extends JpaRepository<PostComment, String> {
     List<PostComment> findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(Post post);
-    List<PostComment> findFirstThreeByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(String postCommentId);
+    List<PostComment> findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(PostComment parentComment);
     List<PostComment> findAllByParentCommentAndIsDeletedFalseOrderByCreatedAt(PostComment postComment);
 }

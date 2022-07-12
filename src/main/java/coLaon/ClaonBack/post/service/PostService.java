@@ -53,7 +53,7 @@ public class PostService {
 
         return LikeResponseDto.from(
                 postLikeRepository.save(PostLike.of(liker, post)),
-                postLikeRepository.countByPost_Id(post.getId())
+                postLikeRepository.countByPost(post)
         );
     }
 
@@ -84,7 +84,7 @@ public class PostService {
 
         return LikeResponseDto.from(
                 like,
-                postLikeRepository.countByPost_Id(like.getPost().getId())
+                postLikeRepository.countByPost(like.getPost())
         );
     }
 
@@ -99,9 +99,10 @@ public class PostService {
 
         return postLikeRepository.findAllByPostOrderByCreatedAt(post)
                 .stream()
-                .map(like -> LikeFindResponseDto.from(
-                        like,
-                        postLikeRepository.countByPost_Id(post.getId())))
+                .map(like ->
+                        LikeFindResponseDto.from(
+                                like,
+                                postLikeRepository.countByPost(post)))
                 .collect(Collectors.toList());
     }
 }

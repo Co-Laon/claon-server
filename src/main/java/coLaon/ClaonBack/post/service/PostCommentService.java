@@ -78,7 +78,7 @@ public class PostCommentService {
                 .map(parent ->
                         CommentFindResponseDto.from(
                                 parent,
-                                postCommentRepository.findFirstThreeByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(parent.getId())
+                                postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(parent)
                         ))
                 .collect(Collectors.toList());
     }
