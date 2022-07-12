@@ -18,6 +18,7 @@ public class CommentFindResponseDto {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
     private final List<ChildCommentResponseDto> children;
+    private final Boolean viewMore;
 
     private CommentFindResponseDto(
             String commentId,
@@ -28,7 +29,8 @@ public class CommentFindResponseDto {
             String writerProfileImage,
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
-            List<ChildCommentResponseDto> children
+            List<ChildCommentResponseDto> children,
+            Boolean viewMore
     ) {
         this.commentId = commentId;
         this.content = content;
@@ -39,9 +41,10 @@ public class CommentFindResponseDto {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.children = children;
+        this.viewMore = viewMore;
     }
 
-    public static CommentFindResponseDto from(PostComment postComment, List<PostComment> childComments) {
+    public static CommentFindResponseDto from(PostComment postComment, List<PostComment> childComments, Long commentCount) {
         return new CommentFindResponseDto(
                 postComment.getId(),
                 postComment.getContent(),
@@ -51,7 +54,8 @@ public class CommentFindResponseDto {
                 postComment.getWriter().getImagePath(),
                 postComment.getCreatedAt(),
                 postComment.getUpdatedAt(),
-                childComments.stream().map(ChildCommentResponseDto::from).collect(Collectors.toList())
+                childComments.stream().map(ChildCommentResponseDto::from).collect(Collectors.toList()),
+                commentCount > 3
         );
     }
 }
