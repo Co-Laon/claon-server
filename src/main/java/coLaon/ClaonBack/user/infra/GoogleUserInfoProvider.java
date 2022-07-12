@@ -24,20 +24,7 @@ public class GoogleUserInfoProvider implements OAuth2UserInfoProvider {
 
     @Override
     public OAuth2UserInfoDto getUserInfo(String code) {
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance())
-                .setAudience(Collections.singletonList(this.clientId))
-                .build();
-
-        // Verify it
-        GoogleIdToken idToken;
-        try {
-            idToken = verifier.verify(code);
-        } catch (GeneralSecurityException | IOException e) {
-            throw new InternalServerErrorException(
-                    ErrorCode.INTERNAL_SERVER_ERROR,
-                    "구글 로그인에 실패했습니다."
-            );
-        }
+        GoogleIdToken idToken = this.resolveIdToken(code);
 
         if (idToken == null) {
             throw new InternalServerErrorException(
@@ -46,6 +33,25 @@ public class GoogleUserInfoProvider implements OAuth2UserInfoProvider {
             );
         }
 
-        return OAuth2UserInfoDto.of(idToken.getPayload().getSubject(), idToken.getPayload().getEmail());
+        return OAuth2UserInfoDto.of(
+                idToken.getPayload().getSubject(),
+                idToken.getPayload().getEmail()
+        );
+    }
+
+    private GoogleIdToken resolveIdToken(String code) {
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance())
+                .setAudience(Collections.singletonList(this.clientId))
+                .build();
+
+        // Verify it
+        try {
+            return verifier.verify(code);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new InternalServerErrorException(
+                    ErrorCode.INTERNAL_SERVER_ERROR,
+                    "구글 로그인에 실패했습니다."
+            );
+        }
     }
 }

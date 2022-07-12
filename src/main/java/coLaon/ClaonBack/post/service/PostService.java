@@ -38,7 +38,7 @@ public class PostService {
         Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
+                        "게시글을 찾을 수 없습니다."
                 )
         );
 
@@ -53,7 +53,7 @@ public class PostService {
 
         return LikeResponseDto.from(
                 postLikeRepository.save(PostLike.of(liker, post)),
-                postLikeRepository.countByPost_Id(post.getId())
+                postLikeRepository.countByPost(post)
         );
     }
 
@@ -69,7 +69,7 @@ public class PostService {
         Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
+                        "게시글을 찾을 수 없습니다."
                 )
         );
 
@@ -81,9 +81,10 @@ public class PostService {
         );
 
         postLikeRepository.deleteById(like.getId());
+
         return LikeResponseDto.from(
                 like,
-                postLikeRepository.countByPost_Id(like.getPost().getId())
+                postLikeRepository.countByPost(like.getPost())
         );
     }
 
@@ -92,15 +93,16 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
+                        "게시글을 찾을 수 없습니다."
                 )
         );
 
         return postLikeRepository.findAllByPostOrderByCreatedAt(post)
                 .stream()
-                .map(like -> LikeFindResponseDto.from(
-                        like,
-                        postLikeRepository.countByPost_Id(post.getId())
-                )).collect(Collectors.toList());
+                .map(like ->
+                        LikeFindResponseDto.from(
+                                like,
+                                postLikeRepository.countByPost(post)))
+                .collect(Collectors.toList());
     }
 }

@@ -35,7 +35,6 @@ public class PostComment extends BaseEntity {
             User writer,
             Post post,
             PostComment parentComment
-
     ) {
         this.content = content;
         this.isDeleted = false;
@@ -50,7 +49,6 @@ public class PostComment extends BaseEntity {
             User writer,
             Post post,
             PostComment parentComment
-
     ) {
         super(id);
         this.content = content;

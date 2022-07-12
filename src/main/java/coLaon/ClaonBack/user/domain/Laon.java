@@ -22,7 +22,7 @@ public class Laon extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private Laon(User laon, User user){
+    private Laon(User laon, User user) {
         this.laon = laon;
         this.user = user;
     }

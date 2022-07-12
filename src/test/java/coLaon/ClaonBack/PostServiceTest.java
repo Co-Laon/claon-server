@@ -105,7 +105,7 @@ public class PostServiceTest {
             given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.empty());
 
             mockedPostLike.when(() -> PostLike.of(user, post)).thenReturn(postLike);
-            given(this.postLikeRepository.countByPost_Id("testPostId")).willReturn(1);
+            given(this.postLikeRepository.countByPost(post)).willReturn(1);
 
             given(this.postLikeRepository.save(this.postLike)).willReturn(postLike);
 
@@ -151,6 +151,5 @@ public class PostServiceTest {
 
         //then
         assertThat(likeFindResponseDto.size()).isEqualTo(postLikes.size());
-        assertThat(likeFindResponseDto.contains(postLike));
     }
 }

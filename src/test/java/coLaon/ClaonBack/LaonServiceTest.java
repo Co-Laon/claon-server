@@ -1,6 +1,5 @@
 package coLaon.ClaonBack;
 
-
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.LaonRepository;
@@ -71,33 +70,35 @@ public class LaonServiceTest {
     @DisplayName("Success case for create laon")
     void successCreateLaon() {
         try (MockedStatic<Laon> mockedLaon = mockStatic(Laon.class)) {
-            //given
+            // given
             given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(laon));
             given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-            given(Laon.of(this.laon, this.user)).willReturn(this.laonRelation);
+            given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.empty());
+
+            mockedLaon.when(() ->Laon.of(this.laon, this.user)).thenReturn(this.laonRelation);
 
             given(this.laonRepository.save(this.laonRelation)).willReturn(this.laonRelation);
 
-            //when
+            // when
             this.laonService.createLaon("userNickname1", "userId");
 
-            //then
+            // then
             assertThat(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).isNotNull();
         }
     }
 
     @Test
     @DisplayName("Success case for delete laon")
-    void successDeletelaon() {
-            //given
-            given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(laon));
-            given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-            given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.of(this.laonRelation));
+    void successDeleteLaon() {
+        // given
+        given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(laon));
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.of(this.laonRelation));
 
-            //when
-            this.laonService.deleteLaon("userNickname1", "userId");
+        // when
+        this.laonService.deleteLaon("userNickname1", "userId");
 
-            //then
-            assertThat(this.laonRepository.findAll()).isEmpty();
+        // then
+        assertThat(this.laonRepository.findAll()).isEmpty();
     }
 }
