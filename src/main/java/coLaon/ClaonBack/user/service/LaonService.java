@@ -21,26 +21,27 @@ public class LaonService {
         User laon = userRepository.findByNickname(laonNickname).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "유저 정보가 없습니다."
+                        String.format("%s을 찾을 수 없습니다.", laonNickname)
                 )
         );
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "유저 정보가 없습니다."
+                        "이용자를 찾을 수 없습니다."
                 )
         );
 
         laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId()).ifPresent(
-                follow -> {
+                l -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
                             "이미 라온 관계입니다."
                     );
                 }
         );
-        laonRepository.save(Laon.of(laon,user));
+
+        laonRepository.save(Laon.of(laon, user));
     }
 
     @Transactional
@@ -48,14 +49,14 @@ public class LaonService {
         User laon = userRepository.findByNickname(laonNickname).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "유저 정보가 없습니다."
+                        String.format("%s을 찾을 수 없습니다.", laonNickname)
                 )
         );
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "유저 정보가 없습니다."
+                        "이용자를 찾을 수 없습니다."
                 )
         );
 
@@ -65,6 +66,7 @@ public class LaonService {
                         "라온 관계가 아닙니다."
                 )
         );
+
         laonRepository.deleteById(laonRelation.getId());
     }
 }

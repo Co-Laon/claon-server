@@ -38,7 +38,7 @@ public class PostService {
         Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
+                        "게시글을 찾을 수 없습니다."
                 )
         );
 
@@ -69,7 +69,7 @@ public class PostService {
         Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
+                        "게시글을 찾을 수 없습니다."
                 )
         );
 
@@ -81,6 +81,7 @@ public class PostService {
         );
 
         postLikeRepository.deleteById(like.getId());
+
         return LikeResponseDto.from(
                 like,
                 postLikeRepository.countByPost_Id(like.getPost().getId())
@@ -92,7 +93,7 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
+                        "게시글을 찾을 수 없습니다."
                 )
         );
 
@@ -100,7 +101,7 @@ public class PostService {
                 .stream()
                 .map(like -> LikeFindResponseDto.from(
                         like,
-                        postLikeRepository.countByPost_Id(post.getId())
-                )).collect(Collectors.toList());
+                        postLikeRepository.countByPost_Id(post.getId())))
+                .collect(Collectors.toList());
     }
 }

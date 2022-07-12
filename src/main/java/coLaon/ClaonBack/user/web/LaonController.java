@@ -21,7 +21,8 @@ public class LaonController {
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createLaon(
             @AuthenticationPrincipal String userId,
-            @PathVariable String laonNickname) {
+            @PathVariable String laonNickname
+    ) {
         this.laonService.createLaon(laonNickname, userId);
     }
 
@@ -29,7 +30,8 @@ public class LaonController {
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteLaon(
             @AuthenticationPrincipal String userId,
-            @PathVariable String laonNickname) {
+            @PathVariable String laonNickname
+    ) {
         this.laonService.deleteLaon(laonNickname, userId);
     }
 }

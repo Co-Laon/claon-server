@@ -4,7 +4,6 @@ import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 
 public class IsDeletedValidator extends Validator {
-
     private final Boolean isDeleted;
     private final String target;
 

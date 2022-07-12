@@ -151,6 +151,5 @@ public class PostServiceTest {
 
         //then
         assertThat(likeFindResponseDto.size()).isEqualTo(postLikes.size());
-        assertThat(likeFindResponseDto.contains(postLike));
     }
 }

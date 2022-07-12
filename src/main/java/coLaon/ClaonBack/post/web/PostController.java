@@ -17,12 +17,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
+
 import javax.validation.Valid;
 import java.util.List;
 
@@ -50,7 +50,7 @@ public class PostController {
         return this.postService.deleteLike(userId, likeRequestDto);
     }
 
-    @GetMapping(value = "/posts/{postId}/like")
+    @GetMapping(value = "/{postId}/like")
     @ResponseStatus(value = HttpStatus.OK)
     public List<LikeFindResponseDto> findAllLike(
             @PathVariable String postId
@@ -68,10 +68,10 @@ public class PostController {
         return this.postCommentService.createComment(userId, commentCreateRequestDto);
     }
 
-    @GetMapping(value = "/comment", params = "postId")
+    @GetMapping(value = "/{postId}/comment")
     @ResponseStatus(value = HttpStatus.OK)
     public List<CommentFindResponseDto> findAllParentCommentAndThreeChildComment(
-            @RequestParam String postId
+            @PathVariable String postId
     ) {
         return this.postCommentService.findCommentsByPost(postId);
     }
