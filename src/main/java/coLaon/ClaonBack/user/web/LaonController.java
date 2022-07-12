@@ -17,19 +17,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class LaonController {
     private final LaonService laonService;
 
-    @PostMapping(value = "/{laonId}")
+    @PostMapping(value = "/{laonNickname}")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createLaon(
             @AuthenticationPrincipal String userId,
-            @PathVariable String laonId) {
-        this.laonService.createLaon(laonId, userId);
+            @PathVariable String laonNickname) {
+        this.laonService.createLaon(laonNickname, userId);
     }
 
-    @DeleteMapping(value = "/{laonId}")
+    @DeleteMapping(value = "/{laonNickname}")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteLaon(
             @AuthenticationPrincipal String userId,
-            @PathVariable String laonId) {
-        this.laonService.deleteLaon(laonId, userId);
+            @PathVariable String laonNickname) {
+        this.laonService.deleteLaon(laonNickname, userId);
     }
 }

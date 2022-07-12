@@ -41,7 +41,7 @@ public class LaonServiceTest {
                 "laonId",
                 "test@gmail.com",
                 "1234567890",
-                "test",
+                "userNickname1",
                 "경기도",
                 "성남시",
                 "",
@@ -53,7 +53,7 @@ public class LaonServiceTest {
                 "userId",
                 "test@gmail.com",
                 "1234567222",
-                "tes2t",
+                "userNickname2",
                 "경기도",
                 "성남시",
                 "",
@@ -72,14 +72,14 @@ public class LaonServiceTest {
     void successCreateLaon() {
         try (MockedStatic<Laon> mockedLaon = mockStatic(Laon.class)) {
             //given
-            given(this.userRepository.findById("laonId")).willReturn(Optional.of(laon));
+            given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(laon));
             given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
             given(Laon.of(this.laon, this.user)).willReturn(this.laonRelation);
 
             given(this.laonRepository.save(this.laonRelation)).willReturn(this.laonRelation);
 
             //when
-            this.laonService.createLaon("laonId", "userId");
+            this.laonService.createLaon("userNickname1", "userId");
 
             //then
             assertThat(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).isNotNull();
@@ -90,12 +90,12 @@ public class LaonServiceTest {
     @DisplayName("Success case for delete laon")
     void successDeletelaon() {
             //given
-            given(this.userRepository.findById("laonId")).willReturn(Optional.of(laon));
+            given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(laon));
             given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
             given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.of(this.laonRelation));
 
             //when
-            this.laonService.deleteLaon("laonId", "userId");
+            this.laonService.deleteLaon("userNickname1", "userId");
 
             //then
             assertThat(this.laonRepository.findAll()).isEmpty();

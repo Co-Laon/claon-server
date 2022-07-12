@@ -17,8 +17,8 @@ public class LaonService {
     private final LaonRepository laonRepository;
 
     @Transactional
-    public void createLaon(String laonId, String userId) {
-        User laon = userRepository.findById(laonId).orElseThrow(
+    public void createLaon(String laonNickname, String userId) {
+        User laon = userRepository.findByNickname(laonNickname).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "유저 정보가 없습니다."
@@ -44,8 +44,8 @@ public class LaonService {
     }
 
     @Transactional
-    public void deleteLaon(String laonId, String userId) {
-        User laon = userRepository.findById(laonId).orElseThrow(
+    public void deleteLaon(String laonNickname, String userId) {
+        User laon = userRepository.findByNickname(laonNickname).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "유저 정보가 없습니다."
