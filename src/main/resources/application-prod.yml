@@ -3,4 +3,4 @@ server:
 
 spring:
   config:
-    import: optional:classpath:email-config.yml, classpath:auth-config.yml, classpath:database-config.yml
+    import: optional:classpath:email-config.yml, classpath:auth-config.yml, classpath:database-config.yml, classpath:aws-config.yml
