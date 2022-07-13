@@ -23,9 +23,9 @@ public class JwtUtil {
     private String SECRET_KEY;
 
     @Value("${spring.jwt.access-token.expire-seconds}")
-    private Integer ACCESS_TOKEN_EXPIRE_TIME;
+    private Long ACCESS_TOKEN_EXPIRE_TIME;
     @Value("${spring.jwt.refresh-token.expire-seconds}")
-    private Integer REFRESH_TOKEN_EXPIRE_TIME;
+    private Long REFRESH_TOKEN_EXPIRE_TIME;
 
     @PostConstruct
     protected void init() {

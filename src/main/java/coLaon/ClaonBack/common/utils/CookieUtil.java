@@ -18,9 +18,9 @@ public class CookieUtil {
     @Value("${spring.jwt.refresh-token.cookie-name}")
     private String REFRESH_COOKIE_NAME;
     @Value("${spring.jwt.access-token.expire-seconds}")
-    private Integer ACCESS_TOKEN_EXPIRE_TIME;
+    private Long ACCESS_TOKEN_EXPIRE_TIME;
     @Value("${spring.jwt.refresh-token.expire-seconds}")
-    private Integer REFRESH_TOKEN_EXPIRE_TIME;
+    private Long REFRESH_TOKEN_EXPIRE_TIME;
 
     public void createCookie(
             HttpServletResponse res,
@@ -29,9 +29,9 @@ public class CookieUtil {
     ) {
         int maxAge;
         if (Objects.equals(cookieName, this.ACCESS_COOKIE_NAME))
-            maxAge = this.ACCESS_TOKEN_EXPIRE_TIME;
+            maxAge = (int) (this.ACCESS_TOKEN_EXPIRE_TIME / 1000);
         else
-            maxAge = this.REFRESH_TOKEN_EXPIRE_TIME;
+            maxAge = (int) (this.REFRESH_TOKEN_EXPIRE_TIME / 1000);
 
         Cookie cookie = new Cookie(cookieName, value);
         cookie.setMaxAge(maxAge);
