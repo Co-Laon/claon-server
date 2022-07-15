@@ -261,8 +261,8 @@ public class PostCommentServiceTest {
     }
 
     @Test
-    @DisplayName("Update comment by other user")
-    void FailUpdateComment() {
+    @DisplayName("Failure case for update comment because update by other user")
+    void failureAuthUpdateComment() {
         // given
         CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent", "testPostId");
 
@@ -294,8 +294,8 @@ public class PostCommentServiceTest {
     }
 
     @Test
-    @DisplayName("Delete comment by other user")
-    void FailDeleteComment() {
+    @DisplayName("Failure case for delete comment because delete by other user")
+    void failureAuthDeleteComment() {
         // given
         given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(writer2));
         given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));

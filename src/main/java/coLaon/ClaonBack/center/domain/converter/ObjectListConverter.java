@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.center.domain;
+package coLaon.ClaonBack.center.domain.converter;
 
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.InternalServerErrorException;
@@ -15,6 +15,10 @@ public abstract class ObjectListConverter<T> implements AttributeConverter<List<
 
     @Override
     public String convertToDatabaseColumn(List<T> attribute) {
+        if (attribute.size() == 0) {
+            return "";
+        }
+
         List<String> jsonList = attribute.stream().map(a -> {
             try {
                 return objectMapper.writeValueAsString(a);
@@ -35,8 +39,8 @@ public abstract class ObjectListConverter<T> implements AttributeConverter<List<
 
         return jsonList.stream().map(json -> {
             try {
-                return objectMapper.readValue(dbData, new TypeReference<T>() {
-                });
+                if (json.length() == 0) return null;
+                return objectMapper.readValue(json, new TypeReference<T>() {});
             } catch (JsonProcessingException e) {
                 throw new InternalServerErrorException(
                         ErrorCode.INTERNAL_SERVER_ERROR,

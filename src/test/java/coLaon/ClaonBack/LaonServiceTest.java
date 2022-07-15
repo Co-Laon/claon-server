@@ -75,7 +75,7 @@ public class LaonServiceTest {
             given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
             given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.empty());
 
-            mockedLaon.when(() ->Laon.of(this.laon, this.user)).thenReturn(this.laonRelation);
+            mockedLaon.when(() -> Laon.of(this.laon, this.user)).thenReturn(this.laonRelation);
 
             given(this.laonRepository.save(this.laonRelation)).willReturn(this.laonRelation);
 
