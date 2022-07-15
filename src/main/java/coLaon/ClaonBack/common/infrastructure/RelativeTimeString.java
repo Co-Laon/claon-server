@@ -6,15 +6,12 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 public class RelativeTimeString {
-    
     // const timezone for absolute time string fallback output
     private static final ZoneId ZONE_ID = ZoneId.of("Asia/Seoul");
     
     // datetime to compare with. usually current datetime (now)
     private final ZonedDateTime baseZonedDatetime;
-    
-    
-    
+
     /**
      * Create a new relative time string converter with current datetime.
      */
@@ -36,9 +33,7 @@ public class RelativeTimeString {
             this.baseZonedDatetime = baseDatetime.atZoneSameInstant(ZONE_ID);
         }
     }
-    
-    
-    
+
     /**
      * Get a relative time string from base datetime of the object.
      *
@@ -46,8 +41,10 @@ public class RelativeTimeString {
      * @return                Relative time string in Korean
      */
     public String convert(OffsetDateTime inputDatetime) {
-        return convertZoned(inputDatetime.atZoneSameInstant(ZONE_ID),
-                            this.baseZonedDatetime);
+        return convertZoned(
+                inputDatetime.atZoneSameInstant(ZONE_ID),
+                this.baseZonedDatetime
+        );
     }
     
     /**
@@ -58,8 +55,10 @@ public class RelativeTimeString {
      * @return                Relative time string in Korean
      */
     public static String convertNow(OffsetDateTime inputDatetime) {
-        return convertZoned(inputDatetime.atZoneSameInstant(ZONE_ID),
-                            null);
+        return convertZoned(
+                inputDatetime.atZoneSameInstant(ZONE_ID),
+                null
+        );
     }
     
     /**
@@ -74,26 +73,28 @@ public class RelativeTimeString {
      *                        If null, current datetime is used by default.
      * @return                Relative time string in Korean
      */
-    public static String convertNow(OffsetDateTime inputDatetime,
-                                    OffsetDateTime baseDatetime) {
-        return convertZoned(inputDatetime.atZoneSameInstant(ZONE_ID),
-                            baseDatetime.atZoneSameInstant(ZONE_ID));
+    public static String convertNow(
+            OffsetDateTime inputDatetime,
+            OffsetDateTime baseDatetime
+    ) {
+        return convertZoned(
+                inputDatetime.atZoneSameInstant(ZONE_ID),
+                baseDatetime.atZoneSameInstant(ZONE_ID)
+        );
     }
-    
-    
-    
+
     // convert datetime -> relative time string,
     // in the form of ZONE_ID timezone datetime
-    private static String convertZoned(ZonedDateTime inputZonedDatetime,
-                                       ZonedDateTime baseZonedDatetime) {
-        
+    private static String convertZoned(
+            ZonedDateTime inputZonedDatetime,
+            ZonedDateTime baseZonedDatetime
+    ) {
         final long MIN_IN_SECS = 60;
         final long HOUR_IN_SECS = MIN_IN_SECS * 60;
         final long DAY_IN_SECS = HOUR_IN_SECS * 24;
         final long WEEK_IN_SECS = DAY_IN_SECS * 7;
         final long MONTH_IN_SECS = WEEK_IN_SECS * 4;
-        
-        
+
         // baseDatetime default: current datetime
         if (baseZonedDatetime == null) {
             baseZonedDatetime = ZonedDateTime.now(ZONE_ID);
@@ -105,7 +106,6 @@ public class RelativeTimeString {
         if (secDiff < 0) {
             secDiff = 0;
         }
-        
         
         // convert to relative time string
         if (secDiff == 0) {
@@ -120,7 +120,6 @@ public class RelativeTimeString {
             return secDiff / DAY_IN_SECS + "일 전";
         } else if (secDiff < MONTH_IN_SECS) {
             return secDiff / WEEK_IN_SECS + "주 전";
-            
         } else {
             // absolute time string fallbacks
             if (inputZonedDatetime.getYear() == baseZonedDatetime.getYear()) {
@@ -135,5 +134,4 @@ public class RelativeTimeString {
             }
         }
     }
-    
 }

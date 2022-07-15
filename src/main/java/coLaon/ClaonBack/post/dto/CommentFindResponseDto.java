@@ -13,49 +13,49 @@ public class CommentFindResponseDto {
     private final String content;
     private final Boolean isDeleted;
     private final String postId;
-    private final String writerId;
     private final String writerNickname;
-    private final String writerProfile;
+    private final String writerProfileImage;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
     private final List<ChildCommentResponseDto> children;
+    private final Boolean viewMore;
 
     private CommentFindResponseDto(
             String commentId,
             String content,
             Boolean isDeleted,
             String postId,
-            String writerId,
             String writerNickname,
-            String writerProfile,
+            String writerProfileImage,
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
-            List<ChildCommentResponseDto> children
+            List<ChildCommentResponseDto> children,
+            Boolean viewMore
     ) {
         this.commentId = commentId;
         this.content = content;
         this.isDeleted = isDeleted;
         this.postId = postId;
-        this.writerId = writerId;
         this.writerNickname = writerNickname;
-        this.writerProfile = writerProfile;
+        this.writerProfileImage = writerProfileImage;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.children = children;
+        this.viewMore = viewMore;
     }
 
-    public static CommentFindResponseDto from(PostComment postComment, List<PostComment> childComments) {
+    public static CommentFindResponseDto from(PostComment postComment, List<PostComment> childComments, Long commentCount) {
         return new CommentFindResponseDto(
                 postComment.getId(),
                 postComment.getContent(),
                 postComment.getIsDeleted(),
                 postComment.getPost().getId(),
-                postComment.getWriter().getId(),
                 postComment.getWriter().getNickname(),
                 postComment.getWriter().getImagePath(),
                 postComment.getCreatedAt(),
                 postComment.getUpdatedAt(),
-                childComments.stream().map(ChildCommentResponseDto::from).collect(Collectors.toList())
+                childComments.stream().map(ChildCommentResponseDto::from).collect(Collectors.toList()),
+                commentCount > 3
         );
     }
 }

@@ -1,8 +1,9 @@
 package coLaon.ClaonBack.post.web;
 
-import coLaon.ClaonBack.post.Service.PostCommentService;
-import coLaon.ClaonBack.post.Service.PostService;
+import coLaon.ClaonBack.post.service.PostCommentService;
+import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
+import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
@@ -18,7 +19,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -62,6 +62,15 @@ public class PostController {
         return this.postService.deleteLike(userId, likeRequestDto);
     }
 
+    @GetMapping(value = "/{postId}/like")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<LikeFindResponseDto> findAllLike(
+            @PathVariable String postId
+    ) {
+        // TODO: add pagination
+        return this.postService.findLikeByPost(postId);
+    }
+
     @PostMapping("/comment")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CommentResponseDto createComment(
@@ -71,10 +80,10 @@ public class PostController {
         return this.postCommentService.createComment(userId, commentCreateRequestDto);
     }
 
-    @GetMapping(value = "/comment", params = "postId")
+    @GetMapping(value = "/{postId}/comment")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<CommentFindResponseDto> findAllParentComment(
-            @RequestParam String postId
+    public List<CommentFindResponseDto> findAllParentCommentAndThreeChildComment(
+            @PathVariable String postId
     ) {
         return this.postCommentService.findCommentsByPost(postId);
     }

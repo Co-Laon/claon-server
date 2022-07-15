@@ -2,6 +2,7 @@ package coLaon.ClaonBack.common.domain.enums;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,16 +25,16 @@ public enum BasicLocalArea {
         return Arrays.stream(values())
                 .filter(basicLocalArea -> key.equals(basicLocalArea.key))
                 .map(basicLocalArea ->
-                    basicLocalArea.value
-                            .stream()
-                            .filter(v -> v.equals(value))
-                            .findFirst()
-                            .orElseThrow(
-                                    () -> new BadRequestException(
-                                            ErrorCode.WRONG_ADDRESS,
-                                            "잘못된 주소입니다."
-                                    )
-                            )
+                        basicLocalArea.value
+                                .stream()
+                                .filter(v -> v.equals(value))
+                                .findFirst()
+                                .orElseThrow(
+                                        () -> new BadRequestException(
+                                                ErrorCode.WRONG_ADDRESS,
+                                                "잘못된 주소입니다."
+                                        )
+                                )
                 )
                 .findFirst()
                 .orElseThrow(

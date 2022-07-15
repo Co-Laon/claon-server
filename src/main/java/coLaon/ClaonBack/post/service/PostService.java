@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.post.Service;
+package coLaon.ClaonBack.post.service;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -8,6 +8,7 @@ import coLaon.ClaonBack.common.validator.ContentsUrlFormatValidator;
 import coLaon.ClaonBack.common.validator.Validator;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostLike;
+import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
@@ -19,8 +20,10 @@ import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +76,7 @@ public class PostService {
         Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
+                        "게시글을 찾을 수 없습니다."
                 )
         );
 
@@ -88,7 +91,7 @@ public class PostService {
 
         return LikeResponseDto.from(
                 postLikeRepository.save(PostLike.of(liker, post)),
-                postLikeRepository.countByPost_Id(post.getId())
+                postLikeRepository.countByPost(post)
         );
     }
 
@@ -104,7 +107,7 @@ public class PostService {
         Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
+                        "게시글을 찾을 수 없습니다."
                 )
         );
 
@@ -116,9 +119,28 @@ public class PostService {
         );
 
         postLikeRepository.deleteById(like.getId());
+
         return LikeResponseDto.from(
                 like,
-                postLikeRepository.countByPost_Id(like.getPost().getId())
+                postLikeRepository.countByPost(like.getPost())
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<LikeFindResponseDto> findLikeByPost(String postId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "게시글을 찾을 수 없습니다."
+                )
+        );
+
+        return postLikeRepository.findAllByPostOrderByCreatedAt(post)
+                .stream()
+                .map(like ->
+                        LikeFindResponseDto.from(
+                                like,
+                                postLikeRepository.countByPost(post)))
+                .collect(Collectors.toList());
     }
 }
