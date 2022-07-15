@@ -35,6 +35,35 @@ public class Post extends BaseEntity {
     Set<PostContents> contentsSet;
 
     private Post(
+            String id,
+            String centerName,
+            String holdInfo,
+            String content,
+            User writer
+    ) {
+        super(id);
+        this.centerName = centerName;
+        this.holdInfo = holdInfo;
+        this.content = content;
+        this.isDeleted = false;
+        this.writer = writer;
+    }
+
+    private Post(
+            String centerName,
+            String holdInfo,
+            String content,
+            User writer
+    ) {
+        this.centerName = centerName;
+        this.holdInfo = holdInfo;
+        this.content = content;
+        this.isDeleted = false;
+        this.writer = writer;
+        this.contentsSet = Set.of();
+    }
+
+    private Post(
             String centerName,
             String holdInfo,
             String content,
@@ -64,6 +93,36 @@ public class Post extends BaseEntity {
         this.isDeleted = false;
         this.writer = writer;
         this.contentsSet = contentsSet;
+    }
+
+    public static Post of(
+            String centerName,
+            String holdInfo,
+            String content,
+            User writer
+    ) {
+        return new Post(
+                centerName,
+                holdInfo,
+                content,
+                writer
+        );
+    }
+
+    public static Post of(
+            String id,
+            String centerName,
+            String holdInfo,
+            String content,
+            User writer
+    ) {
+        return new Post(
+                id,
+                centerName,
+                holdInfo,
+                content,
+                writer
+        );
     }
 
     public static Post of(

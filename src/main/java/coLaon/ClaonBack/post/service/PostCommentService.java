@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.post.Service;
+package coLaon.ClaonBack.post.service;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,21 +41,27 @@ public class PostCommentService {
         Post post = postRepository.findById(commentCreateRequestDto.getPostId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
+                        "게시글을 찾을 수 없습니다."
                 )
         );
 
-        return CommentResponseDto.from(postCommentRepository.save(
-                        PostComment.of(commentCreateRequestDto.getContent(), writer, post,
-                                commentCreateRequestDto.getParentCommentId() != null ?
-                                        postCommentRepository.findById(commentCreateRequestDto.getParentCommentId()).orElseThrow(
-                                                () -> new BadRequestException(
-                                                        ErrorCode.ROW_DOES_NOT_EXIST,
-                                                        "부모 댓글이 없습니다."
-                                                )
-                                        ) : null)
-                )
-        );
+        return CommentResponseDto.from(
+                postCommentRepository.save(
+                        PostComment.of(
+                                commentCreateRequestDto.getContent(),
+                                writer,
+                                post,
+                                Optional.ofNullable(commentCreateRequestDto.getParentCommentId())
+                                        .map(parentCommentId ->
+                                                postCommentRepository.findById(commentCreateRequestDto.getParentCommentId())
+                                                        .orElseThrow(
+                                                                () -> new BadRequestException(
+                                                                        ErrorCode.ROW_DOES_NOT_EXIST,
+                                                                        "상위 댓글을 찾을 수 없습니다."
+                                                                )))
+                                        .orElse(null)
+                        )
+                ));
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +69,7 @@ public class PostCommentService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "등반 정보가 없습니다."
+                        "게시글을 찾을 수 없습니다."
                 )
         );
 
@@ -71,9 +78,10 @@ public class PostCommentService {
                 .map(parent ->
                         CommentFindResponseDto.from(
                                 parent,
-                                postCommentRepository.findFirst3ByParentCommentIdAndIsDeletedFalseOrderByCreatedAt(parent.getId())
-                        )
-                ).collect(Collectors.toList());
+                                postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(parent),
+                                postCommentRepository.countAllByParentCommentId(parent.getId())
+                        ))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -85,8 +93,10 @@ public class PostCommentService {
                 )
         );
 
-        return postCommentRepository.findAllByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment).stream()
-                .map(ChildCommentResponseDto::from).collect(Collectors.toList());
+        return postCommentRepository.findAllByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment)
+                .stream()
+                .map(ChildCommentResponseDto::from)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -97,15 +107,18 @@ public class PostCommentService {
                         "이용자를 찾을 수 없습니다."
                 )
         );
+
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "댓글 정보가 없습니다."
+                        "댓글을 찾을 수 없습니다."
                 )
         );
+
         IdEqualValidator.of(postComment.getWriter().getId(), writer.getId()).validate();
 
         postComment.delete();
+
         return CommentResponseDto.from(postCommentRepository.save(postComment));
     }
 
@@ -121,15 +134,18 @@ public class PostCommentService {
                         "이용자를 찾을 수 없습니다."
                 )
         );
+
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "댓글 정보가 없습니다."
+                        "댓글을 찾을 수 없습니다."
                 )
         );
+
         IdEqualValidator.of(postComment.getWriter().getId(), writer.getId()).validate();
 
         postComment.updateContent(commentUpdateRequestDto.getContent());
+
         return CommentResponseDto.from(postCommentRepository.save(postComment));
     }
 }

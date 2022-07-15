@@ -12,8 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -24,16 +22,10 @@ public class JwtUtil {
     @Value("${spring.jwt.secret-key}")
     private String SECRET_KEY;
 
-    @Value("${spring.jwt.access-token.cookie-name}")
-    private String ACCESS_COOKIE_NAME;
-    @Value("${spring.jwt.refresh-token.cookie-name}")
-    private String REFRESH_COOKIE_NAME;
     @Value("${spring.jwt.access-token.expire-seconds}")
-    private Integer ACCESS_TOKEN_EXPIRE_TIME;
+    private Long ACCESS_TOKEN_EXPIRE_TIME;
     @Value("${spring.jwt.refresh-token.expire-seconds}")
-    private Integer REFRESH_TOKEN_EXPIRE_TIME;
-
-    private final CookieUtil cookieUtil;
+    private Long REFRESH_TOKEN_EXPIRE_TIME;
 
     @PostConstruct
     protected void init() {
@@ -41,32 +33,45 @@ public class JwtUtil {
     }
 
     public JwtDto createToken(
-            HttpServletResponse response,
             String userPk,
-            Boolean isSignUp
+            Boolean isCompletedSignUp
     ) {
+        Date now = new Date();
+        return JwtDto.of(
+                generateAccessToken(userPk, now),
+                generateRefreshToken(userPk, now),
+                isCompletedSignUp);
+    }
+
+    public JwtDto createToken(
+            String userPk
+    ) {
+        Date now = new Date();
+        return JwtDto.of(
+                generateAccessToken(userPk, now),
+                generateRefreshToken(userPk, now));
+    }
+
+    private String generateAccessToken(String userPk, Date now) {
         Claims claims = Jwts.claims().setSubject(userPk);
 
-        Date now = new Date();
-        JwtDto jwtDto = new JwtDto(
-                Jwts.builder()
-                        .setClaims(claims)
-                        .setIssuedAt(now)
-                        .setExpiration(new Date(now.getTime() + this.ACCESS_TOKEN_EXPIRE_TIME))
-                        .signWith(SignatureAlgorithm.HS256, this.SECRET_KEY)
-                        .compact(),
-                Jwts.builder()
-                        .setClaims(claims)
-                        .setIssuedAt(now)
-                        .setExpiration(new Date(now.getTime() + this.REFRESH_TOKEN_EXPIRE_TIME))
-                        .signWith(SignatureAlgorithm.HS256, this.SECRET_KEY)
-                        .compact());
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + this.ACCESS_TOKEN_EXPIRE_TIME))
+                .signWith(SignatureAlgorithm.HS256, this.SECRET_KEY)
+                .compact();
+    }
 
-        this.cookieUtil.createCookie(response, this.ACCESS_COOKIE_NAME, jwtDto.getAccessToken());
-        this.cookieUtil.createCookie(response, this.REFRESH_COOKIE_NAME, jwtDto.getRefreshToken());
-        this.cookieUtil.createCookie(response, "isSignUp", isSignUp.toString());
+    private String generateRefreshToken(String userPk, Date now) {
+        Claims claims = Jwts.claims().setSubject(userPk);
 
-        return jwtDto;
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + this.REFRESH_TOKEN_EXPIRE_TIME))
+                .signWith(SignatureAlgorithm.HS256, this.SECRET_KEY)
+                .compact();
     }
 
     public Authentication getAuthentication(String token) {
@@ -78,15 +83,6 @@ public class JwtUtil {
         return Jwts.parser().setSigningKey(this.SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
     }
 
-    public JwtDto resolveToken(HttpServletRequest request) {
-        return new JwtDto(
-                this.cookieUtil.getCookie(request, this.ACCESS_COOKIE_NAME)
-                        .orElse(null),
-                this.cookieUtil.getCookie(request, this.REFRESH_COOKIE_NAME)
-                        .orElse(null)
-        );
-    }
-
     public boolean validateToken(String jwtToken) {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(this.SECRET_KEY).parseClaimsJws(jwtToken);
@@ -95,10 +91,5 @@ public class JwtUtil {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public void removeToken(HttpServletResponse response) {
-        this.cookieUtil.removeCookie(response, this.ACCESS_COOKIE_NAME);
-        this.cookieUtil.removeCookie(response, this.REFRESH_COOKIE_NAME);
     }
 }

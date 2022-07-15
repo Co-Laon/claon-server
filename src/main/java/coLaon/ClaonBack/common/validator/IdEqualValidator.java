@@ -4,7 +4,6 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 
 public class IdEqualValidator extends Validator {
-
     private final String srcId;
     private final String dstId;
 
@@ -20,7 +19,10 @@ public class IdEqualValidator extends Validator {
     @Override
     public void validate() {
         if (!srcId.equals(dstId)) {
-            throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
+            throw new UnauthorizedException(
+                    ErrorCode.NOT_ACCESSIBLE,
+                    "접근 권한이 없습니다."
+            );
         }
 
         if (this.next != null) {

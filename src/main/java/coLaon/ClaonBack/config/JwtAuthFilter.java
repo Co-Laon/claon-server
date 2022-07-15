@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.config;
 
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.utils.CookieUtil;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends GenericFilterBean {
     private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
 
     @Override
     public void doFilter(
@@ -26,7 +28,7 @@ public class JwtAuthFilter extends GenericFilterBean {
             ServletResponse response,
             FilterChain chain
     ) throws IOException, ServletException {
-        JwtDto jwtDto = this.jwtUtil.resolveToken((HttpServletRequest) request);
+        JwtDto jwtDto = this.cookieUtil.resolveToken((HttpServletRequest) request);
 
         if (jwtDto.getAccessToken() != null && jwtDto.getRefreshToken() != null) {
             if (this.jwtUtil.validateToken(jwtDto.getAccessToken())) {
@@ -42,7 +44,8 @@ public class JwtAuthFilter extends GenericFilterBean {
                 if (this.jwtUtil.validateToken(jwtDto.getRefreshToken())) {
                     // Success sign-in and create access and refresh token
                     String userId = this.jwtUtil.getUserId(jwtDto.getRefreshToken());
-                    jwtDto = this.jwtUtil.createToken((HttpServletResponse) response, userId, true);
+
+                    this.cookieUtil.addToken((HttpServletResponse) response, this.jwtUtil.createToken(userId));
 
                     Authentication auth = this.jwtUtil.getAuthentication(jwtDto.getAccessToken());
                     SecurityContextHolder.getContext().setAuthentication(auth);

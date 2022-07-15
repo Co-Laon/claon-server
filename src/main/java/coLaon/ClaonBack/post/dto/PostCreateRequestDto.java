@@ -1,18 +1,17 @@
 package coLaon.ClaonBack.post.dto;
 
-import coLaon.ClaonBack.post.domain.PostContents;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
-import java.util.Set;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostCreateRequestDto {
     private String centerName;
-    private String holdName;
+    private String holdInfo;
     private String content;
-    Set<PostContents> contentsSet;
+    List<PostContentsDto> contentsList;
 }

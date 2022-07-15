@@ -7,20 +7,19 @@ import coLaon.ClaonBack.post.domain.PostContents;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ContentsUrlFormatValidator extends Validator{
+public class ContentsImageFormatValidator extends Validator{
 
-    private final Set<PostContents> postContents;
+    private final List<PostContents> postContents;
     private final List<String> imageFormat = new ArrayList<>(Arrays.asList("png", "jpg", "jpeg"));
 
-    public ContentsUrlFormatValidator(Set<PostContents> postContents) {
+    public ContentsImageFormatValidator(List<PostContents> postContents) {
         this.postContents = postContents;
     }
 
-    public static ContentsUrlFormatValidator of(Set<PostContents> postContents) {
-        return new ContentsUrlFormatValidator(postContents);
+    public static ContentsImageFormatValidator of(List<PostContents> postContents) {
+        return new ContentsImageFormatValidator(postContents);
     }
 
     @Override

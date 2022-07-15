@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.common.utils;
 
+import coLaon.ClaonBack.config.dto.JwtDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +15,12 @@ import java.util.Optional;
 public class CookieUtil {
     @Value("${spring.jwt.access-token.cookie-name}")
     private String ACCESS_COOKIE_NAME;
+    @Value("${spring.jwt.refresh-token.cookie-name}")
+    private String REFRESH_COOKIE_NAME;
     @Value("${spring.jwt.access-token.expire-seconds}")
-    private Integer ACCESS_TOKEN_EXPIRE_TIME;
+    private Long ACCESS_TOKEN_EXPIRE_TIME;
     @Value("${spring.jwt.refresh-token.expire-seconds}")
-    private Integer REFRESH_TOKEN_EXPIRE_TIME;
+    private Long REFRESH_TOKEN_EXPIRE_TIME;
 
     public void createCookie(
             HttpServletResponse res,
@@ -26,9 +29,9 @@ public class CookieUtil {
     ) {
         int maxAge;
         if (Objects.equals(cookieName, this.ACCESS_COOKIE_NAME))
-            maxAge = this.ACCESS_TOKEN_EXPIRE_TIME;
+            maxAge = (int) (this.ACCESS_TOKEN_EXPIRE_TIME / 1000);
         else
-            maxAge = this.REFRESH_TOKEN_EXPIRE_TIME;
+            maxAge = (int) (this.REFRESH_TOKEN_EXPIRE_TIME / 1000);
 
         Cookie cookie = new Cookie(cookieName, value);
         cookie.setMaxAge(maxAge);
@@ -37,6 +40,26 @@ public class CookieUtil {
         cookie.setSecure(true);
 
         res.addCookie(cookie);
+    }
+
+    public void addToken(HttpServletResponse response, JwtDto jwt) {
+        this.createCookie(response, jwt.getAccessToken(), this.ACCESS_COOKIE_NAME);
+        this.createCookie(response, jwt.getRefreshToken(), this.REFRESH_COOKIE_NAME);
+
+        jwt.getIsCompletedSignUp().ifPresent(
+                isCompletedSignUp -> {
+                    this.createCookie(response, isCompletedSignUp.toString(), "isCompletedSignUp");
+                }
+        );
+    }
+
+    public JwtDto resolveToken(HttpServletRequest request) {
+        return JwtDto.of(
+                this.getCookie(request, this.ACCESS_COOKIE_NAME)
+                        .orElse(null),
+                this.getCookie(request, this.REFRESH_COOKIE_NAME)
+                        .orElse(null)
+        );
     }
 
     public Optional<String> getCookie(
