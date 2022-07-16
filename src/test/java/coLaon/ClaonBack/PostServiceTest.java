@@ -2,14 +2,21 @@ package coLaon.ClaonBack;
 
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
+import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
+import coLaon.ClaonBack.post.dto.PostContentsDto;
+import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
+import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,10 +31,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
+
 
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
@@ -37,6 +47,8 @@ public class PostServiceTest {
     PostRepository postRepository;
     @Mock
     PostLikeRepository postLikeRepository;
+    @Mock
+    PostContentsRepository postContentsRepository;
 
     @InjectMocks
     PostService postService;
@@ -46,6 +58,7 @@ public class PostServiceTest {
     private User user;
     private User user2;
     private Post post;
+    private PostContents postContents;
 
     @BeforeEach
     void setUp() {
@@ -74,10 +87,16 @@ public class PostServiceTest {
         this.post = Post.of(
                 "testPostId",
                 "center1",
-                "hold",
-                "testContent",
+                "hold1",
+                "testContent1",
                 user,
                 Set.of()
+        );
+
+        this.postContents = PostContents.of(
+                "testPostContentsId",
+                post,
+                "test.com/test.png"
         );
 
         this.postLike = PostLike.of(
@@ -91,6 +110,118 @@ public class PostServiceTest {
                 user2,
                 post
         );
+    }
+
+    @Test
+    @DisplayName("Success case for create post")
+    void successCreatePost() {
+        MockedStatic<Post> mockedPost = mockStatic(Post.class);
+        MockedStatic<PostContents> mockedPostContents = mockStatic(PostContents.class);
+        //given
+        PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
+                "center1",
+                "hold",
+                "testContent",
+                List.of(new PostContentsDto("test.com/test.png"))
+        );
+
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+        mockedPost.when(() -> Post.of(
+                postCreateRequestDto.getCenterName(),
+                postCreateRequestDto.getHoldInfo(),
+                postCreateRequestDto.getContent(),
+                user)).thenReturn(post);
+        given(this.postRepository.save(post)).willReturn(post);
+
+        mockedPostContents.when(() -> PostContents.of(
+                post.getId(),
+                post,
+                "test.com/test.png"
+        )).thenReturn(postContents);
+        given(this.postContentsRepository.save(postContents)).willReturn(postContents);
+
+        //when
+        PostResponseDto postResponseDto = this.postService.createPost("testUserId", postCreateRequestDto);
+
+        //then
+        assertThat(postResponseDto).isNotNull();
+        assertThat(postCreateRequestDto.getCenterName()).isEqualTo(postResponseDto.getCenterName());
+        assertThat(postCreateRequestDto.getContentsList().size()).isEqualTo(1);
+        mockedPost.close();
+        mockedPostContents.close();
+    }
+
+    @Test
+    @DisplayName("Failed case (Invalid Image Format in post) for create post")
+    void failedCreatePost_InvalidImageFormat() {
+        try (MockedStatic<Post> mockedPost = mockStatic(Post.class)) {
+            //given
+            List<PostContentsDto> postContentsDtoList = new ArrayList<>(Arrays.asList("png", "jpg", "gif"))
+                    .stream()
+                    .map(s -> "test.com/test." + s)
+                    .map(PostContentsDto::new)
+                    .collect(Collectors.toList());
+
+            PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
+                    "center1",
+                    "hold",
+                    "testContent",
+                    postContentsDtoList
+            );
+
+            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+            mockedPost.when(() -> Post.of(
+                    postCreateRequestDto.getCenterName(),
+                    postCreateRequestDto.getHoldInfo(),
+                    postCreateRequestDto.getContent(),
+                    user)).thenReturn(post);
+            given(this.postRepository.save(post)).willReturn(post);
+
+            //when
+            final BadRequestException ex = Assertions.assertThrows(
+                    BadRequestException.class,
+                    () -> postService.createPost("testUserId", postCreateRequestDto)
+            );
+
+            //then
+            assertThat(ex.getMessage()).isEqualTo("이미지 형식이 잘못되었습니다.");
+        }
+    }
+
+    @Test
+    @DisplayName("Failed case (Invalid Image number in post) for create post")
+    void failedCreatePost_InvalidImageNumber() {
+        try (MockedStatic<Post> mockedPost = mockStatic(Post.class)) {
+            //given
+            List<PostContentsDto> postContentsDtoList = Stream.iterate(0, i -> i + 1).limit(11)
+                    .map(s -> "test.com/test" + s + ".png")
+                    .map(PostContentsDto::new)
+                    .collect(Collectors.toList());
+
+            PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
+                    "center1",
+                    "hold",
+                    "testContent",
+                    postContentsDtoList
+            );
+
+            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+            mockedPost.when(() -> Post.of(
+                    postCreateRequestDto.getCenterName(),
+                    postCreateRequestDto.getHoldInfo(),
+                    postCreateRequestDto.getContent(),
+                    user)).thenReturn(post);
+            given(this.postRepository.save(post)).willReturn(post);
+
+            //when
+            final BadRequestException ex = Assertions.assertThrows(
+                    BadRequestException.class,
+                    () -> postService.createPost("testUserId", postCreateRequestDto)
+            );
+
+            //then
+            assertThat(ex.getMessage()).isEqualTo("이미지 혹은 영상은 1개 이상 10개 이하 업로드해야 합니다.");
+        }
     }
 
     @Test

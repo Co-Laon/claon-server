@@ -3,11 +3,18 @@ package coLaon.ClaonBack.post.service;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
+import coLaon.ClaonBack.common.validator.ContentsCountValidator;
+import coLaon.ClaonBack.common.validator.ContentsImageFormatValidator;
+import coLaon.ClaonBack.common.validator.Validator;
 import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
+import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
+import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
@@ -15,7 +22,6 @@ import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +30,53 @@ import java.util.stream.Collectors;
 public class PostService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final PostContentsRepository postContentsRepository;
     private final PostLikeRepository postLikeRepository;
+
+    @Transactional
+    public PostResponseDto createPost(String userId, PostCreateRequestDto postCreateRequestDto) {
+        User writer = userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        Post post = this.postRepository.save(
+                Post.of(
+                        postCreateRequestDto.getCenterName(),
+                        postCreateRequestDto.getHoldInfo(),
+                        postCreateRequestDto.getContent(),
+                        writer
+                )
+        );
+
+        List<PostContents> postContentsList = postCreateRequestDto.getContentsList()
+                .stream()
+                .map(dto -> PostContents.of(
+                        post.getId(),
+                        post,
+                        dto.getUrl()
+                ))
+                .collect(Collectors.toList());
+
+        Validator validator = new ContentsCountValidator(postContentsList);
+        validator.linkWith(ContentsImageFormatValidator.of(postContentsList));
+        validator.validate();
+
+        postContentsList = postContentsList
+                .stream()
+                .map(postContentsRepository::save)
+                .collect(Collectors.toList());
+
+        return PostResponseDto.from(
+                post,
+                postContentsList
+                        .stream()
+                        .map(PostContents::getUrl)
+                        .collect(Collectors.toList())
+        );
+    }
 
     @Transactional
     public LikeResponseDto createLike(String userId, LikeRequestDto likeRequestDto) {
