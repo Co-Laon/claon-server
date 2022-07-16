@@ -1,5 +1,7 @@
 package coLaon.ClaonBack;
 
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
@@ -24,10 +26,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -49,6 +54,8 @@ public class PostServiceTest {
     PostLikeRepository postLikeRepository;
     @Mock
     PostContentsRepository postContentsRepository;
+    @Spy
+    PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     PostService postService;
@@ -117,7 +124,7 @@ public class PostServiceTest {
     void successCreatePost() {
         MockedStatic<Post> mockedPost = mockStatic(Post.class);
         MockedStatic<PostContents> mockedPostContents = mockStatic(PostContents.class);
-        //given
+        // given
         PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
                 "center1",
                 "hold",
@@ -140,10 +147,10 @@ public class PostServiceTest {
         )).thenReturn(postContents);
         given(this.postContentsRepository.save(postContents)).willReturn(postContents);
 
-        //when
+        // when
         PostResponseDto postResponseDto = this.postService.createPost("testUserId", postCreateRequestDto);
 
-        //then
+        // then
         assertThat(postResponseDto).isNotNull();
         assertThat(postCreateRequestDto.getCenterName()).isEqualTo(postResponseDto.getCenterName());
         assertThat(postCreateRequestDto.getContentsList().size()).isEqualTo(1);
@@ -155,9 +162,8 @@ public class PostServiceTest {
     @DisplayName("Failed case (Invalid Image Format in post) for create post")
     void failedCreatePost_InvalidImageFormat() {
         try (MockedStatic<Post> mockedPost = mockStatic(Post.class)) {
-            //given
-            List<PostContentsDto> postContentsDtoList = new ArrayList<>(Arrays.asList("png", "jpg", "gif"))
-                    .stream()
+            // given
+            List<PostContentsDto> postContentsDtoList = Stream.of("png", "jpg", "gif")
                     .map(s -> "test.com/test." + s)
                     .map(PostContentsDto::new)
                     .collect(Collectors.toList());
@@ -177,13 +183,13 @@ public class PostServiceTest {
                     user)).thenReturn(post);
             given(this.postRepository.save(post)).willReturn(post);
 
-            //when
+            // when
             final BadRequestException ex = Assertions.assertThrows(
                     BadRequestException.class,
                     () -> postService.createPost("testUserId", postCreateRequestDto)
             );
 
-            //then
+            // then
             assertThat(ex.getMessage()).isEqualTo("이미지 형식이 잘못되었습니다.");
         }
     }
@@ -192,7 +198,7 @@ public class PostServiceTest {
     @DisplayName("Failed case (Invalid Image number in post) for create post")
     void failedCreatePost_InvalidImageNumber() {
         try (MockedStatic<Post> mockedPost = mockStatic(Post.class)) {
-            //given
+            // given
             List<PostContentsDto> postContentsDtoList = Stream.iterate(0, i -> i + 1).limit(11)
                     .map(s -> "test.com/test" + s + ".png")
                     .map(PostContentsDto::new)
@@ -213,13 +219,13 @@ public class PostServiceTest {
                     user)).thenReturn(post);
             given(this.postRepository.save(post)).willReturn(post);
 
-            //when
+            // when
             final BadRequestException ex = Assertions.assertThrows(
                     BadRequestException.class,
                     () -> postService.createPost("testUserId", postCreateRequestDto)
             );
 
-            //then
+            // then
             assertThat(ex.getMessage()).isEqualTo("이미지 혹은 영상은 1개 이상 10개 이하 업로드해야 합니다.");
         }
     }
@@ -270,17 +276,18 @@ public class PostServiceTest {
     @Test
     @DisplayName("Success case for find likes")
     void successFindLikes() {
-        //given
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
         given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
 
-        ArrayList<PostLike> postLikes = new ArrayList<>(Arrays.asList(postLike, postLike2));
+        Page<PostLike> postLikes = new PageImpl<>(List.of(postLike, postLike2), pageable, 2);
 
-        given(this.postLikeRepository.findAllByPostOrderByCreatedAt(post)).willReturn(postLikes);
+        given(this.postLikeRepository.findAllByPost(post, pageable)).willReturn(postLikes);
 
-        //when
-        List<LikeFindResponseDto> likeFindResponseDto = this.postService.findLikeByPost("testPostId");
+        // when
+        Pagination<LikeFindResponseDto> likeFindResponseDto = this.postService.findLikeByPost("testPostId", pageable);
 
-        //then
-        assertThat(likeFindResponseDto.size()).isEqualTo(postLikes.size());
+        // then
+        assertThat(likeFindResponseDto.getResults().size()).isEqualTo(postLikes.getContent().size());
     }
 }
