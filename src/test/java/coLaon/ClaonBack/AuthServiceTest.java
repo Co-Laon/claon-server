@@ -8,6 +8,7 @@ import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import coLaon.ClaonBack.user.service.OAuth2UserInfoProvider;
 import coLaon.ClaonBack.user.service.OAuth2UserInfoProviderSupplier;

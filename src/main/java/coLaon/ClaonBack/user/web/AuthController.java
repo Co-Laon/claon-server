@@ -3,6 +3,7 @@ package coLaon.ClaonBack.user.web;
 import coLaon.ClaonBack.common.utils.CookieUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
+import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
@@ -32,6 +33,14 @@ public class AuthController {
     @ResponseStatus(value = HttpStatus.OK)
     public DuplicatedCheckResponseDto nicknameDuplicatedCheck(@PathVariable String nickname) {
         return this.userService.nicknameDuplicatedCheck(nickname);
+    }
+
+    @PostMapping("/instagram/account")
+    @ResponseStatus(value = HttpStatus.OK)
+    public InstagramResponseDto getInstagramAccount(
+            @RequestBody SignInRequestDto signInRequestDto
+    ) {
+        return this.userService.getInstagramAccount(signInRequestDto);
     }
 
     @PostMapping("/sign-in/{provider}")

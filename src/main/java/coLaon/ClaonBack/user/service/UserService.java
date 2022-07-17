@@ -10,11 +10,13 @@ import coLaon.ClaonBack.config.dto.JwtDto;
 import coLaon.ClaonBack.user.domain.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
+import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,11 +29,22 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
+    private final InstagramUserInfoProvider instagramUserInfoProvider;
     private final JwtUtil jwtUtil;
 
     @Transactional(readOnly = true)
     public DuplicatedCheckResponseDto nicknameDuplicatedCheck(String nickname) {
         return DuplicatedCheckResponseDto.of(this.userRepository.findByNickname(nickname).isPresent());
+    }
+
+    @Transactional(readOnly = true)
+    public InstagramResponseDto getInstagramAccount(SignInRequestDto requestDto) {
+        OAuth2UserInfoDto userInfoDto = this.instagramUserInfoProvider.getUserInfo(requestDto.getCode());
+
+        return InstagramResponseDto.of(
+                userInfoDto.getOAuthId(),
+                userInfoDto.getEmail()
+        );
     }
 
     @Transactional
