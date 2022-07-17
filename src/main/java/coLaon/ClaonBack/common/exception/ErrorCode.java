@@ -11,7 +11,6 @@ public enum ErrorCode {
     INVALID_FORMAT(40003),
     ROW_DOES_NOT_EXIST(40004),
     INVALID_OAUTH2_PROVIDER(40005),
-    INVALID_USER_DATA(40006),
     /**
      * 401 Unauthorized Error
      */
@@ -26,7 +25,7 @@ public enum ErrorCode {
     /**
      * 503 Service Unavailable
      */
-    UNAVAILABLE_MAIL_SERVER(50300),
+    SERVICE_UNAVAILABLE(50300),
     ;
 
     private final int code;

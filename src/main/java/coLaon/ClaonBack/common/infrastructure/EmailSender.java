@@ -3,7 +3,7 @@ package coLaon.ClaonBack.common.infrastructure;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.InternalServerErrorException;
-import coLaon.ClaonBack.common.exception.UnavailableMailServerException;
+import coLaon.ClaonBack.common.exception.ServiceUnavailableException;
 import coLaon.ClaonBack.config.EmailSenderConfig;
 import com.sun.mail.smtp.SMTPAddressFailedException;
 import lombok.RequiredArgsConstructor;
@@ -114,8 +114,8 @@ public class EmailSender {
             }
 
             // others (timeout, etc.)
-            throw new UnavailableMailServerException(
-                    ErrorCode.UNAVAILABLE_MAIL_SERVER,
+            throw new ServiceUnavailableException(
+                    ErrorCode.SERVICE_UNAVAILABLE,
                     "메일 전송 중 오류가 발생했습니다."
             );
         } catch (MailException e) {
