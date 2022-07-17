@@ -1,5 +1,7 @@
 package coLaon.ClaonBack.post.service;
 
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
@@ -20,6 +22,7 @@ import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -32,6 +35,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostContentsRepository postContentsRepository;
     private final PostLikeRepository postLikeRepository;
+    private final PaginationFactory paginationFactory;
 
     @Transactional
     public PostResponseDto createPost(String userId, PostCreateRequestDto postCreateRequestDto) {
@@ -141,7 +145,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<LikeFindResponseDto> findLikeByPost(String postId) {
+    public Pagination<LikeFindResponseDto> findLikeByPost(String postId, Pageable pageable) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -149,12 +153,12 @@ public class PostService {
                 )
         );
 
-        return postLikeRepository.findAllByPostOrderByCreatedAt(post)
-                .stream()
+        return this.paginationFactory.create(
+                postLikeRepository.findAllByPost(post, pageable)
                 .map(like ->
                         LikeFindResponseDto.from(
                                 like,
                                 postLikeRepository.countByPost(post)))
-                .collect(Collectors.toList());
+        );
     }
 }

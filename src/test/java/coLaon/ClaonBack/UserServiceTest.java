@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,28 +59,28 @@ public class UserServiceTest {
     @Test
     @DisplayName("Success case for set public user private account")
     void successSetPrivateAccount() {
-        //given
+        // given
         given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
         given(this.userRepository.save(publicUser)).willReturn(publicUser);
 
-        //when
+        // when
         PublicScopeResponseDto publicScopeResponseDto = this.userService.setPublicScope("publicUserId");
 
-        //then
+        // then
         assertThat(publicScopeResponseDto.getIsPrivate()).isTrue();
     }
 
     @Test
     @DisplayName("Success case for set private user public account")
     void successSetPublicAccount() {
-        //given
+        // given
         given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
         given(this.userRepository.save(privateUser)).willReturn(privateUser);
 
-        //when
+        // when
         PublicScopeResponseDto publicScopeResponseDto = this.userService.setPublicScope("privateUserId");
 
-        //then
+        // then
         assertThat(publicScopeResponseDto.getIsPrivate()).isFalse();
     }
 }

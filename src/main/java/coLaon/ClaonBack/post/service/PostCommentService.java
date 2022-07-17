@@ -1,5 +1,7 @@
 package coLaon.ClaonBack.post.service;
 
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
@@ -16,12 +18,11 @@ import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,7 @@ public class PostCommentService {
     private final UserRepository userRepository;
     private final PostCommentRepository postCommentRepository;
     private final PostRepository postRepository;
+    private final PaginationFactory paginationFactory;
 
     @Transactional
     public CommentResponseDto createComment(String userId, CommentCreateRequestDto commentCreateRequestDto) {
@@ -65,7 +67,7 @@ public class PostCommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentFindResponseDto> findCommentsByPost(String postId) {
+    public Pagination<CommentFindResponseDto> findCommentsByPost(String postId, Pageable pageable) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -73,19 +75,19 @@ public class PostCommentService {
                 )
         );
 
-        return postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(post)
-                .stream()
-                .map(parent ->
-                        CommentFindResponseDto.from(
-                                parent,
-                                postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(parent),
-                                postCommentRepository.countAllByParentCommentId(parent.getId())
-                        ))
-                .collect(Collectors.toList());
+        return this.paginationFactory.create(
+                postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalse(post, pageable)
+                        .map(parent ->
+                                CommentFindResponseDto.from(
+                                        parent,
+                                        postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(parent),
+                                        postCommentRepository.countAllByParentCommentId(parent.getId())
+                                ))
+        );
     }
 
     @Transactional(readOnly = true)
-    public List<ChildCommentResponseDto> findAllChildCommentsByParent(String parentId) {
+    public Pagination<ChildCommentResponseDto> findAllChildCommentsByParent(String parentId, Pageable pageable) {
         PostComment postComment = postCommentRepository.findById(parentId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -93,10 +95,10 @@ public class PostCommentService {
                 )
         );
 
-        return postCommentRepository.findAllByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment)
-                .stream()
-                .map(ChildCommentResponseDto::from)
-                .collect(Collectors.toList());
+        return this.paginationFactory.create(
+                postCommentRepository.findAllByParentCommentAndIsDeletedFalse(postComment, pageable)
+                        .map(ChildCommentResponseDto::from)
+        );
     }
 
     @Transactional

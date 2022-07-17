@@ -1,5 +1,7 @@
 package coLaon.ClaonBack;
 
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.service.PostCommentService;
 import coLaon.ClaonBack.post.domain.Post;
@@ -20,10 +22,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +45,8 @@ public class PostCommentServiceTest {
     PostCommentRepository postCommentRepository;
     @Mock
     PostRepository postRepository;
+    @Spy
+    PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     PostCommentService postCommentService;
@@ -53,7 +60,6 @@ public class PostCommentServiceTest {
     private PostComment childPostComment2;
     private PostComment childPostComment3;
     private PostComment childPostComment4;
-    private PostComment childPostComment5;
 
     @BeforeEach
     void setUp() {
@@ -137,14 +143,6 @@ public class PostCommentServiceTest {
                 post,
                 postComment
         );
-
-        this.childPostComment5 = PostComment.of(
-                "testChildId5",
-                "testChildContent5",
-                writer,
-                post,
-                postComment
-        );
     }
 
     @Test
@@ -198,47 +196,49 @@ public class PostCommentServiceTest {
     @DisplayName("Success case for find parent comments")
     void successFindParentComments() {
         // given
+        Pageable pageable = PageRequest.of(0, 2);
         given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
 
-        ArrayList<PostComment> parents = new ArrayList<>(Arrays.asList(postComment, postComment2));
-        ArrayList<PostComment> children1 = new ArrayList<>(Arrays.asList(childPostComment, childPostComment2, childPostComment4, childPostComment5));
-        ArrayList<PostComment> children2 = new ArrayList<>(Arrays.asList(childPostComment3));
+        Page<PostComment> parents = new PageImpl<>(List.of(postComment, postComment2), pageable, 2);
+        List<PostComment> children1 = List.of(childPostComment, childPostComment2, childPostComment4);
+        List<PostComment> children2 = List.of(childPostComment3);
 
-        given(this.postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(post)).willReturn(parents);
+        given(this.postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalse(post, pageable)).willReturn(parents);
         given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment)).willReturn(children1);
         given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment2)).willReturn(children2);
-        given(this.postCommentRepository.countAllByParentCommentId(postComment.getId())).willReturn((long) children1.size());
+        given(this.postCommentRepository.countAllByParentCommentId(postComment.getId())).willReturn((long) 4);
         given(this.postCommentRepository.countAllByParentCommentId(postComment2.getId())).willReturn((long) children2.size());
 
         // when
-        List<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testPostId");
+        Pagination<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testPostId", pageable);
 
         // then
-        assertThat(CommentFindResponseDto.get(0).getViewMore()).isTrue();
-        assertThat(CommentFindResponseDto.get(1).getViewMore()).isFalse();
+        assertThat(CommentFindResponseDto.getResults().get(0).getViewMore()).isTrue();
+        assertThat(CommentFindResponseDto.getResults().get(1).getViewMore()).isFalse();
         assertThat(CommentFindResponseDto).isNotNull();
-        assertThat(CommentFindResponseDto.size()).isEqualTo(parents.size());
-        assertThat(CommentFindResponseDto.get(0).getChildren().size()).isEqualTo(children1.size());
-        assertThat(CommentFindResponseDto.get(1).getChildren().size()).isEqualTo(children2.size());
-        assertThat(CommentFindResponseDto.get(0).getChildren().get(0).getContent()).isEqualTo(childPostComment.getContent());
+        assertThat(CommentFindResponseDto.getResults().size()).isEqualTo(parents.getContent().size());
+        assertThat(CommentFindResponseDto.getResults().get(0).getChildren().size()).isEqualTo(children1.size());
+        assertThat(CommentFindResponseDto.getResults().get(1).getChildren().size()).isEqualTo(children2.size());
+        assertThat(CommentFindResponseDto.getResults().get(0).getChildren().get(0).getContent()).isEqualTo(childPostComment.getContent());
     }
 
     @Test
     @DisplayName("Success case for find child comments")
     void successFindChildComments() {
         // given
-        ArrayList<PostComment> children = new ArrayList<>(Arrays.asList(childPostComment, childPostComment2));
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<PostComment> children = new PageImpl<>(List.of(childPostComment, childPostComment2), pageable, 2);
 
         given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
-        given(this.postCommentRepository.findAllByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment)).willReturn(children);
+        given(this.postCommentRepository.findAllByParentCommentAndIsDeletedFalse(postComment, pageable)).willReturn(children);
 
         // when
-        List<ChildCommentResponseDto> CommentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testCommentId");
+        Pagination<ChildCommentResponseDto> CommentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testCommentId", pageable);
 
         // then
         assertThat(CommentFindResponseDto).isNotNull();
-        assertThat(CommentFindResponseDto.size()).isEqualTo(children.size());
-        assertThat(CommentFindResponseDto.get(0).getContent()).isEqualTo(childPostComment.getContent());
+        assertThat(CommentFindResponseDto.getResults().size()).isEqualTo(children.getContent().size());
+        assertThat(CommentFindResponseDto.getResults().get(0).getContent()).isEqualTo(childPostComment.getContent());
     }
 
     @Test

@@ -2,6 +2,8 @@ package coLaon.ClaonBack.post.repository;
 
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,8 +11,8 @@ import java.util.List;
 
 @Repository
 public interface PostCommentRepository extends JpaRepository<PostComment, String> {
-    List<PostComment> findByPostAndParentCommentIsNullAndIsDeletedFalseOrderByCreatedAt(Post post);
+    Page<PostComment> findByPostAndParentCommentIsNullAndIsDeletedFalse(Post post, Pageable pageable);
     List<PostComment> findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(PostComment parentComment);
-    List<PostComment> findAllByParentCommentAndIsDeletedFalseOrderByCreatedAt(PostComment postComment);
+    Page<PostComment> findAllByParentCommentAndIsDeletedFalse(PostComment postComment, Pageable pageable);
     Long countAllByParentCommentId(String postCommentId);
 }
