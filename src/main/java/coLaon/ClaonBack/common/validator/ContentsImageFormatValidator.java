@@ -3,6 +3,7 @@ package coLaon.ClaonBack.common.validator;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.post.domain.PostContents;
+import coLaon.ClaonBack.post.dto.PostContentsDto;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,21 +12,21 @@ import java.util.stream.Collectors;
 
 public class ContentsImageFormatValidator extends Validator{
 
-    private final List<PostContents> postContents;
+    private final List<PostContentsDto> postContents;
     private final List<String> imageFormat = new ArrayList<>(Arrays.asList("png", "jpg", "jpeg"));
 
-    public ContentsImageFormatValidator(List<PostContents> postContents) {
+    public ContentsImageFormatValidator(List<PostContentsDto> postContents) {
         this.postContents = postContents;
     }
 
-    public static ContentsImageFormatValidator of(List<PostContents> postContents) {
+    public static ContentsImageFormatValidator of(List<PostContentsDto> postContents) {
         return new ContentsImageFormatValidator(postContents);
     }
 
     @Override
     public void validate() {
         List<Boolean> postContentsUrls = postContents.stream()
-                .map(PostContents::getUrl)
+                .map(PostContentsDto::getUrl)
                 .map(url -> url.substring(url.lastIndexOf(".") + 1))
                 .map(String::toLowerCase)
                 .map(imageFormat::contains)

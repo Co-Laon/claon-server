@@ -1,8 +1,11 @@
 package coLaon.ClaonBack.post.dto;
 
+import coLaon.ClaonBack.common.validator.PostContentsSize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 
@@ -10,8 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostCreateRequestDto {
+    @NotBlank(message = "암장 정보를 입력해주세요.")
     private String centerName;
     private String holdInfo;
     private String content;
+    @PostContentsSize(message = "이미지 혹은 동영상 1개 이상 10개 이하로 업로드해야 합니다.")
     List<PostContentsDto> contentsList;
 }

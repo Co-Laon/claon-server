@@ -5,7 +5,6 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
-import coLaon.ClaonBack.common.validator.ContentsCountValidator;
 import coLaon.ClaonBack.common.validator.ContentsImageFormatValidator;
 import coLaon.ClaonBack.common.validator.Validator;
 import coLaon.ClaonBack.post.domain.Post;
@@ -46,6 +45,8 @@ public class PostService {
                 )
         );
 
+        ContentsImageFormatValidator.of(postCreateRequestDto.getContentsList()).validate();
+
         Post post = this.postRepository.save(
                 Post.of(
                         postCreateRequestDto.getCenterName(),
@@ -64,19 +65,11 @@ public class PostService {
                 ))
                 .collect(Collectors.toList());
 
-        Validator validator = new ContentsCountValidator(postContentsList);
-        validator.linkWith(ContentsImageFormatValidator.of(postContentsList));
-        validator.validate();
-
-        postContentsList = postContentsList
-                .stream()
-                .map(postContentsRepository::save)
-                .collect(Collectors.toList());
-
         return PostResponseDto.from(
                 post,
                 postContentsList
                         .stream()
+                        .map(postContentsRepository::save)
                         .map(PostContents::getUrl)
                         .collect(Collectors.toList())
         );
