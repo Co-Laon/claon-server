@@ -32,7 +32,7 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User writer;
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    Set<PostContents> contentsSet;
+    private Set<PostContents> contentsSet;
 
     private Post(
             String centerName,
