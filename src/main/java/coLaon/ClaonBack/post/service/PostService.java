@@ -59,7 +59,6 @@ public class PostService {
         List<PostContents> postContentsList = postCreateRequestDto.getContentsList()
                 .stream()
                 .map(dto -> PostContents.of(
-                        post.getId(),
                         post,
                         dto.getUrl()
                 ))

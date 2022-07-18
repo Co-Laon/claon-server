@@ -146,7 +146,6 @@ public class PostServiceTest {
 
         mockedPostContents.when(() ->
                         PostContents.of(
-                                post.getId(),
                                 post,
                                 "test.com/test.png"
                         ))

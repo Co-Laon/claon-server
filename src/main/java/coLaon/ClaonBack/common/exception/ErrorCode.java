@@ -12,6 +12,7 @@ public enum ErrorCode {
     ROW_DOES_NOT_EXIST(40004),
     INVALID_OAUTH2_PROVIDER(40005),
     WRONG_PURPOSE(40006),
+    INVALID_PARAMETER(40007),
     /**
      * 401 Unauthorized Error
      */
