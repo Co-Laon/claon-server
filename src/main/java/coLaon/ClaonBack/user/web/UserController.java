@@ -10,10 +10,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
+import coLaon.ClaonBack.user.dto.UserResponseDto;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
 public class UserController {
+
     private final UserService userService;
 
     @PutMapping("/public-scope")
@@ -22,5 +28,15 @@ public class UserController {
             @AuthenticationPrincipal String userId
     ) {
         return this.userService.setPublicScope(userId);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getUser(@AuthenticationPrincipal String userId) {
+        return new ResponseEntity<>(userService.getUser(userId), HttpStatus.OK);
+    }
+
+    @PatchMapping("/me")
+    public void modifyUser(@AuthenticationPrincipal String userId, @RequestBody UserModifyRequestDto dto) {
+        userService.modifyUser(userId, dto);
     }
 }

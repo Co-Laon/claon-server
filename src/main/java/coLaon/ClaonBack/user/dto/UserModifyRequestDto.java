@@ -1,21 +1,22 @@
 package coLaon.ClaonBack.user.dto;
 
-import coLaon.ClaonBack.user.domain.User;
 import lombok.Data;
 
+import javax.validation.constraints.Size;
+
 @Data
-public class UserResponseDto {
-    private String email;
+public class UserModifyRequestDto {
+
+    @Size(max=100, message="닉네임은 20자 이하여야 합니다. ")
     private String nickname;
     private String metropolitanActiveArea;
     private String basicLocalActiveArea;
     private String imagePath;
-    private String instagramOAuthId;
     private String instagramUserName;
+    private String instagramOAuthId;
     private Boolean isPrivate;
 
-    private UserResponseDto(
-            String email,
+    public UserModifyRequestDto(
             String nickname,
             String metropolitanActiveArea,
             String basicLocalActiveArea,
@@ -24,7 +25,6 @@ public class UserResponseDto {
             String instagramUserName,
             Boolean isPrivate
     ) {
-        this.email = email;
         this.nickname = nickname;
         this.metropolitanActiveArea = metropolitanActiveArea;
         this.basicLocalActiveArea = basicLocalActiveArea;
@@ -32,18 +32,5 @@ public class UserResponseDto {
         this.instagramOAuthId = instagramOAuthId;
         this.instagramUserName = instagramUserName;
         this.isPrivate = isPrivate;
-    }
-
-    public static UserResponseDto from(User user) {
-        return new UserResponseDto(
-                user.getEmail(),
-                user.getNickname(),
-                user.getMetropolitanActiveArea(),
-                user.getBasicLocalActiveArea(),
-                user.getImagePath(),
-                user.getInstagramOAuthId(),
-                user.getInstagramUserName(),
-                user.getIsPrivate()
-        );
     }
 }

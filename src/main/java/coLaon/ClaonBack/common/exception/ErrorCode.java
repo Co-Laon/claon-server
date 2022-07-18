@@ -28,6 +28,11 @@ public enum ErrorCode {
      * 503 Service Unavailable
      */
     SERVICE_UNAVAILABLE(50300),
+    UNAVAILABLE_MAIL_SERVER(50300),
+    /**
+     * 409 Conflict
+     */
+    CONFLICT_STATE(40900)
     ;
 
     private final int code;

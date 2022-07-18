@@ -6,7 +6,9 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.ExceptionDto;
 import coLaon.ClaonBack.common.exception.ServiceUnavailableException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
+import coLaon.ClaonBack.common.exception.ConflictExceptionDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -51,5 +53,12 @@ public class GlobalExceptionHandler {
     public ExceptionDto unknownException(Exception exception) {
         GlobalExceptionHandler.log.error("error message", exception);
         return new ExceptionDto(ErrorCode.INTERNAL_SERVER_ERROR, "Internal server error");
+    }
+
+    @ExceptionHandler(value = {DataIntegrityViolationException.class})
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ExceptionDto handleUniqueConstraintException(Exception exception) {
+        GlobalExceptionHandler.log.error("error message", exception);
+        return new ConflictExceptionDto("Violate unique constraint - " + exception.getMessage());
     }
 }

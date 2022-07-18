@@ -16,13 +16,12 @@ import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -56,11 +55,11 @@ public class UserService {
                 .getUserInfo(signInRequestDto.getCode());
 
         User user = this.userRepository.findByEmailAndOAuthId(userInfoDto.getEmail(), userInfoDto.getOAuthId())
-                .orElseGet(() -> this.userRepository.save(User.of(userInfoDto.getEmail(), userInfoDto.getOAuthId())));
+                .orElseGet(() -> this.userRepository.save(User.createNewUser(userInfoDto.getEmail(), userInfoDto.getOAuthId())));
 
         return this.jwtUtil.createToken(
                 user.getId(),
-                Optional.ofNullable(user.getNickname()).isPresent()
+                user.isSignupCompleted()
         );
     }
 
@@ -121,6 +120,28 @@ public class UserService {
 
         user.changePublicScope();
         return PublicScopeResponseDto.from(userRepository.save(user).getIsPrivate());
+    }
+
+    public UserResponseDto getUser(String userId){
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            throw new UnauthorizedException(
+                    ErrorCode.USER_DOES_NOT_EXIST,
+                    "로그인한 사용자의 계정 정보가 존재하지 않습니다."
+            );
+        });
+        return UserResponseDto.from(user);
+    }
+
+    @Transactional
+    public void modifyUser(String userId, UserModifyRequestDto dto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            throw new UnauthorizedException(
+                    ErrorCode.USER_DOES_NOT_EXIST,
+                    "로그인한 사용자의 계정 정보가 존재하지 않습니다."
+            );
+        });
+
+        user.modifyUser(dto);
     }
 }
 
