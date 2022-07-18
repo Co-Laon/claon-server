@@ -1,4 +1,4 @@
-package coLaon.ClaonBack;
+package coLaon.ClaonBack.service;
 
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
@@ -69,7 +69,7 @@ public class PostServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.user = User.of(
+        this.user = User.createNewUser(
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -80,7 +80,7 @@ public class PostServiceTest {
                 "instagramId"
         );
 
-        this.user2 = User.of(
+        this.user2 = User.createNewUser(
                 "testUserId2",
                 "test123@gmail.com",
                 "test2345!!",

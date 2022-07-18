@@ -1,4 +1,4 @@
-package coLaon.ClaonBack;
+package coLaon.ClaonBack.service;
 
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
@@ -36,7 +36,7 @@ public class LaonServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.laon = User.of(
+        this.laon = User.createNewUser(
                 "laonId",
                 "test@gmail.com",
                 "1234567890",
@@ -48,7 +48,7 @@ public class LaonServiceTest {
                 "instagramId"
         );
 
-        this.user = User.of(
+        this.user = User.createNewUser(
                 "userId",
                 "test@gmail.com",
                 "1234567222",

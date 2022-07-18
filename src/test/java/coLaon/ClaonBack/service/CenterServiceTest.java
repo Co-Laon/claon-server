@@ -1,4 +1,4 @@
-package coLaon.ClaonBack;
+package coLaon.ClaonBack.service;
 
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
@@ -51,7 +51,7 @@ public class CenterServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.admin = User.of(
+        this.admin = User.createNewUser(
                 "adminId",
                 "coraon.dev@gmail.com",
                 "1234567890",
@@ -63,7 +63,7 @@ public class CenterServiceTest {
                 "instagramId"
         );
 
-        this.user = User.of(
+        this.user = User.createNewUser(
                 "userId",
                 "test@gmail.com",
                 "1234567222",

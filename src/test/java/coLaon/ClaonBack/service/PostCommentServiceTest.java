@@ -1,8 +1,7 @@
-package coLaon.ClaonBack;
+package coLaon.ClaonBack.service;
 
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
-import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.service.PostCommentService;
@@ -65,7 +64,7 @@ public class PostCommentServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.writer = User.of(
+        this.writer = User.createNewUser(
                 "testUserId",
                 "test@gmail.com",
                 "1234567890",
@@ -77,7 +76,7 @@ public class PostCommentServiceTest {
                 "instagramId"
         );
 
-        this.writer2 = User.of(
+        this.writer2 = User.createNewUser(
                 "testUserId2",
                 "test123@gmail.com",
                 "1234567890",
