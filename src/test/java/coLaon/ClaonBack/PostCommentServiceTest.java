@@ -2,6 +2,8 @@ package coLaon.ClaonBack;
 
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
+import coLaon.ClaonBack.common.exception.BadRequestException;
+import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.service.PostCommentService;
 import coLaon.ClaonBack.post.domain.Post;
@@ -15,6 +17,7 @@ import coLaon.ClaonBack.post.repository.PostCommentRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +35,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mockStatic;
@@ -262,7 +264,7 @@ public class PostCommentServiceTest {
 
     @Test
     @DisplayName("Failure case for update comment because update by other user")
-    void failureAuthUpdateComment() {
+    void failUpdateComment_Unauthorized() {
         // given
         CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent", "testPostId");
 
@@ -270,10 +272,13 @@ public class PostCommentServiceTest {
         given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
         // when
-        assertThatThrownBy(() -> this.postCommentService.updateComment("testUserId2", "testCommentId", commentUpdateRequestDto))
-                // then
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("접근 권한이 없습니다.");
+        final UnauthorizedException ex = Assertions.assertThrows(
+                UnauthorizedException.class,
+                () -> this.postCommentService.updateComment("testUserId2", "testCommentId", commentUpdateRequestDto)
+        );
+
+        // then
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
     }
 
     @Test
@@ -295,15 +300,18 @@ public class PostCommentServiceTest {
 
     @Test
     @DisplayName("Failure case for delete comment because delete by other user")
-    void failureAuthDeleteComment() {
+    void failDeleteComment_Unauthorized() {
         // given
         given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(writer2));
         given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
         // when
-        assertThatThrownBy(() -> this.postCommentService.deleteComment("testCommentId", "testUserId2"))
-                //then
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("접근 권한이 없습니다.");
+        final UnauthorizedException ex = Assertions.assertThrows(
+                UnauthorizedException.class,
+                () -> this.postCommentService.deleteComment("testCommentId", "testUserId2")
+        );
+
+        // then
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
     }
 }

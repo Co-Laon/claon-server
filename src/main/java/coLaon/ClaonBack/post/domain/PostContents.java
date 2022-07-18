@@ -22,12 +22,6 @@ public class PostContents extends BaseEntity {
     private String url;
 
     private PostContents(
-            String url
-    ) {
-        this.url = url;
-    }
-
-    private PostContents(
             Post post,
             String url
     ) {
@@ -43,14 +37,6 @@ public class PostContents extends BaseEntity {
         super(id);
         this.post = post;
         this.url = url;
-    }
-
-    public static PostContents of(
-            String url
-    ) {
-        return new PostContents(
-                url
-        );
     }
 
     public static PostContents of(
@@ -73,9 +59,5 @@ public class PostContents extends BaseEntity {
                 post,
                 url
         );
-    }
-
-    public void setPost(Post post) {
-        this.post = post;
     }
 }
