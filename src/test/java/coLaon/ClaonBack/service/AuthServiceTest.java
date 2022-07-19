@@ -1,4 +1,4 @@
-package coLaon.ClaonBack;
+package coLaon.ClaonBack.service;
 
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
@@ -100,7 +100,7 @@ public class AuthServiceTest {
                 "test",
                 "test@gmail.com",
                 "1234567890",
-                null,
+                "nickname",
                 null,
                 null,
                 null,
@@ -130,10 +130,10 @@ public class AuthServiceTest {
 
             given(this.userRepository.findByEmailAndOAuthId(oAuth2UserInfoDto.getEmail(), oAuth2UserInfoDto.getOAuthId())).willReturn(Optional.empty());
 
-            mockedUser.when(() -> User.of("test@gmail.com", "1234567890")).thenReturn(firstAccessUser);
+            mockedUser.when(() -> User.createNewUser("test@gmail.com", "1234567890")).thenReturn(firstAccessUser);
             given(this.userRepository.save(firstAccessUser)).willReturn(firstAccessUser);
 
-            given(this.jwtUtil.createToken(this.user.getId(), false)).willReturn(jwtDto);
+            given(this.jwtUtil.createToken(this.user.getId(), true)).willReturn(jwtDto);
 
             // when
             JwtDto result = this.userService.signIn("google", signInRequestDto);

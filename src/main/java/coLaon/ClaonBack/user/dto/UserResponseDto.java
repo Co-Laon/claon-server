@@ -10,7 +10,9 @@ public class UserResponseDto {
     private String metropolitanActiveArea;
     private String basicLocalActiveArea;
     private String imagePath;
+    private String instagramOAuthId;
     private String instagramUserName;
+    private Boolean isPrivate;
 
     private UserResponseDto(
             String email,
@@ -18,14 +20,18 @@ public class UserResponseDto {
             String metropolitanActiveArea,
             String basicLocalActiveArea,
             String imagePath,
-            String instagramUserName
+            String instagramOAuthId,
+            String instagramUserName,
+            Boolean isPrivate
     ) {
         this.email = email;
         this.nickname = nickname;
         this.metropolitanActiveArea = metropolitanActiveArea;
         this.basicLocalActiveArea = basicLocalActiveArea;
         this.imagePath = imagePath;
+        this.instagramOAuthId = instagramOAuthId;
         this.instagramUserName = instagramUserName;
+        this.isPrivate = isPrivate;
     }
 
     public static UserResponseDto from(User user) {
@@ -35,7 +41,9 @@ public class UserResponseDto {
                 user.getMetropolitanActiveArea(),
                 user.getBasicLocalActiveArea(),
                 user.getImagePath(),
-                user.getInstagramUserName()
+                user.getInstagramOAuthId(),
+                user.getInstagramUserName(),
+                user.getIsPrivate()
         );
     }
 }
