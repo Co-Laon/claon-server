@@ -1,7 +1,10 @@
 package coLaon.ClaonBack.common.exception;
 
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
+@Getter
 public class ExceptionDto {
     private final Integer errorCode;
     private final String message;
