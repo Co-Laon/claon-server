@@ -20,7 +20,6 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -34,7 +33,7 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.publicUser = User.createNewUser(
+        this.publicUser = User.of(
                 "publicUserId",
                 "test@gmail.com",
                 "1234567890",
@@ -46,7 +45,7 @@ public class UserServiceTest {
                 "instagramId"
         );
 
-        this.privateUser = User.createNewUser(
+        this.privateUser = User.of(
                 "privateUserId",
                 "test12@gmail.com",
                 "1234567823",
@@ -58,7 +57,7 @@ public class UserServiceTest {
                 "instagramId"
         );
         this.privateUser.changePublicScope();
-        this.user = User.createNewUser(
+        this.user = User.of(
                 "userId",
                 "test@gmail.com",
                 "1234567890",

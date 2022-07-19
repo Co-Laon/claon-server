@@ -45,7 +45,7 @@ public class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.user = User.createNewUser(
+        this.user = User.of(
                 "test",
                 "test@gmail.com",
                 "1234567890",
@@ -96,11 +96,11 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Success case for sign in for first access user")
     void successSignInForFirstAccessUser() {
-        User firstAccessUser = User.createNewUser(
+        User firstAccessUser = User.of(
                 "test",
                 "test@gmail.com",
                 "1234567890",
-                null,
+                "nickname",
                 null,
                 null,
                 null,
@@ -133,7 +133,7 @@ public class AuthServiceTest {
             mockedUser.when(() -> User.createNewUser("test@gmail.com", "1234567890")).thenReturn(firstAccessUser);
             given(this.userRepository.save(firstAccessUser)).willReturn(firstAccessUser);
 
-            given(this.jwtUtil.createToken(this.user.getId(), false)).willReturn(jwtDto);
+            given(this.jwtUtil.createToken(this.user.getId(), true)).willReturn(jwtDto);
 
             // when
             JwtDto result = this.userService.signIn("google", signInRequestDto);

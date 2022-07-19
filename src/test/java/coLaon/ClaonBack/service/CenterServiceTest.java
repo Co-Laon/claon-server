@@ -51,7 +51,7 @@ public class CenterServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.admin = User.createNewUser(
+        this.admin = User.of(
                 "adminId",
                 "coraon.dev@gmail.com",
                 "1234567890",
@@ -63,7 +63,7 @@ public class CenterServiceTest {
                 "instagramId"
         );
 
-        this.user = User.createNewUser(
+        this.user = User.of(
                 "userId",
                 "test@gmail.com",
                 "1234567222",

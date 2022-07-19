@@ -32,12 +32,14 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getUser(@AuthenticationPrincipal String userId) {
-        return new ResponseEntity<>(userService.getUser(userId), HttpStatus.OK);
+    @ResponseStatus(value = HttpStatus.OK)
+    public UserResponseDto getUser(@AuthenticationPrincipal String userId) {
+        return userService.getUser(userId);
     }
 
     @PutMapping("/me")
-    public void modifyUser(@AuthenticationPrincipal String userId, @RequestBody UserModifyRequestDto dto) {
-        userService.modifyUser(userId, dto);
+    @ResponseStatus(value = HttpStatus.OK)
+    public UserResponseDto modifyUser(@AuthenticationPrincipal String userId, @RequestBody UserModifyRequestDto dto) {
+        return userService.modifyUser(userId, dto);
     }
 }

@@ -36,7 +36,7 @@ public class LaonServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.laon = User.createNewUser(
+        this.laon = User.of(
                 "laonId",
                 "test@gmail.com",
                 "1234567890",
@@ -48,7 +48,7 @@ public class LaonServiceTest {
                 "instagramId"
         );
 
-        this.user = User.createNewUser(
+        this.user = User.of(
                 "userId",
                 "test@gmail.com",
                 "1234567222",

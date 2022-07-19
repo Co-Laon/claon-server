@@ -133,7 +133,7 @@ public class UserService {
     }
 
     @Transactional
-    public void modifyUser(String userId, UserModifyRequestDto dto) {
+    public UserResponseDto modifyUser(String userId, UserModifyRequestDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> {
             throw new UnauthorizedException(
                     ErrorCode.USER_DOES_NOT_EXIST,
@@ -142,6 +142,7 @@ public class UserService {
         });
 
         user.modifyUser(dto);
+        return UserResponseDto.from(user);
     }
 }
 

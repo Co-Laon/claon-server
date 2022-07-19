@@ -69,7 +69,7 @@ public class PostServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.user = User.createNewUser(
+        this.user = User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -80,7 +80,7 @@ public class PostServiceTest {
                 "instagramId"
         );
 
-        this.user2 = User.createNewUser(
+        this.user2 = User.of(
                 "testUserId2",
                 "test123@gmail.com",
                 "test2345!!",

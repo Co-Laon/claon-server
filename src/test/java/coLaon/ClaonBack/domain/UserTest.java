@@ -17,7 +17,7 @@ public class UserTest {
 
     @BeforeEach
     void setUp() {
-        this.user = User.createNewUser("abcd", "hoonki", "hoonki", "asdf", "asdf", "sdd", "sdf", "dfdf");
+        this.user = User.of("abcd", "hoonki", "hoonki", "asdf", "asdf", "sdd", "sdf", "dfdf");
     }
 
     @Test
@@ -30,8 +30,8 @@ public class UserTest {
         assertThat(this.user.getMetropolitanActiveArea()).isEqualTo("metro");
         assertThat(this.user.getBasicLocalActiveArea()).isEqualTo("basic");
         assertThat(this.user.getImagePath()).isEqualTo("imagepath");
-        assertThat(this.user.getInstagramOAuthId()).isEqualTo("dfdf");
-        assertThat(this.user.getInstagramUserName()).isEqualTo("dsfsf");
+        assertThat(this.user.getInstagramOAuthId()).isEqualTo("dsfsf");
+        assertThat(this.user.getInstagramUserName()).isEqualTo("dfdf");
         assertThat(this.user.getIsPrivate()).isEqualTo(true);
     }
 
@@ -46,7 +46,7 @@ public class UserTest {
         assertThat(isCompleted).isFalse();
 
         // given # completed user
-        User user2 = User.createNewUser(
+        User user2 = User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",

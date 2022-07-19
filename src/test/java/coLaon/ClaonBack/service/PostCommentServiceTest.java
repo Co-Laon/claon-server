@@ -64,7 +64,7 @@ public class PostCommentServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.writer = User.createNewUser(
+        this.writer = User.of(
                 "testUserId",
                 "test@gmail.com",
                 "1234567890",
@@ -76,7 +76,7 @@ public class PostCommentServiceTest {
                 "instagramId"
         );
 
-        this.writer2 = User.createNewUser(
+        this.writer2 = User.of(
                 "testUserId2",
                 "test123@gmail.com",
                 "1234567890",
