@@ -1,7 +1,7 @@
 package coLaon.ClaonBack.common;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
-import coLaon.ClaonBack.common.exception.ConstraintExceptionDto;
+import coLaon.ClaonBack.common.exception.MethodArgumentNotValidExceptionDto;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.ExceptionDto;
 import coLaon.ClaonBack.common.exception.ServiceUnavailableException;
@@ -9,15 +9,14 @@ import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.validation.ConstraintViolationException;
-
 @Slf4j
 @Component
-@RestControllerAdvice(basePackages = "com.coLaon.ClaonBack.**.web")
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(value = {BadRequestException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -26,11 +25,11 @@ public class GlobalExceptionHandler {
         return new ExceptionDto(exception.getErrorCode(), exception.getMessage());
     }
 
-    @ExceptionHandler(value = {ConstraintViolationException.class})
+    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ConstraintExceptionDto handleConstraintViolationException(ConstraintViolationException exception) {
+    public MethodArgumentNotValidExceptionDto handleConstraintViolationException(MethodArgumentNotValidException exception) {
         GlobalExceptionHandler.log.error("error message", exception);
-        return new ConstraintExceptionDto(ErrorCode.INVALID_PARAMETER, exception.getMessage(), exception);
+        return new MethodArgumentNotValidExceptionDto(ErrorCode.INVALID_PARAMETER, exception.getMessage(), exception);
     }
 
     @ExceptionHandler(value = {UnauthorizedException.class})
