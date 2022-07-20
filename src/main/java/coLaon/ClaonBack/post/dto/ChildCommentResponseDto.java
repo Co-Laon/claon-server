@@ -1,9 +1,13 @@
 package coLaon.ClaonBack.post.dto;
 
+import coLaon.ClaonBack.common.utils.RelativeTimeUtil;
 import coLaon.ClaonBack.post.domain.PostComment;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 @Data
 public class ChildCommentResponseDto {
@@ -13,8 +17,8 @@ public class ChildCommentResponseDto {
     private final String postId;
     private final String writerNickname;
     private final String writerProfileImage;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
+    private final String createdAt;
+    private final String updatedAt;
 
     private ChildCommentResponseDto(
             String commentId,
@@ -23,8 +27,8 @@ public class ChildCommentResponseDto {
             String postId,
             String writerNickname,
             String writerProfileImage,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt
+            String createdAt,
+            String updatedAt
     ) {
         this.commentId = commentId;
         this.content = content;
@@ -44,8 +48,8 @@ public class ChildCommentResponseDto {
                 postComment.getPost().getId(),
                 postComment.getWriter().getNickname(),
                 postComment.getWriter().getImagePath(),
-                postComment.getCreatedAt(),
-                postComment.getUpdatedAt()
+                RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getCreatedAt(), ZoneOffset.of("+9"))),
+                RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getUpdatedAt(), ZoneOffset.of("+9")))
         );
     }
 }

@@ -2,6 +2,7 @@ package coLaon.ClaonBack.common;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ExceptionDto;
+import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import coLaon.ClaonBack.common.exception.MethodArgumentNotValidExceptionDto;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.exception.ConflictExceptionDto;
@@ -44,6 +45,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {ServiceUnavailableException.class})
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ExceptionDto handleServiceUnavailableException(ServiceUnavailableException exception) {
+        GlobalExceptionHandler.log.error("error message", exception);
+        return new ExceptionDto(exception.getErrorCode(), exception.getMessage());
+    }
+
+    @ExceptionHandler(value = {InternalServerErrorException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ExceptionDto handlerInternalServerErrorException(InternalServerErrorException exception) {
         GlobalExceptionHandler.log.error("error message", exception);
         return new ExceptionDto(exception.getErrorCode(), exception.getMessage());
     }

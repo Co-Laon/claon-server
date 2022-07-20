@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.common.infrastructure;
+package coLaon.ClaonBack.common.utils;
 
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.InternalServerErrorException;
@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,7 +20,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class S3Uploader {
+public class S3Util {
     private final AmazonS3Client amazonS3Client;
 
     @Value("${cloud.aws.s3.bucket}")
@@ -63,21 +62,16 @@ public class S3Uploader {
                 System.getProperty("user.dir") + "/" + multipartFile.getOriginalFilename()
         );
 
-        try{
+        try (FileOutputStream fos = new FileOutputStream(convertFile)) {
             if (convertFile.createNewFile()) {
-                FileOutputStream fos = new FileOutputStream(convertFile);
                 fos.write(multipartFile.getBytes());
-            }
-            else {
+            } else {
                 return Optional.empty();
             }
+        } catch (Exception e) {
+            return Optional.empty();
         }
-        catch (IOException e) {
-            throw new InternalServerErrorException(
-                    ErrorCode.INTERNAL_SERVER_ERROR,
-                    "파일 전환에 실패했습니다."
-            );
-        }
+
         return Optional.of(convertFile);
     }
 }

@@ -63,7 +63,6 @@ public class PostServiceTest {
     private PostLike postLike;
     private PostLike postLike2;
     private User user;
-    private User user2;
     private Post post;
     private PostContents postContents;
 
@@ -80,7 +79,7 @@ public class PostServiceTest {
                 "instagramId"
         );
 
-        this.user2 = User.of(
+        User user2 = User.of(
                 "testUserId2",
                 "test123@gmail.com",
                 "test2345!!",

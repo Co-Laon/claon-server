@@ -31,6 +31,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -102,7 +103,9 @@ public class PostCommentServiceTest {
                 "testContent1",
                 writer,
                 post,
-                null
+                null,
+                LocalDateTime.now(),
+                LocalDateTime.now()
         );
 
         this.childPostComment = PostComment.of(
@@ -110,7 +113,9 @@ public class PostCommentServiceTest {
                 "testChildContent1",
                 writer,
                 post,
-                postComment
+                postComment,
+                LocalDateTime.now(),
+                LocalDateTime.now()
         );
 
         this.childPostComment2 = PostComment.of(
@@ -118,7 +123,9 @@ public class PostCommentServiceTest {
                 "testChildContent2",
                 writer,
                 post,
-                postComment
+                postComment,
+                LocalDateTime.now(),
+                LocalDateTime.now()
         );
 
         this.postComment2 = PostComment.of(
@@ -126,7 +133,9 @@ public class PostCommentServiceTest {
                 "testContent2",
                 writer,
                 post,
-                null
+                null,
+                LocalDateTime.now(),
+                LocalDateTime.now()
         );
 
         this.childPostComment3 = PostComment.of(
@@ -134,7 +143,9 @@ public class PostCommentServiceTest {
                 "testChildContent3",
                 writer,
                 post,
-                postComment2
+                postComment2,
+                LocalDateTime.now(),
+                LocalDateTime.now()
         );
 
         this.childPostComment4 = PostComment.of(
@@ -142,7 +153,9 @@ public class PostCommentServiceTest {
                 "testChildContent4",
                 writer,
                 post,
-                postComment
+                postComment,
+                LocalDateTime.now(),
+                LocalDateTime.now()
         );
     }
 
@@ -151,7 +164,7 @@ public class PostCommentServiceTest {
     void successCreateParentComment() {
         try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             // given
-            CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testContent1", null, "testPostId");
+            CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testContent1", null);
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
             given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
@@ -161,7 +174,7 @@ public class PostCommentServiceTest {
             given(this.postCommentRepository.save(this.postComment)).willReturn(this.postComment);
 
             // when
-            CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", commentRequestDto);
+            CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", "testPostId", commentRequestDto);
 
             // then
             assertThat(commentResponseDto).isNotNull();
@@ -174,7 +187,7 @@ public class PostCommentServiceTest {
     void successCreateChildComment() {
         try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             // given
-            CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testChildContent1", postComment.getId(), "testPostId");
+            CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testChildContent1", postComment.getId());
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
             given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
@@ -185,7 +198,7 @@ public class PostCommentServiceTest {
             given(this.postCommentRepository.save(this.childPostComment)).willReturn(this.childPostComment);
 
             // when
-            CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", commentRequestDto);
+            CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", "testPostId", commentRequestDto);
 
             // then
             assertThat(commentResponseDto).isNotNull();
@@ -234,12 +247,12 @@ public class PostCommentServiceTest {
         given(this.postCommentRepository.findAllByParentCommentAndIsDeletedFalse(postComment, pageable)).willReturn(children);
 
         // when
-        Pagination<ChildCommentResponseDto> CommentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testCommentId", pageable);
+        Pagination<ChildCommentResponseDto> commentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testCommentId", pageable);
 
         // then
-        assertThat(CommentFindResponseDto).isNotNull();
-        assertThat(CommentFindResponseDto.getResults().size()).isEqualTo(children.getContent().size());
-        assertThat(CommentFindResponseDto.getResults().get(0).getContent()).isEqualTo(childPostComment.getContent());
+        assertThat(commentFindResponseDto).isNotNull();
+        assertThat(commentFindResponseDto.getResults().size()).isEqualTo(children.getContent().size());
+        assertThat(commentFindResponseDto.getResults().get(0).getContent()).isEqualTo(childPostComment.getContent());
     }
 
     @Test
@@ -290,7 +303,7 @@ public class PostCommentServiceTest {
         given(this.postCommentRepository.save(childPostComment)).willReturn(childPostComment);
 
         // when
-        CommentResponseDto commentResponseDto = this.postCommentService.deleteComment("testChildId1", "testUserId");
+        CommentResponseDto commentResponseDto = this.postCommentService.deleteComment("testUserId", "testChildId1");
 
         // then
         assertThat(commentResponseDto).isNotNull();
@@ -307,7 +320,7 @@ public class PostCommentServiceTest {
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.postCommentService.deleteComment("testCommentId", "testUserId2")
+                () -> this.postCommentService.deleteComment("testUserId2", "testCommentId")
         );
 
         // then

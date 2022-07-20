@@ -16,6 +16,4 @@ public class CommentCreateRequestDto {
     @Size(min = 1, max = 255, message = "댓글 최대 글자수는 255자입니다")
     private String content;
     private String parentCommentId;
-    @NotNull
-    private String postId;
 }

@@ -1,7 +1,11 @@
 package coLaon.ClaonBack.center.service;
 
 import coLaon.ClaonBack.center.domain.Center;
+import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.HoldInfo;
+import coLaon.ClaonBack.center.domain.OperatingTime;
+import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
@@ -47,13 +51,21 @@ public class CenterService {
                         requestDto.getWebUrl(),
                         requestDto.getInstagramUrl(),
                         requestDto.getYoutubeUrl(),
-                        requestDto.getImgList(),
-                        requestDto.getOperatingTimeList(),
+                        requestDto.getImgList()
+                                .stream().map(dto -> CenterImg.of(dto.getUrl()))
+                                .collect(Collectors.toList()),
+                        requestDto.getOperatingTimeList()
+                                .stream().map(dto -> OperatingTime.of(dto.getDay(), dto.getStart(), dto.getEnd()))
+                                .collect(Collectors.toList()),
                         requestDto.getFacilities(),
-                        requestDto.getChargeList(),
+                        requestDto.getChargeList()
+                                .stream().map(dto -> Charge.of(dto.getName(), dto.getFee()))
+                                .collect(Collectors.toList()),
                         requestDto.getChargeImg(),
                         requestDto.getHoldInfoImg(),
                         requestDto.getSectorInfoList()
+                                .stream().map(dto -> SectorInfo.of(dto.getName(), dto.getStart(), dto.getEnd()))
+                                .collect(Collectors.toList())
                 )
         );
 

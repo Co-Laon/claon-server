@@ -5,12 +5,12 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 
 import java.util.Arrays;
 
-public enum Purpose {
+public enum ImagePurpose {
     PROFILE("profile");
 
     private String value;
 
-    Purpose(String value) {
+    ImagePurpose(String value) {
         this.value = value;
     }
 
@@ -22,7 +22,7 @@ public enum Purpose {
                 .orElseThrow(
                         () -> new BadRequestException(
                                 ErrorCode.WRONG_PURPOSE,
-                                "잘못된 용도입니다."
+                                "잘못된 이미지 업로드입니다."
                         )
                 );
     }
