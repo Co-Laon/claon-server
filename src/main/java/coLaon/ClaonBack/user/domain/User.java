@@ -180,13 +180,19 @@ public class User extends BaseEntity {
         this.isPrivate = !this.isPrivate;
     }
 
-    public void modifyUser(UserModifyRequestDto dto) {
-        this.imagePath = dto.getImagePath();
-        this.nickname = dto.getNickname();
-        this.basicLocalActiveArea = dto.getBasicLocalActiveArea();
-        this.metropolitanActiveArea = dto.getMetropolitanActiveArea();
-        this.instagramUserName = dto.getInstagramUserName();
-        this.instagramOAuthId = dto.getInstagramOAuthId();
-        this.isPrivate = dto.getIsPrivate();
+    public void modifyUser(
+            String nickname,
+            String metropolitanActiveArea,
+            String basicLocalActiveArea,
+            String imagePath,
+            String instagramUserName,
+            String instagramOAuthId
+    ) {
+        this.nickname = nickname;
+        this.metropolitanActiveArea = metropolitanActiveArea;
+        this.basicLocalActiveArea = basicLocalActiveArea;
+        this.imagePath = imagePath;
+        this.instagramUserName = instagramUserName;
+        this.instagramOAuthId = instagramOAuthId;
     }
 }

@@ -20,6 +20,6 @@ public class StorageController {
             @RequestParam("image") MultipartFile multipartFile,
             @PathVariable String purpose
     ) {
-       return storageService.upload(multipartFile, purpose);
+       return storageService.imageUpload(multipartFile, purpose);
     }
 }

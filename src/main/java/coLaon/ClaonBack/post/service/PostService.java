@@ -110,7 +110,7 @@ public class PostService {
         User liker = userRepository.findById(userId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "유저 정보가 없습니다."
+                        "이용자를 찾을 수 없습니다."
                 )
         );
 
@@ -124,7 +124,7 @@ public class PostService {
         PostLike like = postLikeRepository.findByLikerAndPost(liker, post).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "해당 게시글에 좋아요 하지 않았습니다."
+                        "좋아요 하지 않은 게시글입니다."
                 )
         );
 

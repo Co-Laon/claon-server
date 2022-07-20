@@ -1,11 +1,11 @@
-package coLaon.ClaonBack.common.infrastructure;
+package coLaon.ClaonBack.common.utils;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
-public class RelativeTimeString {
+public class RelativeTimeUtil {
     // const timezone for absolute time string fallback output
     private static final ZoneId ZONE_ID = ZoneId.of("Asia/Seoul");
     
@@ -15,7 +15,7 @@ public class RelativeTimeString {
     /**
      * Create a new relative time string converter with current datetime.
      */
-    public RelativeTimeString() {
+    public RelativeTimeUtil() {
         this(null);
     }
     
@@ -26,7 +26,7 @@ public class RelativeTimeString {
      *                        when converting a datetime with this object.
      *                        If null, current datetime is used by default.
      */
-    public RelativeTimeString(OffsetDateTime baseDatetime) {
+    public RelativeTimeUtil(OffsetDateTime baseDatetime) {
         if (baseDatetime == null) {
             this.baseZonedDatetime = ZonedDateTime.now(ZONE_ID);
         } else {
@@ -101,8 +101,8 @@ public class RelativeTimeString {
         }
         
         // get a time difference (in seconds)
-        long secDiff =
-            ChronoUnit.SECONDS.between(inputZonedDatetime, baseZonedDatetime);
+        long secDiff = ChronoUnit.SECONDS.between(inputZonedDatetime, baseZonedDatetime);
+
         if (secDiff < 0) {
             secDiff = 0;
         }

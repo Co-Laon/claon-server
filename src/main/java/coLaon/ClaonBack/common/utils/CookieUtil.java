@@ -47,10 +47,11 @@ public class CookieUtil {
         this.createCookie(response, jwt.getRefreshToken(), this.REFRESH_COOKIE_NAME);
 
         jwt.getIsCompletedSignUp().ifPresent(
-                isCompletedSignUp -> {
-                    this.createCookie(response, isCompletedSignUp.toString(), "isCompletedSignUp");
-                }
-        );
+                isCompletedSignUp -> this.createCookie(
+                        response,
+                        isCompletedSignUp.toString(),
+                        "isCompletedSignUp"
+                ));
     }
 
     public JwtDto resolveToken(HttpServletRequest request) {
@@ -66,7 +67,7 @@ public class CookieUtil {
             HttpServletRequest req,
             String cookieName
     ) {
-        if(req.getCookies() == null) return Optional.empty();
+        if (req.getCookies() == null) return Optional.empty();
         return Arrays.stream(req.getCookies())
                 .filter(cookie -> cookie.getName().equals(cookieName))
                 .map(Cookie::getValue)

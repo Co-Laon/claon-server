@@ -34,4 +34,10 @@ public class BaseEntity {
     protected BaseEntity(String id) {
         this.id = id;
     }
+
+    protected BaseEntity(String id, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

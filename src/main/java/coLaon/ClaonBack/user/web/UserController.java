@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
-import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,10 +24,10 @@ public class UserController {
 
     @PutMapping("/public-scope")
     @ResponseStatus(value = HttpStatus.OK)
-    public PublicScopeResponseDto setPublicScope(
+    public PublicScopeResponseDto changePublicScope(
             @AuthenticationPrincipal String userId
     ) {
-        return this.userService.setPublicScope(userId);
+        return this.userService.changePublicScope(userId);
     }
 
     @GetMapping("/me")

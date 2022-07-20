@@ -1,9 +1,12 @@
 package coLaon.ClaonBack.post.dto;
 
+import coLaon.ClaonBack.common.utils.RelativeTimeUtil;
 import coLaon.ClaonBack.post.domain.PostComment;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,8 +18,8 @@ public class CommentFindResponseDto {
     private final String postId;
     private final String writerNickname;
     private final String writerProfileImage;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
+    private final String createdAt;
+    private final String updatedAt;
     private final List<ChildCommentResponseDto> children;
     private final Long commentCount;
 
@@ -27,8 +30,8 @@ public class CommentFindResponseDto {
             String postId,
             String writerNickname,
             String writerProfileImage,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt,
+            String createdAt,
+            String updatedAt,
             List<ChildCommentResponseDto> children,
             Long commentCount
     ) {
@@ -52,8 +55,8 @@ public class CommentFindResponseDto {
                 postComment.getPost().getId(),
                 postComment.getWriter().getNickname(),
                 postComment.getWriter().getImagePath(),
-                postComment.getCreatedAt(),
-                postComment.getUpdatedAt(),
+                RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getCreatedAt(), ZoneOffset.of("+9"))),
+                RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getUpdatedAt(), ZoneOffset.of("+9"))),
                 childComments.stream().map(ChildCommentResponseDto::from).collect(Collectors.toList()),
                 commentCount
         );

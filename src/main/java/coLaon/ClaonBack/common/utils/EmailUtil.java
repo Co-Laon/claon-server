@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.common.infrastructure;
+package coLaon.ClaonBack.common.utils;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -23,7 +23,7 @@ import javax.mail.internet.MimeMessage;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EmailSender {
+public class  EmailUtil {
     private final EmailSenderConfig emailSenderConfig;
 
     private static JavaMailSender emailSender;

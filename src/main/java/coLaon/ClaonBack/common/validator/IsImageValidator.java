@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class IsImageValidator extends Validator{
     private final MultipartFile multipartFile;
@@ -22,11 +23,17 @@ public class IsImageValidator extends Validator{
     @Override
     public void validate() {
         try {
-            Files.probeContentType(Path.of(multipartFile.getOriginalFilename())).startsWith("image");
+            if (Files.probeContentType(Path.of(Objects.requireNonNull(multipartFile.getOriginalFilename())))
+                    .startsWith("image")) {
+                throw new BadRequestException(
+                        ErrorCode.INVALID_FORMAT,
+                        "이미지 파일 형식이 올바르지 않습니다."
+                );
+            }
         } catch (IOException e) {
             throw new BadRequestException(
                     ErrorCode.INVALID_FORMAT,
-                    "파일 형식이 올바르지 않습니다."
+                    "이미지 파일이 올바르지 않습니다."
             );
         }
 

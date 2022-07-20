@@ -7,8 +7,12 @@ import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
+import coLaon.ClaonBack.center.dto.CenterImgDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
+import coLaon.ClaonBack.center.dto.ChargeDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
+import coLaon.ClaonBack.center.dto.OperatingTimeDto;
+import coLaon.ClaonBack.center.dto.SectorInfoDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.service.CenterService;
@@ -106,20 +110,32 @@ public class CenterServiceTest {
                 "https://test.com",
                 "https://instagram.com/test",
                 "https://youtube.com/channel/test",
-                List.of(new CenterImg("img test")),
-                List.of(new OperatingTime("매일", "10:00", "23:00")),
+                List.of(new CenterImgDto("img test")),
+                List.of(new OperatingTimeDto("매일", "10:00", "23:00")),
                 "facilities test",
-                List.of(new Charge("자유 패키지", "330,000")),
+                List.of(new ChargeDto("자유 패키지", "330,000")),
                 "charge img test",
                 List.of(new HoldInfoRequestDto("test hold", "hold img test")),
                 "hold info img test",
-                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+                List.of(new SectorInfoDto("test sector", "1/1", "1/2"))
         );
+
+        CenterImg centerImg = CenterImg.of("img test");
+        OperatingTime operatingTime = OperatingTime.of("매일", "10:00", "23:00");
+        Charge charge = Charge.of("자유 패키지", "330,000");
+        SectorInfo sectorInfo = SectorInfo.of("test sector", "1/1", "1/2");
 
         MockedStatic<Center> mockedCenter = mockStatic(Center.class);
         MockedStatic<HoldInfo> mockedHoldInfo = mockStatic(HoldInfo.class);
+        MockedStatic<CenterImg> mockedCenterImg = mockStatic(CenterImg.class);
+        MockedStatic<OperatingTime> mockedOperatingTime = mockStatic(OperatingTime.class);
+        MockedStatic<Charge> mockedCharge = mockStatic(Charge.class);
+        MockedStatic<SectorInfo> mockedSectorInfo = mockStatic(SectorInfo.class);
 
-        given(this.userRepository.findById("adminId")).willReturn(Optional.of(this.admin));
+        mockedCenterImg.when(() -> CenterImg.of("img test")).thenReturn(centerImg);
+        mockedOperatingTime.when(() -> OperatingTime.of("매일", "10:00", "23:00")).thenReturn(operatingTime);
+        mockedCharge.when(() -> Charge.of("자유 패키지", "330,000")).thenReturn(charge);
+        mockedSectorInfo.when(() -> SectorInfo.of("test sector", "1/1", "1/2")).thenReturn(sectorInfo);
 
         mockedCenter.when(() -> Center.of(
                 "test",
@@ -128,20 +144,21 @@ public class CenterServiceTest {
                 "https://test.com",
                 "https://instagram.com/test",
                 "https://youtube.com/channel/test",
-                requestDto.getImgList(),
-                requestDto.getOperatingTimeList(),
+                List.of(centerImg),
+                List.of(operatingTime),
                 "facilities test",
-                requestDto.getChargeList(),
+                List.of(charge),
                 "charge img test",
                 "hold info img test",
-                requestDto.getSectorInfoList()
+                List.of(sectorInfo)
         )).thenReturn(this.center);
-
-        given(this.centerRepository.save(this.center)).willReturn(this.center);
 
         mockedHoldInfo.when(() -> HoldInfo.of(
                 "test hold", "hold img test", this.center
         )).thenReturn(this.holdInfo);
+
+        given(this.userRepository.findById("adminId")).willReturn(Optional.of(this.admin));
+        given(this.centerRepository.save(this.center)).willReturn(this.center);
 
         given(this.holdInfoRepository.save(this.holdInfo)).willReturn(this.holdInfo);
 
@@ -153,6 +170,13 @@ public class CenterServiceTest {
         assertThat(responseDto)
                 .extracting("id", "name")
                 .contains("center id", "test");
+
+        mockedCenter.close();
+        mockedHoldInfo.close();
+        mockedCenterImg.close();
+        mockedOperatingTime.close();
+        mockedCharge.close();
+        mockedSectorInfo.close();
     }
 
     @Test
