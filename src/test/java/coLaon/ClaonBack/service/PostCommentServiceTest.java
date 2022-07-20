@@ -207,15 +207,15 @@ public class PostCommentServiceTest {
         given(this.postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalse(post, pageable)).willReturn(parents);
         given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment)).willReturn(children1);
         given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment2)).willReturn(children2);
-        given(this.postCommentRepository.countAllByParentCommentId(postComment.getId())).willReturn((long) 4);
+        given(this.postCommentRepository.countAllByParentCommentId(postComment.getId())).willReturn((long) children1.size());
         given(this.postCommentRepository.countAllByParentCommentId(postComment2.getId())).willReturn((long) children2.size());
 
         // when
         Pagination<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testPostId", pageable);
 
         // then
-        assertThat(CommentFindResponseDto.getResults().get(0).getViewMore()).isTrue();
-        assertThat(CommentFindResponseDto.getResults().get(1).getViewMore()).isFalse();
+        assertThat(CommentFindResponseDto.getResults().get(0).getCommentCount()).isEqualTo(3);
+        assertThat(CommentFindResponseDto.getResults().get(1).getCommentCount()).isEqualTo(1);
         assertThat(CommentFindResponseDto).isNotNull();
         assertThat(CommentFindResponseDto.getResults().size()).isEqualTo(parents.getContent().size());
         assertThat(CommentFindResponseDto.getResults().get(0).getChildren().size()).isEqualTo(children1.size());
