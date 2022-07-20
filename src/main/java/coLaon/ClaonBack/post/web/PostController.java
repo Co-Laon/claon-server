@@ -49,6 +49,15 @@ public class PostController {
         return this.postService.createPost(userId, postCreateRequestDto);
     }
 
+    @DeleteMapping("/{postId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public PostResponseDto deletePost(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String postId
+    ) {
+        return this.postService.deletePost(postId, userId);
+    }
+
 
     @PostMapping("/like")
     @ResponseStatus(value = HttpStatus.CREATED)
