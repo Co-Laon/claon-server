@@ -18,7 +18,7 @@ public class CommentFindResponseDto {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
     private final List<ChildCommentResponseDto> children;
-    private final Boolean viewMore;
+    private final Long commentCount;
 
     private CommentFindResponseDto(
             String commentId,
@@ -30,7 +30,7 @@ public class CommentFindResponseDto {
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
             List<ChildCommentResponseDto> children,
-            Boolean viewMore
+            Long commentCount
     ) {
         this.commentId = commentId;
         this.content = content;
@@ -41,7 +41,7 @@ public class CommentFindResponseDto {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.children = children;
-        this.viewMore = viewMore;
+        this.commentCount = commentCount;
     }
 
     public static CommentFindResponseDto from(PostComment postComment, List<PostComment> childComments, Long commentCount) {
@@ -55,7 +55,7 @@ public class CommentFindResponseDto {
                 postComment.getCreatedAt(),
                 postComment.getUpdatedAt(),
                 childComments.stream().map(ChildCommentResponseDto::from).collect(Collectors.toList()),
-                commentCount > 3
+                commentCount
         );
     }
 }
