@@ -23,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -85,14 +87,14 @@ public class UserService {
                 }
         );
 
-        this.userRepository.findByInstagramOAuthId(signUpRequestDto.getInstagramOAuthId()).ifPresent(
+        Optional.ofNullable(signUpRequestDto.getInstagramOAuthId()).flatMap(
+                this.userRepository::findByInstagramOAuthId).ifPresent(
                 u -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
                             "이미 가입한 인스타그램 계정입니다."
                     );
-                }
-        );
+                });
 
         user.signUp(
                 signUpRequestDto.getNickname(),
@@ -110,7 +112,7 @@ public class UserService {
     }
 
     @Transactional
-    public PublicScopeResponseDto setPublicScope(String userId) {
+    public PublicScopeResponseDto changePublicScope(String userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -122,27 +124,40 @@ public class UserService {
         return PublicScopeResponseDto.from(userRepository.save(user).getIsPrivate());
     }
 
-    public UserResponseDto getUser(String userId){
-        User user = userRepository.findById(userId).orElseThrow(() -> {
+    @Transactional(readOnly = true)
+    public UserResponseDto getUser(String userId) {
+        User user = this.userRepository.findById(userId).orElseThrow(() -> {
             throw new UnauthorizedException(
                     ErrorCode.USER_DOES_NOT_EXIST,
-                    "로그인한 사용자의 계정 정보가 존재하지 않습니다."
+                    "이용자를 찾을 수 없습니다."
             );
         });
+
         return UserResponseDto.from(user);
     }
 
     @Transactional
     public UserResponseDto modifyUser(String userId, UserModifyRequestDto dto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
+        User user = this.userRepository.findById(userId).orElseThrow(() -> {
             throw new UnauthorizedException(
                     ErrorCode.USER_DOES_NOT_EXIST,
-                    "로그인한 사용자의 계정 정보가 존재하지 않습니다."
+                    "이용자를 찾을 수 없습니다."
             );
         });
 
-        user.modifyUser(dto);
-        return UserResponseDto.from(user);
+        user.modifyUser(
+                dto.getNickname(),
+                MetropolitanArea.of(dto.getMetropolitanActiveArea()),
+                BasicLocalArea.of(
+                        dto.getMetropolitanActiveArea(),
+                        dto.getBasicLocalActiveArea()
+                ),
+                dto.getImagePath(),
+                dto.getInstagramUserName(),
+                dto.getInstagramOAuthId()
+        );
+
+        return UserResponseDto.from(this.userRepository.save(user));
     }
 }
 

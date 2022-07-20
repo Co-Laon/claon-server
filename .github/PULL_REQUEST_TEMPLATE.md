@@ -1,5 +1,5 @@
 ## Related issue
-Fixes #issue_number
+resolves #issue_number
 
 ## Description
 Please include a summary of the change and which issue is fixed.

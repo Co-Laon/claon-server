@@ -21,6 +21,4 @@ public class UserModifyRequestDto {
     private String imagePath;
     private String instagramUserName;
     private String instagramOAuthId;
-    @NotNull
-    private Boolean isPrivate;
 }

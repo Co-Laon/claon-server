@@ -85,13 +85,14 @@ public class PostController {
         return this.postService.findLikeByPost(postId, pageable);
     }
 
-    @PostMapping("/comment")
+    @PostMapping("/{postId}/comment")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CommentResponseDto createComment(
             @AuthenticationPrincipal String userId,
+            @PathVariable String postId,
             @RequestBody @Valid CommentCreateRequestDto commentCreateRequestDto
     ) {
-        return this.postCommentService.createComment(userId, commentCreateRequestDto);
+        return this.postCommentService.createComment(userId, postId, commentCreateRequestDto);
     }
 
     @GetMapping(value = "/{postId}/comment")
@@ -128,6 +129,6 @@ public class PostController {
             @AuthenticationPrincipal String userId,
             @PathVariable String commentId
     ) {
-        return this.postCommentService.deleteComment(commentId, userId);
+        return this.postCommentService.deleteComment(userId, commentId);
     }
 }

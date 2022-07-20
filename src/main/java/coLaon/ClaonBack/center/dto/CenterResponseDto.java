@@ -1,11 +1,7 @@
 package coLaon.ClaonBack.center.dto;
 
 import coLaon.ClaonBack.center.domain.Center;
-import coLaon.ClaonBack.center.domain.CenterImg;
-import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.HoldInfo;
-import coLaon.ClaonBack.center.domain.OperatingTime;
-import coLaon.ClaonBack.center.domain.SectorInfo;
 import lombok.Data;
 
 import java.util.List;
@@ -20,14 +16,14 @@ public class CenterResponseDto {
     private String webUrl;
     private String instagramUrl;
     private String youtubeUrl;
-    private List<CenterImg> imgList;
-    private List<OperatingTime> operatingTimeList;
+    private List<CenterImgDto> imgList;
+    private List<OperatingTimeDto> operatingTimeList;
     private String facilities;
-    private List<Charge> chargeList;
+    private List<ChargeDto> chargeList;
     private String chargeImg;
     private List<HoldInfoResponseDto> holdInfoList;
     private String holdInfoImg;
-    private List<SectorInfo> sectorInfoList;
+    private List<SectorInfoDto> sectorInfoList;
 
     private CenterResponseDto(
             String id,
@@ -37,14 +33,14 @@ public class CenterResponseDto {
             String webUrl,
             String instagramUrl,
             String youtubeUrl,
-            List<CenterImg> imgList,
-            List<OperatingTime> operatingTimeList,
+            List<CenterImgDto> imgList,
+            List<OperatingTimeDto> operatingTimeList,
             String facilities,
-            List<Charge> chargeList,
+            List<ChargeDto> chargeList,
             String chargeImg,
             List<HoldInfoResponseDto> holdInfoList,
             String holdInfoImg,
-            List<SectorInfo> sectorInfoList
+            List<SectorInfoDto> sectorInfoList
     ) {
         this.id = id;
         this.name = name;
@@ -72,14 +68,14 @@ public class CenterResponseDto {
                 center.getWebUrl(),
                 center.getInstagramUrl(),
                 center.getYoutubeUrl(),
-                center.getImgList(),
-                center.getOperatingTime(),
+                center.getImgList().stream().map(CenterImgDto::from).collect(Collectors.toList()),
+                center.getOperatingTime().stream().map(OperatingTimeDto::from).collect(Collectors.toList()),
                 center.getFacilities(),
-                center.getCharge(),
+                center.getCharge().stream().map(ChargeDto::from).collect(Collectors.toList()),
                 center.getChargeImg(),
                 holdInfoList.stream().map(HoldInfoResponseDto::from).collect(Collectors.toList()),
                 center.getHoldInfoImg(),
-                center.getSectorInfo()
+                center.getSectorInfo().stream().map(SectorInfoDto::from).collect(Collectors.toList())
         );
     }
 }

@@ -1,6 +1,5 @@
 package coLaon.ClaonBack.service;
 
-
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
@@ -15,11 +14,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -57,6 +55,7 @@ public class UserServiceTest {
                 "instagramId"
         );
         this.privateUser.changePublicScope();
+
         this.user = User.of(
                 "userId",
                 "test@gmail.com",
@@ -89,11 +88,23 @@ public class UserServiceTest {
     @DisplayName("Success case for modifying single user")
     void successModifyUser() {
         // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        UserModifyRequestDto dto = new UserModifyRequestDto(
+                "nickname",
+                "경기도",
+                "성남시",
+                "",
+                "hoonki",
+                "dfdf"
+        );
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
+        given(this.userRepository.save(this.user)).willReturn(this.user);
 
         // when
-        UserModifyRequestDto dto = new UserModifyRequestDto("nickname", "seoul", "seoul", "", "hoonki", "dfdf", true);
-        this.userService.modifyUser(user.getId(), dto);
+        UserResponseDto userResponseDto = this.userService.modifyUser("userId", dto);
+
+        // then
+        assertThat(userResponseDto.getEmail()).isEqualTo("test@gmail.com");
     }
 
     @Test
@@ -104,7 +115,7 @@ public class UserServiceTest {
         given(this.userRepository.save(publicUser)).willReturn(publicUser);
 
         // when
-        PublicScopeResponseDto publicScopeResponseDto = this.userService.setPublicScope("publicUserId");
+        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope("publicUserId");
 
         // then
         assertThat(publicScopeResponseDto.getIsPrivate()).isTrue();
@@ -118,7 +129,7 @@ public class UserServiceTest {
         given(this.userRepository.save(privateUser)).willReturn(privateUser);
 
         // when
-        PublicScopeResponseDto publicScopeResponseDto = this.userService.setPublicScope("privateUserId");
+        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope("privateUserId");
 
         // then
         assertThat(publicScopeResponseDto.getIsPrivate()).isFalse();

@@ -33,14 +33,18 @@ public class PostCommentService {
     private final PaginationFactory paginationFactory;
 
     @Transactional
-    public CommentResponseDto createComment(String userId, CommentCreateRequestDto commentCreateRequestDto) {
+    public CommentResponseDto createComment(
+            String userId,
+            String postId,
+            CommentCreateRequestDto commentCreateRequestDto
+    ) {
         User writer = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
                 )
         );
-        Post post = postRepository.findById(commentCreateRequestDto.getPostId()).orElseThrow(
+        Post post = postRepository.findById(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
@@ -102,7 +106,7 @@ public class PostCommentService {
     }
 
     @Transactional
-    public CommentResponseDto deleteComment(String commentId, String userId) {
+    public CommentResponseDto deleteComment(String userId, String commentId) {
         User writer = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
