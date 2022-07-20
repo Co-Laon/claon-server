@@ -96,4 +96,8 @@ public class Post extends BaseEntity {
                 contentsSet
         );
     }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
 }

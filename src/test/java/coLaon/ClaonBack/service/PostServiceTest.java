@@ -3,6 +3,7 @@ package coLaon.ClaonBack.service;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
@@ -70,6 +71,7 @@ public class PostServiceTest {
     @BeforeEach
     void setUp() {
         this.user = User.of(
+                "testUserId",
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -87,6 +89,7 @@ public class PostServiceTest {
                 "test2",
                 "경기도",
                 "성남시",
+                "",
                 "",
                 "instagramId2"
         );
@@ -190,6 +193,40 @@ public class PostServiceTest {
 
         // then
         assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.INVALID_FORMAT);
+    }
+
+    @Test
+    @DisplayName("Success case for delete post")
+    void successDeletePost() {
+        // given
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+        given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+
+        given(this.postRepository.save(post)).willReturn(post);
+
+        // when
+        PostResponseDto postResponseDto = this.postService.deletePost("testPostId", "testUserId");
+
+        // then
+        assertThat(postResponseDto).isNotNull();
+        assertThat(postResponseDto.getIsDeleted()).isEqualTo(true);
+    }
+
+    @Test
+    @DisplayName("Failure case for post delete")
+    void failureDeletePost() {
+        // given
+        given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(user2));
+        given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+
+        // when
+        final UnauthorizedException ex = Assertions.assertThrows(
+                UnauthorizedException.class,
+                () -> this.postService.deletePost("testPostId", "testUserId2")
+        );
+
+        // then
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
     }
 
     @Test

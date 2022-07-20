@@ -6,7 +6,7 @@ import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.ContentsImageFormatValidator;
-import coLaon.ClaonBack.common.validator.Validator;
+import coLaon.ClaonBack.common.validator.IdEqualValidator;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
@@ -71,6 +71,30 @@ public class PostService {
                         .map(postContentsRepository::save)
                         .map(PostContents::getUrl)
                         .collect(Collectors.toList())
+        );
+    }
+
+    @Transactional
+    public PostResponseDto deletePost(String postId, String userId) {
+        User writer = userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "게시글을 찾을 수 없습니다."
+                )
+        );
+
+        IdEqualValidator.of(post.getWriter().getId(), writer.getId()).validate();
+        post.delete();
+
+        return PostResponseDto.from(
+                this.postRepository.save(post)
         );
     }
 
