@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,5 +17,5 @@ public class PostCreateRequestDto {
     private List<String> holdIdList;
     private String content;
     @PostContentsSize(message = "이미지 혹은 동영상 1개 이상 10개 이하로 업로드해야 합니다.")
-    List<PostContentsDto> contentsList;
+    private List<PostContentsDto> contentsList;
 }
