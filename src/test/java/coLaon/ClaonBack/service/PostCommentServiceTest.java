@@ -220,8 +220,8 @@ public class PostCommentServiceTest {
         given(this.postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalse(post, pageable)).willReturn(parents);
         given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment)).willReturn(children1);
         given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment2)).willReturn(children2);
-        given(this.postCommentRepository.countAllByParentCommentId(postComment.getId())).willReturn((long) children1.size());
-        given(this.postCommentRepository.countAllByParentCommentId(postComment2.getId())).willReturn((long) children2.size());
+        given(this.postCommentRepository.countAllByParentCommentAndIsDeletedFalse(postComment)).willReturn((long) children1.size());
+        given(this.postCommentRepository.countAllByParentCommentAndIsDeletedFalse(postComment2)).willReturn((long) children2.size());
 
         // when
         Pagination<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testPostId", pageable);

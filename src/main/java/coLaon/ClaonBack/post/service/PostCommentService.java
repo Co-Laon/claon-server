@@ -85,7 +85,7 @@ public class PostCommentService {
                                 CommentFindResponseDto.from(
                                         parent,
                                         postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(parent),
-                                        postCommentRepository.countAllByParentCommentId(parent.getId())
+                                        postCommentRepository.countAllByParentCommentAndIsDeletedFalse(parent)
                                 ))
         );
     }
