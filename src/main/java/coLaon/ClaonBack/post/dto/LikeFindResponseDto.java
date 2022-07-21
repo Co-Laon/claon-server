@@ -8,26 +8,22 @@ public class LikeFindResponseDto {
     private String postId;
     private String likerNickname;
     private String likerProfileImage;
-    private Integer likeNumber;
 
     private LikeFindResponseDto(
             String postId,
             String likerNickname,
-            String likerProfileImage,
-            Integer likeNumber
+            String likerProfileImage
     ) {
         this.postId = postId;
         this.likerNickname = likerNickname;
         this.likerProfileImage = likerProfileImage;
-        this.likeNumber = likeNumber;
     }
 
-    public static LikeFindResponseDto from(PostLike postLike, Integer likeNumber) {
+    public static LikeFindResponseDto from(PostLike postLike) {
         return new LikeFindResponseDto(
                 postLike.getPost().getId(),
                 postLike.getLiker().getNickname(),
-                postLike.getLiker().getImagePath(),
-                likeNumber
+                postLike.getLiker().getImagePath()
         );
     }
 }

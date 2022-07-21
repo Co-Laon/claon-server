@@ -6,7 +6,6 @@ import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
-import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
 import coLaon.ClaonBack.post.dto.CommentResponseDto;
 import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
@@ -57,21 +56,22 @@ public class PostController {
         return this.postService.deletePost(postId, userId);
     }
 
-    @PostMapping("/like")
+    @PostMapping("/{postId}/like")
     @ResponseStatus(value = HttpStatus.CREATED)
     public LikeResponseDto createLike(
             @AuthenticationPrincipal String userId,
-            @RequestBody @Valid LikeRequestDto likeRequestDto
+            @PathVariable String postId
     ) {
-        return this.postService.createLike(userId, likeRequestDto);
+        return this.postService.createLike(userId, postId);
     }
 
-    @DeleteMapping("/like")
+    @DeleteMapping("/{postId}/like")
     @ResponseStatus(value = HttpStatus.OK)
     public LikeResponseDto deleteLike(
             @AuthenticationPrincipal String userId,
-            @RequestBody @Valid LikeRequestDto likeRequestDto) {
-        return this.postService.deleteLike(userId, likeRequestDto);
+            @PathVariable String postId
+    ) {
+        return this.postService.deleteLike(userId, postId);
     }
 
     @GetMapping(value = "/{postId}/like")

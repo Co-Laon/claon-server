@@ -212,7 +212,7 @@ public class UserService {
                         "차단 관계가 아닙니다."
                 )
         );
-        blockUserRepository.deleteById(blockedRelation.getId());
+        blockUserRepository.delete(blockedRelation);
     }
 }
 

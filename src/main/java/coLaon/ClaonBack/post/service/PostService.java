@@ -16,7 +16,6 @@ import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
-import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
@@ -133,7 +132,7 @@ public class PostService {
     }
 
     @Transactional
-    public LikeResponseDto createLike(String userId, LikeRequestDto likeRequestDto) {
+    public LikeResponseDto createLike(String userId, String postId) {
         User liker = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
@@ -141,7 +140,7 @@ public class PostService {
                 )
         );
 
-        Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
+        Post post = postRepository.findById(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
@@ -164,7 +163,7 @@ public class PostService {
     }
 
     @Transactional
-    public LikeResponseDto deleteLike(String userId, LikeRequestDto likeRequestDto) {
+    public LikeResponseDto deleteLike(String userId, String postId) {
         User liker = userRepository.findById(userId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -172,7 +171,7 @@ public class PostService {
                 )
         );
 
-        Post post = postRepository.findById(likeRequestDto.getPostId()).orElseThrow(
+        Post post = postRepository.findById(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
@@ -186,7 +185,7 @@ public class PostService {
                 )
         );
 
-        postLikeRepository.deleteById(like.getId());
+        postLikeRepository.delete(like);
 
         return LikeResponseDto.from(
                 like,
@@ -205,10 +204,7 @@ public class PostService {
 
         return this.paginationFactory.create(
                 postLikeRepository.findAllByPost(post, pageable)
-                        .map(like ->
-                                LikeFindResponseDto.from(
-                                        like,
-                                        postLikeRepository.countByPost(post)))
+                        .map(like -> LikeFindResponseDto.from(like))
         );
     }
 }

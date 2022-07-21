@@ -72,7 +72,7 @@ public class LaonService {
                 )
         );
 
-        laonRepository.deleteById(laonRelation.getId());
+        laonRepository.delete(laonRelation);
     }
 
     @Transactional(readOnly = true)

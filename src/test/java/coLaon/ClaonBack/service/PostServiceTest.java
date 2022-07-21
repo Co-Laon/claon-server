@@ -20,7 +20,6 @@ import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.common.exception.BadRequestException;
-import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
@@ -298,8 +297,6 @@ public class PostServiceTest {
     void successCreateLike() {
         try (MockedStatic<PostLike> mockedPostLike = mockStatic(PostLike.class)) {
             // given
-            LikeRequestDto likeRequestDto = new LikeRequestDto("testPostId");
-
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
             given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
             given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.empty());
@@ -310,7 +307,7 @@ public class PostServiceTest {
             given(this.postLikeRepository.save(this.postLike)).willReturn(postLike);
 
             // when
-            LikeResponseDto likeResponseDto = this.postService.createLike("testUserId", likeRequestDto);
+            LikeResponseDto likeResponseDto = this.postService.createLike("testUserId", "testPostId");
 
             // then
             assertThat(likeResponseDto).isNotNull();
@@ -322,18 +319,16 @@ public class PostServiceTest {
     @DisplayName("Success case for delete like")
     void successDeleteLike() {
         // given
-        LikeRequestDto likeRequestDto = new LikeRequestDto("testPostId");
-
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
         given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
         given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.of(postLike));
 
         // when
-        LikeResponseDto likeResponseDto = this.postService.deleteLike("testUserId", likeRequestDto);
+        LikeResponseDto likeResponseDto = this.postService.deleteLike("testUserId", "testPostId");
 
         // then
         assertThat(likeResponseDto).isNotNull();
-        assertThat(likeRequestDto.getPostId()).isEqualTo(likeResponseDto.getPostId());
+        assertThat(likeResponseDto.getPostId()).isEqualTo("testPostId");
     }
 
     @Test
