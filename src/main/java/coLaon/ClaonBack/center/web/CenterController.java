@@ -19,7 +19,7 @@ public class CenterController {
     private final CenterService centerService;
 
     @PostMapping
-    @ResponseStatus(value = HttpStatus.OK)
+    @ResponseStatus(value = HttpStatus.CREATED)
     public CenterResponseDto create(
             @AuthenticationPrincipal String userId,
             @RequestBody CenterCreateRequestDto centerCreateRequestDto

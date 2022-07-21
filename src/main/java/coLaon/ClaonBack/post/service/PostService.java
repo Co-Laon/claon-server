@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -171,10 +172,10 @@ public class PostService {
 
         return this.paginationFactory.create(
                 postLikeRepository.findAllByPost(post, pageable)
-                .map(like ->
-                        LikeFindResponseDto.from(
-                                like,
-                                postLikeRepository.countByPost(post)))
+                        .map(like ->
+                                LikeFindResponseDto.from(
+                                        like,
+                                        postLikeRepository.countByPost(post)))
         );
     }
 }
