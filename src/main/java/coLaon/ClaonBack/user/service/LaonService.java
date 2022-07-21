@@ -86,7 +86,7 @@ public class LaonService {
 
         return this.paginationFactory.create(
                 laonRepository.findAllByUserId(userId, pageable)
-                        .map(laon -> LaonFindResponseDto.from(laon))
+                        .map(LaonFindResponseDto::from)
         );
     }
 }

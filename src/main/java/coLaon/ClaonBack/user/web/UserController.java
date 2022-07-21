@@ -1,8 +1,14 @@
 package coLaon.ClaonBack.user.web;
 
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,5 +68,14 @@ public class UserController {
             @PathVariable String blockNickname
     ) {
         this.userService.deleteBlock(userId, blockNickname);
+    }
+
+    @GetMapping("/{userId}/blocked-users")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Pagination<BlockUserFindResponseDto> findBlockUser(
+            @AuthenticationPrincipal String userId,
+            @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) final Pageable pageable
+    ) {
+        return this.userService.findBlockUser(userId, pageable);
     }
 }

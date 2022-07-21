@@ -1,5 +1,7 @@
 package coLaon.ClaonBack.user.service;
 
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.domain.enums.BasicLocalArea;
 import coLaon.ClaonBack.common.domain.enums.MetropolitanArea;
 import coLaon.ClaonBack.common.exception.BadRequestException;
@@ -10,6 +12,7 @@ import coLaon.ClaonBack.config.dto.JwtDto;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
 import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
@@ -23,6 +26,7 @@ import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +38,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BlockUserRepository blockUserRepository;
     private final LaonRepository laonRepository;
+    private final PaginationFactory paginationFactory;
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
     private final JwtUtil jwtUtil;
@@ -219,6 +224,21 @@ public class UserService {
         );
 
         blockUserRepository.delete(blockedRelation);
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<BlockUserFindResponseDto> findBlockUser(String userId, Pageable pageable) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        return this.paginationFactory.create(
+                this.blockUserRepository.findByUserId(user.getId(), pageable)
+                        .map(BlockUserFindResponseDto::from)
+        );
     }
 }
 
