@@ -14,5 +14,5 @@ public interface PostCommentRepository extends JpaRepository<PostComment, String
     Page<PostComment> findByPostAndParentCommentIsNullAndIsDeletedFalse(Post post, Pageable pageable);
     List<PostComment> findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(PostComment parentComment);
     Page<PostComment> findAllByParentCommentAndIsDeletedFalse(PostComment postComment, Pageable pageable);
-    Long countAllByParentCommentId(String postCommentId);
+    Long countAllByParentCommentAndIsDeletedFalse(PostComment postComment);
 }
