@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.user.web;
 
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
+import coLaon.ClaonBack.user.dto.PublicUserResponseDto;
 import coLaon.ClaonBack.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,12 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     public UserResponseDto modifyUser(@AuthenticationPrincipal String userId, @RequestBody UserModifyRequestDto dto) {
         return userService.modifyUser(userId, dto);
+    }
+
+    @GetMapping("/{userId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public PublicUserResponseDto getPublicUser(@PathVariable String userId) {
+        return userService.getOtherUserInformation(userId);
     }
 
     @PostMapping(value = "/{blockNickname}/block")

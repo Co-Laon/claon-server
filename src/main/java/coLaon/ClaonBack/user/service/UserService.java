@@ -7,30 +7,30 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
+import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
-import coLaon.ClaonBack.user.dto.InstagramResponseDto;
-import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
-import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
-import coLaon.ClaonBack.user.dto.SignInRequestDto;
-import coLaon.ClaonBack.user.dto.SignUpRequestDto;
-import coLaon.ClaonBack.user.dto.UserResponseDto;
-import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
+import coLaon.ClaonBack.user.dto.*;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
+import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final LaonRepository laonRepository;
+    private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
     private final BlockUserRepository blockUserRepository;
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
@@ -137,6 +137,24 @@ public class UserService {
         });
 
         return UserResponseDto.from(user);
+    }
+
+    @Transactional(readOnly = true)
+    public PublicUserResponseDto getOtherUserInformation(String userId) {
+        //user 필요
+        User user = this.userRepository.findById(userId).orElseThrow(() -> {
+            throw new UnauthorizedException(
+                    ErrorCode.USER_DOES_NOT_EXIST,
+                    "이용자를 찾을 수 없습니다."
+            );
+        });
+        //게시글 수 필요
+        List<String> postIds = this.postRepository.selectPostIdsByUserId(userId);
+        Long postCount = (long) postIds.size();
+        Long postLikeCount = this.postLikeRepository.countByPostIdIn(postIds);
+        Long laonCount = this.laonRepository.countByUserId(userId);
+
+        return PublicUserResponseDto.from(user, postCount, laonCount, postLikeCount);
     }
 
     @Transactional
