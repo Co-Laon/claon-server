@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -57,7 +56,6 @@ public class PostController {
     ) {
         return this.postService.deletePost(postId, userId);
     }
-
 
     @PostMapping("/like")
     @ResponseStatus(value = HttpStatus.CREATED)

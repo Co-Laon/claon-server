@@ -1,7 +1,10 @@
 package coLaon.ClaonBack.service;
 
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import coLaon.ClaonBack.user.service.LaonService;
@@ -12,8 +15,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,13 +35,17 @@ public class LaonServiceTest {
     UserRepository userRepository;
     @Mock
     LaonRepository laonRepository;
+    @Spy
+    PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     LaonService laonService;
 
     private User laon;
+    private User laon2;
     private User user;
     private Laon laonRelation;
+    private Laon laonRelation2;
 
     @BeforeEach
     void setUp() {
@@ -40,12 +53,24 @@ public class LaonServiceTest {
                 "laonId",
                 "test@gmail.com",
                 "1234567890",
-                "userNickname1",
+                "laonNickname1",
                 "경기도",
                 "성남시",
                 "",
                 "",
                 "instagramId"
+        );
+
+        this.laon2 = User.of(
+                "laonId2",
+                "test1@gmail.com",
+                "12345678902",
+                "laonNickname2",
+                "경기도",
+                "성남시",
+                "",
+                "",
+                "instagramId3"
         );
 
         this.user = User.of(
@@ -62,6 +87,11 @@ public class LaonServiceTest {
 
         this.laonRelation = Laon.of(
                 this.laon,
+                this.user
+        );
+
+        this.laonRelation2 = Laon.of(
+                this.laon2,
                 this.user
         );
     }
@@ -100,5 +130,23 @@ public class LaonServiceTest {
 
         // then
         assertThat(this.laonRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Success case for find laons")
+    void successFindLikes() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+
+        Page<Laon> laons = new PageImpl<>(List.of(laonRelation, laonRelation2), pageable, 2);
+
+        given(this.laonRepository.findAllByUserId("userId", pageable)).willReturn(laons);
+
+        // when
+        Pagination<LaonFindResponseDto> loanFindResponseDto = this.laonService.findAllLaon("userId", pageable);
+
+        // then
+        assertThat(loanFindResponseDto.getResults().size()).isEqualTo(laons.getContent().size());
     }
 }

@@ -22,7 +22,6 @@ import coLaon.ClaonBack.user.dto.UserResponseDto;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
 public class UserController {
-
     private final UserService userService;
 
     @PutMapping("/public-scope")

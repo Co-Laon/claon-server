@@ -1,12 +1,16 @@
 package coLaon.ClaonBack.user.service;
 
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LaonService {
     private final UserRepository userRepository;
     private final LaonRepository laonRepository;
+    private final PaginationFactory paginationFactory;
 
     @Transactional
     public void createLaon(String laonNickname, String userId) {
@@ -68,5 +73,20 @@ public class LaonService {
         );
 
         laonRepository.deleteById(laonRelation.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<LaonFindResponseDto> findAllLaon(String userId, Pageable pageable) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        return this.paginationFactory.create(
+                laonRepository.findAllByUserId(userId, pageable)
+                        .map(laon -> LaonFindResponseDto.from(laon))
+        );
     }
 }
