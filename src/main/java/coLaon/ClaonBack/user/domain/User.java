@@ -47,6 +47,8 @@ public class User extends BaseEntity {
         this.email = email;
         this.nickname = nickname;
         this.oAuthId = oAuthId;
+        this.isDeleted = false;
+        this.isPrivate = false;
     }
 
     private User(
