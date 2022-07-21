@@ -1,11 +1,13 @@
 package coLaon.ClaonBack.service;
 
 
+import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.service.UserService;
@@ -28,15 +30,17 @@ import static org.mockito.Mockito.mockStatic;
 public class UserServiceTest {
     @Mock
     UserRepository userRepository;
-
     @Mock
     BlockUserRepository blockUserRepository;
+    @Mock
+    LaonRepository laonRepository;
 
     @InjectMocks
     UserService userService;
 
     private User user, privateUser, publicUser, blockUser;
     private BlockUser blockUserRelation;
+    private Laon laonRelation;
 
     @BeforeEach
     void setUp() {
@@ -91,6 +95,11 @@ public class UserServiceTest {
         this.blockUserRelation = BlockUser.of(
                 this.publicUser,
                 this.blockUser
+        );
+
+        this.laonRelation = Laon.of(
+                this.blockUser,
+                this.publicUser
         );
     }
 
@@ -168,6 +177,7 @@ public class UserServiceTest {
             given(this.userRepository.findByNickname("testBlockNickname")).willReturn(Optional.of(blockUser));
             given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
             given(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).willReturn(Optional.empty());
+            given(this.laonRepository.findByLaonIdAndUserId("blockUserId", "publicUserId")).willReturn(Optional.of(this.laonRelation));
 
             mockedBlock.when(() -> BlockUser.of(this.publicUser, this.blockUser)).thenReturn(this.blockUserRelation);
 
