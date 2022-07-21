@@ -1,5 +1,10 @@
 package coLaon.ClaonBack.service;
 
+import coLaon.ClaonBack.center.domain.Center;
+import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.center.domain.OperatingTime;
+import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -62,6 +67,7 @@ public class PostCommentServiceTest {
     private PostComment childPostComment2;
     private PostComment childPostComment3;
     private PostComment childPostComment4;
+    private Center center;
 
     @BeforeEach
     void setUp() {
@@ -89,12 +95,29 @@ public class PostCommentServiceTest {
                 "instagramId2"
         );
 
+        this.center = Center.of(
+                "center1",
+                "testCenter",
+                "testAddress",
+                "010-1234-1234",
+                "https://test.com",
+                "https://instagram.com/test",
+                "https://youtube.com/channel/test",
+                List.of(new CenterImg("img test")),
+                List.of(new OperatingTime("매일", "10:00", "23:00")),
+                "facilities test",
+                List.of(new Charge("자유 패키지", "330,000")),
+                "charge img test",
+                "hold info img test",
+                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+        );
+
         this.post = Post.of(
                 "testPostId",
-                "center1",
-                "hold",
+                center,
                 "testContent",
                 writer,
+                null,
                 null
         );
 

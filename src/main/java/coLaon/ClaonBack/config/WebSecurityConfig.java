@@ -63,7 +63,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/**/auth/sign-in/**",
                         "/api/**/posts/**/like",
                         "/api/**/posts/**/comment",
-                        "/api/**/posts/comment/**/children"
+                        "/api/**/posts/comment/**/children",
+                        "/api/**/centers/**/hold"
                 )
                 .permitAll()
                 .anyRequest().authenticated()

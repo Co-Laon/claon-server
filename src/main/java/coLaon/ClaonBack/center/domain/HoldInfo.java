@@ -37,11 +37,32 @@ public class HoldInfo extends BaseEntity {
         this.center = center;
     }
 
+    private HoldInfo(
+            String id,
+            String name,
+            String img,
+            Center center
+    ) {
+        super(id);
+        this.name = name;
+        this.img = img;
+        this.center = center;
+    }
+
     public static HoldInfo of(
             String name,
             String img,
             Center center
     ) {
         return new HoldInfo(name, img, center);
+    }
+
+    public static HoldInfo of(
+            String id,
+            String name,
+            String img,
+            Center center
+    ) {
+        return new HoldInfo(id, name, img, center);
     }
 }

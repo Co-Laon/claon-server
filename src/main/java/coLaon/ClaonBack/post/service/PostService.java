@@ -1,5 +1,9 @@
 package coLaon.ClaonBack.post.service;
 
+import coLaon.ClaonBack.center.domain.Center;
+import coLaon.ClaonBack.center.domain.HoldInfo;
+import coLaon.ClaonBack.center.repository.CenterRepository;
+import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
@@ -7,6 +11,7 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.ContentsImageFormatValidator;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
+import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
@@ -15,6 +20,7 @@ import coLaon.ClaonBack.post.dto.LikeRequestDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
@@ -35,6 +41,9 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostContentsRepository postContentsRepository;
     private final PostLikeRepository postLikeRepository;
+    private final HoldInfoRepository holdInfoRepository;
+    private final CenterRepository centerRepository;
+    private final ClimbingHistoryRepository climbingHistoryRepository;
     private final PaginationFactory paginationFactory;
 
     @Transactional
@@ -46,16 +55,35 @@ public class PostService {
                 )
         );
 
+        Center center = centerRepository.findById(postCreateRequestDto.getCenterId()).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "암장 정보를 찾을 수 없습니다."
+                )
+        );
+
         ContentsImageFormatValidator.of(postCreateRequestDto.getContentsList()).validate();
 
         Post post = this.postRepository.save(
                 Post.of(
-                        postCreateRequestDto.getCenterName(),
-                        postCreateRequestDto.getHoldInfo(),
+                        center,
                         postCreateRequestDto.getContent(),
                         writer
                 )
         );
+
+        List<ClimbingHistory> climbingHistoryList = postCreateRequestDto.getHoldIdList()
+                .stream()
+                .map(holdInfo ->
+                        climbingHistoryRepository.save(ClimbingHistory.of(
+                                post,
+                                holdInfoRepository.findById(holdInfo).orElseThrow(
+                                        () -> new BadRequestException(
+                                                ErrorCode.ROW_DOES_NOT_EXIST,
+                                                "홀드 정보를 찾을 수 없습니다."
+                                        )
+                                ))
+                        )).collect(Collectors.toList());
 
         List<PostContents> postContentsList = postCreateRequestDto.getContentsList()
                 .stream()
@@ -71,6 +99,11 @@ public class PostService {
                         .stream()
                         .map(postContentsRepository::save)
                         .map(PostContents::getUrl)
+                        .collect(Collectors.toList()),
+                climbingHistoryList
+                        .stream()
+                        .map(ClimbingHistory::getHoldInfo)
+                        .map(HoldInfo::getId)
                         .collect(Collectors.toList())
         );
     }

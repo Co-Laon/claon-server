@@ -13,6 +13,7 @@ import coLaon.ClaonBack.center.dto.ChargeDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
 import coLaon.ClaonBack.center.dto.OperatingTimeDto;
 import coLaon.ClaonBack.center.dto.SectorInfoDto;
+import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.service.CenterService;
@@ -51,7 +52,7 @@ public class CenterServiceTest {
     private User admin;
     private User user;
     private Center center;
-    private HoldInfo holdInfo;
+    private HoldInfo holdInfo, holdInfo2;
 
     @BeforeEach
     void setUp() {
@@ -97,6 +98,7 @@ public class CenterServiceTest {
         );
 
         this.holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
+        this.holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
     }
 
     @Test
@@ -192,5 +194,22 @@ public class CenterServiceTest {
                 // then
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("접근 권한이 없습니다.");
+    }
+
+    @Test
+    @DisplayName("Success case for find HoldInfo by center")
+    void successFindHoldInfoByCenter() {
+        //given
+        System.out.println(this.center);
+        given(this.centerRepository.findById("center id")).willReturn(Optional.of(this.center));
+        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
+        //when
+        List<HoldInfoResponseDto> holdInfoResponseDto = this.centerService.findHoldInfoByCenterId("center id");
+        //then
+        assertThat(holdInfoResponseDto).isNotNull();
+        assertThat(holdInfoResponseDto.get(0).getName()).isEqualTo(holdInfo.getName());
+        assertThat(holdInfoResponseDto.get(1).getName()).isEqualTo(holdInfo2.getName());
+        assertThat(holdInfoResponseDto.get(0).getImg()).isEqualTo(holdInfo.getImg());
+        assertThat(holdInfoResponseDto.get(1).getImg()).isEqualTo(holdInfo2.getImg());
     }
 }

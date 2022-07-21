@@ -8,6 +8,7 @@ import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
+import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.common.exception.BadRequestException;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,5 +84,20 @@ public class CenterService {
                         ))
                         .collect(Collectors.toList())
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<HoldInfoResponseDto> findHoldInfoByCenterId(String centerId) {
+        Center center = centerRepository.findById(centerId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "암장 정보를 찾을 수 없습니다."
+                )
+        );
+
+        return holdInfoRepository.findAllByCenter(center)
+                .stream()
+                .map(HoldInfoResponseDto::from)
+                .collect(Collectors.toList());
     }
 }

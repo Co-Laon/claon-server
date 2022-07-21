@@ -14,8 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 public class PostCreateRequestDto {
     @NotBlank(message = "암장 정보를 입력해주세요.")
-    private String centerName;
-    private String holdInfo;
+    private String centerId;
+    private List<String> holdIdList;
     private String content;
     @PostContentsSize(message = "이미지 혹은 동영상 1개 이상 10개 이하로 업로드해야 합니다.")
     List<PostContentsDto> contentsList;
