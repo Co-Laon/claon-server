@@ -2,12 +2,16 @@ package coLaon.ClaonBack.service;
 
 
 import coLaon.ClaonBack.user.domain.Laon;
-import coLaon.ClaonBack.common.domain.Pagination;
-import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.domain.BlockUser;
+import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
+import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
+import coLaon.ClaonBack.user.dto.PublicUserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
@@ -28,6 +32,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,9 +46,14 @@ public class UserServiceTest {
     @Mock
     UserRepository userRepository;
     @Mock
-    BlockUserRepository blockUserRepository;
+    PostRepository postRepository;
+    @Mock
+    PostLikeRepository postLikeRepository;
     @Mock
     LaonRepository laonRepository;
+
+    @Mock
+    BlockUserRepository blockUserRepository;
 
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
@@ -51,6 +62,7 @@ public class UserServiceTest {
     UserService userService;
 
     private User user, privateUser, publicUser, blockUser;
+    private Post post;
     private BlockUser blockUserRelation;
     private Laon laonRelation;
 
@@ -116,8 +128,8 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Success case for retrieving single user")
-    void successRetrieveUser() {
+    @DisplayName("Success case for retrieving me")
+    void successRetrieveMe() {
         // given
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
 
@@ -151,6 +163,40 @@ public class UserServiceTest {
 
         // then
         assertThat(userResponseDto.getEmail()).isEqualTo("test@gmail.com");
+    }
+
+    @Test
+    @DisplayName("Success case for retrieving single other user")
+    void successRetrieveUser() {
+        // given
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        List<String> givenList = new ArrayList<>(Arrays.asList("12","23"));
+        given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(givenList);
+        given(this.postLikeRepository.countByPostIdIn(givenList)).willReturn(5L);
+        given(this.laonRepository.countByUserId("userId")).willReturn(1L);
+
+        // when
+        PublicUserResponseDto userResponseDto = this.userService.getOtherUserInformation("userId");
+
+        // then
+        assertThat(userResponseDto.getMetropolitanActiveArea()).isEqualTo("경기도");
+        assertThat(userResponseDto.getPostCount()).isEqualTo(2L);
+        assertThat(userResponseDto.getLikeCount()).isEqualTo(5L);
+        assertThat(userResponseDto.getLaonCount()).isEqualTo(1L);
+
+        // given
+        given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
+        List<String> givenList1 = new ArrayList<>(Arrays.asList("12","23"));
+        given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(givenList1);
+        given(this.postLikeRepository.countByPostIdIn(givenList)).willReturn(5L);
+        given(this.laonRepository.countByUserId("privateUserId")).willReturn(1L);
+
+        // when
+        PublicUserResponseDto userResponseDto1 = this.userService.getOtherUserInformation("privateUserId");
+
+        // then
+        assertThat(userResponseDto1.getMetropolitanActiveArea()).isEqualTo(null);
+        assertThat(userResponseDto1.getBasicLocalActiveArea()).isEqualTo(null);
     }
 
     @Test
