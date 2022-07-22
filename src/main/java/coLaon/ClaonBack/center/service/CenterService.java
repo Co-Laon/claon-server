@@ -193,4 +193,9 @@ public class CenterService {
 
         return ReviewResponseDto.from(reviewRepository.save(review));
     }
+
+    @Transactional(readOnly = true)
+    public List<String> searchCenter(String keyword) {
+        return centerRepository.searchCenter(keyword);
+    }
 }

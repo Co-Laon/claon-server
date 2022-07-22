@@ -61,7 +61,7 @@ public class CenterServiceTest {
     private User admin;
     private User user;
     private User user2;
-    private Center center;
+    private Center center, center2;
     private HoldInfo holdInfo, holdInfo2;
     private CenterReview review;
 
@@ -111,6 +111,23 @@ public class CenterServiceTest {
                 "https://test.com",
                 "https://instagram.com/test",
                 "https://youtube.com/channel/test",
+                List.of(new CenterImg("img test")),
+                List.of(new OperatingTime("매일", "10:00", "23:00")),
+                "facilities test",
+                List.of(new Charge("자유 패키지", "330,000")),
+                "charge img test",
+                "hold info img test",
+                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+        );
+
+        this.center2 = Center.of(
+                "center id2",
+                "test2",
+                "test2",
+                "010-2345-1234",
+                "https://test2.com",
+                "https://instagram2.com/test",
+                "https://youtube2.com/channel/test",
                 List.of(new CenterImg("img test")),
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
@@ -328,5 +345,19 @@ public class CenterServiceTest {
 
         // then
         assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
+    }
+
+    @Test
+    @DisplayName("Success case for search Center by keyword")
+    void successSearchCenterByKeyword() {
+        //given
+        given(this.centerRepository.searchCenter("te")).willReturn(List.of(this.center.getName(), this.center2.getName()));
+
+        //when
+        List<String> centerNicknameList = this.centerService.searchCenter("te");
+
+        //then
+        assertThat(centerNicknameList.get(0)).isEqualTo(this.center.getName());
+        assertThat(centerNicknameList.get(1)).isEqualTo(this.center2.getName());
     }
 }
