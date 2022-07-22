@@ -2,6 +2,7 @@ package coLaon.ClaonBack.service;
 
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.CenterReview;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
@@ -12,14 +13,20 @@ import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.ChargeDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
 import coLaon.ClaonBack.center.dto.OperatingTimeDto;
+import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
+import coLaon.ClaonBack.center.dto.ReviewResponseDto;
+import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.dto.SectorInfoDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.service.CenterService;
+import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
+import coLaon.ClaonBack.post.repository.ReviewRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,14 +52,18 @@ public class CenterServiceTest {
     CenterRepository centerRepository;
     @Mock
     HoldInfoRepository holdInfoRepository;
+    @Mock
+    ReviewRepository reviewRepository;
 
     @InjectMocks
     CenterService centerService;
 
     private User admin;
     private User user;
+    private User user2;
     private Center center;
     private HoldInfo holdInfo, holdInfo2;
+    private CenterReview review;
 
     @BeforeEach
     void setUp() {
@@ -80,6 +91,18 @@ public class CenterServiceTest {
                 "instagramId2"
         );
 
+        this.user2 = User.of(
+                "userId2",
+                "test2@gmail.com",
+                "1234567222",
+                "userNickname3",
+                "경기도",
+                "성남시",
+                "",
+                "",
+                "instagramId3"
+        );
+
         this.center = Center.of(
                 "center id",
                 "test",
@@ -99,6 +122,7 @@ public class CenterServiceTest {
 
         this.holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
         this.holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
+        this.review = CenterReview.of("reviewId", 5, "testContent", this.user, this.center);
     }
 
     @Test
@@ -211,5 +235,98 @@ public class CenterServiceTest {
         assertThat(holdInfoResponseDto.get(1).getName()).isEqualTo(holdInfo2.getName());
         assertThat(holdInfoResponseDto.get(0).getImg()).isEqualTo(holdInfo.getImg());
         assertThat(holdInfoResponseDto.get(1).getImg()).isEqualTo(holdInfo2.getImg());
+    }
+
+    @Test
+    @DisplayName("Success case for create center review")
+    void successCreateReview() {
+        try (MockedStatic<CenterReview> reviewMockedStatic = mockStatic(CenterReview.class)) {
+            // given
+            ReviewCreateRequestDto reviewCreateRequestDto = new ReviewCreateRequestDto(5, "testContent");
+
+            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+            given(this.centerRepository.findById("testCenterId")).willReturn(Optional.of(center));
+
+            reviewMockedStatic.when(() -> CenterReview.of(5, "testContent", this.user, this.center)).thenReturn(this.review);
+
+            given(this.reviewRepository.save(this.review)).willReturn(this.review);
+
+            // when
+            ReviewResponseDto reviewResponseDto = this.centerService.createReview("testUserId", "testCenterId", reviewCreateRequestDto);
+
+            // then
+            assertThat(reviewResponseDto).isNotNull();
+            assertThat(reviewResponseDto.getContent()).isEqualTo("testContent");
+        }
+    }
+
+    @Test
+    @DisplayName("Success case for update review")
+    void successUpdateReview() {
+        // given
+        ReviewUpdateRequestDto reviewUpdateRequestDto = new ReviewUpdateRequestDto(1, "updateContent");
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review));
+        given(this.reviewRepository.save(this.review)).willReturn(this.review);
+
+        // when
+        ReviewResponseDto reviewResponseDto = this.centerService.updateReview("userId", "reviewId", reviewUpdateRequestDto);
+
+        // then
+        assertThat(reviewResponseDto).isNotNull();
+        assertThat(reviewResponseDto.getContent()).isEqualTo("updateContent");
+    }
+
+    @Test
+    @DisplayName("Failure case for update review because update by other user")
+    void failUpdateReview_Unauthorized() {
+        // given
+        ReviewUpdateRequestDto reviewUpdateRequestDto = new ReviewUpdateRequestDto(1, "updateContent");
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user2));
+        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review));
+
+        // when
+        final UnauthorizedException ex = Assertions.assertThrows(
+                UnauthorizedException.class,
+                () -> this.centerService.updateReview("userId", "reviewId", reviewUpdateRequestDto)
+        );
+
+        // then
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
+    }
+
+    @Test
+    @DisplayName("Success case for delete review")
+    void successDeleteReview() {
+        // given
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review));
+        given(this.reviewRepository.save(this.review)).willReturn(this.review);
+
+        // when
+        ReviewResponseDto reviewResponseDto = this.centerService.deleteReview("userId", "reviewId");
+
+        // then
+        assertThat(reviewResponseDto).isNotNull();
+        assertThat(reviewResponseDto.getIsDeleted()).isEqualTo(true);
+    }
+
+    @Test
+    @DisplayName("Failure case for delete review because update by other user")
+    void failDeleteReview_Unauthorized() {
+        // given
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user2));
+        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review));
+
+        // when
+        final UnauthorizedException ex = Assertions.assertThrows(
+                UnauthorizedException.class,
+                () -> this.centerService.deleteReview("userId", "reviewId")
+        );
+
+        // then
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
     }
 }
