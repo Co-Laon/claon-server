@@ -20,6 +20,7 @@ import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
+import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final BlockUserRepository blockUserRepository;
+    private final LaonRepository laonRepository;
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
     private final JwtUtil jwtUtil;
@@ -179,6 +181,8 @@ public class UserService {
                 )
         );
 
+        laonRepository.findByLaonIdAndUserId(blockUser.getId(), user.getId()).ifPresent(laonRepository::delete);
+
         blockUserRepository.findByUserIdAndBlockId(user.getId(), blockUser.getId()).ifPresent(
                 b -> {
                     throw new BadRequestException(
@@ -187,6 +191,7 @@ public class UserService {
                     );
                 }
         );
+
         blockUserRepository.save(BlockUser.of(user, blockUser));
     }
 
@@ -212,6 +217,7 @@ public class UserService {
                         "차단 관계가 아닙니다."
                 )
         );
+
         blockUserRepository.delete(blockedRelation);
     }
 }
