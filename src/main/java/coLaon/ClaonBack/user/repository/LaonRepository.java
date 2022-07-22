@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface LaonRepository extends JpaRepository<Laon, String> {
@@ -22,4 +23,9 @@ public interface LaonRepository extends JpaRepository<Laon, String> {
             "WHERE l.user_id = :userId", nativeQuery = true)
     Page<Laon> findAllByUserId(@Param("userId") String userId, Pageable pageable);
     Long countByUserId(String userId);
+
+    @Query(value = "SELECT l.laon_id " +
+            "FROM TB_LAON AS l " +
+            "l.user_id = :userId", nativeQuery = true)
+    Set<String> getLaonIdsByUserId(@Param("userId") String userId);
 }

@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -153,21 +154,21 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public PublicUserResponseDto getOtherUserInformation(String userId) {
-        //user 필요
+    public PublicUserResponseDto getOtherUserInformation(String requestUserId, String userId) {
         User user = this.userRepository.findById(userId).orElseThrow(() -> {
             throw new UnauthorizedException(
                     ErrorCode.USER_DOES_NOT_EXIST,
                     "이용자를 찾을 수 없습니다."
             );
         });
-        //게시글 수 필요
         List<String> postIds = this.postRepository.selectPostIdsByUserId(userId);
         Long postCount = (long) postIds.size();
         Long postLikeCount = this.postLikeRepository.countByPostIdIn(postIds);
-        Long laonCount = this.laonRepository.countByUserId(userId);
+        Set<String> laonIds = this.laonRepository.getLaonIdsByUserId(userId);
+        Long laonCount = (long) laonIds.size();
+        boolean isLaon = laonIds.contains(requestUserId);
 
-        return PublicUserResponseDto.from(user, postCount, laonCount, postLikeCount);
+        return PublicUserResponseDto.from(user, isLaon, postCount, laonCount, postLikeCount);
     }
 
     @Transactional

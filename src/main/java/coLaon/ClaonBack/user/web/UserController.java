@@ -55,8 +55,8 @@ public class UserController {
 
     @GetMapping("/{userId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public PublicUserResponseDto getPublicUser(@PathVariable String userId) {
-        return userService.getOtherUserInformation(userId);
+    public PublicUserResponseDto getPublicUser(@AuthenticationPrincipal String requestUserId, @PathVariable String userId) {
+        return userService.getOtherUserInformation(requestUserId, userId);
     }
 
     @PostMapping(value = "/{blockNickname}/block")

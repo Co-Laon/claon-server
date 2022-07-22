@@ -12,11 +12,13 @@ public class PublicUserResponseDto {
     private String metropolitanActiveArea;
     private String basicLocalActiveArea;
     private String imagePath;
+    private Boolean isLaon;
     private Boolean isPrivate;
 
 
-    private PublicUserResponseDto(User user, Long postCount, Long laonCount, Long likeCount) {
+    private PublicUserResponseDto(User user, boolean isLaon, Long postCount, Long laonCount, Long likeCount) {
         this.nickname = user.getNickname();
+        this.isLaon = isLaon;
         this.postCount = postCount;
         this.laonCount = laonCount;
         this.likeCount = likeCount;
@@ -30,7 +32,7 @@ public class PublicUserResponseDto {
         }
     }
 
-    public static PublicUserResponseDto from(User user, Long postCount, Long laonCount, Long likeCount) {
-        return new PublicUserResponseDto(user, postCount, laonCount, likeCount);
+    public static PublicUserResponseDto from(User user, boolean isLaon,  Long postCount, Long laonCount, Long likeCount) {
+        return new PublicUserResponseDto(user, isLaon, postCount, laonCount, likeCount);
     }
 }

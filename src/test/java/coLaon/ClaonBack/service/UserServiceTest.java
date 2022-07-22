@@ -32,10 +32,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -173,30 +170,36 @@ public class UserServiceTest {
         List<String> givenList = new ArrayList<>(Arrays.asList("12","23"));
         given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(givenList);
         given(this.postLikeRepository.countByPostIdIn(givenList)).willReturn(5L);
-        given(this.laonRepository.countByUserId("userId")).willReturn(1L);
+        Set<String> laonIds = new HashSet<>();
+        laonIds.add("publicUserId");
+        given(this.laonRepository.getLaonIdsByUserId("userId")).willReturn(laonIds);
 
         // when
-        PublicUserResponseDto userResponseDto = this.userService.getOtherUserInformation("userId");
+        PublicUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId","userId");
 
         // then
         assertThat(userResponseDto.getMetropolitanActiveArea()).isEqualTo("경기도");
         assertThat(userResponseDto.getPostCount()).isEqualTo(2L);
         assertThat(userResponseDto.getLikeCount()).isEqualTo(5L);
         assertThat(userResponseDto.getLaonCount()).isEqualTo(1L);
+        assertThat(userResponseDto.getIsLaon()).isEqualTo(true);
 
         // given
         given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
         List<String> givenList1 = new ArrayList<>(Arrays.asList("12","23"));
         given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(givenList1);
         given(this.postLikeRepository.countByPostIdIn(givenList)).willReturn(5L);
-        given(this.laonRepository.countByUserId("privateUserId")).willReturn(1L);
+        Set<String> laonIds1 = new HashSet<>();
+        given(this.laonRepository.getLaonIdsByUserId("privateUserId")).willReturn(laonIds1);
 
         // when
-        PublicUserResponseDto userResponseDto1 = this.userService.getOtherUserInformation("privateUserId");
+        PublicUserResponseDto userResponseDto1 = this.userService.getOtherUserInformation("publicUserId", "privateUserId");
 
         // then
         assertThat(userResponseDto1.getMetropolitanActiveArea()).isEqualTo(null);
         assertThat(userResponseDto1.getBasicLocalActiveArea()).isEqualTo(null);
+        assertThat(userResponseDto1.getLaonCount()).isEqualTo(0);
+        assertThat(userResponseDto1.getIsLaon()).isEqualTo(false);
     }
 
     @Test
