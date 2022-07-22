@@ -2,8 +2,11 @@ package coLaon.ClaonBack.service;
 
 
 import coLaon.ClaonBack.user.domain.Laon;
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.domain.BlockUser;
+import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
@@ -18,8 +21,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +43,9 @@ public class UserServiceTest {
     BlockUserRepository blockUserRepository;
     @Mock
     LaonRepository laonRepository;
+
+    @Spy
+    PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     UserService userService;
@@ -204,5 +216,23 @@ public class UserServiceTest {
 
         // then
         assertThat(this.blockUserRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Success case for find block users")
+    void successFindBlockUsers() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
+
+        Page<BlockUser> blockUsers = new PageImpl<>(List.of(blockUserRelation), pageable, 2);
+        given(this.blockUserRepository.findByUserId(publicUser.getId(), pageable)).willReturn(blockUsers);
+
+        // when
+        Pagination<BlockUserFindResponseDto> blockUserFindResponseDto = this.userService.findBlockUser("publicUserId", pageable);
+
+        // then
+        assertThat(blockUserFindResponseDto.getResults().size()).isEqualTo(1);
+        assertThat(blockUserFindResponseDto.getResults().get(0).getBlockUserNickName()).isEqualTo("testBlockNickname");
     }
 }
