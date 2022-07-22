@@ -3,18 +3,24 @@ package coLaon.ClaonBack.center.web;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
+import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
+import coLaon.ClaonBack.center.dto.ReviewResponseDto;
+import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.service.CenterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -38,5 +44,34 @@ public class CenterController {
             @PathVariable String centerId
     ) {
         return this.centerService.findHoldInfoByCenterId(centerId);
+    }
+
+    @PostMapping("/{centerId}/review")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public ReviewResponseDto createReview(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String centerId,
+            @RequestBody @Valid ReviewCreateRequestDto commentCreateRequestDto
+    ) {
+        return this.centerService.createReview(userId, centerId, commentCreateRequestDto);
+    }
+
+    @PutMapping(value = "/review/{reviewId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ReviewResponseDto updateReview(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String reviewId,
+            @RequestBody @Valid ReviewUpdateRequestDto updateRequestDto
+    ) {
+        return this.centerService.updateReview(userId, reviewId, updateRequestDto);
+    }
+
+    @DeleteMapping(value = "/review/{reviewId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ReviewResponseDto deleteReview(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String reviewId
+    ) {
+        return this.centerService.deleteReview(userId, reviewId);
     }
 }

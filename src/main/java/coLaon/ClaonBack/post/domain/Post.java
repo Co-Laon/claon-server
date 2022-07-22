@@ -24,7 +24,7 @@ import java.util.Set;
 @Table(name = "tb_post")
 @NoArgsConstructor
 public class Post extends BaseEntity {
-    @ManyToOne
+    @ManyToOne(targetEntity = Center.class)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
     @Column(name = "content", length = 500)

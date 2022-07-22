@@ -282,7 +282,7 @@ public class PostCommentServiceTest {
     @DisplayName("Success case for update comment")
     void successUpdateComment() {
         // given
-        CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent", "testPostId");
+        CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent");
 
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
         given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
@@ -301,7 +301,7 @@ public class PostCommentServiceTest {
     @DisplayName("Failure case for update comment because update by other user")
     void failUpdateComment_Unauthorized() {
         // given
-        CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent", "testPostId");
+        CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent");
 
         given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(writer2));
         given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
