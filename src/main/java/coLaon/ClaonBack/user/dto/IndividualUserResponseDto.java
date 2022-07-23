@@ -4,7 +4,7 @@ import coLaon.ClaonBack.user.domain.User;
 import lombok.Data;
 
 @Data
-public class PublicUserResponseDto {
+public class IndividualUserResponseDto {
     private String nickname;
     private Long postCount;
     private Long laonCount;
@@ -16,7 +16,7 @@ public class PublicUserResponseDto {
     private Boolean isPrivate;
 
 
-    private PublicUserResponseDto(User user, boolean isLaon, Long postCount, Long laonCount, Long likeCount) {
+    private IndividualUserResponseDto(User user, boolean isLaon, Long postCount, Long laonCount, Long likeCount) {
         this.nickname = user.getNickname();
         this.isLaon = isLaon;
         this.postCount = postCount;
@@ -32,7 +32,7 @@ public class PublicUserResponseDto {
         }
     }
 
-    public static PublicUserResponseDto from(User user, boolean isLaon,  Long postCount, Long laonCount, Long likeCount) {
-        return new PublicUserResponseDto(user, isLaon, postCount, laonCount, likeCount);
+    public static IndividualUserResponseDto from(User user, boolean isLaon, Long postCount, Long laonCount, Long likeCount) {
+        return new IndividualUserResponseDto(user, isLaon, postCount, laonCount, likeCount);
     }
 }

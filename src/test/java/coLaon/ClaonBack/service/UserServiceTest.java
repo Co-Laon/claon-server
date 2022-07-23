@@ -11,7 +11,7 @@ import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
-import coLaon.ClaonBack.user.dto.PublicUserResponseDto;
+import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
@@ -176,7 +176,7 @@ public class UserServiceTest {
         given(this.laonRepository.getLaonIdsByUserId("userId")).willReturn(laonIds);
 
         // when
-        PublicUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId","userId");
+        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId","userId");
 
         // then
         assertThat(userResponseDto.getMetropolitanActiveArea()).isEqualTo("경기도");
@@ -194,7 +194,7 @@ public class UserServiceTest {
         given(this.laonRepository.getLaonIdsByUserId("privateUserId")).willReturn(laonIds1);
 
         // when
-        PublicUserResponseDto userResponseDto1 = this.userService.getOtherUserInformation("publicUserId", "privateUserId");
+        IndividualUserResponseDto userResponseDto1 = this.userService.getOtherUserInformation("publicUserId", "privateUserId");
 
         // then
         assertThat(userResponseDto1.getMetropolitanActiveArea()).isEqualTo(null);

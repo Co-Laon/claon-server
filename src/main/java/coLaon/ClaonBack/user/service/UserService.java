@@ -23,7 +23,7 @@ import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
-import coLaon.ClaonBack.user.dto.PublicUserResponseDto;
+import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
@@ -154,7 +154,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public PublicUserResponseDto getOtherUserInformation(String requestUserId, String userId) {
+    public IndividualUserResponseDto getOtherUserInformation(String requestUserId, String userId) {
         User user = this.userRepository.findById(userId).orElseThrow(() -> {
             throw new UnauthorizedException(
                     ErrorCode.USER_DOES_NOT_EXIST,
@@ -168,7 +168,7 @@ public class UserService {
         Long laonCount = (long) laonIds.size();
         boolean isLaon = laonIds.contains(requestUserId);
 
-        return PublicUserResponseDto.from(user, isLaon, postCount, laonCount, postLikeCount);
+        return IndividualUserResponseDto.from(user, isLaon, postCount, laonCount, postLikeCount);
     }
 
     @Transactional
