@@ -12,6 +12,7 @@ public class IndividualUserResponseDto {
     private String metropolitanActiveArea;
     private String basicLocalActiveArea;
     private String imagePath;
+    private String instagramUrl;
     private Boolean isLaon;
     private Boolean isPrivate;
 
@@ -23,12 +24,15 @@ public class IndividualUserResponseDto {
         this.laonCount = laonCount;
         this.likeCount = likeCount;
         this.isPrivate = user.getIsPrivate();
+        this.imagePath = user.getImagePath();
 
         // Only set when private is false.
         if (!user.getIsPrivate()) {
             this.metropolitanActiveArea = user.getMetropolitanActiveArea();
             this.basicLocalActiveArea = user.getBasicLocalActiveArea();
-            this.imagePath = user.getImagePath();
+            if (user.getInstagramUserName() != null) {
+                this.instagramUrl = "https://instagram.com/" + user.getInstagramUserName();
+            }
         }
     }
 
