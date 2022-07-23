@@ -24,7 +24,7 @@ import java.util.Set;
 @Table(name = "tb_post")
 @NoArgsConstructor
 public class Post extends BaseEntity {
-    @ManyToOne(targetEntity = Center.class)
+    @ManyToOne(targetEntity = Center.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
     @Column(name = "content", length = 500)
@@ -50,6 +50,21 @@ public class Post extends BaseEntity {
         this.writer = writer;
         this.contentsSet = Set.of();
         this.climbingHistorySet = Set.of();
+    }
+
+    private Post(
+            Center center,
+            String content,
+            User writer,
+            Set<PostContents> contentsSet,
+            Set<ClimbingHistory> climbingHistorySet
+    ) {
+        this.center = center;
+        this.content = content;
+        this.isDeleted = false;
+        this.writer = writer;
+        this.contentsSet = contentsSet;
+        this.climbingHistorySet = climbingHistorySet;
     }
 
     private Post(
@@ -137,6 +152,22 @@ public class Post extends BaseEntity {
                 climbingHistorySet,
                 createdAt,
                 updatedAt
+        );
+    }
+
+    public static Post of(
+            Center center,
+            String content,
+            User writer,
+            Set<PostContents> contentsSet,
+            Set<ClimbingHistory> climbingHistorySet
+    ) {
+        return new Post(
+                center,
+                content,
+                writer,
+                contentsSet,
+                climbingHistorySet
         );
     }
 

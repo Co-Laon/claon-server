@@ -31,6 +31,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
@@ -91,7 +92,6 @@ public class UserServiceTest {
         this.privateUser.changePublicScope();
 
         this.user = User.of(
-                "userId",
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -101,6 +101,7 @@ public class UserServiceTest {
                 "",
                 "instagramId"
         );
+        ReflectionTestUtils.setField(this.user, "id", "userId");
         this.blockUser = User.of(
                 "blockUserId",
                 "block@gmail.com",
