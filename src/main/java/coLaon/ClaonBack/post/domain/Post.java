@@ -24,7 +24,7 @@ import java.util.Set;
 @Table(name = "tb_post")
 @NoArgsConstructor
 public class Post extends BaseEntity {
-    @ManyToOne(targetEntity = Center.class, fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = Center.class)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
     @Column(name = "content", length = 500)
@@ -173,5 +173,10 @@ public class Post extends BaseEntity {
 
     public void delete() {
         this.isDeleted = true;
+    }
+
+    public void addClimbingHistorySet(Set<ClimbingHistory> climbingHistorySet){
+        this.climbingHistorySet = climbingHistorySet;
+        climbingHistorySet.forEach(history -> history.setPost(this));
     }
 }

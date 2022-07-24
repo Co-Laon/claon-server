@@ -9,6 +9,8 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
+import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.BlockUser;
@@ -41,6 +43,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final ClimbingHistoryRepository climbingHistoryRepository;
     private final LaonRepository laonRepository;
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
@@ -168,7 +171,8 @@ public class UserService {
         Long laonCount = (long) laonIds.size();
         boolean isLaon = laonIds.contains(requestUserId);
 
-        return IndividualUserResponseDto.from(user, isLaon, postCount, laonCount, postLikeCount);
+        List<ClimbingHistory> climbingHistories =  climbingHistoryRepository.findByPostIds(postIds);
+        return IndividualUserResponseDto.from(user, isLaon, postCount, laonCount, postLikeCount, climbingHistories);
     }
 
     @Transactional

@@ -71,17 +71,18 @@ public class PostService {
                 )
         );
 
-        List<ClimbingHistory> climbingHistoryList = postCreateRequestDto.getHoldIdList()
+        List<ClimbingHistory> climbingHistoryList = postCreateRequestDto.getHoldHistories()
                 .stream()
-                .map(holdInfo ->
+                .map(history ->
                         climbingHistoryRepository.save(ClimbingHistory.of(
                                 post,
-                                holdInfoRepository.findById(holdInfo).orElseThrow(
+                                holdInfoRepository.findById(history.getHoldId()).orElseThrow(
                                         () -> new BadRequestException(
                                                 ErrorCode.ROW_DOES_NOT_EXIST,
                                                 "홀드 정보를 찾을 수 없습니다."
                                         )
-                                ))
+                                ), history.getClimbingCount())
+
                         )).collect(Collectors.toList());
 
         List<PostContents> postContentsList = postCreateRequestDto.getContentsList()

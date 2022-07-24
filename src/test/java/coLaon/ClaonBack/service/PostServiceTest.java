@@ -13,17 +13,13 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.dto.*;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
-import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.common.exception.BadRequestException;
-import coLaon.ClaonBack.post.dto.LikeResponseDto;
-import coLaon.ClaonBack.post.dto.PostContentsDto;
-import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
-import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
@@ -168,7 +164,8 @@ public class PostServiceTest {
 
         this.climbingHistory = ClimbingHistory.of(
                 this.post,
-                holdInfo1
+                holdInfo1,
+                0
         );
     }
 
@@ -182,7 +179,7 @@ public class PostServiceTest {
         // given
         PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
                 "center1",
-                List.of("holdId1"),
+                List.of(new ClimbingHistoryRequestDto("holdId1", 1)),
                 "testContent",
                 List.of(new PostContentsDto("test.com/test.png"))
         );
@@ -211,7 +208,8 @@ public class PostServiceTest {
         mockedClimbingHistory.when(() ->
                         ClimbingHistory.of(
                                 post,
-                                holdInfo1
+                                holdInfo1,
+                                1
                         ))
                 .thenReturn(climbingHistory);
         given(this.climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
@@ -223,7 +221,7 @@ public class PostServiceTest {
         assertThat(postResponseDto).isNotNull();
         assertThat(postCreateRequestDto.getCenterId()).isEqualTo(postResponseDto.getCenterId());
         assertThat(postCreateRequestDto.getContentsList().size()).isEqualTo(1);
-        assertThat(postCreateRequestDto.getHoldIdList().size()).isEqualTo(1);
+        assertThat(postCreateRequestDto.getHoldHistories().size()).isEqualTo(1);
 
         mockedPost.close();
         mockedPostContents.close();
@@ -240,7 +238,7 @@ public class PostServiceTest {
 
         PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
                 "center1",
-                List.of("holdId1", "holdId2"),
+                List.of(new ClimbingHistoryRequestDto("holdId1", 1), new ClimbingHistoryRequestDto("holdId2", 2)),
                 "testContent",
                 postContentsDtoList
         );

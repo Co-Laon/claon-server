@@ -23,9 +23,12 @@ public class ClimbingHistory extends BaseEntity {
     @JoinColumn(name = "hold_info_id", nullable = false)
     private HoldInfo holdInfo;
 
-    private ClimbingHistory(Post post, HoldInfo holdInfo) {
+    private Integer climbingCount;
+
+    private ClimbingHistory(Post post, HoldInfo holdInfo, Integer climbingCount) {
         this.post = post;
         this.holdInfo = holdInfo;
+        this.climbingCount = climbingCount;
     }
 
     private ClimbingHistory(String id, Post post, HoldInfo holdInfo) {
@@ -34,10 +37,11 @@ public class ClimbingHistory extends BaseEntity {
         this.holdInfo = holdInfo;
     }
 
-    public static ClimbingHistory of(Post post, HoldInfo holdInfo) {
+    public static ClimbingHistory of(Post post, HoldInfo holdInfo, Integer climbingCount) {
         return new ClimbingHistory(
                 post,
-                holdInfo
+                holdInfo,
+                climbingCount
         );
     }
 
@@ -47,5 +51,9 @@ public class ClimbingHistory extends BaseEntity {
                 post,
                 holdInfo
         );
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
     }
 }
