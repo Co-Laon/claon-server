@@ -71,7 +71,7 @@ public class PostService {
                 )
         );
 
-        List<ClimbingHistory> climbingHistoryList = postCreateRequestDto.getHoldHistories()
+        List<ClimbingHistory> climbingHistoryList = postCreateRequestDto.getClimbingHistories()
                 .stream()
                 .map(history ->
                         climbingHistoryRepository.save(ClimbingHistory.of(

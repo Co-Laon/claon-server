@@ -221,7 +221,7 @@ public class PostServiceTest {
         assertThat(postResponseDto).isNotNull();
         assertThat(postCreateRequestDto.getCenterId()).isEqualTo(postResponseDto.getCenterId());
         assertThat(postCreateRequestDto.getContentsList().size()).isEqualTo(1);
-        assertThat(postCreateRequestDto.getHoldHistories().size()).isEqualTo(1);
+        assertThat(postCreateRequestDto.getClimbingHistories().size()).isEqualTo(1);
 
         mockedPost.close();
         mockedPostContents.close();

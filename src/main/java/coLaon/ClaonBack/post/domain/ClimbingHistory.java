@@ -5,10 +5,8 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.annotation.Nullable;
+import javax.persistence.*;
 
 @Getter
 @Entity
@@ -23,6 +21,7 @@ public class ClimbingHistory extends BaseEntity {
     @JoinColumn(name = "hold_info_id", nullable = false)
     private HoldInfo holdInfo;
 
+    @Column(nullable = false)
     private Integer climbingCount;
 
     private ClimbingHistory(Post post, HoldInfo holdInfo, Integer climbingCount) {
