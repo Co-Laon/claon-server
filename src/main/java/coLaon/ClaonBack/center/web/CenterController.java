@@ -38,6 +38,14 @@ public class CenterController {
         return this.centerService.create(userId, centerCreateRequestDto);
     }
 
+    @GetMapping(value = "/{keyword}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<String> searchCenter(
+            @PathVariable String keyword
+    ) {
+        return this.centerService.searchCenter(keyword);
+    }
+
     @GetMapping(value = "/{centerId}/hold")
     @ResponseStatus(value = HttpStatus.OK)
     public List<HoldInfoResponseDto> findHoldInfoByCenter(
