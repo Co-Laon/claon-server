@@ -9,14 +9,12 @@ public class ReviewResponseDto {
     private final Integer rank;
     private final String content;
     private final String centerId;
-    private final Boolean isDeleted;
 
-    private ReviewResponseDto(String reviewId, Integer rank, String content, String centerId, Boolean isDeleted) {
+    private ReviewResponseDto(String reviewId, Integer rank, String content, String centerId) {
         this.reviewId = reviewId;
         this.rank = rank;
         this.content = content;
         this.centerId = centerId;
-        this.isDeleted = isDeleted;
     }
 
     public static ReviewResponseDto from(CenterReview centerReview) {
@@ -24,8 +22,7 @@ public class ReviewResponseDto {
                 centerReview.getId(),
                 centerReview.getRank(),
                 centerReview.getContent(),
-                centerReview.getCenter().getId(),
-                centerReview.getIsDeleted()
+                centerReview.getCenter().getId()
         );
     }
 }

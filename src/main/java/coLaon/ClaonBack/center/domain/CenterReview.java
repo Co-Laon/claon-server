@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,8 +27,6 @@ public class CenterReview extends BaseEntity {
     @ManyToOne(targetEntity = Center.class)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted;
 
     private CenterReview(
             Integer rank,
@@ -39,7 +38,6 @@ public class CenterReview extends BaseEntity {
         this.content = content;
         this.writer = writer;
         this.center = center;
-        this.isDeleted = false;
     }
 
     private CenterReview(
@@ -47,14 +45,15 @@ public class CenterReview extends BaseEntity {
             Integer rank,
             String content,
             User writer,
-            Center center
+            Center center,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
     ) {
-        super(id);
+        super(id, createdAt, updatedAt);
         this.rank = rank;
         this.content = content;
         this.writer = writer;
         this.center = center;
-        this.isDeleted = false;
     }
 
     public static CenterReview of(
@@ -62,14 +61,18 @@ public class CenterReview extends BaseEntity {
             Integer rank,
             String content,
             User writer,
-            Center center
+            Center center,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
     ) {
         return new CenterReview(
                 id,
                 rank,
                 content,
                 writer,
-                center
+                center,
+                createdAt,
+                updatedAt
         );
     }
 
@@ -90,9 +93,5 @@ public class CenterReview extends BaseEntity {
     public void update(Integer rank, String content) {
         this.rank = rank;
         this.content = content;
-    }
-
-    public void delete() {
-        this.isDeleted = true;
     }
 }
