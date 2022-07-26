@@ -65,6 +65,7 @@ public class UserServiceTest {
     private BlockUser blockUserRelation;
     private Laon laonRelation;
     private Post post;
+    private HoldInfo holdInfo;
     private ClimbingHistory climbingHistory;
 
     private List<String> postIds;
@@ -157,11 +158,11 @@ public class UserServiceTest {
         );
 
         this.postIds = List.of(this.post.getId());
-
+        this.holdInfo = HoldInfo.of("test", "name", "dfdf", center);
         this.climbingHistory = ClimbingHistory.of(
                 this.post,
-                HoldInfo.of("test", "name", "dfdf", center),
-                1);
+                holdInfo,
+                2);
     }
 
     @Test
@@ -212,7 +213,7 @@ public class UserServiceTest {
         given(this.laonRepository.getLaonIdsByUserId("userId")).willReturn(Set.of("publicUserId"));
         List<ClimbingHistory> climbingHistories = new ArrayList<>();
         climbingHistories.add(this.climbingHistory);
-        given(this.climbingHistoryRepository.findByPostIds(postIds)).willReturn(climbingHistories);
+        given(this.climbingHistoryRepository.findByPostIds(this.postIds)).willReturn(climbingHistories);
 
         // when
         IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userId");
@@ -224,7 +225,7 @@ public class UserServiceTest {
         assertThat(userResponseDto.getLaonCount()).isEqualTo(1L);
         assertThat(userResponseDto.getIsLaon()).isEqualTo(true);
         assertThat(userResponseDto.getCenterClimbingHistories().get(0).getCenterName()).isEqualTo(center.getName());
-        assertThat(userResponseDto.getCenterClimbingHistories().get(0).getClimbingHistories().get(0).getClimbingCount()).isEqualTo(1);
+        assertThat(userResponseDto.getCenterClimbingHistories().get(0).getClimbingHistories().get(0).getClimbingCount()).isEqualTo(2);
 
         // given
         given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
