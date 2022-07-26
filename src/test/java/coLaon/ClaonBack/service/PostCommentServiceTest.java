@@ -234,6 +234,7 @@ public class PostCommentServiceTest {
     void successFindParentComments() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
         given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
 
         Page<PostComment> parents = new PageImpl<>(List.of(postComment, postComment2), pageable, 2);
@@ -247,7 +248,7 @@ public class PostCommentServiceTest {
         given(this.postCommentRepository.countAllByParentCommentAndIsDeletedFalse(postComment2)).willReturn((long) children2.size());
 
         // when
-        Pagination<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testPostId", pageable);
+        Pagination<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testUserId", "testPostId", pageable);
 
         // then
         assertThat(CommentFindResponseDto.getResults().get(0).getCommentCount()).isEqualTo(3);
@@ -266,11 +267,12 @@ public class PostCommentServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         Page<PostComment> children = new PageImpl<>(List.of(childPostComment, childPostComment2), pageable, 2);
 
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
         given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
         given(this.postCommentRepository.findAllByParentCommentAndIsDeletedFalse(postComment, pageable)).willReturn(children);
 
         // when
-        Pagination<ChildCommentResponseDto> commentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testCommentId", pageable);
+        Pagination<ChildCommentResponseDto> commentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testUserId", "testCommentId", pageable);
 
         // then
         assertThat(commentFindResponseDto).isNotNull();

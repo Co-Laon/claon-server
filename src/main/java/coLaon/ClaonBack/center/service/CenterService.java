@@ -95,7 +95,14 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public List<HoldInfoResponseDto> findHoldInfoByCenterId(String centerId) {
+    public List<HoldInfoResponseDto> findHoldInfoByCenterId(String userId, String centerId) {
+        userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -195,7 +202,14 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public List<String> searchCenter(String keyword) {
+    public List<String> searchCenter(String userId, String keyword) {
+        userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
         return centerRepository.searchCenter(keyword);
     }
 }

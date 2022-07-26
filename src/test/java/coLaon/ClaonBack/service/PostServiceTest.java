@@ -336,6 +336,7 @@ public class PostServiceTest {
     void successFindLikes() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
         given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
 
         Page<PostLike> postLikes = new PageImpl<>(List.of(postLike, postLike2), pageable, 2);
@@ -343,7 +344,7 @@ public class PostServiceTest {
         given(this.postLikeRepository.findAllByPost(post, pageable)).willReturn(postLikes);
 
         // when
-        Pagination<LikeFindResponseDto> likeFindResponseDto = this.postService.findLikeByPost("testPostId", pageable);
+        Pagination<LikeFindResponseDto> likeFindResponseDto = this.postService.findLikeByPost("testUserId", "testPostId", pageable);
 
         // then
         assertThat(likeFindResponseDto.getResults().size()).isEqualTo(postLikes.getContent().size());

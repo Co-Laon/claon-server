@@ -194,7 +194,14 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<LikeFindResponseDto> findLikeByPost(String postId, Pageable pageable) {
+    public Pagination<LikeFindResponseDto> findLikeByPost(String userId, String postId, Pageable pageable) {
+        userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -204,7 +211,7 @@ public class PostService {
 
         return this.paginationFactory.create(
                 postLikeRepository.findAllByPost(post, pageable)
-                        .map(like -> LikeFindResponseDto.from(like))
+                        .map(LikeFindResponseDto::from)
         );
     }
 }

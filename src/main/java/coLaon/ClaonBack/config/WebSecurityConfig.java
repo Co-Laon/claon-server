@@ -58,14 +58,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(
                         "/api/**/auth/nickname/**/duplicate-check",
-                        "/api/**/posts",
                         "/api/**/auth/instagram/account",
-                        "/api/**/auth/sign-in/**",
-                        "/api/**/posts/**/like",
-                        "/api/**/posts/**/comment",
-                        "/api/**/posts/comment/**/children",
-                        "/api/**/centers/**/hold",
-                        "/api/**/centers/**"
+                        "/api/**/auth/sign-in/**"
                 )
                 .permitAll()
                 .anyRequest().authenticated()
