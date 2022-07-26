@@ -28,7 +28,10 @@ import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
+import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
+import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,21 +75,24 @@ public class PostServiceTest {
     HoldInfoRepository holdInfoRepository;
     @Mock
     ClimbingHistoryRepository climbingHistoryRepository;
+    @Mock
+    BlockUserRepository blockUserRepository;
+    @Mock
+    LaonRepository laonRepository;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     PostService postService;
 
-    private PostLike postLike;
-    private PostLike postLike2;
-    private User user;
-    private User user2;
-    private Post post;
-    private PostContents postContents;
+    private PostLike postLike, postLike2;
+    private User user, user2, blockedUser, privateUser;
+    private Post post, post2, blockedPost, privatePost;
+    private PostContents postContents, postContents2;
     private HoldInfo holdInfo1;
     private Center center;
-    private ClimbingHistory climbingHistory;
+    private ClimbingHistory climbingHistory, climbingHistory2;
+    private BlockUser blockUser;
 
     @BeforeEach
     void setUp() {
@@ -113,6 +119,36 @@ public class PostServiceTest {
                 "",
                 "instagramId2"
         );
+
+        this.blockedUser = User.of(
+                "blockUserId",
+                "test123@gmail.com",
+                "test2345!!",
+                "blockUser",
+                "경기도",
+                "성남시",
+                "",
+                "",
+                "instagramId2"
+        );
+
+        this.blockUser = BlockUser.of(
+                user,
+                blockedUser
+        );
+
+        this.privateUser = User.of(
+                "privateUserId",
+                "test123@gmail.com",
+                "test2345!!",
+                "privateUser",
+                "경기도",
+                "성남시",
+                "",
+                "",
+                "instagramId2"
+        );
+        this.privateUser.changePublicScope();
 
         this.center = Center.of(
                 "center1",
@@ -148,6 +184,12 @@ public class PostServiceTest {
                 "test.com/test.png"
         );
 
+        this.postContents2 = PostContents.of(
+                "testPostContentsId2",
+                post2,
+                "test2.com/test.png"
+        );
+
         this.postLike = PostLike.of(
                 "testPostLikeId",
                 user,
@@ -172,6 +214,102 @@ public class PostServiceTest {
                 holdInfo1,
                 0
         );
+
+        this.climbingHistory2 = ClimbingHistory.of(
+                "climbingId2",
+                this.post2,
+                holdInfo1
+        );
+
+        this.post2 = Post.of(
+                "testPostId2",
+                center,
+                "testContent2",
+                user2,
+                Set.of(postContents2),
+                Set.of(climbingHistory2),
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+        this.blockedPost = Post.of(
+                "blockedPostId",
+                center,
+                "testContent3",
+                blockedUser,
+                Set.of(),
+                Set.of(),
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+        this.privatePost = Post.of(
+                "privatePostId",
+                center,
+                "testContent4",
+                privateUser,
+                Set.of(),
+                Set.of(),
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+    }
+
+    @Test
+    @DisplayName("Success case for find post")
+    void successFindPost() {
+        //given
+        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId2")).willReturn(Optional.of(post2));
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+        given(this.blockUserRepository.findBlock("testUserId", user2.getId())).willReturn(Optional.empty());
+
+        //when
+        PostResponseDto postResponseDto = this.postService.findPost("testUserId", "testPostId2");
+
+        // then
+        assertThat(postResponseDto.getContentsList().get(0)).isEqualTo(postContents2.getUrl());
+        assertThat(postResponseDto.getHoldList().get(0).getName()).isEqualTo(holdInfo1.getName());
+        assertThat(postResponseDto.getCenterName()).isEqualTo(center.getName());
+
+    }
+
+    @Test
+    @DisplayName("Failure case for find post when private user")
+    void failFindPostPrivateUser() {
+        //given
+        given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+        given(this.blockUserRepository.findBlock("testUserId", privateUser.getId())).willReturn(Optional.empty());
+
+        //when
+        final BadRequestException ex = Assertions.assertThrows(
+                BadRequestException.class,
+                () -> this.postService.findPost("testUserId", "privatePostId")
+        );
+
+        // then
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
+        assertThat(ex.getMessage()).isEqualTo("비공개 계정입니다.");
+    }
+
+    @Test
+    @DisplayName("Failure case for find post when blocked user")
+    void failFindPostBlockUser() {
+        //given
+        given(this.postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+        given(this.blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(Optional.of(blockUser));
+
+        //when
+        final BadRequestException ex = Assertions.assertThrows(
+                BadRequestException.class,
+                () -> this.postService.findPost("testUserId", "blockedPostId")
+        );
+
+        // then
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
+        assertThat(ex.getMessage()).isEqualTo("차단 관계입니다.");
     }
 
     @Test

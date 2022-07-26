@@ -1,7 +1,6 @@
 package coLaon.ClaonBack.post.service;
 
 import coLaon.ClaonBack.center.domain.Center;
-import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.common.domain.Pagination;
@@ -11,6 +10,7 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.ContentsImageFormatValidator;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
+import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
@@ -24,6 +24,7 @@ import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +44,37 @@ public class PostService {
     private final HoldInfoRepository holdInfoRepository;
     private final CenterRepository centerRepository;
     private final ClimbingHistoryRepository climbingHistoryRepository;
+    private final BlockUserRepository blockUserRepository;
     private final PaginationFactory paginationFactory;
+
+    @Transactional(readOnly = true)
+    public PostResponseDto findPost(String userId, String postId) {
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "게시글을 찾을 수 없습니다."
+                )
+        );
+
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).ifPresent(
+                b -> {
+                    throw new BadRequestException(
+                            ErrorCode.NOT_ACCESSIBLE,
+                            "차단 관계입니다."
+                    );
+                }
+        );
+        IsPrivateValidator.of(post.getWriter().getIsPrivate()).validate();
+
+        return PostResponseDto.from(post, postLikeRepository.countByPost(post));
+    }
 
     @Transactional
     public PostResponseDto createPost(String userId, PostCreateRequestDto postCreateRequestDto) {
@@ -103,7 +134,6 @@ public class PostService {
                 climbingHistoryList
                         .stream()
                         .map(ClimbingHistory::getHoldInfo)
-                        .map(HoldInfo::getId)
                         .collect(Collectors.toList())
         );
     }

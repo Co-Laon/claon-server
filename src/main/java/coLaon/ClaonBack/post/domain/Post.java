@@ -1,7 +1,6 @@
 package coLaon.ClaonBack.post.domain;
 
 import coLaon.ClaonBack.center.domain.Center;
-import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
@@ -14,7 +13,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Set;
