@@ -71,7 +71,14 @@ public class PostCommentService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<CommentFindResponseDto> findCommentsByPost(String postId, Pageable pageable) {
+    public Pagination<CommentFindResponseDto> findCommentsByPost(String userId, String postId, Pageable pageable) {
+        userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -91,7 +98,14 @@ public class PostCommentService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<ChildCommentResponseDto> findAllChildCommentsByParent(String parentId, Pageable pageable) {
+    public Pagination<ChildCommentResponseDto> findAllChildCommentsByParent(String userId, String parentId, Pageable pageable) {
+        userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
         PostComment postComment = postCommentRepository.findById(parentId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,

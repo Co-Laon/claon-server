@@ -41,17 +41,19 @@ public class CenterController {
     @GetMapping(value = "/{keyword}")
     @ResponseStatus(value = HttpStatus.OK)
     public List<String> searchCenter(
+            @AuthenticationPrincipal String userId,
             @PathVariable String keyword
     ) {
-        return this.centerService.searchCenter(keyword);
+        return this.centerService.searchCenter(userId, keyword);
     }
 
     @GetMapping(value = "/{centerId}/hold")
     @ResponseStatus(value = HttpStatus.OK)
     public List<HoldInfoResponseDto> findHoldInfoByCenter(
+            @AuthenticationPrincipal String userId,
             @PathVariable String centerId
     ) {
-        return this.centerService.findHoldInfoByCenterId(centerId);
+        return this.centerService.findHoldInfoByCenterId(userId, centerId);
     }
 
     @PostMapping("/{centerId}/review")

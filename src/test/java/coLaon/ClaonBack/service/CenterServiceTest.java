@@ -241,11 +241,11 @@ public class CenterServiceTest {
     @DisplayName("Success case for find HoldInfo by center")
     void successFindHoldInfoByCenter() {
         //given
-        System.out.println(this.center);
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.centerRepository.findById("center id")).willReturn(Optional.of(this.center));
         given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
         //when
-        List<HoldInfoResponseDto> holdInfoResponseDto = this.centerService.findHoldInfoByCenterId("center id");
+        List<HoldInfoResponseDto> holdInfoResponseDto = this.centerService.findHoldInfoByCenterId("userId", "center id");
         //then
         assertThat(holdInfoResponseDto).isNotNull();
         assertThat(holdInfoResponseDto.get(0).getName()).isEqualTo(holdInfo.getName());
@@ -351,10 +351,11 @@ public class CenterServiceTest {
     @DisplayName("Success case for search Center by keyword")
     void successSearchCenterByKeyword() {
         //given
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.centerRepository.searchCenter("te")).willReturn(List.of(this.center.getName(), this.center2.getName()));
 
         //when
-        List<String> centerNicknameList = this.centerService.searchCenter("te");
+        List<String> centerNicknameList = this.centerService.searchCenter("userId", "te");
 
         //then
         assertThat(centerNicknameList.get(0)).isEqualTo(this.center.getName());

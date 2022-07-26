@@ -77,10 +77,11 @@ public class PostController {
     @GetMapping(value = "/{postId}/like")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<LikeFindResponseDto> findAllLike(
+            @AuthenticationPrincipal String userId,
             @PathVariable String postId,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) final Pageable pageable
     ) {
-        return this.postService.findLikeByPost(postId, pageable);
+        return this.postService.findLikeByPost(userId, postId, pageable);
     }
 
     @PostMapping("/{postId}/comment")
@@ -96,19 +97,21 @@ public class PostController {
     @GetMapping(value = "/{postId}/comment")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<CommentFindResponseDto> findAllParentCommentAndThreeChildComment(
+            @AuthenticationPrincipal String userId,
             @PathVariable String postId,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 10) final Pageable pageable
     ) {
-        return this.postCommentService.findCommentsByPost(postId, pageable);
+        return this.postCommentService.findCommentsByPost(userId, postId, pageable);
     }
 
     @GetMapping(value = "/comment/{parentId}/children")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<ChildCommentResponseDto> findAllChildrenComment(
+            @AuthenticationPrincipal String userId,
             @PathVariable String parentId,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 10) final Pageable pageable
     ) {
-        return this.postCommentService.findAllChildCommentsByParent(parentId, pageable);
+        return this.postCommentService.findAllChildCommentsByParent(userId, parentId, pageable);
     }
 
     @PutMapping(value = "/comment/{commentId}")
