@@ -263,7 +263,7 @@ public class PostServiceTest {
     void successDeletePost() {
         // given
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-        given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
         given(this.postRepository.save(post)).willReturn(post);
 
@@ -280,7 +280,7 @@ public class PostServiceTest {
     void failureDeletePost() {
         // given
         given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(user2));
-        given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
@@ -298,7 +298,7 @@ public class PostServiceTest {
         try (MockedStatic<PostLike> mockedPostLike = mockStatic(PostLike.class)) {
             // given
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-            given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+            given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
             given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.empty());
 
             mockedPostLike.when(() -> PostLike.of(user, post)).thenReturn(postLike);
@@ -320,7 +320,7 @@ public class PostServiceTest {
     void successDeleteLike() {
         // given
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-        given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
         given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.of(postLike));
 
         // when

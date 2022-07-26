@@ -44,7 +44,8 @@ public class PostCommentService {
                         "이용자를 찾을 수 없습니다."
                 )
         );
-        Post post = postRepository.findById(postId).orElseThrow(
+
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
@@ -79,7 +80,7 @@ public class PostCommentService {
                 )
         );
 
-        Post post = postRepository.findById(postId).orElseThrow(
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
@@ -106,7 +107,7 @@ public class PostCommentService {
                 )
         );
 
-        PostComment postComment = postCommentRepository.findById(parentId).orElseThrow(
+        PostComment postComment = postCommentRepository.findByIdAndIsDeletedFalse(parentId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "댓글 정보가 없습니다."

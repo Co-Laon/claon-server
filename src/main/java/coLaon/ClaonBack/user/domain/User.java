@@ -34,8 +34,6 @@ public class User extends BaseEntity {
     private String instagramOAuthId;
     @Column(name = "instagram_user_name")
     private String instagramUserName;
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
     @Column(name = "is_private")
     private Boolean isPrivate;
 
@@ -47,7 +45,6 @@ public class User extends BaseEntity {
         this.email = email;
         this.nickname = nickname;
         this.oAuthId = oAuthId;
-        this.isDeleted = false;
         this.isPrivate = false;
     }
 
@@ -71,7 +68,6 @@ public class User extends BaseEntity {
         this.imagePath = imagePath;
         this.instagramOAuthId = instagramOAuthId;
         this.instagramUserName = instagramUserName;
-        this.isDeleted = false;
         this.isPrivate = false;
     }
 
@@ -93,7 +89,6 @@ public class User extends BaseEntity {
         this.imagePath = imagePath;
         this.instagramOAuthId = instagramOAuthId;
         this.instagramUserName = instagramUserName;
-        this.isDeleted = false;
         this.isPrivate = false;
     }
 
