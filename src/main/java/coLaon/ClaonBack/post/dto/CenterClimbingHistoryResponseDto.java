@@ -12,7 +12,6 @@ public class CenterClimbingHistoryResponseDto {
     private List<ClimbingHistoryResponseDto> climbingHistories;
 
     public CenterClimbingHistoryResponseDto(String centerName, List<ClimbingHistoryResponseDto> climbingHistories) {
-
         this.centerName = centerName;
         this.climbingHistories = climbingHistories;
     }

@@ -67,6 +67,8 @@ public class UserServiceTest {
     private Post post;
     private ClimbingHistory climbingHistory;
 
+    private List<String> postIds;
+
     @BeforeEach
     void setUp() {
         this.publicUser = User.of(
@@ -153,7 +155,13 @@ public class UserServiceTest {
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
-        this.climbingHistory = ClimbingHistory.of(this.post, HoldInfo.of("name", "dfdf", center), 1);
+
+        this.postIds = List.of(this.post.getId());
+
+        this.climbingHistory = ClimbingHistory.of(
+                this.post,
+                HoldInfo.of("name", "dfdf", center),
+                1);
     }
 
     @Test
@@ -199,14 +207,11 @@ public class UserServiceTest {
     void successRetrieveUser() {
         // given
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        List<String> givenList = List.of(this.post.getId());
-        given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(givenList);
-        given(this.postLikeRepository.countByPostIdIn(givenList)).willReturn(5L);
+        given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(postIds);
+        given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
         given(this.laonRepository.getLaonIdsByUserId("userId")).willReturn(Set.of("publicUserId"));
-
-        List<ClimbingHistory> climbingHistories = new ArrayList<>();
-        climbingHistories.add(climbingHistory);
-        given(this.climbingHistoryRepository.findByPostIds(givenList)).willReturn(climbingHistories);
+        List<ClimbingHistory> climbingHistories = new ArrayList<>(List.of(this.climbingHistory));
+        given(this.climbingHistoryRepository.findByPostIds(postIds)).willReturn(climbingHistories);
 
         // when
         IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userId");
@@ -222,9 +227,8 @@ public class UserServiceTest {
 
         // given
         given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
-        List<String> givenList1 = new ArrayList<>(Arrays.asList(post.getId()));
-        given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(givenList1);
-        given(this.postLikeRepository.countByPostIdIn(givenList)).willReturn(5L);
+        given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
+        given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
         Set<String> laonIds1 = new HashSet<>();
         given(this.laonRepository.getLaonIdsByUserId("privateUserId")).willReturn(laonIds1);
 

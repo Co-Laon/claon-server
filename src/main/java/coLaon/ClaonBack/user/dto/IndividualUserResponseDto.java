@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.user.dto;
 
+import coLaon.ClaonBack.center.dto.HoldInfoKey;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryResponseDto;
@@ -56,17 +57,24 @@ public class IndividualUserResponseDto {
 
     private void setHistoryDto(List<ClimbingHistory> histories) {
         List<CenterClimbingHistoryResponseDto> result = new ArrayList<>();
-        Map<String, List<ClimbingHistoryResponseDto>> historyMap = new HashMap<>();
+        Map<String, Map<HoldInfoKey, Integer>> historyMap = new HashMap<>();
         for (ClimbingHistory history : histories) {
             String centerName = history.getPost().getCenter().getName();
-            historyMap.putIfAbsent(centerName, new ArrayList<>());
-            List<ClimbingHistoryResponseDto> tempHistories = historyMap.get(centerName);
-            tempHistories.add(new ClimbingHistoryResponseDto(history.getHoldInfo().getImg(), history.getClimbingCount()));
+            historyMap.putIfAbsent(centerName, new HashMap<>());
+            Map<HoldInfoKey, Integer> tempHoldInfos = historyMap.get(centerName);
+
+            HoldInfoKey holdInfoKey = new HoldInfoKey(history.getHoldInfo().getId(), history.getHoldInfo().getImg());
+            tempHoldInfos.putIfAbsent(holdInfoKey, 0);
+            tempHoldInfos.put(holdInfoKey, tempHoldInfos.get(holdInfoKey) + history.getClimbingCount());
         }
 
         for (String centerName : historyMap.keySet()) {
-            List<ClimbingHistoryResponseDto> tempHistories = historyMap.get(centerName);
-            result.add(new CenterClimbingHistoryResponseDto(centerName, tempHistories));
+            Map<HoldInfoKey, Integer> holdInfoDtoMap = historyMap.get(centerName);
+            List<ClimbingHistoryResponseDto> dtos = new ArrayList<>();
+            for (HoldInfoKey holdInfoKey : holdInfoDtoMap.keySet()) {
+                dtos.add(new ClimbingHistoryResponseDto(holdInfoKey.getHoldId(), holdInfoKey.getHoldImage(), holdInfoDtoMap.get(holdInfoKey)));
+            }
+            result.add(new CenterClimbingHistoryResponseDto(centerName, dtos));
         }
         this.centerClimbingHistories = result;
     }

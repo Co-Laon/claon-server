@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClimbingHistoryResponseDto {
 
+    private String holdId;
     private String holdImage;
     private Integer climbingCount;
 
