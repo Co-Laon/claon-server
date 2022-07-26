@@ -160,7 +160,7 @@ public class UserServiceTest {
 
         this.climbingHistory = ClimbingHistory.of(
                 this.post,
-                HoldInfo.of("name", "dfdf", center),
+                HoldInfo.of("test", "name", "dfdf", center),
                 1);
     }
 
@@ -210,7 +210,8 @@ public class UserServiceTest {
         given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
         given(this.laonRepository.getLaonIdsByUserId("userId")).willReturn(Set.of("publicUserId"));
-        List<ClimbingHistory> climbingHistories = new ArrayList<>(List.of(this.climbingHistory));
+        List<ClimbingHistory> climbingHistories = new ArrayList<>();
+        climbingHistories.add(this.climbingHistory);
         given(this.climbingHistoryRepository.findByPostIds(postIds)).willReturn(climbingHistories);
 
         // when
