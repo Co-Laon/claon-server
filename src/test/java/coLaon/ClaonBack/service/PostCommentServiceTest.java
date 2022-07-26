@@ -190,7 +190,7 @@ public class PostCommentServiceTest {
             CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testContent1", null);
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
-            given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+            given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
             mockedPostComment.when(() -> PostComment.of("testContent1", this.writer, this.post, null)).thenReturn(this.postComment);
 
@@ -213,7 +213,7 @@ public class PostCommentServiceTest {
             CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testChildContent1", postComment.getId());
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
-            given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+            given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
             mockedPostComment.when(() -> PostComment.of("testChildContent1", this.writer, this.post, postComment)).thenReturn(this.childPostComment);
@@ -235,7 +235,7 @@ public class PostCommentServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 2);
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
-        given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
         Page<PostComment> parents = new PageImpl<>(List.of(postComment, postComment2), pageable, 2);
         List<PostComment> children1 = List.of(childPostComment, childPostComment2, childPostComment4);
@@ -268,7 +268,7 @@ public class PostCommentServiceTest {
         Page<PostComment> children = new PageImpl<>(List.of(childPostComment, childPostComment2), pageable, 2);
 
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
-        given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
+        given(this.postCommentRepository.findByIdAndIsDeletedFalse("testCommentId")).willReturn(Optional.of(postComment));
         given(this.postCommentRepository.findAllByParentCommentAndIsDeletedFalse(postComment, pageable)).willReturn(children);
 
         // when

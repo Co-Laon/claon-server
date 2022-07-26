@@ -116,7 +116,7 @@ public class PostService {
                 )
         );
 
-        Post post = postRepository.findById(postId).orElseThrow(
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
@@ -140,7 +140,7 @@ public class PostService {
                 )
         );
 
-        Post post = postRepository.findById(postId).orElseThrow(
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
@@ -171,7 +171,7 @@ public class PostService {
                 )
         );
 
-        Post post = postRepository.findById(postId).orElseThrow(
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."

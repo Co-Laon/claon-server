@@ -284,7 +284,7 @@ public class CenterServiceTest {
         ReviewUpdateRequestDto reviewUpdateRequestDto = new ReviewUpdateRequestDto(1, "updateContent");
 
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review));
+        given(this.reviewRepository.findByIdAndIsDeletedFalse("reviewId")).willReturn(Optional.of(review));
         given(this.reviewRepository.save(this.review)).willReturn(this.review);
 
         // when
@@ -302,7 +302,7 @@ public class CenterServiceTest {
         ReviewUpdateRequestDto reviewUpdateRequestDto = new ReviewUpdateRequestDto(1, "updateContent");
 
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user2));
-        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review));
+        given(this.reviewRepository.findByIdAndIsDeletedFalse("reviewId")).willReturn(Optional.of(review));
 
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
@@ -319,7 +319,7 @@ public class CenterServiceTest {
     void successDeleteReview() {
         // given
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review));
+        given(this.reviewRepository.findByIdAndIsDeletedFalse("reviewId")).willReturn(Optional.of(review));
         given(this.reviewRepository.save(this.review)).willReturn(this.review);
 
         // when
@@ -335,7 +335,7 @@ public class CenterServiceTest {
     void failDeleteReview_Unauthorized() {
         // given
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user2));
-        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review));
+        given(this.reviewRepository.findByIdAndIsDeletedFalse("reviewId")).willReturn(Optional.of(review));
 
         // when
         final UnauthorizedException ex = Assertions.assertThrows(

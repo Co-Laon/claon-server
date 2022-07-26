@@ -161,7 +161,7 @@ public class CenterService {
                 )
         );
 
-        CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
+        CenterReview review = reviewRepository.findByIdAndIsDeletedFalse(reviewId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "리뷰 정보를 찾을 수 없습니다."
@@ -187,7 +187,7 @@ public class CenterService {
                 )
         );
 
-        CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
+        CenterReview review = reviewRepository.findByIdAndIsDeletedFalse(reviewId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "리뷰 정보를 찾을 수 없습니다."
