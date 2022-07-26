@@ -2,8 +2,6 @@ package coLaon.ClaonBack.service;
 
 
 import coLaon.ClaonBack.center.domain.*;
-import coLaon.ClaonBack.center.repository.CenterRepository;
-import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.user.domain.Laon;
@@ -27,16 +25,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -58,10 +52,6 @@ public class UserServiceTest {
     @Mock
     BlockUserRepository blockUserRepository;
     @Mock
-    HoldInfoRepository holdInfoRepository;
-    @Mock
-    CenterRepository centerRepository;
-    @Mock
     ClimbingHistoryRepository climbingHistoryRepository;
 
     @Spy
@@ -74,6 +64,8 @@ public class UserServiceTest {
     private Center center;
     private BlockUser blockUserRelation;
     private Laon laonRelation;
+    private Post post;
+    private ClimbingHistory climbingHistory;
 
     @BeforeEach
     void setUp() {
@@ -150,6 +142,18 @@ public class UserServiceTest {
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
+
+        this.post = Post.of(
+                "testPostId",
+                center,
+                "testContent1",
+                user,
+                Set.of(),
+                Set.of(),
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+        this.climbingHistory = ClimbingHistory.of(this.post, HoldInfo.of("name", "dfdf", center), 1);
     }
 
     @Test
@@ -194,22 +198,15 @@ public class UserServiceTest {
     @DisplayName("Success case for retrieving single other user")
     void successRetrieveUser() {
         // given
-        Post post = Post.of(
-                "testPostId",
-                center,
-                "testContent1",
-                user,
-                Set.of(),
-                Set.of(),
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        List<String> givenList = List.of(post.getId());
+        List<String> givenList = List.of(this.post.getId());
         given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(givenList);
         given(this.postLikeRepository.countByPostIdIn(givenList)).willReturn(5L);
         given(this.laonRepository.getLaonIdsByUserId("userId")).willReturn(Set.of("publicUserId"));
-        given(this.climbingHistoryRepository.findByPostIds(givenList)).willReturn(List.of(ClimbingHistory.of(post, HoldInfo.of("name", "dfdf", center), 1)));
+
+        List<ClimbingHistory> climbingHistories = new ArrayList<>();
+        climbingHistories.add(climbingHistory);
+        given(this.climbingHistoryRepository.findByPostIds(givenList)).willReturn(climbingHistories);
 
         // when
         IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userId");

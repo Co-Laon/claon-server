@@ -84,8 +84,8 @@ public class ClimbingHistoryRepositoryTest {
         HoldInfo holdInfo = HoldInfo.of("name", "dfdf", center);
         holdInfoRepository.save(holdInfo);
         ClimbingHistory history = ClimbingHistory.of(this.post, holdInfo, 1);
-        this.post.addClimbingHistorySet(Set.of(history));
         postRepository.save(post);
+        climbingHistoryRepository.save(history);
     }
 
     @Test

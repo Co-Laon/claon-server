@@ -174,9 +174,4 @@ public class Post extends BaseEntity {
     public void delete() {
         this.isDeleted = true;
     }
-
-    public void addClimbingHistorySet(Set<ClimbingHistory> climbingHistorySet){
-        this.climbingHistorySet = climbingHistorySet;
-        climbingHistorySet.forEach(history -> history.setPost(this));
-    }
 }

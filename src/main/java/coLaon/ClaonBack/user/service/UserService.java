@@ -171,7 +171,7 @@ public class UserService {
         Long laonCount = (long) laonIds.size();
         boolean isLaon = laonIds.contains(requestUserId);
 
-        List<ClimbingHistory> climbingHistories =  climbingHistoryRepository.findByPostIds(postIds);
+        List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
         return IndividualUserResponseDto.from(user, isLaon, postCount, laonCount, postLikeCount, climbingHistories);
     }
 

@@ -51,8 +51,4 @@ public class ClimbingHistory extends BaseEntity {
                 holdInfo
         );
     }
-
-    public void setPost(Post post) {
-        this.post = post;
-    }
 }
