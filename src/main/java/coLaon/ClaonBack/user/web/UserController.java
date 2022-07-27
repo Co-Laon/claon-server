@@ -3,6 +3,7 @@ package coLaon.ClaonBack.user.web;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
+import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,6 +49,12 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     public UserResponseDto modifyUser(@AuthenticationPrincipal String userId, @RequestBody UserModifyRequestDto dto) {
         return userService.modifyUser(userId, dto);
+    }
+
+    @GetMapping("/{userId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public IndividualUserResponseDto getPublicUser(@AuthenticationPrincipal String requestUserId, @PathVariable String userId) {
+        return userService.getOtherUserInformation(requestUserId, userId);
     }
 
     @PostMapping(value = "/{blockNickname}/block")

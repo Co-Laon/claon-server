@@ -9,6 +9,10 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
+import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
+import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
@@ -21,6 +25,7 @@ import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
+import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
@@ -30,14 +35,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final BlockUserRepository blockUserRepository;
+    private final ClimbingHistoryRepository climbingHistoryRepository;
     private final LaonRepository laonRepository;
+    private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
+    private final BlockUserRepository blockUserRepository;
     private final PaginationFactory paginationFactory;
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
@@ -144,6 +154,25 @@ public class UserService {
         });
 
         return UserResponseDto.from(user);
+    }
+
+    @Transactional(readOnly = true)
+    public IndividualUserResponseDto getOtherUserInformation(String requestUserId, String userId) {
+        User user = this.userRepository.findById(userId).orElseThrow(() -> {
+            throw new UnauthorizedException(
+                    ErrorCode.USER_DOES_NOT_EXIST,
+                    "이용자를 찾을 수 없습니다."
+            );
+        });
+        List<String> postIds = this.postRepository.selectPostIdsByUserId(userId);
+        Long postCount = (long) postIds.size();
+        Long postLikeCount = this.postLikeRepository.countByPostIdIn(postIds);
+        Set<String> laonIds = this.laonRepository.getLaonIdsByUserId(userId);
+        Long laonCount = (long) laonIds.size();
+        boolean isLaon = laonIds.contains(requestUserId);
+
+        List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
+        return IndividualUserResponseDto.from(user, isLaon, postCount, laonCount, postLikeCount, climbingHistories);
     }
 
     @Transactional

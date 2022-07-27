@@ -13,17 +13,18 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
+import coLaon.ClaonBack.post.dto.PostContentsDto;
+import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
+import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.dto.LikeResponseDto;
+import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
-import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.common.exception.BadRequestException;
-import coLaon.ClaonBack.post.dto.LikeResponseDto;
-import coLaon.ClaonBack.post.dto.PostContentsDto;
-import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
-import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
@@ -168,65 +169,66 @@ public class PostServiceTest {
 
         this.climbingHistory = ClimbingHistory.of(
                 this.post,
-                holdInfo1
+                holdInfo1,
+                0
         );
     }
 
     @Test
     @DisplayName("Success case for create post")
     void successCreatePost() {
-        MockedStatic<Post> mockedPost = mockStatic(Post.class);
-        MockedStatic<PostContents> mockedPostContents = mockStatic(PostContents.class);
-        MockedStatic<ClimbingHistory> mockedClimbingHistory = mockStatic(ClimbingHistory.class);
+        try (
+                MockedStatic<Post> mockedPost = mockStatic(Post.class);
+                MockedStatic<PostContents> mockedPostContents = mockStatic(PostContents.class);
+                MockedStatic<ClimbingHistory> mockedClimbingHistory = mockStatic(ClimbingHistory.class)
+        ) {
+            // given
+            PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
+                    "center1",
+                    List.of(new ClimbingHistoryRequestDto("holdId1", 1)),
+                    "testContent",
+                    List.of(new PostContentsDto("test.com/test.png"))
+            );
 
-        // given
-        PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
-                "center1",
-                List.of("holdId1"),
-                "testContent",
-                List.of(new PostContentsDto("test.com/test.png"))
-        );
+            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+            given(this.centerRepository.findById("center1")).willReturn(Optional.of(center));
+            given(this.holdInfoRepository.findById("holdId1")).willReturn(Optional.of(holdInfo1));
 
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-        given(this.centerRepository.findById("center1")).willReturn(Optional.of(center));
-        given(this.holdInfoRepository.findById("holdId1")).willReturn(Optional.of(holdInfo1));
+            mockedPost.when(() ->
+                            Post.of(
+                                    center,
+                                    postCreateRequestDto.getContent(),
+                                    user
+                            ))
+                    .thenReturn(post);
+            given(this.postRepository.save(post)).willReturn(post);
 
-        mockedPost.when(() ->
-                        Post.of(
-                                center,
-                                postCreateRequestDto.getContent(),
-                                user
-                        ))
-                .thenReturn(post);
-        given(this.postRepository.save(post)).willReturn(post);
+            mockedPostContents.when(() ->
+                            PostContents.of(
+                                    post,
+                                    "test.com/test.png"
+                            ))
+                    .thenReturn(postContents);
+            given(this.postContentsRepository.save(postContents)).willReturn(postContents);
 
-        mockedPostContents.when(() ->
-                        PostContents.of(
-                                post,
-                                "test.com/test.png"
-                        ))
-                .thenReturn(postContents);
-        given(this.postContentsRepository.save(postContents)).willReturn(postContents);
+            mockedClimbingHistory.when(() ->
+                            ClimbingHistory.of(
+                                    post,
+                                    holdInfo1,
+                                    1
+                            ))
+                    .thenReturn(climbingHistory);
+            given(this.climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
 
-        mockedClimbingHistory.when(() ->
-                        ClimbingHistory.of(
-                                post,
-                                holdInfo1
-                        ))
-                .thenReturn(climbingHistory);
-        given(this.climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
+            // when
+            PostResponseDto postResponseDto = this.postService.createPost("testUserId", postCreateRequestDto);
 
-        // when
-        PostResponseDto postResponseDto = this.postService.createPost("testUserId", postCreateRequestDto);
-
-        // then
-        assertThat(postResponseDto).isNotNull();
-        assertThat(postCreateRequestDto.getCenterId()).isEqualTo(postResponseDto.getCenterId());
-        assertThat(postCreateRequestDto.getContentsList().size()).isEqualTo(1);
-        assertThat(postCreateRequestDto.getHoldIdList().size()).isEqualTo(1);
-
-        mockedPost.close();
-        mockedPostContents.close();
+            // then
+            assertThat(postResponseDto).isNotNull();
+            assertThat(postCreateRequestDto.getCenterId()).isEqualTo(postResponseDto.getCenterId());
+            assertThat(postCreateRequestDto.getContentsList().size()).isEqualTo(1);
+            assertThat(postCreateRequestDto.getClimbingHistories().size()).isEqualTo(1);
+        }
     }
 
     @Test
@@ -240,7 +242,7 @@ public class PostServiceTest {
 
         PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
                 "center1",
-                List.of("holdId1", "holdId2"),
+                List.of(new ClimbingHistoryRequestDto("holdId1", 1), new ClimbingHistoryRequestDto("holdId2", 2)),
                 "testContent",
                 postContentsDtoList
         );

@@ -53,6 +53,21 @@ public class Post extends BaseEntity {
     }
 
     private Post(
+            Center center,
+            String content,
+            User writer,
+            Set<PostContents> contentsSet,
+            Set<ClimbingHistory> climbingHistorySet
+    ) {
+        this.center = center;
+        this.content = content;
+        this.isDeleted = false;
+        this.writer = writer;
+        this.contentsSet = contentsSet;
+        this.climbingHistorySet = climbingHistorySet;
+    }
+
+    private Post(
             String id,
             Center center,
             String content,
@@ -137,6 +152,22 @@ public class Post extends BaseEntity {
                 climbingHistorySet,
                 createdAt,
                 updatedAt
+        );
+    }
+
+    public static Post of(
+            Center center,
+            String content,
+            User writer,
+            Set<PostContents> contentsSet,
+            Set<ClimbingHistory> climbingHistorySet
+    ) {
+        return new Post(
+                center,
+                content,
+                writer,
+                contentsSet,
+                climbingHistorySet
         );
     }
 

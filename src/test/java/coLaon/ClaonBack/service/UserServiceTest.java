@@ -1,13 +1,25 @@
 package coLaon.ClaonBack.service;
 
 
+import coLaon.ClaonBack.center.domain.HoldInfo;
+import coLaon.ClaonBack.center.domain.Center;
+import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.OperatingTime;
+import coLaon.ClaonBack.center.domain.SectorInfo;
+import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.user.domain.Laon;
-import coLaon.ClaonBack.common.domain.Pagination;
-import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.domain.BlockUser;
+import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
+import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
+import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
@@ -28,8 +40,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -40,9 +56,15 @@ public class UserServiceTest {
     @Mock
     UserRepository userRepository;
     @Mock
-    BlockUserRepository blockUserRepository;
+    PostRepository postRepository;
+    @Mock
+    PostLikeRepository postLikeRepository;
     @Mock
     LaonRepository laonRepository;
+    @Mock
+    BlockUserRepository blockUserRepository;
+    @Mock
+    ClimbingHistoryRepository climbingHistoryRepository;
 
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
@@ -51,8 +73,14 @@ public class UserServiceTest {
     UserService userService;
 
     private User user, privateUser, publicUser, blockUser;
+    private Center center;
     private BlockUser blockUserRelation;
     private Laon laonRelation;
+    private Post post;
+    private HoldInfo holdInfo;
+    private ClimbingHistory climbingHistory;
+
+    private List<String> postIds;
 
     @BeforeEach
     void setUp() {
@@ -92,6 +120,7 @@ public class UserServiceTest {
                 "",
                 "instagramId"
         );
+
         this.blockUser = User.of(
                 "blockUserId",
                 "block@gmail.com",
@@ -113,11 +142,44 @@ public class UserServiceTest {
                 this.blockUser,
                 this.publicUser
         );
+        this.center = Center.of(
+                "test",
+                "test",
+                "010-1234-1234",
+                "https://test.com",
+                "https://instagram.com/test",
+                "https://youtube.com/channel/test",
+                List.of(new CenterImg("img test")),
+                List.of(new OperatingTime("매일", "10:00", "23:00")),
+                "facilities test",
+                List.of(new Charge("자유 패키지", "330,000")),
+                "charge img test",
+                "hold info img test",
+                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+        );
+
+        this.post = Post.of(
+                "testPostId",
+                center,
+                "testContent1",
+                user,
+                Set.of(),
+                Set.of(),
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+        this.postIds = List.of(this.post.getId());
+        this.holdInfo = HoldInfo.of("test", "name", "dfdf", center);
+        this.climbingHistory = ClimbingHistory.of(
+                this.post,
+                holdInfo,
+                2);
     }
 
     @Test
-    @DisplayName("Success case for retrieving single user")
-    void successRetrieveUser() {
+    @DisplayName("Success case for retrieving me")
+    void successRetrieveMe() {
         // given
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
 
@@ -151,6 +213,47 @@ public class UserServiceTest {
 
         // then
         assertThat(userResponseDto.getEmail()).isEqualTo("test@gmail.com");
+    }
+
+    @Test
+    @DisplayName("Success case for retrieving single other user")
+    void successRetrieveUser() {
+        // given
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(postIds);
+        given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
+        given(this.laonRepository.getLaonIdsByUserId("userId")).willReturn(Set.of("publicUserId"));
+        List<ClimbingHistory> climbingHistories = new ArrayList<>();
+        climbingHistories.add(this.climbingHistory);
+        given(this.climbingHistoryRepository.findByPostIds(this.postIds)).willReturn(climbingHistories);
+
+        // when
+        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userId");
+
+        // then
+        assertThat(userResponseDto.getMetropolitanActiveArea()).isEqualTo("경기도");
+        assertThat(userResponseDto.getPostCount()).isEqualTo(1L);
+        assertThat(userResponseDto.getLikeCount()).isEqualTo(5L);
+        assertThat(userResponseDto.getLaonCount()).isEqualTo(1L);
+        assertThat(userResponseDto.getIsLaon()).isEqualTo(true);
+        assertThat(userResponseDto.getCenterClimbingHistories().get(0).getCenterName()).isEqualTo(center.getName());
+        assertThat(userResponseDto.getCenterClimbingHistories().get(0).getClimbingHistories().get(0).getClimbingCount()).isEqualTo(2);
+
+        // given
+        given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
+        given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
+        given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
+        Set<String> laonIds1 = new HashSet<>();
+        given(this.laonRepository.getLaonIdsByUserId("privateUserId")).willReturn(laonIds1);
+
+        // when
+        IndividualUserResponseDto userResponseDto1 = this.userService.getOtherUserInformation("publicUserId", "privateUserId");
+
+        // then
+        assertThat(userResponseDto1.getMetropolitanActiveArea()).isEqualTo(null);
+        assertThat(userResponseDto1.getBasicLocalActiveArea()).isEqualTo(null);
+        assertThat(userResponseDto1.getLaonCount()).isEqualTo(0);
+        assertThat(userResponseDto1.getIsLaon()).isEqualTo(false);
     }
 
     @Test
