@@ -12,7 +12,6 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class ClimbingHistoryRequestDto {
 
-    @NotNull
     @NotBlank
     private String holdId;
     @NotNull
