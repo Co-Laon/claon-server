@@ -2,6 +2,9 @@ plugins {
 	id 'org.springframework.boot' version '2.5.12'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+
+	// querydsl
+	id 'com.ewerk.gradle.plugins.querydsl' version '1.0.10'
 }
 
 group = 'co-Raon'
@@ -21,28 +24,64 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'io.springfox:springfox-boot-starter:3.0.0'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.boot:spring-boot-configuration-processor'
-	implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
-	implementation 'org.mockito:mockito-junit-jupiter:4.6.1'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	implementation 'io.jsonwebtoken:jjwt:0.9.1'
-	implementation 'com.google.api-client:google-api-client:1.35.1'
-	implementation 'org.json:json:20220320'
-	implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
-	implementation 'com.amazonaws:aws-java-sdk-s3'
-	compileOnly 'org.apache.tika:tika-parsers:2.3.0'
-	compileOnly 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
-    compileOnly 'org.projectlombok:lombok'
-	compileOnly 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'org.postgresql:postgresql'
+
+    compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// swagger
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+	// security
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+	// querydsl
+	implementation 'com.querydsl:querydsl-jpa'
+	implementation 'com.querydsl:querydsl-core'
+	annotationProcessor 'com.querydsl:querydsl-apt'
+
+	// aws
+	implementation 'com.google.api-client:google-api-client:1.35.1'
+	implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
+	implementation 'com.amazonaws:aws-java-sdk-s3'
+	compileOnly 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	compileOnly 'org.apache.tika:tika-parsers:2.3.0'
+
+	// test
+	implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+	implementation 'org.mockito:mockito-junit-jupiter:4.6.1'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.mockito:mockito-inline:4.6.1'
+}
+
+// querydsl
+def querydslDir = "$buildDir/generated/querydsl"
+querydsl {
+	library = "com.querydsl:querydsl-apt"
+	jpa = true
+	querydslSourcesDir = querydslDir
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java', querydslDir]
+		}
+	}
+}
+
+configurations {
+	querydsl.extendsFrom compileClasspath
+}
+
+compileQuerydsl{
+	options.annotationProcessorPath = configurations.querydsl
 }
 
 test {
