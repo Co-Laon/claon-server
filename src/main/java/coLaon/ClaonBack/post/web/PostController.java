@@ -47,6 +47,15 @@ public class PostController {
         return this.postService.createPost(userId, postCreateRequestDto);
     }
 
+    @GetMapping(value = "/{postId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public PostResponseDto getPost(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String postId
+    ) {
+        return this.postService.findPost(userId, postId);
+    }
+
     @DeleteMapping("/{postId}")
     @ResponseStatus(value = HttpStatus.OK)
     public PostResponseDto deletePost(
