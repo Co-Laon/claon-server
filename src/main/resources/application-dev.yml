@@ -1,0 +1,11 @@
+server:
+  port: 8080
+
+spring:
+  config:
+    import: optional:classpath:email-config.yml, classpath:auth-config.yml, classpath:dev-database-config.yml, classpath:aws-config.yml
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
