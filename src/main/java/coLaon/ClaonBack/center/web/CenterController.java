@@ -38,7 +38,7 @@ public class CenterController {
         return this.centerService.create(userId, centerCreateRequestDto);
     }
 
-    @GetMapping(value = "/{keyword}")
+    @GetMapping(value = "/name/{keyword}")
     @ResponseStatus(value = HttpStatus.OK)
     public List<String> searchCenter(
             @AuthenticationPrincipal String userId,
