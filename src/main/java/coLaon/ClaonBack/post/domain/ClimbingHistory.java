@@ -5,7 +5,11 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Getter
 @Entity
@@ -23,19 +27,33 @@ public class ClimbingHistory extends BaseEntity {
     @Column(nullable = false)
     private Integer climbingCount;
 
-    private ClimbingHistory(Post post, HoldInfo holdInfo, Integer climbingCount) {
+    private ClimbingHistory(
+            Post post,
+            HoldInfo holdInfo,
+            Integer climbingCount
+    ) {
         this.post = post;
         this.holdInfo = holdInfo;
         this.climbingCount = climbingCount;
     }
 
-    private ClimbingHistory(String id, Post post, HoldInfo holdInfo) {
+    private ClimbingHistory(
+            String id,
+            Post post,
+            HoldInfo holdInfo,
+            Integer climbingCount
+    ) {
         super(id);
         this.post = post;
         this.holdInfo = holdInfo;
+        this.climbingCount = climbingCount;
     }
 
-    public static ClimbingHistory of(Post post, HoldInfo holdInfo, Integer climbingCount) {
+    public static ClimbingHistory of(
+            Post post,
+            HoldInfo holdInfo,
+            Integer climbingCount
+    ) {
         return new ClimbingHistory(
                 post,
                 holdInfo,
@@ -43,11 +61,17 @@ public class ClimbingHistory extends BaseEntity {
         );
     }
 
-    public static ClimbingHistory of(String id, Post post, HoldInfo holdInfo) {
+    public static ClimbingHistory of(
+            String id,
+            Post post,
+            HoldInfo holdInfo,
+            Integer climbingCount
+    ) {
         return new ClimbingHistory(
                 id,
                 post,
-                holdInfo
+                holdInfo,
+                climbingCount
         );
     }
 }

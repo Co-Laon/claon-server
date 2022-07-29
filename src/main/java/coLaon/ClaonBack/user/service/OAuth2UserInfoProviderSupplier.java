@@ -2,7 +2,6 @@ package coLaon.ClaonBack.user.service;
 
 import coLaon.ClaonBack.user.domain.OAuth2Provider;
 import coLaon.ClaonBack.user.infra.GoogleUserInfoProvider;
-import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.infra.KakaoUserInfoProvider;
 import org.springframework.stereotype.Component;
 

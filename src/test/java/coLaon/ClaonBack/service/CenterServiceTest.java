@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -145,81 +145,76 @@ public class CenterServiceTest {
     @Test
     @DisplayName("Success case for create center")
     void successCreateCenter() {
-        // given
-        CenterCreateRequestDto requestDto = new CenterCreateRequestDto(
-                "test",
-                "test",
-                "010-1234-1234",
-                "https://test.com",
-                "https://instagram.com/test",
-                "https://youtube.com/channel/test",
-                List.of(new CenterImgDto("img test")),
-                List.of(new OperatingTimeDto("매일", "10:00", "23:00")),
-                "facilities test",
-                List.of(new ChargeDto("자유 패키지", "330,000")),
-                "charge img test",
-                List.of(new HoldInfoRequestDto("test hold", "hold img test")),
-                "hold info img test",
-                List.of(new SectorInfoDto("test sector", "1/1", "1/2"))
-        );
-
         CenterImg centerImg = CenterImg.of("img test");
         OperatingTime operatingTime = OperatingTime.of("매일", "10:00", "23:00");
         Charge charge = Charge.of("자유 패키지", "330,000");
         SectorInfo sectorInfo = SectorInfo.of("test sector", "1/1", "1/2");
 
-        MockedStatic<Center> mockedCenter = mockStatic(Center.class);
-        MockedStatic<HoldInfo> mockedHoldInfo = mockStatic(HoldInfo.class);
-        MockedStatic<CenterImg> mockedCenterImg = mockStatic(CenterImg.class);
-        MockedStatic<OperatingTime> mockedOperatingTime = mockStatic(OperatingTime.class);
-        MockedStatic<Charge> mockedCharge = mockStatic(Charge.class);
-        MockedStatic<SectorInfo> mockedSectorInfo = mockStatic(SectorInfo.class);
+        try (
+                MockedStatic<Center> mockedCenter = mockStatic(Center.class);
+                MockedStatic<HoldInfo> mockedHoldInfo = mockStatic(HoldInfo.class);
+                MockedStatic<CenterImg> mockedCenterImg = mockStatic(CenterImg.class);
+                MockedStatic<OperatingTime> mockedOperatingTime = mockStatic(OperatingTime.class);
+                MockedStatic<Charge> mockedCharge = mockStatic(Charge.class);
+                MockedStatic<SectorInfo> mockedSectorInfo = mockStatic(SectorInfo.class)
+        ) {
+            // given
+            CenterCreateRequestDto requestDto = new CenterCreateRequestDto(
+                    "test",
+                    "test",
+                    "010-1234-1234",
+                    "https://test.com",
+                    "https://instagram.com/test",
+                    "https://youtube.com/channel/test",
+                    List.of(new CenterImgDto("img test")),
+                    List.of(new OperatingTimeDto("매일", "10:00", "23:00")),
+                    "facilities test",
+                    List.of(new ChargeDto("자유 패키지", "330,000")),
+                    "charge img test",
+                    List.of(new HoldInfoRequestDto("test hold", "hold img test")),
+                    "hold info img test",
+                    List.of(new SectorInfoDto("test sector", "1/1", "1/2"))
+            );
 
-        mockedCenterImg.when(() -> CenterImg.of("img test")).thenReturn(centerImg);
-        mockedOperatingTime.when(() -> OperatingTime.of("매일", "10:00", "23:00")).thenReturn(operatingTime);
-        mockedCharge.when(() -> Charge.of("자유 패키지", "330,000")).thenReturn(charge);
-        mockedSectorInfo.when(() -> SectorInfo.of("test sector", "1/1", "1/2")).thenReturn(sectorInfo);
+            mockedCenterImg.when(() -> CenterImg.of("img test")).thenReturn(centerImg);
+            mockedOperatingTime.when(() -> OperatingTime.of("매일", "10:00", "23:00")).thenReturn(operatingTime);
+            mockedCharge.when(() -> Charge.of("자유 패키지", "330,000")).thenReturn(charge);
+            mockedSectorInfo.when(() -> SectorInfo.of("test sector", "1/1", "1/2")).thenReturn(sectorInfo);
 
-        mockedCenter.when(() -> Center.of(
-                "test",
-                "test",
-                "010-1234-1234",
-                "https://test.com",
-                "https://instagram.com/test",
-                "https://youtube.com/channel/test",
-                List.of(centerImg),
-                List.of(operatingTime),
-                "facilities test",
-                List.of(charge),
-                "charge img test",
-                "hold info img test",
-                List.of(sectorInfo)
-        )).thenReturn(this.center);
+            mockedCenter.when(() -> Center.of(
+                    "test",
+                    "test",
+                    "010-1234-1234",
+                    "https://test.com",
+                    "https://instagram.com/test",
+                    "https://youtube.com/channel/test",
+                    List.of(centerImg),
+                    List.of(operatingTime),
+                    "facilities test",
+                    List.of(charge),
+                    "charge img test",
+                    "hold info img test",
+                    List.of(sectorInfo)
+            )).thenReturn(this.center);
 
-        mockedHoldInfo.when(() -> HoldInfo.of(
-                "test hold", "hold img test", this.center
-        )).thenReturn(this.holdInfo);
+            mockedHoldInfo.when(() -> HoldInfo.of(
+                    "test hold", "hold img test", this.center
+            )).thenReturn(this.holdInfo);
 
-        given(this.userRepository.findById("adminId")).willReturn(Optional.of(this.admin));
-        given(this.centerRepository.save(this.center)).willReturn(this.center);
+            given(this.userRepository.findById("adminId")).willReturn(Optional.of(this.admin));
+            given(this.centerRepository.save(this.center)).willReturn(this.center);
 
-        given(this.holdInfoRepository.save(this.holdInfo)).willReturn(this.holdInfo);
+            given(this.holdInfoRepository.save(this.holdInfo)).willReturn(this.holdInfo);
 
-        // when
-        CenterResponseDto responseDto = this.centerService.create("adminId", requestDto);
+            // when
+            CenterResponseDto responseDto = this.centerService.create("adminId", requestDto);
 
-        // then
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto)
-                .extracting("id", "name")
-                .contains("center id", "test");
-
-        mockedCenter.close();
-        mockedHoldInfo.close();
-        mockedCenterImg.close();
-        mockedOperatingTime.close();
-        mockedCharge.close();
-        mockedSectorInfo.close();
+            // then
+            assertThat(responseDto)
+                    .isNotNull()
+                    .extracting("id", "name")
+                    .contains("center id", "test");
+        }
     }
 
     @Test
@@ -231,27 +226,35 @@ public class CenterServiceTest {
         given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
 
         // when
-        assertThatThrownBy(() -> this.centerService.create("userId", requestDto))
-                // then
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("접근 권한이 없습니다.");
+        final UnauthorizedException ex = Assertions.assertThrows(
+                UnauthorizedException.class,
+                () -> this.centerService.create("userId", requestDto)
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
     }
 
     @Test
     @DisplayName("Success case for find HoldInfo by center")
     void successFindHoldInfoByCenter() {
-        //given
+        // given
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.centerRepository.findById("center id")).willReturn(Optional.of(this.center));
         given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
-        //when
+
+        // when
         List<HoldInfoResponseDto> holdInfoResponseDto = this.centerService.findHoldInfoByCenterId("userId", "center id");
-        //then
-        assertThat(holdInfoResponseDto).isNotNull();
-        assertThat(holdInfoResponseDto.get(0).getName()).isEqualTo(holdInfo.getName());
-        assertThat(holdInfoResponseDto.get(1).getName()).isEqualTo(holdInfo2.getName());
-        assertThat(holdInfoResponseDto.get(0).getImg()).isEqualTo(holdInfo.getImg());
-        assertThat(holdInfoResponseDto.get(1).getImg()).isEqualTo(holdInfo2.getImg());
+
+        // then
+        assertThat(holdInfoResponseDto)
+                .isNotNull()
+                .extracting(HoldInfoResponseDto::getName, HoldInfoResponseDto::getImage)
+                .containsExactly(
+                        tuple(holdInfo.getName(), holdInfo.getImg()),
+                        tuple(holdInfo2.getName(), holdInfo2.getImg()));
     }
 
     @Test
@@ -272,8 +275,10 @@ public class CenterServiceTest {
             ReviewResponseDto reviewResponseDto = this.centerService.createReview("testUserId", "testCenterId", reviewCreateRequestDto);
 
             // then
-            assertThat(reviewResponseDto).isNotNull();
-            assertThat(reviewResponseDto.getContent()).isEqualTo("testContent");
+            assertThat(reviewResponseDto)
+                    .isNotNull()
+                    .extracting("content", "centerId")
+                    .contains("testContent", "center id");
         }
     }
 
@@ -291,8 +296,10 @@ public class CenterServiceTest {
         ReviewResponseDto reviewResponseDto = this.centerService.updateReview("userId", "reviewId", reviewUpdateRequestDto);
 
         // then
-        assertThat(reviewResponseDto).isNotNull();
-        assertThat(reviewResponseDto.getContent()).isEqualTo("updateContent");
+        assertThat(reviewResponseDto)
+                .isNotNull()
+                .extracting("content", "reviewId")
+                .contains("updateContent", "reviewId");
     }
 
     @Test
@@ -311,7 +318,9 @@ public class CenterServiceTest {
         );
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
     }
 
     @Test
@@ -326,8 +335,10 @@ public class CenterServiceTest {
         ReviewResponseDto reviewResponseDto = this.centerService.deleteReview("userId", "reviewId");
 
         // then
-        assertThat(reviewResponseDto).isNotNull();
-        assertThat(reviewResponseDto.getIsDeleted()).isEqualTo(true);
+        assertThat(reviewResponseDto)
+                .isNotNull()
+                .extracting("reviewId", "isDeleted")
+                .contains("reviewId", true);
     }
 
     @Test
@@ -344,21 +355,24 @@ public class CenterServiceTest {
         );
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
     }
 
     @Test
     @DisplayName("Success case for search Center by keyword")
     void successSearchCenterByKeyword() {
-        //given
+        // given
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.centerRepository.searchCenter("te")).willReturn(List.of(this.center.getName(), this.center2.getName()));
 
-        //when
+        // when
         List<String> centerNicknameList = this.centerService.searchCenter("userId", "te");
 
-        //then
-        assertThat(centerNicknameList.get(0)).isEqualTo(this.center.getName());
-        assertThat(centerNicknameList.get(1)).isEqualTo(this.center2.getName());
+        // then
+        assertThat(centerNicknameList)
+                .isNotNull()
+                .contains(this.center.getName(), this.center2.getName());
     }
 }

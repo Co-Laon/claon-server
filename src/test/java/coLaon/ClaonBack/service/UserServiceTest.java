@@ -1,6 +1,5 @@
 package coLaon.ClaonBack.service;
 
-
 import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
@@ -8,6 +7,7 @@ import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
@@ -41,13 +41,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -187,9 +187,10 @@ public class UserServiceTest {
         UserResponseDto userResponseDto = this.userService.getUser("userId");
 
         // then
-        assertThat(userResponseDto.getEmail()).isEqualTo("test@gmail.com");
-        assertThat(userResponseDto.getInstagramUserName()).isEqualTo("instagramId");
-        assertThat(userResponseDto.getIsPrivate()).isFalse();
+        assertThat(userResponseDto)
+                .isNotNull()
+                .extracting("email", "instagramUserName", "isPrivate")
+                .contains("test@gmail.com", "instagramId", false);
     }
 
     @Test
@@ -212,7 +213,10 @@ public class UserServiceTest {
         UserResponseDto userResponseDto = this.userService.modifyUser("userId", dto);
 
         // then
-        assertThat(userResponseDto.getEmail()).isEqualTo("test@gmail.com");
+        assertThat(userResponseDto)
+                .isNotNull()
+                .extracting("email", "nickname")
+                .contains("test@gmail.com", "nickname");
     }
 
     @Test
@@ -223,37 +227,53 @@ public class UserServiceTest {
         given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
         given(this.laonRepository.getLaonIdsByUserId("userId")).willReturn(Set.of("publicUserId"));
-        List<ClimbingHistory> climbingHistories = new ArrayList<>();
-        climbingHistories.add(this.climbingHistory);
-        given(this.climbingHistoryRepository.findByPostIds(this.postIds)).willReturn(climbingHistories);
+        given(this.climbingHistoryRepository.findByPostIds(this.postIds)).willReturn(List.of(this.climbingHistory));
 
         // when
         IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userId");
 
         // then
-        assertThat(userResponseDto.getMetropolitanActiveArea()).isEqualTo("경기도");
-        assertThat(userResponseDto.getPostCount()).isEqualTo(1L);
-        assertThat(userResponseDto.getLikeCount()).isEqualTo(5L);
-        assertThat(userResponseDto.getLaonCount()).isEqualTo(1L);
-        assertThat(userResponseDto.getIsLaon()).isEqualTo(true);
-        assertThat(userResponseDto.getCenterClimbingHistories().get(0).getCenterName()).isEqualTo(center.getName());
-        assertThat(userResponseDto.getCenterClimbingHistories().get(0).getClimbingHistories().get(0).getClimbingCount()).isEqualTo(2);
+        assertThat(userResponseDto)
+                .isNotNull()
+                .extracting(
+                        IndividualUserResponseDto::getMetropolitanActiveArea,
+                        IndividualUserResponseDto::getPostCount,
+                        IndividualUserResponseDto::getLikeCount,
+                        IndividualUserResponseDto::getLaonCount,
+                        IndividualUserResponseDto::getIsLaon)
+                .contains("경기도", 1L, 5L, 1L, true);
 
+        assertThat(userResponseDto.getCenterClimbingHistories())
+                .isNotNull()
+                .extracting(
+                        CenterClimbingHistoryResponseDto::getCenterName,
+                        history -> history.getClimbingHistories().get(0).getClimbingCount())
+                .containsExactly(
+                        tuple(center.getName(), 2)
+                );
+    }
+
+    @Test
+    @DisplayName("Success case for retrieving single other private user")
+    void successRetrievePrivateUser() {
         // given
         given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
         given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
-        Set<String> laonIds1 = new HashSet<>();
-        given(this.laonRepository.getLaonIdsByUserId("privateUserId")).willReturn(laonIds1);
+        given(this.laonRepository.getLaonIdsByUserId("privateUserId")).willReturn(new HashSet<>());
 
         // when
-        IndividualUserResponseDto userResponseDto1 = this.userService.getOtherUserInformation("publicUserId", "privateUserId");
+        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "privateUserId");
 
         // then
-        assertThat(userResponseDto1.getMetropolitanActiveArea()).isEqualTo(null);
-        assertThat(userResponseDto1.getBasicLocalActiveArea()).isEqualTo(null);
-        assertThat(userResponseDto1.getLaonCount()).isEqualTo(0);
-        assertThat(userResponseDto1.getIsLaon()).isEqualTo(false);
+        assertThat(userResponseDto)
+                .isNotNull()
+                .extracting(
+                        IndividualUserResponseDto::getMetropolitanActiveArea,
+                        IndividualUserResponseDto::getBasicLocalActiveArea,
+                        IndividualUserResponseDto::getLaonCount,
+                        IndividualUserResponseDto::getIsLaon)
+                .contains(null, null, 0L, false);
     }
 
     @Test
@@ -335,7 +355,13 @@ public class UserServiceTest {
         Pagination<BlockUserFindResponseDto> blockUserFindResponseDto = this.userService.findBlockUser("publicUserId", pageable);
 
         // then
-        assertThat(blockUserFindResponseDto.getResults().size()).isEqualTo(1);
-        assertThat(blockUserFindResponseDto.getResults().get(0).getBlockUserNickName()).isEqualTo("testBlockNickname");
+        assertThat(blockUserFindResponseDto.getResults())
+                .isNotNull()
+                .extracting(
+                        BlockUserFindResponseDto::getBlockUserNickName,
+                        BlockUserFindResponseDto::getBlockUserProfileImage)
+                .containsExactly(
+                        tuple("testBlockNickname", "")
+                );
     }
 }

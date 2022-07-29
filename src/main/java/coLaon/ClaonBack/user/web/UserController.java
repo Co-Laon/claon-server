@@ -75,7 +75,7 @@ public class UserController {
         this.userService.deleteBlock(userId, blockNickname);
     }
 
-    @GetMapping("/{userId}/blocked-users")
+    @GetMapping("/blocked-users")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<BlockUserFindResponseDto> findBlockUser(
             @AuthenticationPrincipal String userId,

@@ -4,7 +4,6 @@ import coLaon.ClaonBack.common.utils.RelativeTimeUtil;
 import coLaon.ClaonBack.post.domain.PostComment;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -47,7 +46,11 @@ public class CommentFindResponseDto {
         this.commentCount = commentCount;
     }
 
-    public static CommentFindResponseDto from(PostComment postComment, List<PostComment> childComments, Long commentCount) {
+    public static CommentFindResponseDto from(
+            PostComment postComment,
+            List<PostComment> childComments,
+            Long commentCount
+    ) {
         return new CommentFindResponseDto(
                 postComment.getId(),
                 postComment.getContent(),

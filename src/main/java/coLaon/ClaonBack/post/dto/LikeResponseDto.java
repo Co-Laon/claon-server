@@ -6,23 +6,23 @@ import lombok.Data;
 @Data
 public class LikeResponseDto {
     private String postId;
-    private Integer likeNumber;
+    private Integer likeCount;
 
     private LikeResponseDto(
             String postId,
-            Integer likeNumber
+            Integer likeCount
     ) {
         this.postId = postId;
-        this.likeNumber = likeNumber;
+        this.likeCount = likeCount;
     }
 
     public static LikeResponseDto from(
             PostLike like,
-            Integer likeNumber
+            Integer likeCount
     ) {
         return new LikeResponseDto(
                 like.getPost().getId(),
-                likeNumber
+                likeCount
         );
     }
 }

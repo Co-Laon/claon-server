@@ -18,6 +18,7 @@ import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
+import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
@@ -48,7 +49,7 @@ public class PostService {
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
-    public PostResponseDto findPost(String userId, String postId) {
+    public PostDetailResponseDto findPost(String userId, String postId) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
@@ -71,9 +72,13 @@ public class PostService {
                     );
                 }
         );
+
         IsPrivateValidator.of(post.getWriter().getIsPrivate()).validate();
 
-        return PostResponseDto.from(post, postLikeRepository.countByPost(post));
+        return PostDetailResponseDto.from(
+                post,
+                postLikeRepository.countByPost(post)
+        );
     }
 
     @Transactional
@@ -111,17 +116,15 @@ public class PostService {
                                         () -> new BadRequestException(
                                                 ErrorCode.ROW_DOES_NOT_EXIST,
                                                 "홀드 정보를 찾을 수 없습니다."
-                                        )
-                                ), history.getClimbingCount())
-
-                        )).collect(Collectors.toList());
+                                        )),
+                                history.getClimbingCount())))
+                .collect(Collectors.toList());
 
         List<PostContents> postContentsList = postCreateRequestDto.getContentsList()
                 .stream()
                 .map(dto -> PostContents.of(
                         post,
-                        dto.getUrl()
-                ))
+                        dto.getUrl()))
                 .collect(Collectors.toList());
 
         return PostResponseDto.from(
@@ -155,6 +158,7 @@ public class PostService {
         );
 
         IdEqualValidator.of(post.getWriter().getId(), writer.getId()).validate();
+
         post.delete();
 
         return PostResponseDto.from(

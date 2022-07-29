@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionDto unknownException(Exception exception) {
         GlobalExceptionHandler.log.error("error message", exception);
-        return new ExceptionDto(ErrorCode.INTERNAL_SERVER_ERROR, "Internal server error");
+        return new ExceptionDto(ErrorCode.INTERNAL_SERVER_ERROR, exception.getMessage());
     }
 
     @ExceptionHandler(value = {DataIntegrityViolationException.class})

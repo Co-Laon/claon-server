@@ -1,6 +1,10 @@
 package coLaon.ClaonBack.repository;
 
-import coLaon.ClaonBack.center.domain.*;
+import coLaon.ClaonBack.center.domain.Center;
+import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.center.domain.OperatingTime;
+import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostLike;
@@ -12,12 +16,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -26,26 +28,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class PostLikeRepositoryTest {
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private CenterRepository centerRepository;
-
     @Autowired
     private PostRepository postRepository;
-
     @Autowired
     private PostLikeRepository postLikeRepository;
 
     private User user;
     private Post post;
 
-    private PostLike postLike;
-
     @BeforeEach
-    void setUp(){
+    void setUp() {
         // given
         this.user = User.of(
                 "test@gmail.com",
@@ -84,7 +80,7 @@ public class PostLikeRepositoryTest {
     }
 
     @Test
-    public void successCountByPostIdIn(){
+    public void successCountByPostIdIn() {
         // given
         postLikeRepository.save(PostLike.of(
                 this.user, this.post

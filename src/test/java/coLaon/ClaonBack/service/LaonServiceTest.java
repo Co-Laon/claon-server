@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -144,9 +145,15 @@ public class LaonServiceTest {
         given(this.laonRepository.findAllByUserId("userId", pageable)).willReturn(laons);
 
         // when
-        Pagination<LaonFindResponseDto> loanFindResponseDto = this.laonService.findAllLaon("userId", pageable);
+        Pagination<LaonFindResponseDto> laonFindResponseDto = this.laonService.findAllLaon("userId", pageable);
 
         // then
-        assertThat(loanFindResponseDto.getResults().size()).isEqualTo(laons.getContent().size());
+        assertThat(laonFindResponseDto.getResults())
+                .isNotNull()
+                .extracting(LaonFindResponseDto::getLaonNickname, LaonFindResponseDto::getLaonProfileImage)
+                .containsExactly(
+                        tuple(this.laon.getNickname(), this.laon.getImagePath()),
+                        tuple(this.laon2.getNickname(), this.laon2.getImagePath())
+                );
     }
 }

@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class IsImageValidator extends Validator{
+public class IsImageValidator extends Validator {
     private final MultipartFile multipartFile;
 
     private IsImageValidator(MultipartFile multipartFile) {

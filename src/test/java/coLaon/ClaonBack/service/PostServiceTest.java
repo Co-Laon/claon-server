@@ -16,6 +16,7 @@ import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
+import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
@@ -31,7 +32,6 @@ import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
-import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -77,8 +78,6 @@ public class PostServiceTest {
     ClimbingHistoryRepository climbingHistoryRepository;
     @Mock
     BlockUserRepository blockUserRepository;
-    @Mock
-    LaonRepository laonRepository;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -218,7 +217,8 @@ public class PostServiceTest {
         this.climbingHistory2 = ClimbingHistory.of(
                 "climbingId2",
                 this.post2,
-                holdInfo1
+                holdInfo1,
+                0
         );
 
         this.post2 = Post.of(
@@ -253,36 +253,39 @@ public class PostServiceTest {
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
-
     }
 
     @Test
     @DisplayName("Success case for find post")
     void successFindPost() {
-        //given
+        // given
         given(this.postRepository.findByIdAndIsDeletedFalse("testPostId2")).willReturn(Optional.of(post2));
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
         given(this.blockUserRepository.findBlock("testUserId", user2.getId())).willReturn(Optional.empty());
 
-        //when
-        PostResponseDto postResponseDto = this.postService.findPost("testUserId", "testPostId2");
+        // when
+        PostDetailResponseDto postResponseDto = this.postService.findPost("testUserId", "testPostId2");
 
         // then
-        assertThat(postResponseDto.getContentsList().get(0)).isEqualTo(postContents2.getUrl());
-        assertThat(postResponseDto.getHoldList().get(0).getName()).isEqualTo(holdInfo1.getName());
-        assertThat(postResponseDto.getCenterName()).isEqualTo(center.getName());
+        assertThat(postResponseDto)
+                .isNotNull()
+                .extracting(
+                        post -> post.getContentsList().get(0),
+                        post -> post.getHoldList().get(0).getName(),
+                        PostDetailResponseDto::getCenterName)
+                .contains(postContents2.getUrl(), holdInfo1.getName(), center.getName());
 
     }
 
     @Test
     @DisplayName("Failure case for find post when private user")
     void failFindPostPrivateUser() {
-        //given
+        // given
         given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
         given(this.blockUserRepository.findBlock("testUserId", privateUser.getId())).willReturn(Optional.empty());
 
-        //when
+        // when
         final BadRequestException ex = Assertions.assertThrows(
                 BadRequestException.class,
                 () -> this.postService.findPost("testUserId", "privatePostId")
@@ -296,20 +299,21 @@ public class PostServiceTest {
     @Test
     @DisplayName("Failure case for find post when blocked user")
     void failFindPostBlockUser() {
-        //given
+        // given
         given(this.postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
         given(this.blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(Optional.of(blockUser));
 
-        //when
+        // when
         final BadRequestException ex = Assertions.assertThrows(
                 BadRequestException.class,
                 () -> this.postService.findPost("testUserId", "blockedPostId")
         );
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
-        assertThat(ex.getMessage()).isEqualTo("차단 관계입니다.");
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "차단 관계입니다.");
     }
 
     @Test
@@ -332,40 +336,40 @@ public class PostServiceTest {
             given(this.centerRepository.findById("center1")).willReturn(Optional.of(center));
             given(this.holdInfoRepository.findById("holdId1")).willReturn(Optional.of(holdInfo1));
 
-            mockedPost.when(() ->
-                            Post.of(
-                                    center,
-                                    postCreateRequestDto.getContent(),
-                                    user
-                            ))
-                    .thenReturn(post);
+            mockedPost.when(() -> Post.of(
+                    center,
+                    postCreateRequestDto.getContent(),
+                    user
+            )).thenReturn(post);
+
             given(this.postRepository.save(post)).willReturn(post);
 
-            mockedPostContents.when(() ->
-                            PostContents.of(
-                                    post,
-                                    "test.com/test.png"
-                            ))
-                    .thenReturn(postContents);
+            mockedPostContents.when(() -> PostContents.of(
+                    post,
+                    "test.com/test.png"
+            )).thenReturn(postContents);
+
             given(this.postContentsRepository.save(postContents)).willReturn(postContents);
 
-            mockedClimbingHistory.when(() ->
-                            ClimbingHistory.of(
-                                    post,
-                                    holdInfo1,
-                                    1
-                            ))
-                    .thenReturn(climbingHistory);
+            mockedClimbingHistory.when(() -> ClimbingHistory.of(
+                    post,
+                    holdInfo1,
+                    1
+            )).thenReturn(climbingHistory);
+
             given(this.climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
 
             // when
             PostResponseDto postResponseDto = this.postService.createPost("testUserId", postCreateRequestDto);
 
             // then
-            assertThat(postResponseDto).isNotNull();
-            assertThat(postCreateRequestDto.getCenterId()).isEqualTo(postResponseDto.getCenterId());
-            assertThat(postCreateRequestDto.getContentsList().size()).isEqualTo(1);
-            assertThat(postCreateRequestDto.getClimbingHistories().size()).isEqualTo(1);
+            assertThat(postResponseDto)
+                    .isNotNull()
+                    .extracting(
+                            PostResponseDto::getCenterId,
+                            post -> post.getContentsList().size(),
+                            post -> post.getHoldList().size())
+                    .contains("center1", 1, 1);
         }
     }
 
@@ -395,7 +399,9 @@ public class PostServiceTest {
         );
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.INVALID_FORMAT);
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.INVALID_FORMAT, "이미지 형식이 잘못되었습니다.");
     }
 
     @Test
@@ -411,8 +417,10 @@ public class PostServiceTest {
         PostResponseDto postResponseDto = this.postService.deletePost("testPostId", "testUserId");
 
         // then
-        assertThat(postResponseDto).isNotNull();
-        assertThat(postResponseDto.getIsDeleted()).isEqualTo(true);
+        assertThat(postResponseDto)
+                .isNotNull()
+                .extracting("postId", "isDeleted")
+                .contains("testPostId", true);
     }
 
     @Test
@@ -429,7 +437,9 @@ public class PostServiceTest {
         );
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
     }
 
     @Test
@@ -450,8 +460,10 @@ public class PostServiceTest {
             LikeResponseDto likeResponseDto = this.postService.createLike("testUserId", "testPostId");
 
             // then
-            assertThat(likeResponseDto).isNotNull();
-            assertThat(likeResponseDto.getLikeNumber()).isEqualTo(1);
+            assertThat(likeResponseDto)
+                    .isNotNull()
+                    .extracting("postId", "likeCount")
+                    .contains("testPostId", 1);
         }
     }
 
@@ -467,8 +479,10 @@ public class PostServiceTest {
         LikeResponseDto likeResponseDto = this.postService.deleteLike("testUserId", "testPostId");
 
         // then
-        assertThat(likeResponseDto).isNotNull();
-        assertThat(likeResponseDto.getPostId()).isEqualTo("testPostId");
+        assertThat(likeResponseDto)
+                .isNotNull()
+                .extracting("postId", "likeCount")
+                .contains("testPostId", 0);
     }
 
     @Test
@@ -487,6 +501,12 @@ public class PostServiceTest {
         Pagination<LikeFindResponseDto> likeFindResponseDto = this.postService.findLikeByPost("testUserId", "testPostId", pageable);
 
         // then
-        assertThat(likeFindResponseDto.getResults().size()).isEqualTo(postLikes.getContent().size());
+        assertThat(likeFindResponseDto.getResults())
+                .isNotNull()
+                .extracting(LikeFindResponseDto::getPostId, LikeFindResponseDto::getLikerNickname)
+                .contains(
+                        tuple("testPostId", postLike.getLiker().getNickname()),
+                        tuple("testPostId", postLike2.getLiker().getNickname())
+                );
     }
 }

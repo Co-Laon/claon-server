@@ -29,7 +29,7 @@ public class UserTest {
     }
 
     @Test
-    @DisplayName("success modify user")
+    @DisplayName("Success case for modify user")
     void successModifyUser() {
         // when
         this.user.modifyUser(
@@ -42,16 +42,14 @@ public class UserTest {
         );
 
         // then
-        assertThat(this.user.getNickname()).isEqualTo("newnickname");
-        assertThat(this.user.getMetropolitanActiveArea()).isEqualTo("metro");
-        assertThat(this.user.getBasicLocalActiveArea()).isEqualTo("basic");
-        assertThat(this.user.getImagePath()).isEqualTo("imagepath");
-        assertThat(this.user.getInstagramOAuthId()).isEqualTo("dsfsf");
-        assertThat(this.user.getInstagramUserName()).isEqualTo("dfdf");
+        assertThat(this.user)
+                .extracting("nickname", "metropolitanActiveArea", "basicLocalActiveArea", "imagePath",
+                        "instagramUserName", "instagramOAuthId")
+                .contains("newnickname", "metro", "basic", "imagepath", "dsfsf", "dfdf");
     }
 
     @Test
-    @DisplayName("check iscompletedSignUp User")
+    @DisplayName("Success case for check isCompletedSignUp")
     void checkIsCompletedSignUp() {
         // given # not completed user
         User user = User.createNewUser("cbh1203@naver.com", "2344");

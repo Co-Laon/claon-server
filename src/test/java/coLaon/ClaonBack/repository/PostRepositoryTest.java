@@ -1,6 +1,10 @@
 package coLaon.ClaonBack.repository;
 
-import coLaon.ClaonBack.center.domain.*;
+import coLaon.ClaonBack.center.domain.Center;
+import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.center.domain.OperatingTime;
+import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.repository.PostRepository;
@@ -10,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
@@ -21,13 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class PostRepositoryTest {
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private CenterRepository centerRepository;
-
     @Autowired
     private PostRepository postRepository;
 
@@ -78,6 +78,7 @@ public class PostRepositoryTest {
     public void checkSelectPostIdsByUserId(){
         // when
         List<String> postIds = postRepository.selectPostIdsByUserId(user.getId());
+
         // then
         assertThat(postIds.contains(post.getId())).isTrue();
     }

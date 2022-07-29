@@ -141,6 +141,7 @@ public class UserService {
         );
 
         user.changePublicScope();
+
         return PublicScopeResponseDto.from(userRepository.save(user).getIsPrivate());
     }
 
