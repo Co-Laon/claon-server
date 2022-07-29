@@ -40,6 +40,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mockStatic;
@@ -187,12 +188,20 @@ public class PostCommentServiceTest {
     void successCreateParentComment() {
         try (MockedStatic<PostComment> mockedPostComment = mockStatic(PostComment.class)) {
             // given
-            CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testContent1", null);
+            CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto(
+                    "testContent1",
+                    null
+            );
 
             given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
             given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
-            mockedPostComment.when(() -> PostComment.of("testContent1", this.writer, this.post, null)).thenReturn(this.postComment);
+            mockedPostComment.when(() -> PostComment.of(
+                    "testContent1",
+                    this.writer,
+                    this.post,
+                    null
+            )).thenReturn(this.postComment);
 
             given(this.postCommentRepository.save(this.postComment)).willReturn(this.postComment);
 
@@ -200,8 +209,10 @@ public class PostCommentServiceTest {
             CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", "testPostId", commentRequestDto);
 
             // then
-            assertThat(commentResponseDto).isNotNull();
-            assertThat(commentResponseDto.getContent()).isEqualTo("testContent1");
+            assertThat(commentResponseDto)
+                    .isNotNull()
+                    .extracting("isDeleted", "content")
+                    .contains(false, "testContent1");
         }
     }
 
@@ -216,7 +227,12 @@ public class PostCommentServiceTest {
             given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
-            mockedPostComment.when(() -> PostComment.of("testChildContent1", this.writer, this.post, postComment)).thenReturn(this.childPostComment);
+            mockedPostComment.when(() -> PostComment.of(
+                    "testChildContent1",
+                    this.writer,
+                    this.post,
+                    postComment
+            )).thenReturn(this.childPostComment);
 
             given(this.postCommentRepository.save(this.childPostComment)).willReturn(this.childPostComment);
 
@@ -224,8 +240,10 @@ public class PostCommentServiceTest {
             CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", "testPostId", commentRequestDto);
 
             // then
-            assertThat(commentResponseDto).isNotNull();
-            assertThat(commentResponseDto.getContent()).isEqualTo("testChildContent1");
+            assertThat(commentResponseDto)
+                    .isNotNull()
+                    .extracting("isDeleted", "content", "parentCommentId")
+                    .contains(false, "testChildContent1", "testCommentId");
         }
     }
 
@@ -248,16 +266,16 @@ public class PostCommentServiceTest {
         given(this.postCommentRepository.countAllByParentCommentAndIsDeletedFalse(postComment2)).willReturn((long) children2.size());
 
         // when
-        Pagination<CommentFindResponseDto> CommentFindResponseDto = this.postCommentService.findCommentsByPost("testUserId", "testPostId", pageable);
+        Pagination<CommentFindResponseDto> commentFindResponseDto = this.postCommentService.findCommentsByPost("testUserId", "testPostId", pageable);
 
         // then
-        assertThat(CommentFindResponseDto.getResults().get(0).getCommentCount()).isEqualTo(3);
-        assertThat(CommentFindResponseDto.getResults().get(1).getCommentCount()).isEqualTo(1);
-        assertThat(CommentFindResponseDto).isNotNull();
-        assertThat(CommentFindResponseDto.getResults().size()).isEqualTo(parents.getContent().size());
-        assertThat(CommentFindResponseDto.getResults().get(0).getChildren().size()).isEqualTo(children1.size());
-        assertThat(CommentFindResponseDto.getResults().get(1).getChildren().size()).isEqualTo(children2.size());
-        assertThat(CommentFindResponseDto.getResults().get(0).getChildren().get(0).getContent()).isEqualTo(childPostComment.getContent());
+        assertThat(commentFindResponseDto.getResults())
+                .isNotNull()
+                .extracting(CommentFindResponseDto::getContent, CommentFindResponseDto::getCommentCount)
+                .containsExactly(
+                        tuple("testContent1", 3L),
+                        tuple("testContent2", 1L)
+                );
     }
 
     @Test
@@ -275,9 +293,13 @@ public class PostCommentServiceTest {
         Pagination<ChildCommentResponseDto> commentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testUserId", "testCommentId", pageable);
 
         // then
-        assertThat(commentFindResponseDto).isNotNull();
-        assertThat(commentFindResponseDto.getResults().size()).isEqualTo(children.getContent().size());
-        assertThat(commentFindResponseDto.getResults().get(0).getContent()).isEqualTo(childPostComment.getContent());
+        assertThat(commentFindResponseDto.getResults())
+                .isNotNull()
+                .extracting(ChildCommentResponseDto::getContent, ChildCommentResponseDto::getIsDeleted)
+                .containsExactly(
+                        tuple("testChildContent1", false),
+                        tuple("testChildContent2", false)
+                );
     }
 
     @Test
@@ -295,8 +317,10 @@ public class PostCommentServiceTest {
         CommentResponseDto commentResponseDto = this.postCommentService.updateComment("testUserId", "testCommentId", commentUpdateRequestDto);
 
         // then
-        assertThat(commentResponseDto).isNotNull();
-        assertThat(commentResponseDto.getContent()).isEqualTo("updateContent");
+        assertThat(commentResponseDto)
+                .isNotNull()
+                .extracting("commentId", "content")
+                .contains("testCommentId", "updateContent");
     }
 
     @Test
@@ -315,7 +339,9 @@ public class PostCommentServiceTest {
         );
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
     }
 
     @Test
@@ -331,8 +357,10 @@ public class PostCommentServiceTest {
         CommentResponseDto commentResponseDto = this.postCommentService.deleteComment("testUserId", "testChildId1");
 
         // then
-        assertThat(commentResponseDto).isNotNull();
-        assertThat(commentResponseDto.getIsDeleted()).isEqualTo(true);
+        assertThat(commentResponseDto)
+                .isNotNull()
+                .extracting("commentId", "isDeleted")
+                .contains("testChildId1", true);
     }
 
     @Test
@@ -349,6 +377,8 @@ public class PostCommentServiceTest {
         );
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
     }
 }

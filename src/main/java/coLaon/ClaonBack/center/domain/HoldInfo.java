@@ -3,7 +3,6 @@ package coLaon.ClaonBack.center.domain;
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +12,6 @@ import javax.persistence.Table;
 
 @Entity
 @Getter
-@Setter
 @Table(name = "tb_hold_info")
 @NoArgsConstructor
 public class HoldInfo extends BaseEntity {

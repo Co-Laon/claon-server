@@ -1,16 +1,15 @@
 package coLaon.ClaonBack.user.dto;
 
-import coLaon.ClaonBack.center.dto.HoldInfoKey;
+import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 public class IndividualUserResponseDto {
@@ -26,8 +25,14 @@ public class IndividualUserResponseDto {
     private Boolean isPrivate;
     private List<CenterClimbingHistoryResponseDto> centerClimbingHistories;
 
-
-    private IndividualUserResponseDto(User user, boolean isLaon, Long postCount, Long laonCount, Long likeCount, List<ClimbingHistory> histories) {
+    private IndividualUserResponseDto(
+            User user,
+            Boolean isLaon,
+            Long postCount,
+            Long laonCount,
+            Long likeCount,
+            List<ClimbingHistory> histories
+    ) {
         this.nickname = user.getNickname();
         this.isLaon = isLaon;
         this.postCount = postCount;
@@ -41,8 +46,22 @@ public class IndividualUserResponseDto {
         this.setHistoryDto(histories);
     }
 
-    public static IndividualUserResponseDto from(User user, boolean isLaon, Long postCount, Long laonCount, Long likeCount, List<ClimbingHistory> histories) {
-        return new IndividualUserResponseDto(user, isLaon, postCount, laonCount, likeCount, histories);
+    public static IndividualUserResponseDto from(
+            User user,
+            Boolean isLaon,
+            Long postCount,
+            Long laonCount,
+            Long likeCount,
+            List<ClimbingHistory> histories
+    ) {
+        return new IndividualUserResponseDto(
+                user,
+                isLaon,
+                postCount,
+                laonCount,
+                likeCount,
+                histories
+        );
     }
 
     private void processBlind(User user) {
@@ -56,26 +75,23 @@ public class IndividualUserResponseDto {
     }
 
     private void setHistoryDto(List<ClimbingHistory> histories) {
-        List<CenterClimbingHistoryResponseDto> result = new ArrayList<>();
-        Map<String, Map<HoldInfoKey, Integer>> historyMap = new HashMap<>();
-        for (ClimbingHistory history : histories) {
-            String centerName = history.getPost().getCenter().getName();
-            historyMap.putIfAbsent(centerName, new HashMap<>());
-            Map<HoldInfoKey, Integer> tempHoldInfos = historyMap.get(centerName);
+        Map<String, Map<HoldInfoResponseDto, Integer>> historyMap = histories.stream().collect(
+                Collectors.groupingBy(history -> history.getPost().getCenter().getName(),
+                        Collectors.toMap(
+                                history -> HoldInfoResponseDto.from(history.getHoldInfo()),
+                                ClimbingHistory::getClimbingCount,
+                                Integer::sum
+                        )
+                ));
 
-            HoldInfoKey holdInfoKey = new HoldInfoKey(history.getHoldInfo().getId(), history.getHoldInfo().getImg());
-            tempHoldInfos.putIfAbsent(holdInfoKey, 0);
-            tempHoldInfos.put(holdInfoKey, tempHoldInfos.get(holdInfoKey) + history.getClimbingCount());
-        }
-
-        for (String centerName : historyMap.keySet()) {
-            Map<HoldInfoKey, Integer> holdInfoDtoMap = historyMap.get(centerName);
-            List<ClimbingHistoryResponseDto> dtos = new ArrayList<>();
-            for (HoldInfoKey holdInfoKey : holdInfoDtoMap.keySet()) {
-                dtos.add(new ClimbingHistoryResponseDto(holdInfoKey.getHoldId(), holdInfoKey.getHoldImage(), holdInfoDtoMap.get(holdInfoKey)));
-            }
-            result.add(new CenterClimbingHistoryResponseDto(centerName, dtos));
-        }
-        this.centerClimbingHistories = result;
+        this.centerClimbingHistories = historyMap.entrySet()
+                .stream()
+                .map(entry -> CenterClimbingHistoryResponseDto.from(
+                        entry.getKey(),
+                        entry.getValue().entrySet()
+                                .stream()
+                                .map(en -> ClimbingHistoryResponseDto.from(en.getKey(), en.getValue()))
+                                .collect(Collectors.toList())))
+                .collect(Collectors.toList());
     }
 }

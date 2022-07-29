@@ -87,8 +87,8 @@ public class AuthServiceTest {
         JwtDto result = this.userService.signIn("google", signInRequestDto);
 
         // then
-        assertThat(result).isNotNull();
         assertThat(result)
+                .isNotNull()
                 .extracting("accessToken", "refreshToken")
                 .contains("access-token", "refresh-token");
     }
@@ -139,8 +139,8 @@ public class AuthServiceTest {
             JwtDto result = this.userService.signIn("google", signInRequestDto);
 
             // then
-            assertThat(result).isNotNull();
             assertThat(result)
+                    .isNotNull()
                     .extracting("accessToken", "refreshToken")
                     .contains("access-token", "refresh-token");
         }
@@ -168,8 +168,8 @@ public class AuthServiceTest {
         UserResponseDto userResponseDto = this.userService.signUp(this.user.getId(), signUpRequestDto);
 
         // then
-        assertThat(userResponseDto).isNotNull();
         assertThat(userResponseDto)
+                .isNotNull()
                 .extracting("email", "nickname")
                 .contains("test@gmail.com", "test");
     }

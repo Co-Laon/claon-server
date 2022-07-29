@@ -22,12 +22,18 @@ public class BlockUser extends BaseEntity {
     @JoinColumn(name = "block_user_id", nullable = false)
     private User blockedUser;
 
-    private BlockUser(User user, User blockedUser) {
+    private BlockUser(
+            User user,
+            User blockedUser
+    ) {
         this.user = user;
         this.blockedUser = blockedUser;
     }
 
-    public static BlockUser of(User user, User blockedUser) {
+    public static BlockUser of(
+            User user,
+            User blockedUser
+    ) {
         return new BlockUser(user, blockedUser);
     }
 }

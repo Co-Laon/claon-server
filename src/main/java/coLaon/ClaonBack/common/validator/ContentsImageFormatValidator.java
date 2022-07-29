@@ -2,7 +2,6 @@ package coLaon.ClaonBack.common.validator;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
-import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
 
 import java.util.ArrayList;
@@ -10,8 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ContentsImageFormatValidator extends Validator{
-
+public class ContentsImageFormatValidator extends Validator {
     private final List<PostContentsDto> postContents;
     private final List<String> imageFormat = new ArrayList<>(Arrays.asList("png", "jpg", "jpeg"));
 
@@ -42,6 +40,5 @@ public class ContentsImageFormatValidator extends Validator{
         if (this.next != null) {
             this.next.validate();
         }
-
     }
 }

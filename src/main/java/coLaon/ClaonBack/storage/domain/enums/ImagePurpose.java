@@ -2,9 +2,11 @@ package coLaon.ClaonBack.storage.domain.enums;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import lombok.Getter;
 
 import java.util.Arrays;
 
+@Getter
 public enum ImagePurpose {
     PROFILE("profile");
 

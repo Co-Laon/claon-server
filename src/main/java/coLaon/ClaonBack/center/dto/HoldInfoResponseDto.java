@@ -5,23 +5,32 @@ import lombok.Data;
 
 @Data
 public class HoldInfoResponseDto {
+    private String id;
     private String name;
-    private String img;
+    private String image;
 
     private HoldInfoResponseDto(
+            String id,
             String name,
-            String img
+            String image
     ) {
+        this.id = id;
         this.name = name;
-        this.img = img;
+        this.image = image;
     }
 
     public static HoldInfoResponseDto from(
             HoldInfo holdInfo
     ) {
         return new HoldInfoResponseDto(
+                holdInfo.getId(),
                 holdInfo.getName(),
                 holdInfo.getImg()
         );
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode() * this.name.hashCode() * this.image.hashCode();
     }
 }

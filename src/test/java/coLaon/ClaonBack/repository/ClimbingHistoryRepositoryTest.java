@@ -1,6 +1,11 @@
 package coLaon.ClaonBack.repository;
 
-import coLaon.ClaonBack.center.domain.*;
+import coLaon.ClaonBack.center.domain.Center;
+import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.center.domain.HoldInfo;
+import coLaon.ClaonBack.center.domain.OperatingTime;
+import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
@@ -13,9 +18,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import java.util.List;
 import java.util.Set;
 
@@ -44,8 +49,7 @@ public class ClimbingHistoryRepositoryTest {
     private Post post;
 
     @BeforeEach
-    void setUp(){
-        // given
+    void setUp() {
         this.user = User.of(
                 "test@gmail.com",
                 "1234567890",
@@ -80,6 +84,7 @@ public class ClimbingHistoryRepositoryTest {
                 Set.of(),
                 Set.of()
         );
+
         // Setting climbing History
         HoldInfo holdInfo = HoldInfo.of("name", "dfdf", center);
         holdInfoRepository.save(holdInfo);
@@ -89,7 +94,7 @@ public class ClimbingHistoryRepositoryTest {
     }
 
     @Test
-    public void successFindByPostIds(){
+    public void successFindByPostIds() {
         // when
         List<ClimbingHistory> histories = climbingHistoryRepository.findByPostIds(List.of(this.post.getId()));
 

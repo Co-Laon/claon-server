@@ -50,8 +50,7 @@ public class CenterService {
                 )
         );
 
-        IsAdminValidator validator = IsAdminValidator.of(admin.getEmail());
-        validator.validate();
+        IsAdminValidator.of(admin.getEmail()).validate();
 
         Center center = this.centerRepository.save(
                 Center.of(
@@ -88,8 +87,7 @@ public class CenterService {
                                         holdInfo.getName(),
                                         holdInfo.getImg(),
                                         center
-                                )
-                        ))
+                                )))
                         .collect(Collectors.toList())
         );
     }
@@ -170,7 +168,10 @@ public class CenterService {
 
         IdEqualValidator.of(review.getWriter().getId(), writer.getId()).validate();
 
-        review.update(updateRequestDto.getRank(), updateRequestDto.getContent());
+        review.update(
+                updateRequestDto.getRank(),
+                updateRequestDto.getContent()
+        );
 
         return ReviewResponseDto.from(reviewRepository.save(review));
     }

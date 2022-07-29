@@ -5,7 +5,6 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 @Getter
 public enum OAuth2Provider {

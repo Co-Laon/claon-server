@@ -6,7 +6,9 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 public class IsPrivateValidator extends Validator {
     private final Boolean isPrivate;
 
-    private IsPrivateValidator(Boolean isPrivate) { this.isPrivate = isPrivate; }
+    private IsPrivateValidator(Boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
 
     public static IsPrivateValidator of(Boolean isPrivate) {
         return new IsPrivateValidator(isPrivate);

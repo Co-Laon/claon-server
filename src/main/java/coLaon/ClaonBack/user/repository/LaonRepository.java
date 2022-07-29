@@ -22,7 +22,6 @@ public interface LaonRepository extends JpaRepository<Laon, String> {
             "FROM TB_LAON AS l " +
             "WHERE l.user_id = :userId", nativeQuery = true)
     Page<Laon> findAllByUserId(@Param("userId") String userId, Pageable pageable);
-    Long countByUserId(String userId);
 
     @Query(value = "SELECT l.laon_id " +
             "FROM TB_LAON AS l " +

@@ -44,10 +44,8 @@ public class Post extends BaseEntity {
     ) {
         this.center = center;
         this.content = content;
-        this.isDeleted = false;
         this.writer = writer;
-        this.contentsSet = Set.of();
-        this.climbingHistorySet = Set.of();
+        this.isDeleted = false;
     }
 
     private Post(

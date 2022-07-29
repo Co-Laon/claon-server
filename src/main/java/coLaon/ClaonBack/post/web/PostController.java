@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.post.web;
 
 import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.service.PostCommentService;
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
@@ -49,7 +50,7 @@ public class PostController {
 
     @GetMapping(value = "/{postId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public PostResponseDto getPost(
+    public PostDetailResponseDto getPost(
             @AuthenticationPrincipal String userId,
             @PathVariable String postId
     ) {
