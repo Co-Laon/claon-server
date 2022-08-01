@@ -11,19 +11,23 @@ import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
+import coLaon.ClaonBack.center.dto.ReviewFindResponseDto;
+import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
 import coLaon.ClaonBack.common.validator.IsAdminValidator;
-import coLaon.ClaonBack.post.repository.ReviewRepository;
+import coLaon.ClaonBack.center.repository.ReviewRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +41,7 @@ public class CenterService {
     private final CenterRepository centerRepository;
     private final HoldInfoRepository holdInfoRepository;
     private final ReviewRepository reviewRepository;
+    private final PaginationFactory paginationFactory;
 
     @Transactional
     public CenterResponseDto create(
@@ -114,6 +119,18 @@ public class CenterService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<String> searchCenter(String userId, String keyword) {
+        userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        return centerRepository.searchCenter(keyword);
+    }
+
     @Transactional
     public ReviewResponseDto createReview(
             String userId,
@@ -143,6 +160,10 @@ public class CenterService {
                 }
         );
 
+        Integer reviewCount = reviewRepository.countByCenter(center);
+        List<Integer> ranks = reviewRepository.selectRanksByCenterId(centerId);
+        center.addRank(ranks, reviewCreateRequestDto.getRank(), reviewCount);
+
         return ReviewResponseDto.from(
                 reviewRepository.save(
                         CenterReview.of(
@@ -168,7 +189,7 @@ public class CenterService {
                 )
         );
 
-        CenterReview review = reviewRepository.findByIdAndIsDeletedFalse(reviewId).orElseThrow(
+        CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "리뷰 정보를 찾을 수 없습니다."
@@ -177,10 +198,11 @@ public class CenterService {
 
         IdEqualValidator.of(review.getWriter().getId(), writer.getId()).validate();
 
-        review.update(
-                updateRequestDto.getRank(),
-                updateRequestDto.getContent()
-        );
+        Integer reviewCount = reviewRepository.countByCenter(review.getCenter());
+        List<Integer> ranks = reviewRepository.selectRanksByCenterId(review.getCenter().getId());
+        review.getCenter().changeRank(ranks, review.getRank(), updateRequestDto.getRank(), reviewCount);
+
+        review.update(updateRequestDto.getRank(), updateRequestDto.getContent());
 
         return ReviewResponseDto.from(reviewRepository.save(review));
     }
@@ -197,7 +219,7 @@ public class CenterService {
                 )
         );
 
-        CenterReview review = reviewRepository.findByIdAndIsDeletedFalse(reviewId).orElseThrow(
+        CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "리뷰 정보를 찾을 수 없습니다."
@@ -206,13 +228,17 @@ public class CenterService {
 
         IdEqualValidator.of(review.getWriter().getId(), writer.getId()).validate();
 
-        review.delete();
+        Integer reviewCount = reviewRepository.countByCenter(review.getCenter());
+        List<Integer> ranks = reviewRepository.selectRanksByCenterId(review.getCenter().getId());
+        review.getCenter().deleteRank(ranks, review.getRank(), reviewCount);
 
-        return ReviewResponseDto.from(reviewRepository.save(review));
+        reviewRepository.delete(review);
+
+        return ReviewResponseDto.from(review);
     }
 
-    @Transactional(readOnly = true)
-    public List<String> searchCenter(String userId, String keyword) {
+    @Transactional
+    public ReviewListFindResponseDto findReview(String userId, String centerId, Pageable pageable) {
         userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
@@ -220,6 +246,22 @@ public class CenterService {
                 )
         );
 
-        return centerRepository.searchCenter(keyword);
+        Center center = centerRepository.findById(centerId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "암장 정보를 찾을 수 없습니다."
+                )
+        );
+
+        List<Integer> ranks = reviewRepository.selectRanksByCenterId(centerId);
+        center.updateRank((float) ranks.stream().mapToInt(r -> r).average().orElse(0));
+
+        return ReviewListFindResponseDto.from(
+                this.paginationFactory.create(
+                        reviewRepository.findByCenter(center.getId(), userId, pageable)
+                                .map(ReviewFindResponseDto::from)
+                ),
+                center
+        );
     }
 }

@@ -4,10 +4,13 @@ import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
+import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.service.CenterService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -83,5 +86,15 @@ public class CenterController {
             @PathVariable String reviewId
     ) {
         return this.centerService.deleteReview(userId, reviewId);
+    }
+
+    @GetMapping(value = "/{centerId}/review")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ReviewListFindResponseDto findReviewByCenter(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String centerId,
+            @PageableDefault(size = 5) final Pageable pageable
+    ) {
+        return this.centerService.findReview(userId, centerId, pageable);
     }
 }

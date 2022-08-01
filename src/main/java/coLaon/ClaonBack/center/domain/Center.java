@@ -49,6 +49,8 @@ public class Center extends BaseEntity {
     @Convert(converter = SectorInfoListConverter.class)
     @Column(name = "sector_info")
     private List<SectorInfo> sectorInfo;
+    @Column(name = "review_rank")
+    private float reviewRank;
 
     private Center(
             String name,
@@ -176,5 +178,26 @@ public class Center extends BaseEntity {
                 holdInfoImg,
                 sectorInfoList
         );
+    }
+
+    public void addRank(List<Integer> ranks, Integer addRank, Integer reviewerCount) {
+        this.reviewRank = (float) (ranks.stream().reduce(0, Integer::sum) + addRank) / (reviewerCount + 1);
+    }
+
+    public void changeRank(List<Integer> ranks, Integer rank, Integer updateRank, Integer reviewerCount) {
+        this.reviewRank = (float) (ranks.stream().reduce(0, Integer::sum) - rank + updateRank) / reviewerCount;
+    }
+
+    public void deleteRank(List<Integer> ranks, Integer deleteRank, Integer reviewerCount) {
+        if (reviewerCount == 1) {
+            this.reviewRank = 0;
+        }
+        else {
+            this.reviewRank = (float) (ranks.stream().reduce(0, Integer::sum) - deleteRank) / (reviewerCount - 1);
+        }
+    }
+
+    public void updateRank(float rank) {
+        this.reviewRank = rank;
     }
 }
