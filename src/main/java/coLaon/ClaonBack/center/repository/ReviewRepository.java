@@ -32,6 +32,24 @@ public interface ReviewRepository extends JpaRepository<CenterReview, String> {
             "WHERE bu.block_user_id = :userId " +
             "ORDER BY created_at ASC", nativeQuery = true)
     Page<CenterReview> findByCenter(@Param("centerId")String centerId, @Param("userId")String userId, Pageable pageable);
+    @Query(value = "SELECT COUNT(cr) " +
+            "FROM ( " +
+            "SELECT cr " +
+            "FROM TB_CENTER_REVIEW AS cr " +
+            "WHERE cr.center_id = :centerId " +
+            "EXCEPT " +
+            "SELECT cr " +
+            "FROM TB_CENTER_REVIEW AS cr " +
+            "RIGHT JOIN TB_BLOCK_USER AS bu " +
+            "ON cr.user_id = bu.block_user_id " +
+            "WHERE bu.user_id = :userId " +
+            "EXCEPT " +
+            "SELECT cr " +
+            "FROM TB_CENTER_REVIEW AS cr " +
+            "RIGHT JOIN TB_BLOCK_USER AS bu " +
+            "ON cr.user_id = bu.user_id " +
+            "WHERE bu.block_user_id = :userId) a" , nativeQuery = true)
+    Integer selectCountByCenter(@Param("centerId")String centerId, @Param("userId")String userId);
     Integer countByCenter(Center center);
     @Query(value = "SELECT cr.rank " +
             "FROM TB_CENTER_REVIEW AS cr " +

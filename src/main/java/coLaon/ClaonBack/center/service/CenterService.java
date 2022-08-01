@@ -8,13 +8,16 @@ import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
+import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
+import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
 import coLaon.ClaonBack.center.dto.ReviewFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
+import coLaon.ClaonBack.center.repository.BookmarkCenterRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
@@ -24,6 +27,7 @@ import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
 import coLaon.ClaonBack.common.validator.IsAdminValidator;
 import coLaon.ClaonBack.center.repository.ReviewRepository;
+import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +45,8 @@ public class CenterService {
     private final CenterRepository centerRepository;
     private final HoldInfoRepository holdInfoRepository;
     private final ReviewRepository reviewRepository;
+    private final PostRepository postRepository;
+    private final BookmarkCenterRepository bookmarkCenterRepository;
     private final PaginationFactory paginationFactory;
 
     @Transactional
@@ -98,6 +104,35 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
+    public CenterDetailResponseDto findCenter(String userId, String centerId) {
+        userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        Center center = centerRepository.findById(centerId).orElseThrow(
+                () -> new BadRequestException(
+                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        "암장 정보를 찾을 수 없습니다."
+                )
+        );
+
+        boolean isBookmarked = bookmarkCenterRepository.findByUserIdAndCenterId(userId, centerId).isPresent();
+        Integer postCount = postRepository.selectCountByCenter(centerId, userId);
+        Integer reviewCount = reviewRepository.selectCountByCenter(centerId, userId);
+
+        return CenterDetailResponseDto.from(
+                center,
+                holdInfoRepository.findAllByCenter(center),
+                isBookmarked,
+                postCount,
+                reviewCount
+        );
+    }
+
+    @Transactional(readOnly = true)
     public List<HoldInfoResponseDto> findHoldInfoByCenterId(String userId, String centerId) {
         userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
@@ -120,7 +155,7 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public List<String> searchCenter(String userId, String keyword) {
+    public List<CenterSearchResponseDto> searchCenter(String userId, String keyword) {
         userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
@@ -128,7 +163,10 @@ public class CenterService {
                 )
         );
 
-        return centerRepository.searchCenter(keyword);
+        return centerRepository.searchCenter(keyword)
+                .stream()
+                .map(CenterSearchResponseDto::from)
+                .collect(Collectors.toList());
     }
 
     @Transactional

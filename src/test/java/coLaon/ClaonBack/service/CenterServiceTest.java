@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.service;
 
+import coLaon.ClaonBack.center.domain.BookmarkCenter;
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.CenterReview;
@@ -8,8 +9,10 @@ import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
+import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterImgDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
+import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.ChargeDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
 import coLaon.ClaonBack.center.dto.OperatingTimeDto;
@@ -19,6 +22,7 @@ import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.dto.SectorInfoDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
+import coLaon.ClaonBack.center.repository.BookmarkCenterRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.service.CenterService;
@@ -28,6 +32,7 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.center.repository.ReviewRepository;
+import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -64,6 +69,10 @@ public class CenterServiceTest {
     HoldInfoRepository holdInfoRepository;
     @Mock
     ReviewRepository reviewRepository;
+    @Mock
+    BookmarkCenterRepository bookmarkCenterRepository;
+    @Mock
+    PostRepository postRepository;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -76,6 +85,7 @@ public class CenterServiceTest {
     private Center center, center2;
     private HoldInfo holdInfo, holdInfo2;
     private CenterReview review1, review2;
+    private BookmarkCenter bookmarkCenter;
 
     @BeforeEach
     void setUp() {
@@ -153,6 +163,7 @@ public class CenterServiceTest {
         this.holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
         this.review1 = CenterReview.of("review1Id", 5, "testContent1", this.user, this.center, LocalDateTime.now(), LocalDateTime.now());
         this.review2 = CenterReview.of("review2Id", 4, "testContent2", this.user, this.center, LocalDateTime.now(), LocalDateTime.now());
+        this.bookmarkCenter = BookmarkCenter.of("bookMarkId", center, user);
     }
 
     @Test
@@ -248,6 +259,27 @@ public class CenterServiceTest {
         assertThat(ex)
                 .extracting("errorCode", "message")
                 .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
+    }
+
+    @Test
+    @DisplayName("Success case for find center")
+    void successFindCenter() {
+        // given
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
+        given(this.bookmarkCenterRepository.findByUserIdAndCenterId("userId", "centerId")).willReturn(Optional.of(bookmarkCenter));
+        given(this.postRepository.selectCountByCenter("centerId", "userId")).willReturn(0);
+        given(this.reviewRepository.selectCountByCenter("centerId", "userId")).willReturn(2);
+        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
+
+        //when
+        CenterDetailResponseDto centerResponseDto = centerService.findCenter("userId", "centerId");
+
+        //then
+        assertThat(centerResponseDto)
+                .isNotNull()
+                .extracting(CenterDetailResponseDto::getAddress, CenterDetailResponseDto::getHoldInfoImg)
+                .containsExactly(center.getAddress(), center.getHoldInfoImg());
     }
 
     @Test
@@ -427,14 +459,15 @@ public class CenterServiceTest {
     void successSearchCenterByKeyword() {
         // given
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        given(this.centerRepository.searchCenter("te")).willReturn(List.of(this.center.getName(), this.center2.getName()));
+        given(this.centerRepository.searchCenter("te")).willReturn(List.of(this.center, this.center2));
 
         // when
-        List<String> centerNicknameList = this.centerService.searchCenter("userId", "te");
+        List<CenterSearchResponseDto> centerSearchResponseDto = this.centerService.searchCenter("userId", "te");
 
         // then
-        assertThat(centerNicknameList)
+        assertThat(centerSearchResponseDto)
                 .isNotNull()
+                .extracting(CenterSearchResponseDto::getName)
                 .contains(this.center.getName(), this.center2.getName());
     }
 }

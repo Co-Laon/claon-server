@@ -2,7 +2,9 @@ package coLaon.ClaonBack.center.web;
 
 import coLaon.ClaonBack.center.dto.BookmarkCenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
+import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
+import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
 import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
@@ -44,9 +46,18 @@ public class CenterController {
         return this.centerService.create(userId, centerCreateRequestDto);
     }
 
+    @GetMapping(value = "/{centerId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public CenterDetailResponseDto findCenter(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String centerId
+    ) {
+        return this.centerService.findCenter(userId, centerId);
+    }
+
     @GetMapping(value = "/name/{keyword}")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<String> searchCenter(
+    public List<CenterSearchResponseDto> searchCenter(
             @AuthenticationPrincipal String userId,
             @PathVariable String keyword
     ) {
