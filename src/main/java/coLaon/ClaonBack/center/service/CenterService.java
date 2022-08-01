@@ -134,6 +134,15 @@ public class CenterService {
                 )
         );
 
+        this.reviewRepository.findByUserIdAndCenterId(writer.getId(), center.getId()).ifPresent(
+                review -> {
+                    throw new BadRequestException(
+                            ErrorCode.ROW_ALREADY_EXIST,
+                            "이미 작성된 리뷰가 존재합니다."
+                    );
+                }
+        );
+
         return ReviewResponseDto.from(
                 reviewRepository.save(
                         CenterReview.of(

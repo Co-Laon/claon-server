@@ -21,6 +21,7 @@ import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.service.CenterService;
+import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.repository.ReviewRepository;
@@ -280,6 +281,27 @@ public class CenterServiceTest {
                     .extracting("content", "centerId")
                     .contains("testContent", "center id");
         }
+    }
+
+    @Test
+    @DisplayName("Failure case for create center review for existing own review in center")
+    void failureCreateReview_alreadyExist() {
+        ReviewCreateRequestDto reviewCreateRequestDto = new ReviewCreateRequestDto(5, "testContent");
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.centerRepository.findById("center id")).willReturn(Optional.of(center));
+        given(this.reviewRepository.findByUserIdAndCenterId(user.getId(), center.getId())).willReturn(Optional.of(review));
+
+        // when
+        final BadRequestException ex = Assertions.assertThrows(
+                BadRequestException.class,
+                () -> this.centerService.createReview("userId", "center id", reviewCreateRequestDto)
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.ROW_ALREADY_EXIST, "이미 작성된 리뷰가 존재합니다.");
     }
 
     @Test
