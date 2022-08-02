@@ -20,6 +20,7 @@ import coLaon.ClaonBack.post.dto.ChildCommentResponseDto;
 import coLaon.ClaonBack.post.repository.PostCommentRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +54,8 @@ public class PostCommentServiceTest {
     PostCommentRepository postCommentRepository;
     @Mock
     PostRepository postRepository;
+    @Mock
+    BlockUserRepository blockUserRepository;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -264,6 +267,7 @@ public class PostCommentServiceTest {
         given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment2)).willReturn(children2);
         given(this.postCommentRepository.countAllByParentCommentAndIsDeletedFalse(postComment)).willReturn((long) children1.size());
         given(this.postCommentRepository.countAllByParentCommentAndIsDeletedFalse(postComment2)).willReturn((long) children2.size());
+        given(this.blockUserRepository.findBlock("testUserId", writer.getId())).willReturn(Optional.empty());
 
         // when
         Pagination<CommentFindResponseDto> commentFindResponseDto = this.postCommentService.findCommentsByPost("testUserId", "testPostId", pageable);
@@ -288,6 +292,7 @@ public class PostCommentServiceTest {
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
         given(this.postCommentRepository.findByIdAndIsDeletedFalse("testCommentId")).willReturn(Optional.of(postComment));
         given(this.postCommentRepository.findAllByParentCommentAndIsDeletedFalse(postComment, pageable)).willReturn(children);
+        given(this.blockUserRepository.findBlock("testUserId", writer.getId())).willReturn(Optional.empty());
 
         // when
         Pagination<ChildCommentResponseDto> commentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testUserId", "testCommentId", pageable);

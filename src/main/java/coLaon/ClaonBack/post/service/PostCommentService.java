@@ -16,6 +16,7 @@ import coLaon.ClaonBack.post.dto.ChildCommentResponseDto;
 import coLaon.ClaonBack.post.repository.PostCommentRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ public class PostCommentService {
     private final UserRepository userRepository;
     private final PostCommentRepository postCommentRepository;
     private final PostRepository postRepository;
+    private final BlockUserRepository blockUserRepository;
     private final PaginationFactory paginationFactory;
 
     @Transactional
@@ -73,7 +75,7 @@ public class PostCommentService {
 
     @Transactional(readOnly = true)
     public Pagination<CommentFindResponseDto> findCommentsByPost(String userId, String postId, Pageable pageable) {
-        userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
@@ -90,17 +92,17 @@ public class PostCommentService {
         return this.paginationFactory.create(
                 postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalse(post, pageable)
                         .map(parent ->
-                                CommentFindResponseDto.from(
-                                        parent,
-                                        postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(parent),
-                                        postCommentRepository.countAllByParentCommentAndIsDeletedFalse(parent)
-                                ))
-        );
+                                blockUserRepository.findBlock(user.getId(), parent.getWriter().getId()).isEmpty() ?
+                                        CommentFindResponseDto.from(
+                                                parent,
+                                                postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(parent),
+                                                postCommentRepository.countAllByParentCommentAndIsDeletedFalse(parent)) : null
+                        ));
     }
 
     @Transactional(readOnly = true)
     public Pagination<ChildCommentResponseDto> findAllChildCommentsByParent(String userId, String parentId, Pageable pageable) {
-        userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
@@ -116,8 +118,9 @@ public class PostCommentService {
 
         return this.paginationFactory.create(
                 postCommentRepository.findAllByParentCommentAndIsDeletedFalse(postComment, pageable)
-                        .map(ChildCommentResponseDto::from)
-        );
+                        .map(child -> blockUserRepository.findBlock(user.getId(), child.getWriter().getId()).isEmpty() ?
+                                ChildCommentResponseDto.from(child) : null
+                        ));
     }
 
     @Transactional
