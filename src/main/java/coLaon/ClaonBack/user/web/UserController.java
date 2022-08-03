@@ -51,10 +51,10 @@ public class UserController {
         return userService.modifyUser(userId, dto);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/{userNickname}")
     @ResponseStatus(value = HttpStatus.OK)
-    public IndividualUserResponseDto getPublicUser(@AuthenticationPrincipal String requestUserId, @PathVariable String userId) {
-        return userService.getOtherUserInformation(requestUserId, userId);
+    public IndividualUserResponseDto getPublicUser(@AuthenticationPrincipal String userId, @PathVariable String userNickname) {
+        return userService.getOtherUserInformation(userId, userNickname);
     }
 
     @PostMapping(value = "/{blockNickname}/block")

@@ -223,14 +223,15 @@ public class UserServiceTest {
     @DisplayName("Success case for retrieving single other user")
     void successRetrieveUser() {
         // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
+        given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(user));
         given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
-        given(this.laonRepository.getLaonIdsByUserId("userId")).willReturn(Set.of("publicUserId"));
+        given(this.laonRepository.getUserIdsByLaonId("userId")).willReturn(Set.of("publicUserId"));
         given(this.climbingHistoryRepository.findByPostIds(this.postIds)).willReturn(List.of(this.climbingHistory));
 
         // when
-        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userId");
+        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userNickname");
 
         // then
         assertThat(userResponseDto)
@@ -257,13 +258,14 @@ public class UserServiceTest {
     @DisplayName("Success case for retrieving single other private user")
     void successRetrievePrivateUser() {
         // given
-        given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
+        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
+        given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(privateUser));
         given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
-        given(this.laonRepository.getLaonIdsByUserId("privateUserId")).willReturn(new HashSet<>());
+        given(this.laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(new HashSet<>());
 
         // when
-        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "privateUserId");
+        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userNickname");
 
         // then
         assertThat(userResponseDto)

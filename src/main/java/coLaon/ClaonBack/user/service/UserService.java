@@ -158,19 +158,29 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public IndividualUserResponseDto getOtherUserInformation(String requestUserId, String userId) {
-        User user = this.userRepository.findById(userId).orElseThrow(() -> {
+    public IndividualUserResponseDto getOtherUserInformation(String userId, String userNickname) {
+        this.userRepository.findById(userId).orElseThrow(() -> {
             throw new UnauthorizedException(
                     ErrorCode.USER_DOES_NOT_EXIST,
                     "이용자를 찾을 수 없습니다."
             );
         });
-        List<String> postIds = this.postRepository.selectPostIdsByUserId(userId);
+
+        User user = this.userRepository.findByNickname(userNickname).orElseThrow(() -> {
+            throw new BadRequestException(
+                    ErrorCode.ROW_DOES_NOT_EXIST,
+                    "이용자를 찾을 수 없습니다."
+            );
+        });
+
+        List<String> postIds = this.postRepository.selectPostIdsByUserId(user.getId());
         Long postCount = (long) postIds.size();
         Long postLikeCount = this.postLikeRepository.countByPostIdIn(postIds);
-        Set<String> laonIds = this.laonRepository.getLaonIdsByUserId(userId);
-        Long laonCount = (long) laonIds.size();
-        boolean isLaon = laonIds.contains(requestUserId);
+        
+        Set<String> userIds = this.laonRepository.getUserIdsByLaonId(user.getId());
+        Long laonCount = (long) userIds.size();
+
+        boolean isLaon = userIds.contains(userId);
 
         List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
         return IndividualUserResponseDto.from(user, isLaon, postCount, laonCount, postLikeCount, climbingHistories);
