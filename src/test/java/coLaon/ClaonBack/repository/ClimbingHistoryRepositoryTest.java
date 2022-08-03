@@ -81,7 +81,7 @@ public class ClimbingHistoryRepositoryTest {
                 center,
                 "testContent1",
                 user,
-                Set.of(),
+                List.of(),
                 Set.of()
         );
 

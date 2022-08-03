@@ -7,6 +7,7 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.ContentsImageFormatValidator;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
@@ -20,6 +21,7 @@ import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
@@ -28,6 +30,7 @@ import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,13 +42,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostService {
     private final UserRepository userRepository;
+    private final BlockUserRepository blockUserRepository;
     private final PostRepository postRepository;
     private final PostContentsRepository postContentsRepository;
     private final PostLikeRepository postLikeRepository;
     private final HoldInfoRepository holdInfoRepository;
     private final CenterRepository centerRepository;
     private final ClimbingHistoryRepository climbingHistoryRepository;
-    private final BlockUserRepository blockUserRepository;
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
@@ -248,5 +251,32 @@ public class PostService {
                 postLikeRepository.findAllByPost(post, pageable)
                         .map(LikeFindResponseDto::from)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PostThumbnailResponseDto> getUserPosts(String loginedUserId, String targetUserNickname, Pageable pageable){
+        User targetUser = userRepository.findByNickname(targetUserNickname).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "요청한 사용자가 존재하지 않습니다. "
+                )
+        );
+
+        // my page
+        if (loginedUserId.equals(targetUser.getId())) {
+            postRepository.findByWriterOrderByCreatedAtDesc(targetUser, pageable).map(PostThumbnailResponseDto::from);
+        }
+
+        if (targetUser.getIsPrivate()){
+            throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "해당 사용자는 비공개 입니다. ");
+        }
+
+        blockUserRepository.findByUserIdAndBlockId(targetUser.getId(), loginedUserId).ifPresent(
+                (blockUser -> {
+                    throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 사용자입니다. ");
+                })
+        );
+
+        return postRepository.findByWriterOrderByCreatedAtDesc(targetUser, pageable).map(PostThumbnailResponseDto::from);
     }
 }

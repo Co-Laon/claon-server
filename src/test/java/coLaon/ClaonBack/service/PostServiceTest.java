@@ -13,13 +13,7 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
-import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
-import coLaon.ClaonBack.post.dto.PostContentsDto;
-import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
-import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
-import coLaon.ClaonBack.post.dto.PostResponseDto;
-import coLaon.ClaonBack.post.dto.LikeResponseDto;
-import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
+import coLaon.ClaonBack.post.dto.*;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
@@ -65,6 +59,8 @@ public class PostServiceTest {
     @Mock
     UserRepository userRepository;
     @Mock
+    BlockUserRepository blockUserRepository;
+    @Mock
     PostRepository postRepository;
     @Mock
     PostLikeRepository postLikeRepository;
@@ -76,8 +72,6 @@ public class PostServiceTest {
     HoldInfoRepository holdInfoRepository;
     @Mock
     ClimbingHistoryRepository climbingHistoryRepository;
-    @Mock
-    BlockUserRepository blockUserRepository;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -171,7 +165,7 @@ public class PostServiceTest {
                 center,
                 "testContent1",
                 user,
-                Set.of(),
+                List.of(),
                 Set.of(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -226,7 +220,7 @@ public class PostServiceTest {
                 center,
                 "testContent2",
                 user2,
-                Set.of(postContents2),
+                List.of(postContents2),
                 Set.of(climbingHistory2),
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -237,7 +231,7 @@ public class PostServiceTest {
                 center,
                 "testContent3",
                 blockedUser,
-                Set.of(),
+                List.of(),
                 Set.of(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -248,7 +242,7 @@ public class PostServiceTest {
                 center,
                 "testContent4",
                 privateUser,
-                Set.of(),
+                List.of(),
                 Set.of(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -508,5 +502,23 @@ public class PostServiceTest {
                         tuple("testPostId", postLike.getLiker().getNickname()),
                         tuple("testPostId", postLike2.getLiker().getNickname())
                 );
+    }
+
+    @Test
+    @DisplayName("Success case for find posts by user nickname")
+    void successFindPosts(){
+        // given
+        String loginedUserId = this.user.getId();
+        Post samplePost = Post.of(this.center, "Helloworld", this.user2, List.of(), Set.of());
+        Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findByNickname(this.user2.getNickname())).willReturn(Optional.of(this.user2));
+        given(this.blockUserRepository.findByUserIdAndBlockId(this.user2.getId(), loginedUserId)).willReturn(Optional.empty());
+        given(this.postRepository.findByWriterOrderByCreatedAtDesc(this.user2, pageable)).willReturn(new PageImpl<>(List.of(samplePost)));
+
+        // when
+        Page<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(loginedUserId, this.user2.getNickname(), pageable);
+
+        // then
+        assertThat(dtos.getTotalElements()).isEqualTo(1L);
     }
 }
