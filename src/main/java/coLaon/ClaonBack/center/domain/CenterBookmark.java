@@ -5,7 +5,6 @@ import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -13,9 +12,9 @@ import javax.persistence.Table;
 
 @Entity
 @Getter
-@Table(name = "tb_bookmark_center")
+@Table(name = "tb_center_bookmark")
 @NoArgsConstructor
-public class BookmarkCenter extends BaseEntity {
+public class CenterBookmark extends BaseEntity {
     @ManyToOne(targetEntity = Center.class)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
@@ -23,7 +22,7 @@ public class BookmarkCenter extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private BookmarkCenter(
+    private CenterBookmark(
             Center center,
             User user
     ) {
@@ -31,7 +30,7 @@ public class BookmarkCenter extends BaseEntity {
         this.user = user;
     }
 
-    private BookmarkCenter(
+    private CenterBookmark(
             String id,
             Center center,
             User user
@@ -41,19 +40,19 @@ public class BookmarkCenter extends BaseEntity {
         this.user = user;
     }
 
-    public static BookmarkCenter of(
+    public static CenterBookmark of(
             Center center,
             User user
     ) {
-        return new BookmarkCenter(center, user);
+        return new CenterBookmark(center, user);
     }
 
-    public static BookmarkCenter of(
+    public static CenterBookmark of(
             String id,
             Center center,
             User user
     ) {
-        return new BookmarkCenter(
+        return new CenterBookmark(
                 id,
                 center,
                 user

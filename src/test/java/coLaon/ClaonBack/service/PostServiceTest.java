@@ -14,27 +14,23 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
-import coLaon.ClaonBack.post.dto.LikeResponseDto;
-import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
+import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
-import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
-import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +40,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -55,9 +50,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -79,13 +73,10 @@ public class PostServiceTest {
     HoldInfoRepository holdInfoRepository;
     @Mock
     ClimbingHistoryRepository climbingHistoryRepository;
-    @Spy
-    PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     PostService postService;
 
-    private PostLike postLike, postLike2;
     private User user, user2, blockedUser, privateUser;
     private Post post, post2, blockedPost, privatePost;
     private PostContents postContents, postContents2;
@@ -190,18 +181,6 @@ public class PostServiceTest {
                 "test2.com/test.png"
         );
 
-        this.postLike = PostLike.of(
-                "testPostLikeId",
-                user,
-                post
-        );
-
-        this.postLike2 = PostLike.of(
-                "testPostLikeId2",
-                user2,
-                post
-        );
-
         this.holdInfo1 = HoldInfo.of(
                 "holdId1",
                 "holdName1",
@@ -263,6 +242,7 @@ public class PostServiceTest {
         given(this.postRepository.findByIdAndIsDeletedFalse("testPostId2")).willReturn(Optional.of(post2));
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
         given(this.blockUserRepository.findBlock("testUserId", user2.getId())).willReturn(Optional.empty());
+        given(this.postLikeRepository.countByPost(post2)).willReturn(2);
 
         // when
         PostDetailResponseDto postResponseDto = this.postService.findPost("testUserId", "testPostId2");
@@ -441,74 +421,6 @@ public class PostServiceTest {
         assertThat(ex)
                 .extracting("errorCode", "message")
                 .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
-    }
-
-    @Test
-    @DisplayName("Success case for create like")
-    void successCreateLike() {
-        try (MockedStatic<PostLike> mockedPostLike = mockStatic(PostLike.class)) {
-            // given
-            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-            given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
-            given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.empty());
-
-            mockedPostLike.when(() -> PostLike.of(user, post)).thenReturn(postLike);
-            given(this.postLikeRepository.countByPost(post)).willReturn(1);
-
-            given(this.postLikeRepository.save(this.postLike)).willReturn(postLike);
-
-            // when
-            LikeResponseDto likeResponseDto = this.postService.createLike("testUserId", "testPostId");
-
-            // then
-            assertThat(likeResponseDto)
-                    .isNotNull()
-                    .extracting("postId", "likeCount")
-                    .contains("testPostId", 1);
-        }
-    }
-
-    @Test
-    @DisplayName("Success case for delete like")
-    void successDeleteLike() {
-        // given
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
-        given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.of(postLike));
-
-        // when
-        LikeResponseDto likeResponseDto = this.postService.deleteLike("testUserId", "testPostId");
-
-        // then
-        assertThat(likeResponseDto)
-                .isNotNull()
-                .extracting("postId", "likeCount")
-                .contains("testPostId", 0);
-    }
-
-    @Test
-    @DisplayName("Success case for find likes")
-    void successFindLikes() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-        given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
-
-        Page<PostLike> postLikes = new PageImpl<>(List.of(postLike, postLike2), pageable, 2);
-
-        given(this.postLikeRepository.findAllByPost(post, pageable)).willReturn(postLikes);
-
-        // when
-        Pagination<LikeFindResponseDto> likeFindResponseDto = this.postService.findLikeByPost("testUserId", "testPostId", pageable);
-
-        // then
-        assertThat(likeFindResponseDto.getResults())
-                .isNotNull()
-                .extracting(LikeFindResponseDto::getPostId, LikeFindResponseDto::getLikerNickname)
-                .contains(
-                        tuple("testPostId", postLike.getLiker().getNickname()),
-                        tuple("testPostId", postLike2.getLiker().getNickname())
-                );
     }
 
     @Test

@@ -1,9 +1,8 @@
 package coLaon.ClaonBack.service;
 
-import coLaon.ClaonBack.center.domain.BookmarkCenter;
 import coLaon.ClaonBack.center.domain.Center;
+import coLaon.ClaonBack.center.domain.CenterBookmark;
 import coLaon.ClaonBack.center.domain.CenterImg;
-import coLaon.ClaonBack.center.domain.CenterReview;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
@@ -16,19 +15,12 @@ import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.ChargeDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
 import coLaon.ClaonBack.center.dto.OperatingTimeDto;
-import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
-import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.dto.SectorInfoDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
-import coLaon.ClaonBack.center.repository.BookmarkCenterRepository;
+import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.service.CenterService;
-import coLaon.ClaonBack.common.domain.Pagination;
-import coLaon.ClaonBack.common.exception.BadRequestException;
-import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.center.repository.ReviewRepository;
@@ -43,14 +35,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,22 +56,18 @@ public class CenterServiceTest {
     @Mock
     ReviewRepository reviewRepository;
     @Mock
-    BookmarkCenterRepository bookmarkCenterRepository;
+    CenterBookmarkRepository centerBookmarkRepository;
     @Mock
     PostRepository postRepository;
-    @Spy
-    PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     CenterService centerService;
 
     private User admin;
     private User user;
-    private User user2;
     private Center center, center2;
     private HoldInfo holdInfo, holdInfo2;
-    private CenterReview review1, review2;
-    private BookmarkCenter bookmarkCenter;
+    private CenterBookmark centerBookmark;
 
     @BeforeEach
     void setUp() {
@@ -111,18 +93,6 @@ public class CenterServiceTest {
                 "",
                 "",
                 "instagramId2"
-        );
-
-        this.user2 = User.of(
-                "userId2",
-                "test2@gmail.com",
-                "1234567222",
-                "userNickname3",
-                "경기도",
-                "성남시",
-                "",
-                "",
-                "instagramId3"
         );
 
         this.center = Center.of(
@@ -161,9 +131,7 @@ public class CenterServiceTest {
 
         this.holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
         this.holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
-        this.review1 = CenterReview.of("review1Id", 5, "testContent1", this.user, this.center, LocalDateTime.now(), LocalDateTime.now());
-        this.review2 = CenterReview.of("review2Id", 4, "testContent2", this.user, this.center, LocalDateTime.now(), LocalDateTime.now());
-        this.bookmarkCenter = BookmarkCenter.of("bookMarkId", center, user);
+        this.centerBookmark = CenterBookmark.of("bookMarkId", center, user);
     }
 
     @Test
@@ -267,7 +235,7 @@ public class CenterServiceTest {
         // given
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
-        given(this.bookmarkCenterRepository.findByUserIdAndCenterId("userId", "centerId")).willReturn(Optional.of(bookmarkCenter));
+        given(this.centerBookmarkRepository.findByUserIdAndCenterId("userId", "centerId")).willReturn(Optional.of(centerBookmark));
         given(this.postRepository.selectCountByCenter("centerId", "userId")).willReturn(0);
         given(this.reviewRepository.selectCountByCenter("centerId", "userId")).willReturn(2);
         given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
@@ -300,158 +268,6 @@ public class CenterServiceTest {
                 .containsExactly(
                         tuple(holdInfo.getName(), holdInfo.getImg()),
                         tuple(holdInfo2.getName(), holdInfo2.getImg()));
-    }
-
-    @Test
-    @DisplayName("Success case for create center review")
-    void successCreateReview() {
-        try (MockedStatic<CenterReview> reviewMockedStatic = mockStatic(CenterReview.class)) {
-            // given
-            ReviewCreateRequestDto reviewCreateRequestDto = new ReviewCreateRequestDto(5, "testContent");
-
-            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-            given(this.centerRepository.findById("testCenterId")).willReturn(Optional.of(center));
-
-            reviewMockedStatic.when(() -> CenterReview.of(5, "testContent", this.user, this.center)).thenReturn(this.review1);
-
-            given(this.reviewRepository.countByCenter(center)).willReturn(0);
-            given(this.reviewRepository.selectRanksByCenterId("testCenterId")).willReturn(List.of());
-            given(this.reviewRepository.save(this.review1)).willReturn(this.review1);
-
-            // when
-            ReviewResponseDto reviewResponseDto = this.centerService.createReview("testUserId", "testCenterId", reviewCreateRequestDto);
-
-            // then
-            assertThat(reviewResponseDto).isNotNull();
-            assertThat(reviewResponseDto.getContent()).isEqualTo("testContent1");
-        }
-    }
-
-    @Test
-    @DisplayName("Failure case for create center review for existing own review in center")
-    void failureCreateReview_alreadyExist() {
-        ReviewCreateRequestDto reviewCreateRequestDto = new ReviewCreateRequestDto(5, "testContent");
-
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        given(this.centerRepository.findById("center id")).willReturn(Optional.of(center));
-        given(this.reviewRepository.findByUserIdAndCenterId(user.getId(), center.getId())).willReturn(Optional.of(review1));
-
-        // when
-        final BadRequestException ex = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> this.centerService.createReview("userId", "center id", reviewCreateRequestDto)
-        );
-
-        // then
-        assertThat(ex)
-                .extracting("errorCode", "message")
-                .contains(ErrorCode.ROW_ALREADY_EXIST, "이미 작성된 리뷰가 존재합니다.");
-    }
-
-    @Test
-    @DisplayName("Success case for update review")
-    void successUpdateReview() {
-        // given
-        ReviewUpdateRequestDto reviewUpdateRequestDto = new ReviewUpdateRequestDto(1, "updateContent");
-
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        given(this.reviewRepository.findById("review1Id")).willReturn(Optional.of(review1));
-        given(this.reviewRepository.countByCenter(center)).willReturn(2);
-        given(this.reviewRepository.selectRanksByCenterId("center id")).willReturn(List.of(2));
-        given(this.reviewRepository.save(this.review1)).willReturn(this.review1);
-
-        // when
-        ReviewResponseDto reviewResponseDto = this.centerService.updateReview("userId", "review1Id", reviewUpdateRequestDto);
-
-        // then
-        assertThat(reviewResponseDto)
-                .isNotNull()
-                .extracting("content", "reviewId")
-                .contains("updateContent", "review1Id");
-    }
-
-    @Test
-    @DisplayName("Failure case for update review because update by other user")
-    void failUpdateReview_Unauthorized() {
-        // given
-        ReviewUpdateRequestDto reviewUpdateRequestDto = new ReviewUpdateRequestDto(1, "updateContent");
-
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user2));
-        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review1));
-
-        // when
-        final UnauthorizedException ex = Assertions.assertThrows(
-                UnauthorizedException.class,
-                () -> this.centerService.updateReview("userId", "reviewId", reviewUpdateRequestDto)
-        );
-
-        // then
-        assertThat(ex)
-                .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
-    }
-
-    @Test
-    @DisplayName("Success case for delete review")
-    void successDeleteReview() {
-        // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        given(this.reviewRepository.findById("review1Id")).willReturn(Optional.of(review1));
-        given(this.reviewRepository.countByCenter(center)).willReturn(2);
-        given(this.reviewRepository.selectRanksByCenterId("center id")).willReturn(List.of(2));
-
-        // when
-        this.centerService.deleteReview("userId", "review1Id");
-
-        // then
-        assertThat(this.reviewRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    @DisplayName("Failure case for delete review because update by other user")
-    void failDeleteReview_Unauthorized() {
-        // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user2));
-        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review1));
-
-        // when
-        final UnauthorizedException ex = Assertions.assertThrows(
-                UnauthorizedException.class,
-                () -> this.centerService.deleteReview("userId", "reviewId")
-        );
-
-        // then
-        assertThat(ex)
-                .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
-    }
-
-    @Test
-    @DisplayName("Success case for find center review")
-    void successFindReview() {
-        //given
-        Pageable pageable = PageRequest.of(0, 2);
-        Page<CenterReview> centerReviewPage = new PageImpl<>(List.of(review1, review2), pageable, 2);
-
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.reviewRepository.selectRanksByCenterId("centerId")).willReturn(List.of(5, 4));
-        given(this.reviewRepository.findByCenter(center.getId(), "userId", pageable)).willReturn(centerReviewPage);
-
-        //when
-        ReviewListFindResponseDto reviewListFindResponseDto = this.centerService.findReview("userId", "centerId", pageable);
-
-        // then
-        assertThat(reviewListFindResponseDto)
-                .isNotNull()
-                .extracting(ReviewListFindResponseDto::getReviewFindResponseDtoPagination)
-                .extracting(Pagination::getResults)
-                .extracting(
-                        dtos -> dtos.get(0).getRank(),
-                        dtos -> dtos.get(1).getRank(),
-                        dtos -> dtos.size())
-                .contains(review1.getRank(), review2.getRank(), 2);
     }
 
     @Test

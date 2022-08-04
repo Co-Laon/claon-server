@@ -9,22 +9,16 @@ import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
-import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.common.domain.Pagination;
-import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
-import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
-import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,13 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +37,6 @@ import java.util.HashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -62,24 +49,16 @@ public class UserServiceTest {
     @Mock
     LaonRepository laonRepository;
     @Mock
-    BlockUserRepository blockUserRepository;
-    @Mock
     ClimbingHistoryRepository climbingHistoryRepository;
-
-    @Spy
-    PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     UserService userService;
 
     private User user, privateUser, publicUser, blockUser;
     private Center center;
-    private BlockUser blockUserRelation;
-    private Laon laonRelation;
     private Post post;
     private HoldInfo holdInfo;
     private ClimbingHistory climbingHistory;
-
     private List<String> postIds;
 
     @BeforeEach
@@ -133,15 +112,6 @@ public class UserServiceTest {
                 "instagramId2"
         );
 
-        this.blockUserRelation = BlockUser.of(
-                this.publicUser,
-                this.blockUser
-        );
-
-        this.laonRelation = Laon.of(
-                this.blockUser,
-                this.publicUser
-        );
         this.center = Center.of(
                 "test",
                 "test",
@@ -223,14 +193,15 @@ public class UserServiceTest {
     @DisplayName("Success case for retrieving single other user")
     void successRetrieveUser() {
         // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
+        given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(user));
         given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
-        given(this.laonRepository.getLaonIdsByUserId("userId")).willReturn(Set.of("publicUserId"));
+        given(this.laonRepository.getUserIdsByLaonId("userId")).willReturn(Set.of("publicUserId"));
         given(this.climbingHistoryRepository.findByPostIds(this.postIds)).willReturn(List.of(this.climbingHistory));
 
         // when
-        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userId");
+        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userNickname");
 
         // then
         assertThat(userResponseDto)
@@ -257,13 +228,14 @@ public class UserServiceTest {
     @DisplayName("Success case for retrieving single other private user")
     void successRetrievePrivateUser() {
         // given
-        given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
+        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
+        given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(privateUser));
         given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
-        given(this.laonRepository.getLaonIdsByUserId("privateUserId")).willReturn(new HashSet<>());
+        given(this.laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(new HashSet<>());
 
         // when
-        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "privateUserId");
+        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userNickname");
 
         // then
         assertThat(userResponseDto)
@@ -302,66 +274,5 @@ public class UserServiceTest {
 
         // then
         assertThat(publicScopeResponseDto.getIsPrivate()).isFalse();
-    }
-
-    @Test
-    @DisplayName("Success case for block user")
-    void successBlockUser() {
-        try (MockedStatic<BlockUser> mockedBlock = mockStatic(BlockUser.class)) {
-            // given
-            given(this.userRepository.findByNickname("testBlockNickname")).willReturn(Optional.of(blockUser));
-            given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
-            given(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).willReturn(Optional.empty());
-            given(this.laonRepository.findByLaonIdAndUserId("blockUserId", "publicUserId")).willReturn(Optional.of(this.laonRelation));
-
-            mockedBlock.when(() -> BlockUser.of(this.publicUser, this.blockUser)).thenReturn(this.blockUserRelation);
-
-            given(this.blockUserRepository.save(this.blockUserRelation)).willReturn(this.blockUserRelation);
-
-            // when
-            this.userService.createBlock("publicUserId", "testBlockNickname");
-
-            // then
-            assertThat(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).isNotNull();
-        }
-    }
-
-    @Test
-    @DisplayName("Success case for unblock user")
-    void successUnblockUser() {
-        // given
-        given(this.userRepository.findByNickname("testBlockNickname")).willReturn(Optional.of(blockUser));
-        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
-        given(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).willReturn(Optional.of(blockUserRelation));
-
-        // when
-        this.userService.deleteBlock("publicUserId", "testBlockNickname");
-
-        // then
-        assertThat(this.blockUserRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    @DisplayName("Success case for find block users")
-    void successFindBlockUsers() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
-
-        Page<BlockUser> blockUsers = new PageImpl<>(List.of(blockUserRelation), pageable, 2);
-        given(this.blockUserRepository.findByUserId(publicUser.getId(), pageable)).willReturn(blockUsers);
-
-        // when
-        Pagination<BlockUserFindResponseDto> blockUserFindResponseDto = this.userService.findBlockUser("publicUserId", pageable);
-
-        // then
-        assertThat(blockUserFindResponseDto.getResults())
-                .isNotNull()
-                .extracting(
-                        BlockUserFindResponseDto::getBlockUserNickName,
-                        BlockUserFindResponseDto::getBlockUserProfileImage)
-                .containsExactly(
-                        tuple("testBlockNickname", "")
-                );
     }
 }

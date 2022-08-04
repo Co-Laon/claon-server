@@ -14,14 +14,14 @@ import coLaon.ClaonBack.common.validator.IdEqualValidator;
 import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
-import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
-import coLaon.ClaonBack.post.dto.LikeResponseDto;
+import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
+import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
@@ -30,7 +30,6 @@ import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +49,7 @@ public class PostService {
     private final CenterRepository centerRepository;
     private final ClimbingHistoryRepository climbingHistoryRepository;
     private final PaginationFactory paginationFactory;
+
 
     @Transactional(readOnly = true)
     public PostDetailResponseDto findPost(String userId, String postId) {

@@ -1,9 +1,9 @@
 package coLaon.ClaonBack.center.service;
 
-import coLaon.ClaonBack.center.domain.BookmarkCenter;
+import coLaon.ClaonBack.center.domain.CenterBookmark;
 import coLaon.ClaonBack.center.domain.Center;
-import coLaon.ClaonBack.center.dto.BookmarkCenterResponseDto;
-import coLaon.ClaonBack.center.repository.BookmarkCenterRepository;
+import coLaon.ClaonBack.center.dto.CenterBookmarkResponseDto;
+import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -16,13 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class BookmarkCenterService {
+public class CenterBookmarkService {
     private final UserRepository userRepository;
     private final CenterRepository centerRepository;
-    private final BookmarkCenterRepository bookmarkCenterRepository;
+    private final CenterBookmarkRepository centerBookmarkRepository;
 
     @Transactional
-    public BookmarkCenterResponseDto create(
+    public CenterBookmarkResponseDto create(
             String userId,
             String centerId
     ) {
@@ -40,7 +40,7 @@ public class BookmarkCenterService {
                 )
         );
 
-        this.bookmarkCenterRepository.findByUserIdAndCenterId(user.getId(), center.getId()).ifPresent(
+        this.centerBookmarkRepository.findByUserIdAndCenterId(user.getId(), center.getId()).ifPresent(
                 bookmarkCenter -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
@@ -49,9 +49,9 @@ public class BookmarkCenterService {
                 }
         );
 
-        return BookmarkCenterResponseDto.from(
-                this.bookmarkCenterRepository.save(
-                        BookmarkCenter.of(
+        return CenterBookmarkResponseDto.from(
+                this.centerBookmarkRepository.save(
+                        CenterBookmark.of(
                                 center,
                                 user
                         )
@@ -61,7 +61,7 @@ public class BookmarkCenterService {
     }
 
     @Transactional
-    public BookmarkCenterResponseDto delete(
+    public CenterBookmarkResponseDto delete(
             String userId,
             String centerId
     ) {
@@ -79,17 +79,17 @@ public class BookmarkCenterService {
                 )
         );
 
-        BookmarkCenter bookmarkCenter = this.bookmarkCenterRepository.findByUserIdAndCenterId(user.getId(), center.getId()).orElseThrow(
+        CenterBookmark bookmarkCenter = this.centerBookmarkRepository.findByUserIdAndCenterId(user.getId(), center.getId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "즐겨찾기에 등록되지 않은 암장입니다."
                 )
         );
 
-        this.bookmarkCenterRepository.delete(bookmarkCenter);
+        this.centerBookmarkRepository.delete(bookmarkCenter);
 
-        return BookmarkCenterResponseDto.from(
-                BookmarkCenter.of(
+        return CenterBookmarkResponseDto.from(
+                CenterBookmark.of(
                         center,
                         user
                 ),

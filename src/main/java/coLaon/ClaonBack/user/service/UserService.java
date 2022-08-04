@@ -1,7 +1,5 @@
 package coLaon.ClaonBack.user.service;
 
-import coLaon.ClaonBack.common.domain.Pagination;
-import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.domain.enums.BasicLocalArea;
 import coLaon.ClaonBack.common.domain.enums.MetropolitanArea;
 import coLaon.ClaonBack.common.exception.BadRequestException;
@@ -13,10 +11,8 @@ import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
-import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
 import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
@@ -27,11 +23,9 @@ import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
-import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,8 +41,6 @@ public class UserService {
     private final LaonRepository laonRepository;
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
-    private final BlockUserRepository blockUserRepository;
-    private final PaginationFactory paginationFactory;
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
     private final JwtUtil jwtUtil;
@@ -158,19 +150,29 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public IndividualUserResponseDto getOtherUserInformation(String requestUserId, String userId) {
-        User user = this.userRepository.findById(userId).orElseThrow(() -> {
+    public IndividualUserResponseDto getOtherUserInformation(String userId, String userNickname) {
+        this.userRepository.findById(userId).orElseThrow(() -> {
             throw new UnauthorizedException(
                     ErrorCode.USER_DOES_NOT_EXIST,
                     "이용자를 찾을 수 없습니다."
             );
         });
-        List<String> postIds = this.postRepository.selectPostIdsByUserId(userId);
+
+        User user = this.userRepository.findByNickname(userNickname).orElseThrow(() -> {
+            throw new BadRequestException(
+                    ErrorCode.ROW_DOES_NOT_EXIST,
+                    "이용자를 찾을 수 없습니다."
+            );
+        });
+
+        List<String> postIds = this.postRepository.selectPostIdsByUserId(user.getId());
         Long postCount = (long) postIds.size();
         Long postLikeCount = this.postLikeRepository.countByPostIdIn(postIds);
-        Set<String> laonIds = this.laonRepository.getLaonIdsByUserId(userId);
-        Long laonCount = (long) laonIds.size();
-        boolean isLaon = laonIds.contains(requestUserId);
+        
+        Set<String> userIds = this.laonRepository.getUserIdsByLaonId(user.getId());
+        Long laonCount = (long) userIds.size();
+
+        boolean isLaon = userIds.contains(userId);
 
         List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
         return IndividualUserResponseDto.from(user, isLaon, postCount, laonCount, postLikeCount, climbingHistories);
@@ -198,77 +200,6 @@ public class UserService {
         );
 
         return UserResponseDto.from(this.userRepository.save(user));
-    }
-
-    @Transactional
-    public void createBlock(String userId, String blockNickname) {
-        User blockUser = userRepository.findByNickname(blockNickname).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", blockNickname)
-                )
-        );
-
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
-        laonRepository.findByLaonIdAndUserId(blockUser.getId(), user.getId()).ifPresent(laonRepository::delete);
-
-        blockUserRepository.findByUserIdAndBlockId(user.getId(), blockUser.getId()).ifPresent(
-                b -> {
-                    throw new BadRequestException(
-                            ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 차단 관계입니다."
-                    );
-                }
-        );
-
-        blockUserRepository.save(BlockUser.of(user, blockUser));
-    }
-
-    @Transactional
-    public void deleteBlock(String userId, String blockNickname) {
-        User blockUser = userRepository.findByNickname(blockNickname).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", blockNickname)
-                )
-        );
-
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
-        BlockUser blockedRelation = blockUserRepository.findByUserIdAndBlockId(user.getId(), blockUser.getId()).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "차단 관계가 아닙니다."
-                )
-        );
-
-        blockUserRepository.delete(blockedRelation);
-    }
-
-    @Transactional(readOnly = true)
-    public Pagination<BlockUserFindResponseDto> findBlockUser(String userId, Pageable pageable) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
-        return this.paginationFactory.create(
-                this.blockUserRepository.findByUserId(user.getId(), pageable)
-                        .map(BlockUserFindResponseDto::from)
-        );
     }
 }
 
