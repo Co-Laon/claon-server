@@ -13,7 +13,14 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
-import coLaon.ClaonBack.post.dto.*;
+import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.dto.LikeResponseDto;
+import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
+import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
+import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
+import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
+import coLaon.ClaonBack.post.dto.PostContentsDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
@@ -49,8 +56,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -280,7 +287,7 @@ public class PostServiceTest {
         given(this.blockUserRepository.findBlock("testUserId", privateUser.getId())).willReturn(Optional.empty());
 
         // when
-        final BadRequestException ex = Assertions.assertThrows(
+        final BadRequestException ex = assertThrows(
                 BadRequestException.class,
                 () -> this.postService.findPost("testUserId", "privatePostId")
         );
@@ -299,7 +306,7 @@ public class PostServiceTest {
         given(this.blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(Optional.of(blockUser));
 
         // when
-        final BadRequestException ex = Assertions.assertThrows(
+        final BadRequestException ex = assertThrows(
                 BadRequestException.class,
                 () -> this.postService.findPost("testUserId", "blockedPostId")
         );
@@ -387,7 +394,7 @@ public class PostServiceTest {
         given(this.centerRepository.findById("center1")).willReturn(Optional.of(center));
 
         // when
-        final BadRequestException ex = Assertions.assertThrows(
+        final BadRequestException ex = assertThrows(
                 BadRequestException.class,
                 () -> postService.createPost("testUserId", postCreateRequestDto)
         );
@@ -425,7 +432,7 @@ public class PostServiceTest {
         given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
         // when
-        final UnauthorizedException ex = Assertions.assertThrows(
+        final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
                 () -> this.postService.deletePost("testPostId", "testUserId2")
         );
@@ -516,9 +523,23 @@ public class PostServiceTest {
         given(this.postRepository.findByWriterOrderByCreatedAtDesc(this.user2, pageable)).willReturn(new PageImpl<>(List.of(samplePost)));
 
         // when
-        Page<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(loginedUserId, this.user2.getNickname(), pageable);
+        Pagination<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(loginedUserId, this.user2.getNickname(), pageable);
 
         // then
-        assertThat(dtos.getTotalElements()).isEqualTo(1L);
+        assertThat(dtos.getTotalCount()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("Fail case(user is private) for find posts")
+    void failFindPosts(){
+        // given
+        String loginedUserId = this.user.getId();
+        Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
+
+        // when & then
+        assertThrows(UnauthorizedException.class, () -> {
+            this.postService.getUserPosts(loginedUserId, this.privateUser.getNickname(), pageable);
+        });
     }
 }

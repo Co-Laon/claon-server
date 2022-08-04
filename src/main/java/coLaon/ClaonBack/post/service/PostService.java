@@ -254,7 +254,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostThumbnailResponseDto> getUserPosts(String loginedUserId, String targetUserNickname, Pageable pageable){
+    public Pagination<PostThumbnailResponseDto> getUserPosts(String loginedUserId, String targetUserNickname, Pageable pageable) {
         User targetUser = userRepository.findByNickname(targetUserNickname).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.USER_DOES_NOT_EXIST,
@@ -267,7 +267,7 @@ public class PostService {
             postRepository.findByWriterOrderByCreatedAtDesc(targetUser, pageable).map(PostThumbnailResponseDto::from);
         }
 
-        if (targetUser.getIsPrivate()){
+        if (targetUser.getIsPrivate()) {
             throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "해당 사용자는 비공개 입니다. ");
         }
 
@@ -277,6 +277,14 @@ public class PostService {
                 })
         );
 
-        return postRepository.findByWriterOrderByCreatedAtDesc(targetUser, pageable).map(PostThumbnailResponseDto::from);
+        blockUserRepository.findByUserIdAndBlockId(loginedUserId, targetUser.getId()).ifPresent(
+                (blockUser -> {
+                    throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "내가 차단한 사용자입니다. ");
+                })
+        );
+
+        return this.paginationFactory.create(
+                postRepository.findByWriterOrderByCreatedAtDesc(targetUser, pageable).map(PostThumbnailResponseDto::from)
+        );
     }
 }

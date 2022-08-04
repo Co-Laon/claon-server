@@ -36,17 +36,17 @@ public class Post extends BaseEntity {
     private User writer;
     @BatchSize(size = 10)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<PostContents> contentsSet;
+    private List<PostContents> contentsList;
 
     @BatchSize(size = 10)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ClimbingHistory> climbingHistorySet;
 
     public String getThumbnailUrl() {
-        if (this.getContentsSet().size() == 0) {
+        if (this.getContentsList().size() == 0) {
             return null;
         }
-        return this.getContentsSet().get(0).getUrl();
+        return this.getContentsList().get(0).getUrl();
     }
 
     private Post(
@@ -71,7 +71,7 @@ public class Post extends BaseEntity {
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
-        this.contentsSet = contentsSet;
+        this.contentsList = contentsSet;
         this.climbingHistorySet = climbingHistorySet;
     }
 
@@ -88,7 +88,7 @@ public class Post extends BaseEntity {
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
-        this.contentsSet = contentsSet;
+        this.contentsList = contentsSet;
         this.climbingHistorySet = climbingHistorySet;
     }
 
@@ -107,7 +107,7 @@ public class Post extends BaseEntity {
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
-        this.contentsSet = contentsSet;
+        this.contentsList = contentsSet;
         this.climbingHistorySet = climbingHistorySet;
     }
 

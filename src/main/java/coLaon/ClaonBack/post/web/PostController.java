@@ -44,7 +44,7 @@ public class PostController {
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
-    public Page<PostThumbnailResponseDto> getIndividualUserPost(@AuthenticationPrincipal String userId, @RequestParam(name="nickname") String targetUserNickname, @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public Pagination<PostThumbnailResponseDto> getIndividualUserPost(@AuthenticationPrincipal String userId, @RequestParam(name="nickname") String targetUserNickname, @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return postService.getUserPosts(userId, targetUserNickname, pageable);
     }
 
