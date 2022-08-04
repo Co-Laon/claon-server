@@ -1,13 +1,13 @@
 package coLaon.ClaonBack.center.dto;
 
-import coLaon.ClaonBack.center.domain.BookmarkCenter;
+import coLaon.ClaonBack.center.domain.CenterBookmark;
 import lombok.Data;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class BookmarkCenterResponseDto {
+public class CenterBookmarkResponseDto {
     private String centerId;
     private String name;
     private String address;
@@ -24,21 +24,21 @@ public class BookmarkCenterResponseDto {
     private List<SectorInfoDto> sectorInfoList;
     private Boolean isBookmarked;
 
-    private BookmarkCenterResponseDto(String centerId,
-                                     String name,
-                                     String address,
-                                     String tel,
-                                     String webUrl,
-                                     String instagramUrl,
-                                     String youtubeUrl,
-                                     List<CenterImgDto> imgList,
-                                     List<OperatingTimeDto> operatingTimeList,
-                                     String facilities,
-                                     List<ChargeDto> chargeList,
-                                     String chargeImg,
-                                     String holdInfoImg,
-                                     List<SectorInfoDto> sectorInfoList,
-                                     Boolean isBookmarked) {
+    private CenterBookmarkResponseDto(String centerId,
+                                      String name,
+                                      String address,
+                                      String tel,
+                                      String webUrl,
+                                      String instagramUrl,
+                                      String youtubeUrl,
+                                      List<CenterImgDto> imgList,
+                                      List<OperatingTimeDto> operatingTimeList,
+                                      String facilities,
+                                      List<ChargeDto> chargeList,
+                                      String chargeImg,
+                                      String holdInfoImg,
+                                      List<SectorInfoDto> sectorInfoList,
+                                      Boolean isBookmarked) {
         this.centerId = centerId;
         this.name = name;
         this.address = address;
@@ -56,8 +56,8 @@ public class BookmarkCenterResponseDto {
         this.isBookmarked = isBookmarked;
     }
 
-    public static BookmarkCenterResponseDto from(BookmarkCenter bookmarkCenter, Boolean isBookmarked) {
-        return new BookmarkCenterResponseDto(
+    public static CenterBookmarkResponseDto from(CenterBookmark bookmarkCenter, Boolean isBookmarked) {
+        return new CenterBookmarkResponseDto(
                 bookmarkCenter.getCenter().getId(),
                 bookmarkCenter.getCenter().getName(),
                 bookmarkCenter.getCenter().getAddress(),

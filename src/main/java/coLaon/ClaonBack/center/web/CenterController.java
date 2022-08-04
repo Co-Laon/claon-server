@@ -1,6 +1,6 @@
 package coLaon.ClaonBack.center.web;
 
-import coLaon.ClaonBack.center.dto.BookmarkCenterResponseDto;
+import coLaon.ClaonBack.center.dto.CenterBookmarkResponseDto;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
@@ -10,7 +10,8 @@ import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
 import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
-import coLaon.ClaonBack.center.service.BookmarkCenterService;
+import coLaon.ClaonBack.center.service.CenterBookmarkService;
+import coLaon.ClaonBack.center.service.CenterReviewService;
 import coLaon.ClaonBack.center.service.CenterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +36,8 @@ import java.util.List;
 @RequestMapping("/api/v1/centers")
 public class CenterController {
     private final CenterService centerService;
-    private final BookmarkCenterService bookmarkCenterService;
+    private final CenterReviewService centerReviewService;
+    private final CenterBookmarkService centerBookmarkService;
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
@@ -80,7 +82,7 @@ public class CenterController {
             @PathVariable String centerId,
             @RequestBody @Valid ReviewCreateRequestDto reviewCreateRequestDto
     ) {
-        return this.centerService.createReview(userId, centerId, reviewCreateRequestDto);
+        return this.centerReviewService.createReview(userId, centerId, reviewCreateRequestDto);
     }
 
     @PutMapping(value = "/review/{reviewId}")
@@ -90,7 +92,7 @@ public class CenterController {
             @PathVariable String reviewId,
             @RequestBody @Valid ReviewUpdateRequestDto updateRequestDto
     ) {
-        return this.centerService.updateReview(userId, reviewId, updateRequestDto);
+        return this.centerReviewService.updateReview(userId, reviewId, updateRequestDto);
     }
 
     @DeleteMapping(value = "/review/{reviewId}")
@@ -99,7 +101,7 @@ public class CenterController {
             @AuthenticationPrincipal String userId,
             @PathVariable String reviewId
     ) {
-        return this.centerService.deleteReview(userId, reviewId);
+        return this.centerReviewService.deleteReview(userId, reviewId);
     }
 
     @GetMapping(value = "/{centerId}/review")
@@ -109,16 +111,16 @@ public class CenterController {
             @PathVariable String centerId,
             @PageableDefault(size = 5) final Pageable pageable
     ) {
-        return this.centerService.findReview(userId, centerId, pageable);
+        return this.centerReviewService.findReview(userId, centerId, pageable);
     }
 
     @PostMapping(value = "/{centerId}/bookmark")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public BookmarkCenterResponseDto create(
+    public CenterBookmarkResponseDto create(
             @AuthenticationPrincipal String userId,
             @PathVariable String centerId
     ) {
-        return this.bookmarkCenterService.create(userId, centerId);
+        return this.centerBookmarkService.create(userId, centerId);
     }
 
     @DeleteMapping(value = "/{centerId}/bookmark")
@@ -127,6 +129,6 @@ public class CenterController {
             @AuthenticationPrincipal String userId,
             @PathVariable String centerId
     ) {
-        this.bookmarkCenterService.delete(userId, centerId);
+        this.centerBookmarkService.delete(userId, centerId);
     }
 }

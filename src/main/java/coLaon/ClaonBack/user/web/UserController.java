@@ -4,6 +4,7 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
+import coLaon.ClaonBack.user.service.BlockUserService;
 import coLaon.ClaonBack.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ import coLaon.ClaonBack.user.dto.UserResponseDto;
 @RequestMapping("/api/v1/users")
 public class UserController {
     private final UserService userService;
+    private final BlockUserService blockUserService;
 
     @PutMapping("/public-scope")
     @ResponseStatus(value = HttpStatus.OK)
@@ -63,7 +65,7 @@ public class UserController {
             @AuthenticationPrincipal String userId,
             @PathVariable String blockNickname
     ) {
-        this.userService.createBlock(userId, blockNickname);
+        this.blockUserService.createBlock(userId, blockNickname);
     }
 
     @DeleteMapping(value = "/{blockNickname}/block")
@@ -72,7 +74,7 @@ public class UserController {
             @AuthenticationPrincipal String userId,
             @PathVariable String blockNickname
     ) {
-        this.userService.deleteBlock(userId, blockNickname);
+        this.blockUserService.deleteBlock(userId, blockNickname);
     }
 
     @GetMapping("/blocked-users")
@@ -81,6 +83,6 @@ public class UserController {
             @AuthenticationPrincipal String userId,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) final Pageable pageable
     ) {
-        return this.userService.findBlockUser(userId, pageable);
+        return this.blockUserService.findBlockUser(userId, pageable);
     }
 }

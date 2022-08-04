@@ -2,6 +2,7 @@ package coLaon.ClaonBack.post.web;
 
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
+import coLaon.ClaonBack.post.service.PostLikeService;
 import coLaon.ClaonBack.post.service.PostCommentService;
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
@@ -38,6 +39,7 @@ import javax.validation.Valid;
 public class PostController {
     private final PostService postService;
     private final PostCommentService postCommentService;
+    private final PostLikeService postLikeService;
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
@@ -72,7 +74,7 @@ public class PostController {
             @AuthenticationPrincipal String userId,
             @PathVariable String postId
     ) {
-        return this.postService.createLike(userId, postId);
+        return this.postLikeService.createLike(userId, postId);
     }
 
     @DeleteMapping("/{postId}/like")
@@ -81,7 +83,7 @@ public class PostController {
             @AuthenticationPrincipal String userId,
             @PathVariable String postId
     ) {
-        return this.postService.deleteLike(userId, postId);
+        return this.postLikeService.deleteLike(userId, postId);
     }
 
     @GetMapping(value = "/{postId}/like")
@@ -91,7 +93,7 @@ public class PostController {
             @PathVariable String postId,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) final Pageable pageable
     ) {
-        return this.postService.findLikeByPost(userId, postId, pageable);
+        return this.postLikeService.findLikeByPost(userId, postId, pageable);
     }
 
     @PostMapping("/{postId}/comment")
