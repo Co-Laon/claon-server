@@ -14,14 +14,11 @@ import coLaon.ClaonBack.common.validator.IdEqualValidator;
 import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
-import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
-import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
@@ -169,90 +166,6 @@ public class PostService {
         );
     }
 
-    @Transactional
-    public LikeResponseDto createLike(String userId, String postId) {
-        User liker = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
-
-        postLikeRepository.findByLikerAndPost(liker, post).ifPresent(
-                like -> {
-                    throw new BadRequestException(
-                            ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 좋아요 한 게시글입니다."
-                    );
-                }
-        );
-
-        return LikeResponseDto.from(
-                postLikeRepository.save(PostLike.of(liker, post)),
-                postLikeRepository.countByPost(post)
-        );
-    }
-
-    @Transactional
-    public LikeResponseDto deleteLike(String userId, String postId) {
-        User liker = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
-
-        PostLike like = postLikeRepository.findByLikerAndPost(liker, post).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "좋아요 하지 않은 게시글입니다."
-                )
-        );
-
-        postLikeRepository.delete(like);
-
-        return LikeResponseDto.from(
-                like,
-                postLikeRepository.countByPost(like.getPost())
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public Pagination<LikeFindResponseDto> findLikeByPost(String userId, String postId, Pageable pageable) {
-        userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
-
-        return this.paginationFactory.create(
-                postLikeRepository.findAllByPost(post, pageable)
-                        .map(LikeFindResponseDto::from)
-        );
-    }
-
     @Transactional(readOnly = true)
     public Pagination<PostThumbnailResponseDto> getUserPosts(String loginedUserId, String targetUserNickname, Pageable pageable) {
         User targetUser = userRepository.findByNickname(targetUserNickname).orElseThrow(
@@ -267,9 +180,7 @@ public class PostService {
             postRepository.findByWriterOrderByCreatedAtDesc(targetUser, pageable).map(PostThumbnailResponseDto::from);
         }
 
-        if (targetUser.getIsPrivate()) {
-            throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "해당 사용자는 비공개 입니다. ");
-        }
+        IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
 
         blockUserRepository.findByUserIdAndBlockId(targetUser.getId(), loginedUserId).ifPresent(
                 (blockUser -> {

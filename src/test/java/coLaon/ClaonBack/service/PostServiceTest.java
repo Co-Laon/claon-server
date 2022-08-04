@@ -77,6 +77,9 @@ public class PostServiceTest {
     @InjectMocks
     PostService postService;
 
+    @Spy
+    PaginationFactory paginationFactory = new PaginationFactory();
+
     private User user, user2, blockedUser, privateUser;
     private Post post, post2, blockedPost, privatePost;
     private PostContents postContents, postContents2;
