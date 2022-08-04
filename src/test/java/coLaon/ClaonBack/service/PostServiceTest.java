@@ -435,13 +435,13 @@ public class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         given(this.userRepository.findByNickname(this.user2.getNickname())).willReturn(Optional.of(this.user2));
         given(this.blockUserRepository.findByUserIdAndBlockId(this.user2.getId(), loginedUserId)).willReturn(Optional.empty());
-        given(this.postRepository.findByWriterOrderByCreatedAtDesc(this.user2, pageable)).willReturn(new PageImpl<>(List.of(samplePost)));
+        given(this.postRepository.findByWriterOrderByCreatedAtDesc(this.user2, pageable)).willReturn(new PageImpl<>(List.of(samplePost), pageable, 1));
 
         // when
         Pagination<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(loginedUserId, this.user2.getNickname(), pageable);
 
         // then
-        assertThat(dtos.getTotalCount()).isEqualTo(1L);
+        assertThat(dtos.getResults().size()).isEqualTo(1);
     }
 
     @Test
@@ -453,7 +453,7 @@ public class PostServiceTest {
         given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
 
         // when & then
-        assertThrows(UnauthorizedException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             this.postService.getUserPosts(loginedUserId, this.privateUser.getNickname(), pageable);
         });
     }
