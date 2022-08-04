@@ -9,7 +9,9 @@ import lombok.Data;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Data
@@ -58,8 +60,9 @@ public class PostResponseDto {
                 post.getCenter().getName(),
                 post.getWriter().getImagePath(),
                 post.getWriter().getNickname(),
-                post.getClimbingHistorySet().stream().map(climbingHistory ->
-                        HoldInfoResponseDto.from(climbingHistory.getHoldInfo())).collect(Collectors.toList()),
+                Optional.ofNullable(post.getClimbingHistorySet()).orElseGet(Collections::emptySet).stream()
+                        .map(climbingHistory -> HoldInfoResponseDto.from(climbingHistory.getHoldInfo()))
+                        .collect(Collectors.toList()),
                 post.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(post.getCreatedAt(), ZoneOffset.of("+9"))),
                 post.getIsDeleted(),

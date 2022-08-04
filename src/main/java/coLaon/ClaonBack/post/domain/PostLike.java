@@ -30,33 +30,11 @@ public class PostLike extends BaseEntity {
         this.post = post;
     }
 
-    private PostLike(
-            String id,
-            User liker,
-            Post post
-    ) {
-        super(id);
-        this.liker = liker;
-        this.post = post;
-    }
-
     public static PostLike of(
             User liker,
             Post post
     ) {
         return new PostLike(
-                liker,
-                post
-        );
-    }
-
-    public static PostLike of(
-            String id,
-            User liker,
-            Post post
-    ) {
-        return new PostLike(
-                id,
                 liker,
                 post
         );

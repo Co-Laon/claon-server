@@ -31,7 +31,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,7 +109,8 @@ public class PostService {
                 )
         );
 
-        List<ClimbingHistory> climbingHistoryList = postCreateRequestDto.getClimbingHistories()
+        List<ClimbingHistory> climbingHistoryList = Optional.ofNullable(postCreateRequestDto.getClimbingHistories())
+                .orElse(Collections.emptyList())
                 .stream()
                 .map(history ->
                         climbingHistoryRepository.save(ClimbingHistory.of(

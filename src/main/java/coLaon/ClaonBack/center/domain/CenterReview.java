@@ -10,7 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -38,42 +37,6 @@ public class CenterReview extends BaseEntity {
         this.content = content;
         this.writer = writer;
         this.center = center;
-    }
-
-    private CenterReview(
-            String id,
-            Integer rank,
-            String content,
-            User writer,
-            Center center,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt
-    ) {
-        super(id, createdAt, updatedAt);
-        this.rank = rank;
-        this.content = content;
-        this.writer = writer;
-        this.center = center;
-    }
-
-    public static CenterReview of(
-            String id,
-            Integer rank,
-            String content,
-            User writer,
-            Center center,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt
-    ) {
-        return new CenterReview(
-                id,
-                rank,
-                content,
-                writer,
-                center,
-                createdAt,
-                updatedAt
-        );
     }
 
     public static CenterReview of(

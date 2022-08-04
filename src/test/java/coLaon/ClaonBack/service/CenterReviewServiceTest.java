@@ -7,13 +7,13 @@ import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
+import coLaon.ClaonBack.center.dto.ReviewFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepository;
 import coLaon.ClaonBack.center.service.CenterReviewService;
-import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -34,12 +34,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -58,15 +60,13 @@ public class CenterReviewServiceTest {
     @InjectMocks
     CenterReviewService centerReviewService;
 
-    private User user;
-    private User user2;
+    private User user, user2;
     private Center center;
     private CenterReview review1, review2;
 
     @BeforeEach
     void setUp() {
         this.user = User.of(
-                "userId",
                 "test@gmail.com",
                 "1234567222",
                 "userNickname2",
@@ -76,9 +76,9 @@ public class CenterReviewServiceTest {
                 "",
                 "instagramId2"
         );
+        ReflectionTestUtils.setField(this.user, "id", "userId");
 
         this.user2 = User.of(
-                "userId2",
                 "test2@gmail.com",
                 "1234567222",
                 "userNickname3",
@@ -88,9 +88,9 @@ public class CenterReviewServiceTest {
                 "",
                 "instagramId3"
         );
+        ReflectionTestUtils.setField(this.user2, "id", "userId2");
 
         this.center = Center.of(
-                "center id",
                 "test",
                 "test",
                 "010-1234-1234",
@@ -105,9 +105,16 @@ public class CenterReviewServiceTest {
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
+        ReflectionTestUtils.setField(this.center, "id", "center id");
 
-        this.review1 = CenterReview.of("review1Id", 5, "testContent1", this.user, this.center, LocalDateTime.now(), LocalDateTime.now());
-        this.review2 = CenterReview.of("review2Id", 4, "testContent2", this.user, this.center, LocalDateTime.now(), LocalDateTime.now());
+        this.review1 = CenterReview.of(5, "testContent1", this.user, this.center);
+        ReflectionTestUtils.setField(this.review1, "id", "review1Id");
+        ReflectionTestUtils.setField(this.review1, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.review1, "updatedAt", LocalDateTime.now());
+        this.review2 = CenterReview.of(4, "testContent2", this.user, this.center);
+        ReflectionTestUtils.setField(this.review2, "id", "review2Id");
+        ReflectionTestUtils.setField(this.review2, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.review2, "updatedAt", LocalDateTime.now());
     }
 
     @Test
@@ -130,8 +137,10 @@ public class CenterReviewServiceTest {
             ReviewResponseDto reviewResponseDto = this.centerReviewService.createReview("testUserId", "testCenterId", reviewCreateRequestDto);
 
             // then
-            assertThat(reviewResponseDto).isNotNull();
-            assertThat(reviewResponseDto.getContent()).isEqualTo("testContent1");
+            assertThat(reviewResponseDto)
+                    .isNotNull()
+                    .extracting("reviewId", "content")
+                    .contains(this.review1.getId(), this.review1.getContent());
         }
     }
 
@@ -251,14 +260,12 @@ public class CenterReviewServiceTest {
         ReviewListFindResponseDto reviewListFindResponseDto = this.centerReviewService.findReview("userId", "centerId", pageable);
 
         // then
-        assertThat(reviewListFindResponseDto)
+        assertThat(reviewListFindResponseDto.getReviewFindResponseDtoPagination().getResults())
                 .isNotNull()
-                .extracting(ReviewListFindResponseDto::getReviewFindResponseDtoPagination)
-                .extracting(Pagination::getResults)
-                .extracting(
-                        dtos -> dtos.get(0).getRank(),
-                        dtos -> dtos.get(1).getRank(),
-                        dtos -> dtos.size())
-                .contains(review1.getRank(), review2.getRank(), 2);
+                .extracting(ReviewFindResponseDto::getReviewId, ReviewFindResponseDto::getRank)
+                .contains(
+                        tuple(review1.getId(), review1.getRank()),
+                        tuple(review2.getId(), review2.getRank())
+                );
     }
 }
