@@ -4,6 +4,7 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.validator.NotIdEqualValidator;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
@@ -29,6 +30,8 @@ public class LaonService {
                         String.format("%s을 찾을 수 없습니다.", laonNickname)
                 )
         );
+
+        NotIdEqualValidator.of(userId, laon.getId(), Laon.domain).validate();
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new BadRequestException(

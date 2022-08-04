@@ -4,6 +4,7 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.validator.NotIdEqualValidator;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
@@ -31,6 +32,8 @@ public class BlockUserService {
                         String.format("%s을 찾을 수 없습니다.", blockNickname)
                 )
         );
+
+        NotIdEqualValidator.of(userId, blockUser.getId(), BlockUser.domain).validate();
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new BadRequestException(

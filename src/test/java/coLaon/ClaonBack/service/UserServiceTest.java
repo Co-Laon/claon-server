@@ -54,7 +54,7 @@ public class UserServiceTest {
     @InjectMocks
     UserService userService;
 
-    private User user, privateUser, publicUser, blockUser;
+    private User user, privateUser, publicUser;
     private Center center;
     private Post post;
     private HoldInfo holdInfo;
@@ -98,18 +98,6 @@ public class UserServiceTest {
                 "",
                 "",
                 "instagramId"
-        );
-
-        this.blockUser = User.of(
-                "blockUserId",
-                "block@gmail.com",
-                "1264567890",
-                "testBlockNickname",
-                "경기도",
-                "성남시",
-                "",
-                "",
-                "instagramId2"
         );
 
         this.center = Center.of(
