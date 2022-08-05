@@ -47,11 +47,15 @@ dependencies {
 	annotationProcessor 'com.querydsl:querydsl-apt'
 
 	// aws
-	implementation 'com.google.api-client:google-api-client:1.35.1'
-	implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
+	implementation 'com.google.api-client:google-api-client:2.0.0'
+	implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.239')
 	implementation 'com.amazonaws:aws-java-sdk-s3'
 	compileOnly 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 	compileOnly 'org.apache.tika:tika-parsers:2.3.0'
+
+	// multipart resolver
+	implementation 'commons-io:commons-io:2.11.0'
+	implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
 
 	// test
 	implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
