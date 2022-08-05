@@ -5,6 +5,7 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -32,10 +34,20 @@ public class Post extends BaseEntity {
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User writer;
+    @BatchSize(size = 10)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private Set<PostContents> contentsSet;
+    private List<PostContents> contentsList;
+
+    @BatchSize(size = 10)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ClimbingHistory> climbingHistorySet;
+
+    public String getThumbnailUrl() {
+        if (this.getContentsList().size() == 0) {
+            return null;
+        }
+        return this.getContentsList().get(0).getUrl();
+    }
 
     private Post(
             Center center,
@@ -52,14 +64,14 @@ public class Post extends BaseEntity {
             Center center,
             String content,
             User writer,
-            Set<PostContents> contentsSet,
+            List<PostContents> contentsSet,
             Set<ClimbingHistory> climbingHistorySet
     ) {
         this.center = center;
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
-        this.contentsSet = contentsSet;
+        this.contentsList = contentsSet;
         this.climbingHistorySet = climbingHistorySet;
     }
 
@@ -68,7 +80,7 @@ public class Post extends BaseEntity {
             Center center,
             String content,
             User writer,
-            Set<PostContents> contentsSet,
+            List<PostContents> contentsSet,
             Set<ClimbingHistory> climbingHistorySet
     ) {
         super(id);
@@ -76,7 +88,7 @@ public class Post extends BaseEntity {
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
-        this.contentsSet = contentsSet;
+        this.contentsList = contentsSet;
         this.climbingHistorySet = climbingHistorySet;
     }
 
@@ -85,7 +97,7 @@ public class Post extends BaseEntity {
             Center center,
             String content,
             User writer,
-            Set<PostContents> contentsSet,
+            List<PostContents> contentsSet,
             Set<ClimbingHistory> climbingHistorySet,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
@@ -95,7 +107,7 @@ public class Post extends BaseEntity {
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
-        this.contentsSet = contentsSet;
+        this.contentsList = contentsSet;
         this.climbingHistorySet = climbingHistorySet;
     }
 
@@ -116,7 +128,7 @@ public class Post extends BaseEntity {
             Center center,
             String content,
             User writer,
-            Set<PostContents> contentsSet,
+            List<PostContents> contentsSet,
             Set<ClimbingHistory> climbingHistorySet
     ) {
         return new Post(
@@ -134,7 +146,7 @@ public class Post extends BaseEntity {
             Center center,
             String content,
             User writer,
-            Set<PostContents> contentsSet,
+            List<PostContents> contentsSet,
             Set<ClimbingHistory> climbingHistorySet,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
@@ -155,7 +167,7 @@ public class Post extends BaseEntity {
             Center center,
             String content,
             User writer,
-            Set<PostContents> contentsSet,
+            List<PostContents> contentsSet,
             Set<ClimbingHistory> climbingHistorySet
     ) {
         return new Post(

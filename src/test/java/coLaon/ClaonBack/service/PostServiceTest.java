@@ -8,14 +8,17 @@ import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
+import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
-import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
-import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
-import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.service.PostService;
@@ -28,7 +31,6 @@ import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +38,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,7 +50,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
@@ -53,6 +59,8 @@ import static org.mockito.Mockito.mockStatic;
 public class PostServiceTest {
     @Mock
     UserRepository userRepository;
+    @Mock
+    BlockUserRepository blockUserRepository;
     @Mock
     PostRepository postRepository;
     @Mock
@@ -65,11 +73,12 @@ public class PostServiceTest {
     HoldInfoRepository holdInfoRepository;
     @Mock
     ClimbingHistoryRepository climbingHistoryRepository;
-    @Mock
-    BlockUserRepository blockUserRepository;
 
     @InjectMocks
     PostService postService;
+
+    @Spy
+    PaginationFactory paginationFactory = new PaginationFactory();
 
     private User user, user2, blockedUser, privateUser;
     private Post post, post2, blockedPost, privatePost;
@@ -157,7 +166,7 @@ public class PostServiceTest {
                 center,
                 "testContent1",
                 user,
-                Set.of(),
+                List.of(),
                 Set.of(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -200,7 +209,7 @@ public class PostServiceTest {
                 center,
                 "testContent2",
                 user2,
-                Set.of(postContents2),
+                List.of(postContents2),
                 Set.of(climbingHistory2),
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -211,7 +220,7 @@ public class PostServiceTest {
                 center,
                 "testContent3",
                 blockedUser,
-                Set.of(),
+                List.of(),
                 Set.of(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -222,7 +231,7 @@ public class PostServiceTest {
                 center,
                 "testContent4",
                 privateUser,
-                Set.of(),
+                List.of(),
                 Set.of(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -261,7 +270,7 @@ public class PostServiceTest {
         given(this.blockUserRepository.findBlock("testUserId", privateUser.getId())).willReturn(Optional.empty());
 
         // when
-        final BadRequestException ex = Assertions.assertThrows(
+        final BadRequestException ex = assertThrows(
                 BadRequestException.class,
                 () -> this.postService.findPost("testUserId", "privatePostId")
         );
@@ -280,7 +289,7 @@ public class PostServiceTest {
         given(this.blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(Optional.of(blockUser));
 
         // when
-        final BadRequestException ex = Assertions.assertThrows(
+        final BadRequestException ex = assertThrows(
                 BadRequestException.class,
                 () -> this.postService.findPost("testUserId", "blockedPostId")
         );
@@ -368,7 +377,7 @@ public class PostServiceTest {
         given(this.centerRepository.findById("center1")).willReturn(Optional.of(center));
 
         // when
-        final BadRequestException ex = Assertions.assertThrows(
+        final BadRequestException ex = assertThrows(
                 BadRequestException.class,
                 () -> postService.createPost("testUserId", postCreateRequestDto)
         );
@@ -406,7 +415,7 @@ public class PostServiceTest {
         given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
         // when
-        final UnauthorizedException ex = Assertions.assertThrows(
+        final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
                 () -> this.postService.deletePost("testPostId", "testUserId2")
         );
@@ -415,5 +424,37 @@ public class PostServiceTest {
         assertThat(ex)
                 .extracting("errorCode", "message")
                 .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
+    }
+
+    @Test
+    @DisplayName("Success case for find posts by user nickname")
+    void successFindPosts(){
+        // given
+        String loginedUserId = this.user.getId();
+        Post samplePost = Post.of(this.center, "Helloworld", this.user2, List.of(), Set.of());
+        Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findByNickname(this.user2.getNickname())).willReturn(Optional.of(this.user2));
+        given(this.blockUserRepository.findByUserIdAndBlockId(this.user2.getId(), loginedUserId)).willReturn(Optional.empty());
+        given(this.postRepository.findByWriterOrderByCreatedAtDesc(this.user2, pageable)).willReturn(new PageImpl<>(List.of(samplePost), pageable, 1));
+
+        // when
+        Pagination<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(loginedUserId, this.user2.getNickname(), pageable);
+
+        // then
+        assertThat(dtos.getResults().size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Fail case(user is private) for find posts")
+    void failFindPosts(){
+        // given
+        String loginedUserId = this.user.getId();
+        Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
+
+        // when & then
+        assertThrows(BadRequestException.class, () -> {
+            this.postService.getUserPosts(loginedUserId, this.privateUser.getNickname(), pageable);
+        });
     }
 }

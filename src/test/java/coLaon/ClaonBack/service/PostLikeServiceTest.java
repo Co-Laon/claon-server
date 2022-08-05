@@ -127,7 +127,7 @@ public class PostLikeServiceTest {
                 center,
                 "testContent1",
                 user,
-                Set.of(),
+                List.of(),
                 Set.of(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
@@ -170,7 +170,7 @@ public class PostLikeServiceTest {
                 center,
                 "testContent2",
                 user2,
-                Set.of(postContents2),
+                List.of(postContents2),
                 Set.of(climbingHistory2),
                 LocalDateTime.now(),
                 LocalDateTime.now()

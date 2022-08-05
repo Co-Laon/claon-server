@@ -7,6 +7,7 @@ import coLaon.ClaonBack.common.exception.MethodArgumentNotValidExceptionDto;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.exception.ConflictExceptionDto;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.ServiceUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -68,5 +69,12 @@ public class GlobalExceptionHandler {
     public ExceptionDto handleUniqueConstraintException(Exception exception) {
         GlobalExceptionHandler.log.error("error message", exception);
         return new ConflictExceptionDto("Violate unique constraint - " + exception.getMessage());
+    }
+
+    @ExceptionHandler(value = {NotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionDto handleNotFoundException(Exception exception) {
+        GlobalExceptionHandler.log.error("error message", exception);
+        return new ConflictExceptionDto("Requested data not found - " + exception.getMessage());
     }
 }

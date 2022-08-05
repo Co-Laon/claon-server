@@ -1,7 +1,9 @@
 package coLaon.ClaonBack.post.repository;
 
-import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.user.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,4 +38,5 @@ public interface PostRepository extends JpaRepository<Post, String> {
             "ON p.user_id = bu.user_id " +
             "WHERE bu.block_user_id = :userId) a" , nativeQuery = true)
     Integer selectCountByCenter(@Param("centerId")String centerId, @Param("userId")String userId);
+    Page<Post> findByWriterOrderByCreatedAtDesc(User writer, Pageable pageable);
 }

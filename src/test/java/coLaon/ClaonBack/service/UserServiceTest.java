@@ -133,7 +133,7 @@ public class UserServiceTest {
                 center,
                 "testContent1",
                 user,
-                Set.of(),
+                List.of(),
                 Set.of(),
                 LocalDateTime.now(),
                 LocalDateTime.now()

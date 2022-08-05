@@ -14,8 +14,8 @@ import java.util.Optional;
 public interface BlockUserRepository extends JpaRepository<BlockUser, String> {
     @Query(value = "SELECT * " +
             "FROM TB_BLOCK_USER AS b " +
-            "WHERE b.user_id = :userId AND b.block_user_id = :blockId", nativeQuery = true)
-    Optional<BlockUser> findByUserIdAndBlockId(@Param("userId") String userId, @Param("blockId") String blockId);
+            "WHERE b.user_id = :userId AND b.block_user_id = :blockUserId", nativeQuery = true)
+    Optional<BlockUser> findByUserIdAndBlockId(@Param("userId") String userId, @Param("blockUserId") String blockUserId);
 
     @Query(value = "SELECT * " +
             "FROM TB_BLOCK_USER AS b " +

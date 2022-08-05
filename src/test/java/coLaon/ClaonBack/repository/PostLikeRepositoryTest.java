@@ -74,7 +74,7 @@ public class PostLikeRepositoryTest {
                 center,
                 "testContent1",
                 user,
-                Set.of(),
+                List.of(),
                 Set.of()
         ));
     }

@@ -28,9 +28,4 @@ public class HoldInfoResponseDto {
                 holdInfo.getImg()
         );
     }
-
-    @Override
-    public int hashCode() {
-        return this.id.hashCode() * this.name.hashCode() * this.image.hashCode();
-    }
 }

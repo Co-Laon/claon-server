@@ -60,7 +60,7 @@ public class PostDetailResponseDto {
                         HoldInfoResponseDto.from(climbingHistory.getHoldInfo())).collect(Collectors.toList()),
                 post.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(post.getCreatedAt(), ZoneOffset.of("+9"))),
-                post.getContentsSet().stream().map(PostContents::getUrl).collect(Collectors.toList())
+                post.getContentsList().stream().map(PostContents::getUrl).collect(Collectors.toList())
         );
     }
 }

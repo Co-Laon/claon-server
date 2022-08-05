@@ -15,7 +15,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +39,7 @@ public class PostRepositoryTest {
 
     private User user;
     private Post post;
+    private Center center;
 
     @BeforeEach
     void setUp(){
@@ -63,15 +70,21 @@ public class PostRepositoryTest {
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
-        centerRepository.save(center);
+        this.center = centerRepository.save(center);
         this.post = Post.of(
                 center,
                 "testContent1",
                 user,
-                Set.of(),
+                List.of(),
                 Set.of()
         );
         postRepository.save(post);
+        List<Post> posts = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            Post post = Post.of(this.center, "content" + i, user, List.of(), Set.of());
+            posts.add(post);
+        }
+        postRepository.saveAll(posts);
     }
 
     @Test
@@ -81,5 +94,13 @@ public class PostRepositoryTest {
 
         // then
         assertThat(postIds.contains(post.getId())).isTrue();
+    }
+
+    @Test
+    public void checkFindByUserIdOrderByCreatedAtDesc(){
+        Sort sort = Sort.by(Sort.Direction.ASC, "createdAt");
+        Pageable pageable = PageRequest.of(0, 10, sort);
+        Page<Post> results = postRepository.findByWriterOrderByCreatedAtDesc(this.user, pageable);
+        assertThat(results.getTotalElements()).isEqualTo(6L);
     }
 }
