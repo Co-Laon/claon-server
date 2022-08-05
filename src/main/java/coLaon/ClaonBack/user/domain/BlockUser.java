@@ -22,6 +22,8 @@ public class BlockUser extends BaseEntity {
     @JoinColumn(name = "block_user_id", nullable = false)
     private User blockedUser;
 
+    public static final String domain = "차단";
+
     private BlockUser(
             User user,
             User blockedUser

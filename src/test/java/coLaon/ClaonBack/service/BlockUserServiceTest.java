@@ -2,6 +2,8 @@ package coLaon.ClaonBack.service;
 
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
+import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
@@ -10,6 +12,7 @@ import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import coLaon.ClaonBack.user.service.BlockUserService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -121,6 +124,23 @@ public class BlockUserServiceTest {
             // then
             assertThat(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).isNotNull();
         }
+    }
+
+    @Test
+    @DisplayName("Failure case for create block when block myself")
+    void failCreateBlockMyself() {
+        //given
+        given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(publicUser));
+
+        //when
+        final UnauthorizedException ex = Assertions.assertThrows(
+                UnauthorizedException.class,
+                () -> this.blockUserService.createBlock("publicUserId", "userNickname")
+        );
+
+        //then
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
+        assertThat(ex.getMessage()).isEqualTo(String.format("자기 자신은 %s이 불가능합니다.", BlockUser.domain));
     }
 
     @Test

@@ -22,6 +22,8 @@ public class Laon extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public static final String domain = "라온";
+
     private Laon(
             User laon,
             User user

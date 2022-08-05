@@ -168,7 +168,7 @@ public class UserService {
         List<String> postIds = this.postRepository.selectPostIdsByUserId(user.getId());
         Long postCount = (long) postIds.size();
         Long postLikeCount = this.postLikeRepository.countByPostIdIn(postIds);
-        
+
         Set<String> userIds = this.laonRepository.getUserIdsByLaonId(user.getId());
         Long laonCount = (long) userIds.size();
 
