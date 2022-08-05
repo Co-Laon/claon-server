@@ -13,6 +13,7 @@ import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepository;
+import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.center.service.CenterReviewService;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
@@ -53,6 +54,8 @@ public class CenterReviewServiceTest {
     CenterRepository centerRepository;
     @Mock
     ReviewRepository reviewRepository;
+    @Mock
+    ReviewRepositorySupport reviewRepositorySupport;
 
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
@@ -254,7 +257,7 @@ public class CenterReviewServiceTest {
 
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
         given(this.reviewRepository.selectRanksByCenterId("centerId")).willReturn(List.of(5, 4));
-        given(this.reviewRepository.findByCenter(center.getId(), "userId", pageable)).willReturn(centerReviewPage);
+        given(this.reviewRepositorySupport.findByCenterExceptBlockUser(center.getId(), "userId", pageable)).willReturn(centerReviewPage);
 
         //when
         ReviewListFindResponseDto reviewListFindResponseDto = this.centerReviewService.findReview("userId", "centerId", pageable);
