@@ -4,6 +4,7 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostLike;
@@ -36,8 +37,8 @@ public class PostLikeService {
         );
 
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
                 )
         );
@@ -60,15 +61,15 @@ public class PostLikeService {
     @Transactional
     public LikeResponseDto deleteLike(String userId, String postId) {
         User liker = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
                 )
         );
 
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
                 )
         );
@@ -98,8 +99,8 @@ public class PostLikeService {
         );
 
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
                 )
         );

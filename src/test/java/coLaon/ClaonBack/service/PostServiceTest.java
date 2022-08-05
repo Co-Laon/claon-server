@@ -74,12 +74,11 @@ public class PostServiceTest {
     HoldInfoRepository holdInfoRepository;
     @Mock
     ClimbingHistoryRepository climbingHistoryRepository;
+    @Spy
+    PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     PostService postService;
-
-    @Spy
-    PaginationFactory paginationFactory = new PaginationFactory();
 
     private User user, user2, blockedUser, privateUser;
     private Post post, post2, blockedPost, privatePost;
@@ -246,7 +245,6 @@ public class PostServiceTest {
         // given
         given(this.postRepository.findByIdAndIsDeletedFalse("testPostId2")).willReturn(Optional.of(post2));
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-        given(this.blockUserRepository.findBlock("testUserId", user2.getId())).willReturn(Optional.empty());
         given(this.postLikeRepository.countByPost(post2)).willReturn(2);
 
         // when
@@ -269,7 +267,6 @@ public class PostServiceTest {
         // given
         given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-        given(this.blockUserRepository.findBlock("testUserId", privateUser.getId())).willReturn(Optional.empty());
 
         // when
         final BadRequestException ex = assertThrows(
@@ -291,15 +288,15 @@ public class PostServiceTest {
         given(this.blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(Optional.of(blockUser));
 
         // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
+        final UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
                 () -> this.postService.findPost("testUserId", "blockedPostId")
         );
 
         // then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, "차단 관계입니다.");
+                .contains(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
     }
 
     @Test
@@ -436,7 +433,7 @@ public class PostServiceTest {
         Post samplePost = Post.of(this.center, "Helloworld", this.user2, List.of(), Set.of());
         Pageable pageable = PageRequest.of(0, 2);
         given(this.userRepository.findByNickname(this.user2.getNickname())).willReturn(Optional.of(this.user2));
-        given(this.blockUserRepository.findByUserIdAndBlockId(this.user2.getId(), loginedUserId)).willReturn(Optional.empty());
+        given(this.blockUserRepository.findBlock(this.user2.getId(), loginedUserId)).willReturn(Optional.empty());
         given(this.postRepository.findByWriterOrderByCreatedAtDesc(this.user2, pageable)).willReturn(new PageImpl<>(List.of(samplePost), pageable, 1));
 
         // when

@@ -124,6 +124,7 @@ public class LaonServiceTest {
     void failCreateLaonMyself() {
         //given
         given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(user));
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
 
         //when
         final UnauthorizedException ex = Assertions.assertThrows(
@@ -132,8 +133,9 @@ public class LaonServiceTest {
         );
 
         //then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
-        assertThat(ex.getMessage()).isEqualTo(String.format("자기 자신은 %s이 불가능합니다.", Laon.domain));
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("자기 자신은 %s이 불가능합니다.", Laon.domain));
     }
 
     @Test

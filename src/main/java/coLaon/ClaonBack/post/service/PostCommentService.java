@@ -4,6 +4,8 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.InternalServerErrorException;
+import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.Post;
@@ -46,8 +48,8 @@ public class PostCommentService {
         );
 
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
                 )
         );
@@ -62,8 +64,8 @@ public class PostCommentService {
                                         .map(parentCommentId ->
                                                 postCommentRepository.findById(commentCreateRequestDto.getParentCommentId())
                                                         .orElseThrow(
-                                                                () -> new BadRequestException(
-                                                                        ErrorCode.ROW_DOES_NOT_EXIST,
+                                                                () -> new InternalServerErrorException(
+                                                                        ErrorCode.INTERNAL_SERVER_ERROR,
                                                                         "상위 댓글을 찾을 수 없습니다."
                                                                 )))
                                         .orElse(null)
@@ -72,7 +74,11 @@ public class PostCommentService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<CommentFindResponseDto> findCommentsByPost(String userId, String postId, Pageable pageable) {
+    public Pagination<CommentFindResponseDto> findCommentsByPost(
+            String userId,
+            String postId,
+            Pageable pageable
+    ) {
         userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
@@ -81,8 +87,8 @@ public class PostCommentService {
         );
 
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
                 )
         );
@@ -99,7 +105,11 @@ public class PostCommentService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<ChildCommentResponseDto> findAllChildCommentsByParent(String userId, String parentId, Pageable pageable) {
+    public Pagination<ChildCommentResponseDto> findAllChildCommentsByParent(
+            String userId,
+            String parentId,
+            Pageable pageable
+    ) {
         userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
@@ -108,9 +118,9 @@ public class PostCommentService {
         );
 
         PostComment postComment = postCommentRepository.findByIdAndIsDeletedFalse(parentId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "댓글 정보가 없습니다."
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "댓글을 찾을 수 없습니다."
                 )
         );
 
@@ -130,8 +140,8 @@ public class PostCommentService {
         );
 
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "댓글을 찾을 수 없습니다."
                 )
         );
@@ -157,8 +167,8 @@ public class PostCommentService {
         );
 
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "댓글을 찾을 수 없습니다."
                 )
         );

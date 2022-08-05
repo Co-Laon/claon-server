@@ -17,6 +17,7 @@ import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.IsAdminValidator;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
@@ -45,8 +46,8 @@ public class CenterService {
             CenterCreateRequestDto requestDto
     ) {
         User admin = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
                 )
         );
@@ -103,13 +104,13 @@ public class CenterService {
         );
 
         Center center = centerRepository.findById(centerId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "암장 정보를 찾을 수 없습니다."
                 )
         );
 
-        boolean isBookmarked = centerBookmarkRepository.findByUserIdAndCenterId(userId, centerId).isPresent();
+        Boolean isBookmarked = centerBookmarkRepository.findByUserIdAndCenterId(userId, centerId).isPresent();
         Integer postCount = postRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
         Integer reviewCount = reviewRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
 
@@ -132,8 +133,8 @@ public class CenterService {
         );
 
         Center center = centerRepository.findById(centerId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "암장 정보를 찾을 수 없습니다."
                 )
         );

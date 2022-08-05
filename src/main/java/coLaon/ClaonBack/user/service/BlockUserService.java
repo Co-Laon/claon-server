@@ -4,6 +4,8 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.NotFoundException;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.NotIdEqualValidator;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
@@ -26,23 +28,21 @@ public class BlockUserService {
 
     @Transactional
     public void createBlock(String userId, String blockNickname) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
         User blockUser = userRepository.findByNickname(blockNickname).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         String.format("%s을 찾을 수 없습니다.", blockNickname)
                 )
         );
 
         NotIdEqualValidator.of(userId, blockUser.getId(), BlockUser.domain).validate();
-
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
-        laonRepository.findByLaonIdAndUserId(blockUser.getId(), user.getId()).ifPresent(laonRepository::delete);
 
         blockUserRepository.findByUserIdAndBlockId(user.getId(), blockUser.getId()).ifPresent(
                 b -> {
@@ -53,22 +53,24 @@ public class BlockUserService {
                 }
         );
 
+        laonRepository.findByLaonIdAndUserId(blockUser.getId(), user.getId()).ifPresent(laonRepository::delete);
+
         blockUserRepository.save(BlockUser.of(user, blockUser));
     }
 
     @Transactional
     public void deleteBlock(String userId, String blockNickname) {
-        User blockUser = userRepository.findByNickname(blockNickname).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", blockNickname)
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
                 )
         );
 
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
+        User blockUser = userRepository.findByNickname(blockNickname).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        String.format("%s을 찾을 수 없습니다.", blockNickname)
                 )
         );
 
@@ -85,8 +87,8 @@ public class BlockUserService {
     @Transactional(readOnly = true)
     public Pagination<BlockUserFindResponseDto> findBlockUser(String userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
                 )
         );
