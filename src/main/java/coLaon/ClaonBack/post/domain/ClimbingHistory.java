@@ -37,38 +37,12 @@ public class ClimbingHistory extends BaseEntity {
         this.climbingCount = climbingCount;
     }
 
-    private ClimbingHistory(
-            String id,
-            Post post,
-            HoldInfo holdInfo,
-            Integer climbingCount
-    ) {
-        super(id);
-        this.post = post;
-        this.holdInfo = holdInfo;
-        this.climbingCount = climbingCount;
-    }
-
     public static ClimbingHistory of(
             Post post,
             HoldInfo holdInfo,
             Integer climbingCount
     ) {
         return new ClimbingHistory(
-                post,
-                holdInfo,
-                climbingCount
-        );
-    }
-
-    public static ClimbingHistory of(
-            String id,
-            Post post,
-            HoldInfo holdInfo,
-            Integer climbingCount
-    ) {
-        return new ClimbingHistory(
-                id,
                 post,
                 holdInfo,
                 climbingCount

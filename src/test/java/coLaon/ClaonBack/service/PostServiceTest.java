@@ -43,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -85,13 +86,12 @@ public class PostServiceTest {
     private PostContents postContents, postContents2;
     private HoldInfo holdInfo1;
     private Center center;
-    private ClimbingHistory climbingHistory, climbingHistory2;
+    private ClimbingHistory climbingHistory;
     private BlockUser blockUser;
 
     @BeforeEach
     void setUp() {
         this.user = User.of(
-                "testUserId",
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -101,9 +101,9 @@ public class PostServiceTest {
                 "",
                 "instagramId"
         );
+        ReflectionTestUtils.setField(this.user, "id", "testUserId");
 
         this.user2 = User.of(
-                "testUserId2",
                 "test123@gmail.com",
                 "test2345!!",
                 "test2",
@@ -113,9 +113,9 @@ public class PostServiceTest {
                 "",
                 "instagramId2"
         );
+        ReflectionTestUtils.setField(this.user2, "id", "testUserId2");
 
         this.blockedUser = User.of(
-                "blockUserId",
                 "test123@gmail.com",
                 "test2345!!",
                 "blockUser",
@@ -125,6 +125,7 @@ public class PostServiceTest {
                 "",
                 "instagramId2"
         );
+        ReflectionTestUtils.setField(this.blockedUser, "id", "blockUserId");
 
         this.blockUser = BlockUser.of(
                 user,
@@ -132,7 +133,6 @@ public class PostServiceTest {
         );
 
         this.privateUser = User.of(
-                "privateUserId",
                 "test123@gmail.com",
                 "test2345!!",
                 "privateUser",
@@ -143,9 +143,9 @@ public class PostServiceTest {
                 "instagramId2"
         );
         this.privateUser.changePublicScope();
+        ReflectionTestUtils.setField(this.privateUser, "id", "privateUserId");
 
         this.center = Center.of(
-                "center1",
                 "testCenter",
                 "testAddress",
                 "010-1234-1234",
@@ -160,82 +160,84 @@ public class PostServiceTest {
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
+        ReflectionTestUtils.setField(this.center, "id", "center1");
 
         this.post = Post.of(
-                "testPostId",
                 center,
                 "testContent1",
                 user,
                 List.of(),
-                Set.of(),
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                Set.of()
         );
+        ReflectionTestUtils.setField(this.post, "id", "testPostId");
+        ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.post, "updatedAt", LocalDateTime.now());
 
         this.postContents = PostContents.of(
-                "testPostContentsId",
                 post,
                 "test.com/test.png"
         );
+        ReflectionTestUtils.setField(this.postContents, "id", "testPostContentsId");
 
         this.postContents2 = PostContents.of(
-                "testPostContentsId2",
                 post2,
                 "test2.com/test.png"
         );
+        ReflectionTestUtils.setField(this.postContents2, "id", "testPostContentsId2");
 
         this.holdInfo1 = HoldInfo.of(
-                "holdId1",
                 "holdName1",
                 "/hold1.png",
                 center
         );
+        ReflectionTestUtils.setField(this.holdInfo1, "id", "holdId1");
 
         this.climbingHistory = ClimbingHistory.of(
                 this.post,
                 holdInfo1,
                 0
         );
+        ReflectionTestUtils.setField(this.climbingHistory, "id", "climbingId");
 
-        this.climbingHistory2 = ClimbingHistory.of(
-                "climbingId2",
+        ClimbingHistory climbingHistory2 = ClimbingHistory.of(
                 this.post2,
                 holdInfo1,
                 0
         );
+        ReflectionTestUtils.setField(climbingHistory2, "id", "climbingId2");
 
         this.post2 = Post.of(
-                "testPostId2",
                 center,
                 "testContent2",
                 user2,
                 List.of(postContents2),
-                Set.of(climbingHistory2),
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                Set.of(climbingHistory2)
         );
+        ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
+        ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.post2, "updatedAt", LocalDateTime.now());
 
         this.blockedPost = Post.of(
-                "blockedPostId",
                 center,
                 "testContent3",
                 blockedUser,
                 List.of(),
-                Set.of(),
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                Set.of()
         );
+        ReflectionTestUtils.setField(this.blockedPost, "id", "blockedPostId");
+        ReflectionTestUtils.setField(this.blockedPost, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.blockedPost, "updatedAt", LocalDateTime.now());
 
         this.privatePost = Post.of(
-                "privatePostId",
                 center,
                 "testContent4",
                 privateUser,
                 List.of(),
-                Set.of(),
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                Set.of()
         );
+        ReflectionTestUtils.setField(this.privatePost, "id", "privatePostId");
+        ReflectionTestUtils.setField(this.privatePost, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.privatePost, "updatedAt", LocalDateTime.now());
     }
 
     @Test
@@ -452,9 +454,15 @@ public class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
 
-        // when & then
-        assertThrows(BadRequestException.class, () -> {
-            this.postService.getUserPosts(loginedUserId, this.privateUser.getNickname(), pageable);
-        });
+        // when
+        final BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> this.postService.getUserPosts(loginedUserId, this.privateUser.getNickname(), pageable)
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "비공개 계정입니다.");
     }
 }

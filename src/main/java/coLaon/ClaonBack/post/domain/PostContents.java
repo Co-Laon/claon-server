@@ -29,33 +29,11 @@ public class PostContents extends BaseEntity {
         this.url = url;
     }
 
-    private PostContents(
-            String id,
-            Post post,
-            String url
-    ) {
-        super(id);
-        this.post = post;
-        this.url = url;
-    }
-
     public static PostContents of(
             Post post,
             String url
     ) {
         return new PostContents(
-                post,
-                url
-        );
-    }
-
-    public static PostContents of(
-            String id,
-            Post post,
-            String url
-    ) {
-        return new PostContents(
-                id,
                 post,
                 url
         );

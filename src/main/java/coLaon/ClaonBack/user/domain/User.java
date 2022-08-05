@@ -45,29 +45,6 @@ public class User extends BaseEntity {
     }
 
     private User(
-            String id,
-            String email,
-            String oAuthId,
-            String nickname,
-            String metropolitanActiveArea,
-            String basicLocalActiveArea,
-            String imagePath,
-            String instagramOAuthId,
-            String instagramUserName
-    ) {
-        super(id);
-        this.email = email;
-        this.oAuthId = oAuthId;
-        this.nickname = nickname;
-        this.metropolitanActiveArea = metropolitanActiveArea;
-        this.basicLocalActiveArea = basicLocalActiveArea;
-        this.imagePath = imagePath;
-        this.instagramOAuthId = instagramOAuthId;
-        this.instagramUserName = instagramUserName;
-        this.isPrivate = false;
-    }
-
-    private User(
             String email,
             String oAuthId,
             String nickname,
@@ -110,30 +87,6 @@ public class User extends BaseEntity {
             String instagramUserName
     ) {
         return new User(
-                email,
-                oAuthId,
-                nickname,
-                metropolitanActiveArea,
-                basicLocalActiveArea,
-                imagePath,
-                instagramOAuthId,
-                instagramUserName
-        );
-    }
-
-    public static User of(
-            String id,
-            String email,
-            String oAuthId,
-            String nickname,
-            String metropolitanActiveArea,
-            String basicLocalActiveArea,
-            String imagePath,
-            String instagramOAuthId,
-            String instagramUserName
-    ) {
-        return new User(
-                id,
                 email,
                 oAuthId,
                 nickname,

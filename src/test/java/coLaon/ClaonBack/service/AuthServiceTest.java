@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -46,7 +47,6 @@ public class AuthServiceTest {
     @BeforeEach
     void setUp() {
         this.user = User.of(
-                "test",
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -56,6 +56,7 @@ public class AuthServiceTest {
                 "123456",
                 "test"
         );
+        ReflectionTestUtils.setField(this.user, "id", "test");
     }
 
     @Test
@@ -97,7 +98,6 @@ public class AuthServiceTest {
     @DisplayName("Success case for sign in for first access user")
     void successSignInForFirstAccessUser() {
         User firstAccessUser = User.of(
-                "test",
                 "test@gmail.com",
                 "1234567890",
                 "nickname",
@@ -107,6 +107,7 @@ public class AuthServiceTest {
                 null,
                 null
         );
+        ReflectionTestUtils.setField(firstAccessUser, "id", "test");
 
         try (MockedStatic<User> mockedUser = mockStatic(User.class)) {
             // given

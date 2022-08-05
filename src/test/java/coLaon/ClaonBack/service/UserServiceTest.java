@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,15 +57,12 @@ public class UserServiceTest {
 
     private User user, privateUser, publicUser;
     private Center center;
-    private Post post;
-    private HoldInfo holdInfo;
     private ClimbingHistory climbingHistory;
     private List<String> postIds;
 
     @BeforeEach
     void setUp() {
         this.publicUser = User.of(
-                "publicUserId",
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -74,9 +72,9 @@ public class UserServiceTest {
                 "",
                 "instagramId"
         );
+        ReflectionTestUtils.setField(this.publicUser, "id", "publicUserId");
 
         this.privateUser = User.of(
-                "privateUserId",
                 "test12@gmail.com",
                 "1234567823",
                 "test",
@@ -87,9 +85,9 @@ public class UserServiceTest {
                 "instagramId"
         );
         this.privateUser.changePublicScope();
+        ReflectionTestUtils.setField(this.privateUser, "id", "privateUserId");
 
         this.user = User.of(
-                "userId",
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -99,6 +97,7 @@ public class UserServiceTest {
                 "",
                 "instagramId"
         );
+        ReflectionTestUtils.setField(this.user, "id", "userId");
 
         this.center = Center.of(
                 "test",
@@ -116,21 +115,20 @@ public class UserServiceTest {
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
 
-        this.post = Post.of(
-                "testPostId",
+        Post post = Post.of(
                 center,
                 "testContent1",
-                user,
-                List.of(),
-                Set.of(),
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                user
         );
+        ReflectionTestUtils.setField(post, "id", "testPostId");
+        ReflectionTestUtils.setField(post, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(post, "updatedAt", LocalDateTime.now());
 
-        this.postIds = List.of(this.post.getId());
-        this.holdInfo = HoldInfo.of("test", "name", "dfdf", center);
+        this.postIds = List.of(post.getId());
+        HoldInfo holdInfo = HoldInfo.of("name", "dfdf", center);
+        ReflectionTestUtils.setField(holdInfo, "id", "test");
         this.climbingHistory = ClimbingHistory.of(
-                this.post,
+                post,
                 holdInfo,
                 2);
     }

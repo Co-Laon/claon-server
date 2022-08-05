@@ -24,21 +24,23 @@ public class CenterBookmarkResponseDto {
     private List<SectorInfoDto> sectorInfoList;
     private Boolean isBookmarked;
 
-    private CenterBookmarkResponseDto(String centerId,
-                                      String name,
-                                      String address,
-                                      String tel,
-                                      String webUrl,
-                                      String instagramUrl,
-                                      String youtubeUrl,
-                                      List<CenterImgDto> imgList,
-                                      List<OperatingTimeDto> operatingTimeList,
-                                      String facilities,
-                                      List<ChargeDto> chargeList,
-                                      String chargeImg,
-                                      String holdInfoImg,
-                                      List<SectorInfoDto> sectorInfoList,
-                                      Boolean isBookmarked) {
+    private CenterBookmarkResponseDto(
+            String centerId,
+            String name,
+            String address,
+            String tel,
+            String webUrl,
+            String instagramUrl,
+            String youtubeUrl,
+            List<CenterImgDto> imgList,
+            List<OperatingTimeDto> operatingTimeList,
+            String facilities,
+            List<ChargeDto> chargeList,
+            String chargeImg,
+            String holdInfoImg,
+            List<SectorInfoDto> sectorInfoList,
+            Boolean isBookmarked
+    ) {
         this.centerId = centerId;
         this.name = name;
         this.address = address;

@@ -32,6 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,17 +60,12 @@ public class PostLikeServiceTest {
     PostLikeService postLikeService;
 
     private PostLike postLike, postLike2;
-    private User user, user2, privateUser;
+    private User user;
     private Post post, post2;
-    private PostContents postContents2;
-    private HoldInfo holdInfo1;
-    private Center center;
-    private ClimbingHistory climbingHistory2;
 
     @BeforeEach
     void setUp() {
         this.user = User.of(
-                "testUserId",
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -79,9 +75,9 @@ public class PostLikeServiceTest {
                 "",
                 "instagramId"
         );
+        ReflectionTestUtils.setField(this.user, "id", "testUserId");
 
-        this.user2 = User.of(
-                "testUserId2",
+        User user2 = User.of(
                 "test123@gmail.com",
                 "test2345!!",
                 "test2",
@@ -91,22 +87,9 @@ public class PostLikeServiceTest {
                 "",
                 "instagramId2"
         );
+        ReflectionTestUtils.setField(user2, "id", "testUserId2");
 
-        this.privateUser = User.of(
-                "privateUserId",
-                "test123@gmail.com",
-                "test2345!!",
-                "privateUser",
-                "경기도",
-                "성남시",
-                "",
-                "",
-                "instagramId2"
-        );
-        this.privateUser.changePublicScope();
-
-        this.center = Center.of(
-                "center1",
+        Center center = Center.of(
                 "testCenter",
                 "testAddress",
                 "010-1234-1234",
@@ -121,60 +104,61 @@ public class PostLikeServiceTest {
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
+        ReflectionTestUtils.setField(center, "id", "center1");
 
         this.post = Post.of(
-                "testPostId",
                 center,
                 "testContent1",
                 user,
                 List.of(),
-                Set.of(),
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                Set.of()
         );
+        ReflectionTestUtils.setField(this.post, "id", "testPostId");
+        ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.post, "updatedAt", LocalDateTime.now());
 
-        this.postContents2 = PostContents.of(
-                "testPostContentsId2",
+        PostContents postContents2 = PostContents.of(
                 post2,
                 "test2.com/test.png"
         );
+        ReflectionTestUtils.setField(postContents2, "id", "testPostContentsId2");
 
         this.postLike = PostLike.of(
-                "testPostLikeId",
                 user,
                 post
         );
+        ReflectionTestUtils.setField(this.postLike, "id", "testPostLikeId");
 
         this.postLike2 = PostLike.of(
-                "testPostLikeId2",
                 user2,
                 post
         );
+        ReflectionTestUtils.setField(this.postLike2, "id", "testPostLikeId2");
 
-        this.holdInfo1 = HoldInfo.of(
-                "holdId1",
+        HoldInfo holdInfo1 = HoldInfo.of(
                 "holdName1",
                 "/hold1.png",
                 center
         );
+        ReflectionTestUtils.setField(holdInfo1, "id", "holdId1");
 
-        this.climbingHistory2 = ClimbingHistory.of(
-                "climbingId2",
+        ClimbingHistory climbingHistory2 = ClimbingHistory.of(
                 this.post2,
                 holdInfo1,
                 0
         );
+        ReflectionTestUtils.setField(climbingHistory2, "id", "climbingId2");
 
         this.post2 = Post.of(
-                "testPostId2",
                 center,
                 "testContent2",
                 user2,
                 List.of(postContents2),
-                Set.of(climbingHistory2),
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                Set.of(climbingHistory2)
         );
+        ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
+        ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.post2, "updatedAt", LocalDateTime.now());
     }
 
     @Test

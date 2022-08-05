@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +51,6 @@ class CenterBookmarkServiceTest {
     @BeforeEach
     void setUp() {
         this.user = User.of(
-                "userId",
                 "coraon.dev@gmail.com",
                 "1234567890",
                 "userNickname1",
@@ -60,9 +60,9 @@ class CenterBookmarkServiceTest {
                 "",
                 "instagramId"
         );
+        ReflectionTestUtils.setField(this.user, "id", "userId");
 
         this.user2 = User.of(
-                "userId2",
                 "test123@gmail.com",
                 "1234567890",
                 "test2",
@@ -72,9 +72,9 @@ class CenterBookmarkServiceTest {
                 "",
                 "instagramId2"
         );
+        ReflectionTestUtils.setField(this.user2, "id", "userId2");
 
         this.center = Center.of(
-                "centerId",
                 "test",
                 "test",
                 "010-1234-1234",
@@ -89,12 +89,13 @@ class CenterBookmarkServiceTest {
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
+        ReflectionTestUtils.setField(this.center, "id", "centerId");
 
         this.centerBookmark = CenterBookmark.of(
-                "bookmarkCenterId",
                 this.center,
                 this.user
         );
+        ReflectionTestUtils.setField(this.centerBookmark, "id", "bookmarkCenterId");
     }
 
     @Test

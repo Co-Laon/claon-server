@@ -15,7 +15,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -75,42 +74,6 @@ public class Post extends BaseEntity {
         this.climbingHistorySet = climbingHistorySet;
     }
 
-    private Post(
-            String id,
-            Center center,
-            String content,
-            User writer,
-            List<PostContents> contentsSet,
-            Set<ClimbingHistory> climbingHistorySet
-    ) {
-        super(id);
-        this.center = center;
-        this.content = content;
-        this.isDeleted = false;
-        this.writer = writer;
-        this.contentsList = contentsSet;
-        this.climbingHistorySet = climbingHistorySet;
-    }
-
-    private Post(
-            String id,
-            Center center,
-            String content,
-            User writer,
-            List<PostContents> contentsSet,
-            Set<ClimbingHistory> climbingHistorySet,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt
-    ) {
-        super(id, createdAt, updatedAt);
-        this.center = center;
-        this.content = content;
-        this.isDeleted = false;
-        this.writer = writer;
-        this.contentsList = contentsSet;
-        this.climbingHistorySet = climbingHistorySet;
-    }
-
     public static Post of(
             Center center,
             String content,
@@ -120,46 +83,6 @@ public class Post extends BaseEntity {
                 center,
                 content,
                 writer
-        );
-    }
-
-    public static Post of(
-            String id,
-            Center center,
-            String content,
-            User writer,
-            List<PostContents> contentsSet,
-            Set<ClimbingHistory> climbingHistorySet
-    ) {
-        return new Post(
-                id,
-                center,
-                content,
-                writer,
-                contentsSet,
-                climbingHistorySet
-        );
-    }
-
-    public static Post of(
-            String id,
-            Center center,
-            String content,
-            User writer,
-            List<PostContents> contentsSet,
-            Set<ClimbingHistory> climbingHistorySet,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt
-    ) {
-        return new Post(
-                id,
-                center,
-                content,
-                writer,
-                contentsSet,
-                climbingHistorySet,
-                createdAt,
-                updatedAt
         );
     }
 

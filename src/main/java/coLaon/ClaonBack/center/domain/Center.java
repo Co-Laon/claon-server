@@ -82,38 +82,6 @@ public class Center extends BaseEntity {
         this.sectorInfo = sectorInfo;
     }
 
-    private Center(
-            String id,
-            String name,
-            String address,
-            String tel,
-            String webUrl,
-            String instagramUrl,
-            String youtubeUrl,
-            List<CenterImg> imgList,
-            List<OperatingTime> operatingTime,
-            String facilities,
-            List<Charge> charge,
-            String chargeImg,
-            String holdInfoImg,
-            List<SectorInfo> sectorInfo
-    ) {
-        super(id);
-        this.name = name;
-        this.address = address;
-        this.tel = tel;
-        this.webUrl = webUrl;
-        this.instagramUrl = instagramUrl;
-        this.youtubeUrl = youtubeUrl;
-        this.imgList = imgList;
-        this.operatingTime = operatingTime;
-        this.facilities = facilities;
-        this.charge = charge;
-        this.chargeImg = chargeImg;
-        this.holdInfoImg = holdInfoImg;
-        this.sectorInfo = sectorInfo;
-    }
-
     public static Center of(
             String name,
             String address,
@@ -130,40 +98,6 @@ public class Center extends BaseEntity {
             List<SectorInfo> sectorInfoList
     ) {
         return new Center(
-                name,
-                address,
-                tel,
-                webUrl,
-                instagramUrl,
-                youtubeUrl,
-                imgList,
-                operatingTimeList,
-                facilities,
-                chargeList,
-                chargeImg,
-                holdInfoImg,
-                sectorInfoList
-        );
-    }
-
-    public static Center of(
-            String id,
-            String name,
-            String address,
-            String tel,
-            String webUrl,
-            String instagramUrl,
-            String youtubeUrl,
-            List<CenterImg> imgList,
-            List<OperatingTime> operatingTimeList,
-            String facilities,
-            List<Charge> chargeList,
-            String chargeImg,
-            String holdInfoImg,
-            List<SectorInfo> sectorInfoList
-    ) {
-        return new Center(
-                id,
                 name,
                 address,
                 tel,

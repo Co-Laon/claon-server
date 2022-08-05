@@ -30,32 +30,10 @@ public class CenterBookmark extends BaseEntity {
         this.user = user;
     }
 
-    private CenterBookmark(
-            String id,
-            Center center,
-            User user
-    ) {
-        super(id);
-        this.center = center;
-        this.user = user;
-    }
-
     public static CenterBookmark of(
             Center center,
             User user
     ) {
         return new CenterBookmark(center, user);
-    }
-
-    public static CenterBookmark of(
-            String id,
-            Center center,
-            User user
-    ) {
-        return new CenterBookmark(
-                id,
-                center,
-                user
-        );
     }
 }

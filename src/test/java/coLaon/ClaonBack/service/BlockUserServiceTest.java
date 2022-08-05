@@ -26,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,14 +51,13 @@ public class BlockUserServiceTest {
     @InjectMocks
     BlockUserService blockUserService;
 
-    private User privateUser, publicUser, blockUser;
+    private User publicUser, blockUser;
     private BlockUser blockUserRelation;
     private Laon laonRelation;
 
     @BeforeEach
     void setUp() {
         this.publicUser = User.of(
-                "publicUserId",
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -67,22 +67,9 @@ public class BlockUserServiceTest {
                 "",
                 "instagramId"
         );
-
-        this.privateUser = User.of(
-                "privateUserId",
-                "test12@gmail.com",
-                "1234567823",
-                "test",
-                "경기도",
-                "성남시",
-                "",
-                "",
-                "instagramId"
-        );
-        this.privateUser.changePublicScope();
+        ReflectionTestUtils.setField(this.publicUser, "id", "publicUserId");
 
         this.blockUser = User.of(
-                "blockUserId",
                 "block@gmail.com",
                 "1264567890",
                 "testBlockNickname",
@@ -92,6 +79,7 @@ public class BlockUserServiceTest {
                 "",
                 "instagramId2"
         );
+        ReflectionTestUtils.setField(this.blockUser, "id", "blockUserId");
 
         this.blockUserRelation = BlockUser.of(
                 this.publicUser,

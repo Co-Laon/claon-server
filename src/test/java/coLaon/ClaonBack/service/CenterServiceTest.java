@@ -36,6 +36,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -63,8 +64,7 @@ public class CenterServiceTest {
     @InjectMocks
     CenterService centerService;
 
-    private User admin;
-    private User user;
+    private User admin, user;
     private Center center, center2;
     private HoldInfo holdInfo, holdInfo2;
     private CenterBookmark centerBookmark;
@@ -72,7 +72,6 @@ public class CenterServiceTest {
     @BeforeEach
     void setUp() {
         this.admin = User.of(
-                "adminId",
                 "coraon.dev@gmail.com",
                 "1234567890",
                 "userNickname1",
@@ -82,9 +81,9 @@ public class CenterServiceTest {
                 "",
                 "instagramId"
         );
+        ReflectionTestUtils.setField(this.admin, "id", "adminId");
 
         this.user = User.of(
-                "userId",
                 "test@gmail.com",
                 "1234567222",
                 "userNickname2",
@@ -94,9 +93,9 @@ public class CenterServiceTest {
                 "",
                 "instagramId2"
         );
+        ReflectionTestUtils.setField(this.user, "id", "userId");
 
         this.center = Center.of(
-                "center id",
                 "test",
                 "test",
                 "010-1234-1234",
@@ -111,9 +110,9 @@ public class CenterServiceTest {
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
+        ReflectionTestUtils.setField(this.center, "id", "center id");
 
         this.center2 = Center.of(
-                "center id2",
                 "test2",
                 "test2",
                 "010-2345-1234",
@@ -128,10 +127,12 @@ public class CenterServiceTest {
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
+        ReflectionTestUtils.setField(this.center2, "id", "center id2");
 
         this.holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
         this.holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
-        this.centerBookmark = CenterBookmark.of("bookMarkId", center, user);
+        this.centerBookmark = CenterBookmark.of(center, user);
+        ReflectionTestUtils.setField(this.centerBookmark, "id", "bookMarkId");
     }
 
     @Test

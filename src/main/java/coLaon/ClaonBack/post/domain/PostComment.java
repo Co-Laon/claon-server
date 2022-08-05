@@ -10,7 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -44,23 +43,6 @@ public class PostComment extends BaseEntity {
         this.parentComment = parentComment;
     }
 
-    private PostComment(
-            String id,
-            String content,
-            User writer,
-            Post post,
-            PostComment parentComment,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt
-    ) {
-        super(id, createdAt, updatedAt);
-        this.content = content;
-        this.isDeleted = false;
-        this.writer = writer;
-        this.post = post;
-        this.parentComment = parentComment;
-    }
-
     public static PostComment of(
             String content,
             User writer,
@@ -72,26 +54,6 @@ public class PostComment extends BaseEntity {
                 writer,
                 post,
                 parentComment
-        );
-    }
-
-    public static PostComment of(
-            String id,
-            String content,
-            User writer,
-            Post post,
-            PostComment parentComment,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt
-    ) {
-        return new PostComment(
-                id,
-                content,
-                writer,
-                post,
-                parentComment,
-                createdAt,
-                updatedAt
         );
     }
 

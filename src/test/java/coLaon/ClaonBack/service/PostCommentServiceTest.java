@@ -35,6 +35,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,21 +60,14 @@ public class PostCommentServiceTest {
     @InjectMocks
     PostCommentService postCommentService;
 
-    private User writer;
-    private User writer2;
+    private User writer, writer2;
     private Post post;
-    private PostComment postComment;
-    private PostComment postComment2;
-    private PostComment childPostComment;
-    private PostComment childPostComment2;
-    private PostComment childPostComment3;
-    private PostComment childPostComment4;
-    private Center center;
+    private PostComment postComment, postComment2;
+    private PostComment childPostComment, childPostComment2, childPostComment3, childPostComment4;
 
     @BeforeEach
     void setUp() {
         this.writer = User.of(
-                "testUserId",
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -83,9 +77,9 @@ public class PostCommentServiceTest {
                 "",
                 "instagramId"
         );
+        ReflectionTestUtils.setField(this.writer, "id", "testUserId");
 
         this.writer2 = User.of(
-                "testUserId2",
                 "test123@gmail.com",
                 "1234567890",
                 "test2",
@@ -95,9 +89,9 @@ public class PostCommentServiceTest {
                 "",
                 "instagramId2"
         );
+        ReflectionTestUtils.setField(this.writer2, "id", "testUserId2");
 
-        this.center = Center.of(
-                "center1",
+        Center center = Center.of(
                 "testCenter",
                 "testAddress",
                 "010-1234-1234",
@@ -112,75 +106,74 @@ public class PostCommentServiceTest {
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
+        ReflectionTestUtils.setField(center, "id", "center1");
 
         this.post = Post.of(
-                "testPostId",
                 center,
                 "testContent",
-                writer,
-                null,
-                null
+                writer
         );
+        ReflectionTestUtils.setField(this.post, "id", "testPostId");
 
         this.postComment = PostComment.of(
-                "testCommentId",
                 "testContent1",
                 writer,
                 post,
-                null,
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                null
         );
+        ReflectionTestUtils.setField(this.postComment, "id", "testCommentId");
+        ReflectionTestUtils.setField(this.postComment, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.postComment, "updatedAt", LocalDateTime.now());
 
         this.childPostComment = PostComment.of(
-                "testChildId1",
                 "testChildContent1",
                 writer,
                 post,
-                postComment,
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                postComment
         );
+        ReflectionTestUtils.setField(this.childPostComment, "id", "testChildId1");
+        ReflectionTestUtils.setField(this.childPostComment, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.childPostComment, "updatedAt", LocalDateTime.now());
 
         this.childPostComment2 = PostComment.of(
-                "testChildId2",
                 "testChildContent2",
                 writer,
                 post,
-                postComment,
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                postComment
         );
+        ReflectionTestUtils.setField(this.childPostComment2, "id", "testChildId2");
+        ReflectionTestUtils.setField(this.childPostComment2, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.childPostComment2, "updatedAt", LocalDateTime.now());
 
         this.postComment2 = PostComment.of(
-                "testCommentId2",
                 "testContent2",
                 writer,
                 post,
-                null,
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                null
         );
+        ReflectionTestUtils.setField(this.postComment2, "id", "testCommentId2");
+        ReflectionTestUtils.setField(this.postComment2, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.postComment2, "updatedAt", LocalDateTime.now());
 
         this.childPostComment3 = PostComment.of(
-                "testChildId3",
                 "testChildContent3",
                 writer,
                 post,
-                postComment2,
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                postComment2
         );
+        ReflectionTestUtils.setField(this.childPostComment3, "id", "testChildId3");
+        ReflectionTestUtils.setField(this.childPostComment3, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.childPostComment3, "updatedAt", LocalDateTime.now());
 
         this.childPostComment4 = PostComment.of(
-                "testChildId4",
                 "testChildContent4",
                 writer,
                 post,
-                postComment,
-                LocalDateTime.now(),
-                LocalDateTime.now()
+                postComment
         );
+        ReflectionTestUtils.setField(this.childPostComment4, "id", "testChildId4");
+        ReflectionTestUtils.setField(this.childPostComment4, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.childPostComment4, "updatedAt", LocalDateTime.now());
     }
 
     @Test

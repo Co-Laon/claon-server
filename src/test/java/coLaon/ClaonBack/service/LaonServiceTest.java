@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,16 +46,12 @@ public class LaonServiceTest {
     @InjectMocks
     LaonService laonService;
 
-    private User laon;
-    private User laon2;
-    private User user;
-    private Laon laonRelation;
-    private Laon laonRelation2;
+    private User user, laon, laon2;
+    private Laon laonRelation, laonRelation2;
 
     @BeforeEach
     void setUp() {
         this.laon = User.of(
-                "laonId",
                 "test@gmail.com",
                 "1234567890",
                 "laonNickname1",
@@ -64,9 +61,9 @@ public class LaonServiceTest {
                 "",
                 "instagramId"
         );
+        ReflectionTestUtils.setField(this.laon, "id", "laonId");
 
         this.laon2 = User.of(
-                "laonId2",
                 "test1@gmail.com",
                 "12345678902",
                 "laonNickname2",
@@ -76,9 +73,9 @@ public class LaonServiceTest {
                 "",
                 "instagramId3"
         );
+        ReflectionTestUtils.setField(this.laon2, "id", "laonId2");
 
         this.user = User.of(
-                "userId",
                 "test@gmail.com",
                 "1234567222",
                 "userNickname2",
@@ -88,6 +85,7 @@ public class LaonServiceTest {
                 "",
                 "instagramId2"
         );
+        ReflectionTestUtils.setField(this.user, "id", "userId");
 
         this.laonRelation = Laon.of(
                 this.laon,
