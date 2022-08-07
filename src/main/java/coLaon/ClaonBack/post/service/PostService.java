@@ -5,7 +5,6 @@ import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
-import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import coLaon.ClaonBack.common.exception.NotFoundException;
@@ -168,7 +167,18 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<PostThumbnailResponseDto> getUserPosts(String loginedUserId, String targetUserNickname, Pageable pageable) {
+    public Pagination<PostThumbnailResponseDto> getUserPosts(
+            String loginedUserId,
+            String targetUserNickname,
+            Pageable pageable
+    ) {
+        userRepository.findById(loginedUserId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
         User targetUser = userRepository.findByNickname(targetUserNickname).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -176,18 +186,16 @@ public class PostService {
                 )
         );
 
-        // my page
-        if (loginedUserId.equals(targetUser.getId())) {
-            postRepository.findByWriterOrderByCreatedAtDesc(targetUser, pageable).map(PostThumbnailResponseDto::from);
+        // individual user page
+        if (!loginedUserId.equals(targetUser.getId())) {
+            IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
+
+            blockUserRepository.findBlock(targetUser.getId(), loginedUserId).ifPresent(
+                    blockUser -> {
+                        throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
+                    }
+            );
         }
-
-        IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
-
-        blockUserRepository.findBlock(targetUser.getId(), loginedUserId).ifPresent(
-                blockUser -> {
-                    throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
-                }
-        );
 
         return this.paginationFactory.create(
                 postRepository.findByWriterOrderByCreatedAtDesc(targetUser, pageable).map(PostThumbnailResponseDto::from)

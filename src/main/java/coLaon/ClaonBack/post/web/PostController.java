@@ -15,7 +15,6 @@ import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
 import coLaon.ClaonBack.post.dto.ChildCommentResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
-import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import javax.validation.Valid;
@@ -43,12 +41,6 @@ public class PostController {
     private final PostService postService;
     private final PostCommentService postCommentService;
     private final PostLikeService postLikeService;
-
-    @GetMapping
-    @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<PostThumbnailResponseDto> getIndividualUserPost(@AuthenticationPrincipal String userId, @RequestParam(name="nickname") String targetUserNickname, @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return postService.getUserPosts(userId, targetUserNickname, pageable);
-    }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
