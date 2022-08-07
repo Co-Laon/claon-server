@@ -7,6 +7,7 @@ import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -28,14 +29,14 @@ public class CenterBookmarkService {
     ) {
         User user = this.userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
                 )
         );
 
         Center center = this.centerRepository.findById(centerId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "암장 정보를 찾을 수 없습니다."
                 )
         );
@@ -67,14 +68,14 @@ public class CenterBookmarkService {
     ) {
         User user = this.userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                        ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
                 )
         );
 
         Center center = this.centerRepository.findById(centerId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "암장 정보를 찾을 수 없습니다."
                 )
         );

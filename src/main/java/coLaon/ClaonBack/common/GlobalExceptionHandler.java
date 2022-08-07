@@ -73,8 +73,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {NotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDto handleNotFoundException(Exception exception) {
+    public ExceptionDto handleNotFoundException(NotFoundException exception) {
         GlobalExceptionHandler.log.error("error message", exception);
-        return new ConflictExceptionDto("Requested data not found - " + exception.getMessage());
+        return new ExceptionDto(exception.getErrorCode(), exception.getMessage());
     }
 }

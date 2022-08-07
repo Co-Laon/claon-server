@@ -13,6 +13,7 @@ import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
 import coLaon.ClaonBack.user.domain.User;
@@ -47,8 +48,8 @@ public class CenterReviewService {
         );
 
         Center center = centerRepository.findById(centerId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "암장 정보를 찾을 수 없습니다."
                 )
         );
@@ -62,9 +63,8 @@ public class CenterReviewService {
                 }
         );
 
-        Integer reviewCount = reviewRepository.countByCenter(center);
         List<Integer> ranks = reviewRepository.selectRanksByCenterId(centerId);
-        center.addRank(ranks, reviewCreateRequestDto.getRank(), reviewCount);
+        center.addRank(ranks, reviewCreateRequestDto.getRank(), ranks.size());
 
         return ReviewResponseDto.from(
                 reviewRepository.save(
@@ -92,17 +92,16 @@ public class CenterReviewService {
         );
 
         CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "리뷰 정보를 찾을 수 없습니다."
                 )
         );
 
         IdEqualValidator.of(review.getWriter().getId(), writer.getId()).validate();
 
-        Integer reviewCount = reviewRepository.countByCenter(review.getCenter());
         List<Integer> ranks = reviewRepository.selectRanksByCenterId(review.getCenter().getId());
-        review.getCenter().changeRank(ranks, review.getRank(), updateRequestDto.getRank(), reviewCount);
+        review.getCenter().changeRank(ranks, review.getRank(), updateRequestDto.getRank(), ranks.size());
 
         review.update(updateRequestDto.getRank(), updateRequestDto.getContent());
 
@@ -122,17 +121,16 @@ public class CenterReviewService {
         );
 
         CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "리뷰 정보를 찾을 수 없습니다."
                 )
         );
 
         IdEqualValidator.of(review.getWriter().getId(), writer.getId()).validate();
 
-        Integer reviewCount = reviewRepository.countByCenter(review.getCenter());
         List<Integer> ranks = reviewRepository.selectRanksByCenterId(review.getCenter().getId());
-        review.getCenter().deleteRank(ranks, review.getRank(), reviewCount);
+        review.getCenter().deleteRank(ranks, review.getRank(), ranks.size());
 
         reviewRepository.delete(review);
 
@@ -149,8 +147,8 @@ public class CenterReviewService {
         );
 
         Center center = centerRepository.findById(centerId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "암장 정보를 찾을 수 없습니다."
                 )
         );

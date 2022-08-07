@@ -4,6 +4,7 @@ import coLaon.ClaonBack.common.domain.enums.BasicLocalArea;
 import coLaon.ClaonBack.common.domain.enums.MetropolitanArea;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
@@ -83,12 +84,11 @@ public class UserService {
             SignUpRequestDto signUpRequestDto
     ) {
         User user = this.userRepository.findById(userId).orElseThrow(
-                () -> {
-                    throw new UnauthorizedException(
-                            ErrorCode.USER_DOES_NOT_EXIST,
-                            "이용자를 찾을 수 없습니다."
-                    );
-                });
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
 
         this.userRepository.findByNickname(signUpRequestDto.getNickname()).ifPresent(
                 u -> {
@@ -106,7 +106,8 @@ public class UserService {
                             ErrorCode.ROW_ALREADY_EXIST,
                             "이미 가입한 인스타그램 계정입니다."
                     );
-                });
+                }
+        );
 
         user.signUp(
                 signUpRequestDto.getNickname(),
@@ -126,8 +127,8 @@ public class UserService {
     @Transactional
     public PublicScopeResponseDto changePublicScope(String userId) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
                 )
         );
@@ -159,9 +160,9 @@ public class UserService {
         });
 
         User user = this.userRepository.findByNickname(userNickname).orElseThrow(() -> {
-            throw new BadRequestException(
-                    ErrorCode.ROW_DOES_NOT_EXIST,
-                    "이용자를 찾을 수 없습니다."
+            throw new NotFoundException(
+                    ErrorCode.DATA_DOES_NOT_EXIST,
+                    String.format("%s을 찾을 수 없습니다.", userNickname)
             );
         });
 

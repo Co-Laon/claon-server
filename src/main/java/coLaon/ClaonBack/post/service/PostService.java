@@ -7,6 +7,7 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.ContentsImageFormatValidator;
@@ -52,13 +53,6 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostDetailResponseDto findPost(String userId, String postId) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
-
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
@@ -66,12 +60,16 @@ public class PostService {
                 )
         );
 
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "게시글을 찾을 수 없습니다."
+                )
+        );
+
         blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).ifPresent(
-                b -> {
-                    throw new BadRequestException(
-                            ErrorCode.NOT_ACCESSIBLE,
-                            "차단 관계입니다."
-                    );
+                blockUser -> {
+                    throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
                 }
         );
 
@@ -93,8 +91,8 @@ public class PostService {
         );
 
         Center center = centerRepository.findById(postCreateRequestDto.getCenterId()).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "암장 정보를 찾을 수 없습니다."
                 )
         );
@@ -116,8 +114,8 @@ public class PostService {
                         climbingHistoryRepository.save(ClimbingHistory.of(
                                 post,
                                 holdInfoRepository.findById(history.getHoldId()).orElseThrow(
-                                        () -> new BadRequestException(
-                                                ErrorCode.ROW_DOES_NOT_EXIST,
+                                        () -> new InternalServerErrorException(
+                                                ErrorCode.INTERNAL_SERVER_ERROR,
                                                 "홀드 정보를 찾을 수 없습니다."
                                         )),
                                 history.getClimbingCount())))
@@ -154,8 +152,8 @@ public class PostService {
         );
 
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new BadRequestException(
-                        ErrorCode.ROW_DOES_NOT_EXIST,
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
                 )
         );
@@ -173,8 +171,8 @@ public class PostService {
     public Pagination<PostThumbnailResponseDto> getUserPosts(String loginedUserId, String targetUserNickname, Pageable pageable) {
         User targetUser = userRepository.findByNickname(targetUserNickname).orElseThrow(
                 () -> new NotFoundException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "요청한 사용자가 존재하지 않습니다. "
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        String.format("%s을 찾을 수 없습니다.", targetUserNickname)
                 )
         );
 
@@ -185,16 +183,10 @@ public class PostService {
 
         IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
 
-        blockUserRepository.findByUserIdAndBlockId(targetUser.getId(), loginedUserId).ifPresent(
-                (blockUser -> {
-                    throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 사용자입니다. ");
-                })
-        );
-
-        blockUserRepository.findByUserIdAndBlockId(loginedUserId, targetUser.getId()).ifPresent(
-                (blockUser -> {
-                    throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "내가 차단한 사용자입니다. ");
-                })
+        blockUserRepository.findBlock(targetUser.getId(), loginedUserId).ifPresent(
+                blockUser -> {
+                    throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
+                }
         );
 
         return this.paginationFactory.create(

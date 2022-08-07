@@ -119,6 +119,7 @@ public class BlockUserServiceTest {
     void failCreateBlockMyself() {
         //given
         given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(publicUser));
+        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
 
         //when
         final UnauthorizedException ex = Assertions.assertThrows(
@@ -127,8 +128,9 @@ public class BlockUserServiceTest {
         );
 
         //then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
-        assertThat(ex.getMessage()).isEqualTo(String.format("자기 자신은 %s이 불가능합니다.", BlockUser.domain));
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("자기 자신은 %s이 불가능합니다.", BlockUser.domain));
     }
 
     @Test
