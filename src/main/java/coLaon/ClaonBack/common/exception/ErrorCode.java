@@ -12,6 +12,7 @@ public enum ErrorCode {
     INVALID_OAUTH2_PROVIDER(40004),
     WRONG_PURPOSE(40005),
     INVALID_PARAMETER(40006),
+    WRONG_STORE(40007),
     /**
      * 401 Unauthorized Error
      */

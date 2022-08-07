@@ -4,7 +4,11 @@ import coLaon.ClaonBack.version.dto.AppVersionFindResponseDto;
 import coLaon.ClaonBack.version.service.AppVersionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -12,19 +16,11 @@ import org.springframework.web.bind.annotation.*;
 public class AppVersionController {
     private final AppVersionService appVersionService;
 
-    @GetMapping(value = "/{key}/apple")
+    @GetMapping(value = "/{store}")
     @ResponseStatus(value = HttpStatus.OK)
     public AppVersionFindResponseDto getAppleVersion(
-            @PathVariable String key
+            @PathVariable String store
     ) {
-        return this.appVersionService.findAppleVersion(key);
-    }
-
-    @GetMapping(value = "/{key}/android")
-    @ResponseStatus(value = HttpStatus.OK)
-    public AppVersionFindResponseDto getAndroidVersion(
-            @PathVariable String key
-    ) {
-        return this.appVersionService.findAndroidVersion(key);
+        return this.appVersionService.findVersion(store);
     }
 }

@@ -430,11 +430,12 @@ public class PostServiceTest {
     void successFindPosts(){
         // given
         String loginedUserId = this.user.getId();
-        Post samplePost = Post.of(this.center, "Helloworld", this.user2, List.of(), Set.of());
+
         Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findById(loginedUserId)).willReturn(Optional.of(this.user));
         given(this.userRepository.findByNickname(this.user2.getNickname())).willReturn(Optional.of(this.user2));
         given(this.blockUserRepository.findBlock(this.user2.getId(), loginedUserId)).willReturn(Optional.empty());
-        given(this.postRepository.findByWriterOrderByCreatedAtDesc(this.user2, pageable)).willReturn(new PageImpl<>(List.of(samplePost), pageable, 1));
+        given(this.postRepository.findByWriterOrderByCreatedAtDesc(this.user2, pageable)).willReturn(new PageImpl<>(List.of(this.post), pageable, 1));
 
         // when
         Pagination<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(loginedUserId, this.user2.getNickname(), pageable);
@@ -449,6 +450,7 @@ public class PostServiceTest {
         // given
         String loginedUserId = this.user.getId();
         Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findById(loginedUserId)).willReturn(Optional.of(this.user));
         given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
 
         // when
