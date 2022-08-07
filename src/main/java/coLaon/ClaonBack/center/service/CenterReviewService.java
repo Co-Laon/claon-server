@@ -9,6 +9,7 @@ import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepository;
+import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -29,6 +30,7 @@ public class CenterReviewService {
     private final UserRepository userRepository;
     private final CenterRepository centerRepository;
     private final ReviewRepository reviewRepository;
+    private final ReviewRepositorySupport reviewRepositorySupport;
     private final PaginationFactory paginationFactory;
 
     @Transactional
@@ -158,7 +160,7 @@ public class CenterReviewService {
 
         return ReviewListFindResponseDto.from(
                 this.paginationFactory.create(
-                        reviewRepository.findByCenter(center.getId(), userId, pageable)
+                        reviewRepositorySupport.findByCenterExceptBlockUser(center.getId(), userId, pageable)
                                 .map(ReviewFindResponseDto::from)
                 ),
                 center

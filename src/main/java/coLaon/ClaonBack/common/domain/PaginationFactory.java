@@ -15,7 +15,7 @@ public class PaginationFactory {
     }
 
     private <T> Integer buildNextPageNum(Page<T> p) {
-        return Math.min(p.getPageable().getPageNumber() + 1, p.getTotalPages());
+        return Math.min(p.getPageable().getPageNumber() + 1, p.getTotalPages() - 1);
     }
 
     private <T> Integer buildPreviousPageNum(Page<T> p) {

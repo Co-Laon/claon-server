@@ -14,12 +14,12 @@ import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
+import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.IsAdminValidator;
-import coLaon.ClaonBack.center.repository.ReviewRepository;
-import coLaon.ClaonBack.post.repository.PostRepository;
+import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +35,8 @@ public class CenterService {
     private final UserRepository userRepository;
     private final CenterRepository centerRepository;
     private final HoldInfoRepository holdInfoRepository;
-    private final ReviewRepository reviewRepository;
-    private final PostRepository postRepository;
+    private final ReviewRepositorySupport reviewRepositorySupport;
+    private final PostRepositorySupport postRepositorySupport;
     private final CenterBookmarkRepository centerBookmarkRepository;
 
     @Transactional
@@ -110,8 +110,8 @@ public class CenterService {
         );
 
         boolean isBookmarked = centerBookmarkRepository.findByUserIdAndCenterId(userId, centerId).isPresent();
-        Integer postCount = postRepository.selectCountByCenter(centerId, userId);
-        Integer reviewCount = reviewRepository.selectCountByCenter(centerId, userId);
+        Integer postCount = postRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
+        Integer reviewCount = reviewRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
 
         return CenterDetailResponseDto.from(
                 center,

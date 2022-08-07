@@ -20,11 +20,11 @@ import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
+import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.center.service.CenterService;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
-import coLaon.ClaonBack.center.repository.ReviewRepository;
-import coLaon.ClaonBack.post.repository.PostRepository;
+import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -55,11 +55,11 @@ public class CenterServiceTest {
     @Mock
     HoldInfoRepository holdInfoRepository;
     @Mock
-    ReviewRepository reviewRepository;
+    ReviewRepositorySupport reviewRepositorySupport;
     @Mock
     CenterBookmarkRepository centerBookmarkRepository;
     @Mock
-    PostRepository postRepository;
+    PostRepositorySupport postRepositorySupport;
 
     @InjectMocks
     CenterService centerService;
@@ -237,8 +237,8 @@ public class CenterServiceTest {
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
         given(this.centerBookmarkRepository.findByUserIdAndCenterId("userId", "centerId")).willReturn(Optional.of(centerBookmark));
-        given(this.postRepository.selectCountByCenter("centerId", "userId")).willReturn(0);
-        given(this.reviewRepository.selectCountByCenter("centerId", "userId")).willReturn(2);
+        given(this.postRepositorySupport.countByCenterExceptBlockUser("centerId", "userId")).willReturn(0);
+        given(this.reviewRepositorySupport.countByCenterExceptBlockUser("centerId", "userId")).willReturn(2);
         given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
 
         //when
