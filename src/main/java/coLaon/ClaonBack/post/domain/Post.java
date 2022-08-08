@@ -102,6 +102,12 @@ public class Post extends BaseEntity {
         );
     }
 
+    public void update(
+            String content
+    ) {
+        this.content = content;
+    }
+
     public void delete() {
         this.isDeleted = true;
     }

@@ -3,6 +3,7 @@ package coLaon.ClaonBack.post.web;
 import coLaon.ClaonBack.common.domain.Pagination;
 
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
+import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.service.PostLikeService;
 import coLaon.ClaonBack.post.service.PostCommentService;
 import coLaon.ClaonBack.post.service.PostService;
@@ -49,6 +50,16 @@ public class PostController {
             @RequestBody @Valid PostCreateRequestDto postCreateRequestDto
     ) {
         return this.postService.createPost(userId, postCreateRequestDto);
+    }
+
+    @PutMapping(value = "/{postId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public PostResponseDto updatePost(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String postId,
+            @RequestBody @Valid PostUpdateRequestDto postUpdateRequestDto
+    ) {
+        return this.postService.updatePost(userId, postId, postUpdateRequestDto);
     }
 
     @GetMapping(value = "/{postId}")
