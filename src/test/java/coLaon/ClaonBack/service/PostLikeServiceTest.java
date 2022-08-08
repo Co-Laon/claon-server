@@ -16,6 +16,7 @@ import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostLikeRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.service.PostLikeService;
 import coLaon.ClaonBack.user.domain.User;
@@ -53,6 +54,8 @@ public class PostLikeServiceTest {
     PostRepository postRepository;
     @Mock
     PostLikeRepository postLikeRepository;
+    @Mock
+    PostLikeRepositorySupport postLikeRepositorySupport;
 
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
@@ -210,11 +213,11 @@ public class PostLikeServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 2);
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-        given(this.postRepository.findById("testPostId")).willReturn(Optional.of(post));
+        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
         Page<PostLike> postLikes = new PageImpl<>(List.of(postLike, postLike2), pageable, 2);
 
-        given(this.postLikeRepository.findAllByPost(post, pageable)).willReturn(postLikes);
+        given(this.postLikeRepositorySupport.findAllByPost(post.getId(), user.getId(), pageable)).willReturn(postLikes);
 
         // when
         Pagination<LikeFindResponseDto> likeFindResponseDto = this.postLikeService.findLikeByPost("testUserId", "testPostId", pageable);
