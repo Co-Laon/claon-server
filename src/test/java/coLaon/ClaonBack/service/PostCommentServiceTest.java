@@ -10,6 +10,7 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
+import coLaon.ClaonBack.post.repository.PostCommentRepositorySupport;
 import coLaon.ClaonBack.post.service.PostCommentService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
@@ -53,6 +54,8 @@ public class PostCommentServiceTest {
     UserRepository userRepository;
     @Mock
     PostCommentRepository postCommentRepository;
+    @Mock
+    PostCommentRepositorySupport postCommentRepositorySupport;
     @Mock
     PostRepository postRepository;
     @Spy
@@ -249,14 +252,12 @@ public class PostCommentServiceTest {
         given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
         Page<PostComment> parents = new PageImpl<>(List.of(postComment, postComment2), pageable, 2);
-        List<PostComment> children1 = List.of(childPostComment, childPostComment2, childPostComment4);
-        List<PostComment> children2 = List.of(childPostComment3);
+        Page<PostComment> children1 = new PageImpl<>(List.of(childPostComment, childPostComment2, childPostComment4), pageable, 2);
+        Page<PostComment> children2 = new PageImpl<>(List.of(childPostComment3), pageable, 2);
 
-        given(this.postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalse(post, pageable)).willReturn(parents);
-        given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment)).willReturn(children1);
-        given(this.postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(postComment2)).willReturn(children2);
-        given(this.postCommentRepository.countAllByParentCommentAndIsDeletedFalse(postComment)).willReturn((long) children1.size());
-        given(this.postCommentRepository.countAllByParentCommentAndIsDeletedFalse(postComment2)).willReturn((long) children2.size());
+        given(this.postCommentRepositorySupport.findParentCommentByPost(post.getId(), writer.getId(), pageable)).willReturn(parents);
+        given(this.postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), writer.getId(), pageable)).willReturn(children1);
+        given(this.postCommentRepositorySupport.findChildCommentByParentComment(postComment2.getId(), writer.getId(), pageable)).willReturn(children2);
 
         // when
         Pagination<CommentFindResponseDto> commentFindResponseDto = this.postCommentService.findCommentsByPost("testUserId", "testPostId", pageable);
@@ -264,10 +265,10 @@ public class PostCommentServiceTest {
         // then
         assertThat(commentFindResponseDto.getResults())
                 .isNotNull()
-                .extracting(CommentFindResponseDto::getContent, CommentFindResponseDto::getCommentCount)
+                .extracting(CommentFindResponseDto::getContent, CommentFindResponseDto::getCommentId)
                 .containsExactly(
-                        tuple("testContent1", 3L),
-                        tuple("testContent2", 1L)
+                        tuple("testContent1", "testCommentId"),
+                        tuple("testContent2", "testCommentId2")
                 );
     }
 
@@ -280,7 +281,7 @@ public class PostCommentServiceTest {
 
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
         given(this.postCommentRepository.findByIdAndIsDeletedFalse("testCommentId")).willReturn(Optional.of(postComment));
-        given(this.postCommentRepository.findAllByParentCommentAndIsDeletedFalse(postComment, pageable)).willReturn(children);
+        given(this.postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), writer.getId(), pageable)).willReturn(children);
 
         // when
         Pagination<ChildCommentResponseDto> commentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testUserId", "testCommentId", pageable);

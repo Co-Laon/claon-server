@@ -2,9 +2,7 @@ package coLaon.ClaonBack.post.service;
 
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
-import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
-import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
@@ -16,10 +14,12 @@ import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
 import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
 import coLaon.ClaonBack.post.dto.ChildCommentResponseDto;
 import coLaon.ClaonBack.post.repository.PostCommentRepository;
+import coLaon.ClaonBack.post.repository.PostCommentRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +31,7 @@ import java.util.Optional;
 public class PostCommentService {
     private final UserRepository userRepository;
     private final PostCommentRepository postCommentRepository;
+    private final PostCommentRepositorySupport postCommentRepositorySupport;
     private final PostRepository postRepository;
     private final PaginationFactory paginationFactory;
 
@@ -64,8 +65,8 @@ public class PostCommentService {
                                         .map(parentCommentId ->
                                                 postCommentRepository.findById(commentCreateRequestDto.getParentCommentId())
                                                         .orElseThrow(
-                                                                () -> new InternalServerErrorException(
-                                                                        ErrorCode.INTERNAL_SERVER_ERROR,
+                                                                () -> new NotFoundException(
+                                                                        ErrorCode.DATA_DOES_NOT_EXIST,
                                                                         "상위 댓글을 찾을 수 없습니다."
                                                                 )))
                                         .orElse(null)
@@ -79,7 +80,7 @@ public class PostCommentService {
             String postId,
             Pageable pageable
     ) {
-        userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
@@ -94,12 +95,15 @@ public class PostCommentService {
         );
 
         return this.paginationFactory.create(
-                postCommentRepository.findByPostAndParentCommentIsNullAndIsDeletedFalse(post, pageable)
+                postCommentRepositorySupport.findParentCommentByPost(post.getId(), user.getId(), pageable)
                         .map(parent ->
                                 CommentFindResponseDto.from(
                                         parent,
-                                        postCommentRepository.findTop3ByParentCommentAndIsDeletedFalseOrderByCreatedAt(parent),
-                                        postCommentRepository.countAllByParentCommentAndIsDeletedFalse(parent)
+                                        this.paginationFactory.create(postCommentRepositorySupport.findChildCommentByParentComment(
+                                                        parent.getId(),
+                                                        user.getId(),
+                                                        PageRequest.of(0, pageable.getPageSize()))
+                                                .map(ChildCommentResponseDto::from))
                                 ))
         );
     }
@@ -110,7 +114,7 @@ public class PostCommentService {
             String parentId,
             Pageable pageable
     ) {
-        userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
@@ -125,7 +129,7 @@ public class PostCommentService {
         );
 
         return this.paginationFactory.create(
-                postCommentRepository.findAllByParentCommentAndIsDeletedFalse(postComment, pageable)
+                postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), user.getId(), pageable)
                         .map(ChildCommentResponseDto::from)
         );
     }
