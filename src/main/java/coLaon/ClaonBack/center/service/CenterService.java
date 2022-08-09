@@ -11,11 +11,14 @@ import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
+import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
+import coLaon.ClaonBack.center.dto.CenterListOption;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
-import coLaon.ClaonBack.common.exception.BadRequestException;
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
@@ -24,9 +27,12 @@ import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +45,7 @@ public class CenterService {
     private final ReviewRepositorySupport reviewRepositorySupport;
     private final PostRepositorySupport postRepositorySupport;
     private final CenterBookmarkRepository centerBookmarkRepository;
+    private final PaginationFactory paginationFactory;
 
     @Transactional
     public CenterResponseDto create(
@@ -158,5 +165,49 @@ public class CenterService {
                 .stream()
                 .map(CenterSearchResponseDto::from)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<CenterPreviewResponseDto> findCenterListByOption(String userId, CenterListOption option, Pageable pageable) {
+        userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        if (option == CenterListOption.BOOKMARK) {
+            return findBookMarkedCenters(userId, pageable);
+        } else if (option == CenterListOption.MY_AROUND) {
+            return findMyAroundCenters(userId, pageable);
+        } else if (option == CenterListOption.NEW_SETTING) {
+            return findNewSettingCenters(pageable);
+        } else if (option == CenterListOption.NEWLY_REGISTERED) {
+            return findNewlyRegisteredCenters(pageable);
+        }
+        return null;
+    }
+
+    private Pagination<CenterPreviewResponseDto> findMyAroundCenters(String userId, Pageable pageable) {
+        // TODO implement this.
+        return null;
+    }
+
+    private Pagination<CenterPreviewResponseDto> findNewSettingCenters(Pageable pageable) {
+        // TODO implement this.
+        return null;
+    }
+
+    private Pagination<CenterPreviewResponseDto> findBookMarkedCenters(String userId, Pageable pageable) {
+        return paginationFactory.create(
+                centerRepository.findBookmarkedCenter(userId, pageable).map(CenterPreviewResponseDto::from)
+        );
+    }
+
+    private Pagination<CenterPreviewResponseDto> findNewlyRegisteredCenters(Pageable pageable) {
+        LocalDateTime standardDate = LocalDate.now().atStartOfDay().minusDays(7);
+        return paginationFactory.create(
+                centerRepository.findNewlyCreatedCenter(standardDate, pageable).map(CenterPreviewResponseDto::from)
+        );
     }
 }
