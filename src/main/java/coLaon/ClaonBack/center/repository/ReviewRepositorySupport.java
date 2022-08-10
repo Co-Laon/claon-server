@@ -33,13 +33,13 @@ public class ReviewRepositorySupport extends QuerydslRepositorySupport {
                                 JPAExpressions
                                         .select(centerReview.id)
                                         .from(centerReview)
-                                        .rightJoin(blockUser).on(centerReview.writer.id.eq(blockUser.blockedUser.id))
+                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.blockedUser.id))
                                         .where(blockUser.user.id.eq(userId))))
                         .and(centerReview.id.notIn(
                                 JPAExpressions
                                         .select(centerReview.id)
                                         .from(centerReview)
-                                        .rightJoin(blockUser).on(centerReview.writer.id.eq(blockUser.user.id))
+                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.user.id))
                                         .where(blockUser.blockedUser.id.eq(userId)))
                         ));
 
@@ -57,13 +57,13 @@ public class ReviewRepositorySupport extends QuerydslRepositorySupport {
                                 JPAExpressions
                                         .select(centerReview.id)
                                         .from(centerReview)
-                                        .rightJoin(blockUser).on(centerReview.writer.id.eq(blockUser.blockedUser.id))
+                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.blockedUser.id))
                                         .where(blockUser.user.id.eq(userId))))
                         .and(centerReview.id.notIn(
                                 JPAExpressions
                                         .select(centerReview.id)
                                         .from(centerReview)
-                                        .rightJoin(blockUser).on(centerReview.writer.id.eq(blockUser.user.id))
+                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.user.id))
                                         .where(blockUser.blockedUser.id.eq(userId)))
                         ))
                 .fetchCount();

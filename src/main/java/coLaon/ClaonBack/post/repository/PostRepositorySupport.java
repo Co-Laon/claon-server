@@ -31,13 +31,13 @@ public class PostRepositorySupport extends QuerydslRepositorySupport {
                                 JPAExpressions
                                         .select(post.id)
                                         .from(post)
-                                        .rightJoin(blockUser).on(post.writer.id.eq(blockUser.blockedUser.id))
+                                        .join(blockUser).on(post.writer.id.eq(blockUser.blockedUser.id))
                                         .where(blockUser.user.id.eq(userId))))
                         .and(post.id.notIn(
                                 JPAExpressions
                                         .select(post.id)
                                         .from(post)
-                                        .rightJoin(blockUser).on(post.writer.id.eq(blockUser.user.id))
+                                        .join(blockUser).on(post.writer.id.eq(blockUser.user.id))
                                         .where(blockUser.blockedUser.id.eq(userId)))
                         ))
                 .fetchCount();
