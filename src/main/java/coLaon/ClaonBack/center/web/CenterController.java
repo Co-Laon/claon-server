@@ -10,11 +10,15 @@ import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
 import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
+import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
+import coLaon.ClaonBack.center.dto.CenterListOption;
 import coLaon.ClaonBack.center.service.CenterBookmarkService;
 import coLaon.ClaonBack.center.service.CenterReviewService;
 import coLaon.ClaonBack.center.service.CenterService;
+import coLaon.ClaonBack.common.domain.Pagination;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -55,6 +60,12 @@ public class CenterController {
             @PathVariable String centerId
     ) {
         return this.centerService.findCenter(userId, centerId);
+    }
+
+    @GetMapping
+    @ResponseStatus(value = HttpStatus.OK)
+    public Pagination<CenterPreviewResponseDto> getCenterList(@AuthenticationPrincipal String userId, @RequestParam("option") CenterListOption option, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return this.centerService.findCenterListByOption(userId, option, pageable);
     }
 
     @GetMapping(value = "/name/{keyword}")

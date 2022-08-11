@@ -12,6 +12,10 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.OneToMany;
+import javax.persistence.FetchType;
+import javax.persistence.CascadeType;
+
 import java.util.List;
 
 @Entity
@@ -51,6 +55,9 @@ public class Center extends BaseEntity {
     private List<SectorInfo> sectorInfo;
     @Column(name = "review_rank")
     private float reviewRank;
+
+    @OneToMany(mappedBy = "center", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CenterBookmark> bookmarks;
 
     private Center(
             String name,
@@ -112,6 +119,13 @@ public class Center extends BaseEntity {
                 holdInfoImg,
                 sectorInfoList
         );
+    }
+
+    public String getThumbnailUrl() {
+        if (this.getImgList().size() == 0) {
+            return null;
+        }
+        return this.getImgList().get(0).getUrl();
     }
 
     public void addRank(List<Integer> ranks, Integer addRank, Integer reviewerCount) {
