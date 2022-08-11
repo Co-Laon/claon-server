@@ -19,6 +19,7 @@ import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
+import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.service.PostService;
@@ -258,7 +259,6 @@ public class PostServiceTest {
                         post -> post.getHoldList().get(0).getName(),
                         PostDetailResponseDto::getCenterName)
                 .contains(postContents2.getUrl(), holdInfo1.getName(), center.getName());
-
     }
 
     @Test
@@ -357,34 +357,76 @@ public class PostServiceTest {
     }
 
     @Test
-    @DisplayName("Failure case when invalid image format for create post")
-    void failCreatePost_InvalidImageFormat() {
-        // given
-        List<PostContentsDto> postContentsDtoList = Stream.of("png", "jpg", "gif")
-                .map(s -> "test.com/test." + s)
-                .map(PostContentsDto::new)
-                .collect(Collectors.toList());
+    @DisplayName("Success case for update post")
+    void successUpdatePost() {
+        try (
+                MockedStatic<PostContents> mockedPostContents = mockStatic(PostContents.class);
+                MockedStatic<ClimbingHistory> mockedClimbingHistory = mockStatic(ClimbingHistory.class)
+        ) {
+            // given
+            PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(
+                    List.of(new ClimbingHistoryRequestDto("holdId1", 1)),
+                    "testContent",
+                    List.of(new PostContentsDto("test.com/test.png"))
+            );
 
-        PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
-                "center1",
-                List.of(new ClimbingHistoryRequestDto("holdId1", 1), new ClimbingHistoryRequestDto("holdId2", 2)),
+            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+            given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
+            given(this.holdInfoRepository.findById("holdId1")).willReturn(Optional.of(holdInfo1));
+            given(this.postRepository.save(post)).willReturn(post);
+
+            mockedPostContents.when(() -> PostContents.of(
+                    post,
+                    "test.com/test.png"
+            )).thenReturn(postContents);
+
+            given(this.postContentsRepository.save(postContents)).willReturn(postContents);
+
+            mockedClimbingHistory.when(() -> ClimbingHistory.of(
+                    post,
+                    holdInfo1,
+                    1
+            )).thenReturn(climbingHistory);
+
+            given(this.climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
+
+            // when
+            PostResponseDto postResponseDto = this.postService.updatePost("testUserId", "testPostId", postUpdateRequestDto);
+
+            // then
+            assertThat(postResponseDto)
+                    .isNotNull()
+                    .extracting(
+                            PostResponseDto::getCenterId,
+                            post -> post.getContentsList().size(),
+                            post -> post.getHoldList().size())
+                    .contains("center1", 1, 1);
+        }
+    }
+
+    @Test
+    @DisplayName("Failure case for update post when request user is not writer")
+    void failureUpdatePost_Unauthorized() {
+        // given
+        PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(
+                List.of(new ClimbingHistoryRequestDto("holdId1", 1)),
                 "testContent",
-                postContentsDtoList
+                List.of(new PostContentsDto("test.com/test.png"))
         );
 
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-        given(this.centerRepository.findById("center1")).willReturn(Optional.of(center));
+        given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(user2));
+        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
         // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
-                () -> postService.createPost("testUserId", postCreateRequestDto)
+        final UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
+                () -> this.postService.updatePost("testUserId2", "testPostId", postUpdateRequestDto)
         );
 
         // then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.INVALID_FORMAT, "이미지 형식이 잘못되었습니다.");
+                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
     }
 
     @Test
@@ -407,7 +449,7 @@ public class PostServiceTest {
     }
 
     @Test
-    @DisplayName("Failure case for post delete")
+    @DisplayName("Failure case for post delete when request user is not writer")
     void failureDeletePost() {
         // given
         given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(user2));

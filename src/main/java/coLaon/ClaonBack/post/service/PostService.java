@@ -19,6 +19,7 @@ import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
@@ -122,16 +123,75 @@ public class PostService {
 
         List<PostContents> postContentsList = postCreateRequestDto.getContentsList()
                 .stream()
-                .map(dto -> PostContents.of(
+                .map(dto -> postContentsRepository.save(PostContents.of(
                         post,
-                        dto.getUrl()))
+                        dto.getUrl())))
                 .collect(Collectors.toList());
 
         return PostResponseDto.from(
                 post,
                 postContentsList
                         .stream()
-                        .map(postContentsRepository::save)
+                        .map(PostContents::getUrl)
+                        .collect(Collectors.toList()),
+                climbingHistoryList
+                        .stream()
+                        .map(ClimbingHistory::getHoldInfo)
+                        .collect(Collectors.toList())
+        );
+    }
+
+    @Transactional
+    public PostResponseDto updatePost(
+            String userId,
+            String postId,
+            PostUpdateRequestDto postUpdateRequestDto
+    ) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "게시글을 찾을 수 없습니다."
+                )
+        );
+
+        IdEqualValidator.of(post.getWriter().getId(), user.getId()).validate();
+
+        climbingHistoryRepository.deleteAllByPost(postId);
+        List<ClimbingHistory> climbingHistoryList = Optional.ofNullable(postUpdateRequestDto.getClimbingHistories())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(history ->
+                        climbingHistoryRepository.save(ClimbingHistory.of(
+                                post,
+                                holdInfoRepository.findById(history.getHoldId()).orElseThrow(
+                                        () -> new InternalServerErrorException(
+                                                ErrorCode.INTERNAL_SERVER_ERROR,
+                                                "홀드 정보를 찾을 수 없습니다."
+                                        )),
+                                history.getClimbingCount())))
+                .collect(Collectors.toList());
+
+        postContentsRepository.deleteAllByPost(postId);
+        List<PostContents> postContentsList = postUpdateRequestDto.getContentsList()
+                .stream()
+                .map(dto -> postContentsRepository.save(PostContents.of(
+                        post,
+                        dto.getUrl())))
+                .collect(Collectors.toList());
+
+        post.update(postUpdateRequestDto.getContent());
+
+        return PostResponseDto.from(
+                postRepository.save(post),
+                postContentsList
+                        .stream()
                         .map(PostContents::getUrl)
                         .collect(Collectors.toList()),
                 climbingHistoryList

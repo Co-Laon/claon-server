@@ -10,7 +10,9 @@ import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
+import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -23,12 +25,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-public class ClimbingHistoryRepositoryTest {
+public class PostContentsRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
@@ -43,11 +44,15 @@ public class ClimbingHistoryRepositoryTest {
     private ClimbingHistoryRepository climbingHistoryRepository;
 
     @Autowired
+    private PostContentsRepository postContentsRepository;
+
+    @Autowired
     private HoldInfoRepository holdInfoRepository;
 
     private User user;
     private Post post;
     private ClimbingHistory climbingHistory;
+    private PostContents postContents;
 
     @BeforeEach
     void setUp() {
@@ -91,25 +96,19 @@ public class ClimbingHistoryRepositoryTest {
         );
         post = postRepository.save(post);
 
+        postContents = PostContents.of(post, "testUrl");
+        postContents = postContentsRepository.save(postContents);
+
         climbingHistory = ClimbingHistory.of(this.post, holdInfo, 1);
         climbingHistory = climbingHistoryRepository.save(climbingHistory);
     }
 
     @Test
-    public void successFindByPostIds() {
-        // when
-        List<ClimbingHistory> histories = climbingHistoryRepository.findByPostIds(List.of(this.post.getId()));
-
-        // then
-        assertThat(histories.size()).isEqualTo(1);
-    }
-
-    @Test
     public void successDeleteAllByPost() {
         // when
-        climbingHistoryRepository.deleteAllByPost(this.post.getId());
+        postContentsRepository.deleteAllByPost(this.post.getId());
 
         // then
-        assertTrue(climbingHistoryRepository.findById(climbingHistory.getId()).isEmpty());
+        assertTrue(postContentsRepository.findById(postContents.getId()).isEmpty());
     }
 }
