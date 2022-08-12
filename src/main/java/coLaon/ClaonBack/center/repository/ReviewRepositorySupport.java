@@ -15,6 +15,7 @@ import java.util.Objects;
 
 import static coLaon.ClaonBack.center.domain.QCenterReview.centerReview;
 import static coLaon.ClaonBack.user.domain.QBlockUser.blockUser;
+import static coLaon.ClaonBack.user.domain.QUser.user;
 
 @Repository
 public class ReviewRepositorySupport extends QuerydslRepositorySupport {
@@ -28,6 +29,8 @@ public class ReviewRepositorySupport extends QuerydslRepositorySupport {
     public Page<CenterReview> findByCenterExceptBlockUser(String centerId, String userId, Pageable pageable) {
         JPQLQuery<CenterReview> query = jpaQueryFactory
                 .selectFrom(centerReview)
+                .join(centerReview.writer, user)
+                .fetchJoin()
                 .where(centerReview.center.id.eq(centerId)
                         .and(centerReview.id.notIn(
                                 JPAExpressions
