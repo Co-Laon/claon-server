@@ -3,6 +3,7 @@ package coLaon.ClaonBack.center.service;
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
@@ -77,9 +78,14 @@ public class CenterService {
                                 .collect(Collectors.toList()),
                         requestDto.getFacilities(),
                         requestDto.getChargeList()
-                                .stream().map(dto -> Charge.of(dto.getName(), dto.getFee()))
+                                .stream()
+                                .map(dto -> Charge.of(dto.getChargeList().stream()
+                                                .map(chargeElement -> ChargeElement.of(
+                                                        chargeElement.getName(),
+                                                        chargeElement.getFee()))
+                                                .collect(Collectors.toList()),
+                                        dto.getImage()))
                                 .collect(Collectors.toList()),
-                        requestDto.getChargeImg(),
                         requestDto.getHoldInfoImg(),
                         requestDto.getSectorInfoList()
                                 .stream().map(dto -> SectorInfo.of(dto.getName(), dto.getStart(), dto.getEnd()))

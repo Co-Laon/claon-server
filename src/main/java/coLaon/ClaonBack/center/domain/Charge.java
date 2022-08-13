@@ -5,18 +5,20 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class Charge {
-    private String name;
-    private String fee;
+    private List<ChargeElement> chargeList;
+    private String image;
 
-    public static Charge of(String name, String fee) {
+    public static Charge of(List<ChargeElement> chargeList, String image) {
         return new Charge(
-                name,
-                fee
+                chargeList,
+                image
         );
     }
 }

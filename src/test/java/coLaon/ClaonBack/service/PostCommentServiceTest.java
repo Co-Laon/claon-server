@@ -3,6 +3,7 @@ package coLaon.ClaonBack.service;
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.common.domain.Pagination;
@@ -101,8 +102,7 @@ public class PostCommentServiceTest {
                 List.of(new CenterImg("img test")),
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
-                List.of(new Charge("자유 패키지", "330,000")),
-                "charge img test",
+                List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
