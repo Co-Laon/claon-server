@@ -46,8 +46,6 @@ public class Center extends BaseEntity {
     @Convert(converter = ChargeListConverter.class)
     @Column(name = "charge")
     private List<Charge> charge;
-    @Column(name = "charge_img")
-    private String chargeImg;
     @Column(name = "hold_info_img")
     private String holdInfoImg;
     @Convert(converter = SectorInfoListConverter.class)
@@ -70,7 +68,6 @@ public class Center extends BaseEntity {
             List<OperatingTime> operatingTime,
             String facilities,
             List<Charge> charge,
-            String chargeImg,
             String holdInfoImg,
             List<SectorInfo> sectorInfo
     ) {
@@ -84,7 +81,6 @@ public class Center extends BaseEntity {
         this.operatingTime = operatingTime;
         this.facilities = facilities;
         this.charge = charge;
-        this.chargeImg = chargeImg;
         this.holdInfoImg = holdInfoImg;
         this.sectorInfo = sectorInfo;
     }
@@ -100,7 +96,6 @@ public class Center extends BaseEntity {
             List<OperatingTime> operatingTimeList,
             String facilities,
             List<Charge> chargeList,
-            String chargeImg,
             String holdInfoImg,
             List<SectorInfo> sectorInfoList
     ) {
@@ -115,7 +110,6 @@ public class Center extends BaseEntity {
                 operatingTimeList,
                 facilities,
                 chargeList,
-                chargeImg,
                 holdInfoImg,
                 sectorInfoList
         );

@@ -40,7 +40,6 @@ public class CenterDetailResponseDto {
             List<OperatingTimeDto> operatingTimeList,
             String facilities,
             List<ChargeDto> chargeList,
-            String chargeImg,
             List<HoldInfoResponseDto> holdInfoList,
             String holdInfoImg,
             List<SectorInfoDto> sectorInfoList,
@@ -59,7 +58,6 @@ public class CenterDetailResponseDto {
         this.operatingTimeList = operatingTimeList;
         this.facilities = facilities;
         this.chargeList = chargeList;
-        this.chargeImg = chargeImg;
         this.holdInfoList = holdInfoList;
         this.holdInfoImg = holdInfoImg;
         this.sectorInfoList = sectorInfoList;
@@ -87,7 +85,6 @@ public class CenterDetailResponseDto {
                 center.getOperatingTime().stream().map(OperatingTimeDto::from).collect(Collectors.toList()),
                 center.getFacilities(),
                 center.getCharge().stream().map(ChargeDto::from).collect(Collectors.toList()),
-                center.getChargeImg(),
                 holdInfoList.stream().map(HoldInfoResponseDto::from).collect(Collectors.toList()),
                 center.getHoldInfoImg(),
                 center.getSectorInfo().stream().map(SectorInfoDto::from).collect(Collectors.toList()),

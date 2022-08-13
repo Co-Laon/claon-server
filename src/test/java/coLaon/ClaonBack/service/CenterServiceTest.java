@@ -4,6 +4,7 @@ import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterBookmark;
 import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
@@ -13,6 +14,7 @@ import coLaon.ClaonBack.center.dto.CenterImgDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.ChargeDto;
+import coLaon.ClaonBack.center.dto.ChargeElementDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
 import coLaon.ClaonBack.center.dto.OperatingTimeDto;
 import coLaon.ClaonBack.center.dto.SectorInfoDto;
@@ -105,8 +107,7 @@ public class CenterServiceTest {
                 List.of(new CenterImg("img test")),
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
-                List.of(new Charge("자유 패키지", "330,000")),
-                "charge img test",
+                List.of(new Charge (List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
@@ -122,8 +123,7 @@ public class CenterServiceTest {
                 List.of(new CenterImg("img test")),
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
-                List.of(new Charge("자유 패키지", "330,000")),
-                "charge img test",
+                List.of(new Charge (List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
@@ -140,7 +140,8 @@ public class CenterServiceTest {
     void successCreateCenter() {
         CenterImg centerImg = CenterImg.of("img test");
         OperatingTime operatingTime = OperatingTime.of("매일", "10:00", "23:00");
-        Charge charge = Charge.of("자유 패키지", "330,000");
+        ChargeElement chargeElement = ChargeElement.of("자유 패키지", "330,000");
+        Charge charge = Charge.of(List.of(chargeElement), "charge image");
         SectorInfo sectorInfo = SectorInfo.of("test sector", "1/1", "1/2");
 
         try (
@@ -149,6 +150,7 @@ public class CenterServiceTest {
                 MockedStatic<CenterImg> mockedCenterImg = mockStatic(CenterImg.class);
                 MockedStatic<OperatingTime> mockedOperatingTime = mockStatic(OperatingTime.class);
                 MockedStatic<Charge> mockedCharge = mockStatic(Charge.class);
+                MockedStatic<ChargeElement> mockedChargeElement = mockStatic(ChargeElement.class);
                 MockedStatic<SectorInfo> mockedSectorInfo = mockStatic(SectorInfo.class)
         ) {
             // given
@@ -162,8 +164,7 @@ public class CenterServiceTest {
                     List.of(new CenterImgDto("img test")),
                     List.of(new OperatingTimeDto("매일", "10:00", "23:00")),
                     "facilities test",
-                    List.of(new ChargeDto("자유 패키지", "330,000")),
-                    "charge img test",
+                    List.of(new ChargeDto(List.of(new ChargeElementDto("자유 패키지", "330,000")), "charge image")),
                     List.of(new HoldInfoRequestDto("test hold", "hold img test")),
                     "hold info img test",
                     List.of(new SectorInfoDto("test sector", "1/1", "1/2"))
@@ -171,7 +172,8 @@ public class CenterServiceTest {
 
             mockedCenterImg.when(() -> CenterImg.of("img test")).thenReturn(centerImg);
             mockedOperatingTime.when(() -> OperatingTime.of("매일", "10:00", "23:00")).thenReturn(operatingTime);
-            mockedCharge.when(() -> Charge.of("자유 패키지", "330,000")).thenReturn(charge);
+            mockedChargeElement.when(() -> ChargeElement.of("자유 패키지", "330,000")).thenReturn(chargeElement);
+            mockedCharge.when(() -> Charge.of(List.of(chargeElement), "charge image")).thenReturn(charge);
             mockedSectorInfo.when(() -> SectorInfo.of("test sector", "1/1", "1/2")).thenReturn(sectorInfo);
 
             mockedCenter.when(() -> Center.of(
@@ -185,7 +187,6 @@ public class CenterServiceTest {
                     List.of(operatingTime),
                     "facilities test",
                     List.of(charge),
-                    "charge img test",
                     "hold info img test",
                     List.of(sectorInfo)
             )).thenReturn(this.center);

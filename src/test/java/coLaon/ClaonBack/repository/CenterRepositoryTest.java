@@ -61,8 +61,7 @@ public class CenterRepositoryTest {
                 List.of(new CenterImg("img test")),
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
-                List.of(new Charge("자유 패키지", "330,000")),
-                "charge img test",
+                List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         ));

@@ -23,7 +23,6 @@ public class CenterCreateRequestDto {
     private List<OperatingTimeDto> operatingTimeList;
     private String facilities;
     private List<ChargeDto> chargeList;
-    private String chargeImg;
     private List<HoldInfoRequestDto> holdInfoList;
     private String holdInfoImg;
     private List<SectorInfoDto> sectorInfoList;
