@@ -11,6 +11,7 @@ import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostLikeRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -25,6 +26,7 @@ public class PostLikeService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
+    private final PostLikeRepositorySupport postLikeRepositorySupport;
     private final PaginationFactory paginationFactory;
 
     @Transactional
@@ -91,14 +93,14 @@ public class PostLikeService {
 
     @Transactional(readOnly = true)
     public Pagination<LikeFindResponseDto> findLikeByPost(String userId, String postId, Pageable pageable) {
-        userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
                 )
         );
 
-        Post post = postRepository.findById(postId).orElseThrow(
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
                         "게시글을 찾을 수 없습니다."
@@ -106,7 +108,7 @@ public class PostLikeService {
         );
 
         return this.paginationFactory.create(
-                postLikeRepository.findAllByPost(post, pageable)
+                postLikeRepositorySupport.findAllByPost(post.getId(), user.getId(), pageable)
                         .map(LikeFindResponseDto::from)
         );
     }
