@@ -34,7 +34,6 @@ public class PostLikeRepositorySupport extends QuerydslRepositorySupport {
                 .join(user).on(postLike.liker.id.eq(user.id))
                 .fetchJoin()
                 .where(postLike.post.id.eq(postId)
-                        .and(postLike.post.isDeleted.isFalse())
                         .and(postLike.liker.id.notIn(
                                 JPAExpressions
                                         .select(blockUser.blockedUser.id)
