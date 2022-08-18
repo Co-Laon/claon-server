@@ -3,6 +3,7 @@ package coLaon.ClaonBack.post.service;
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
+import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -11,6 +12,7 @@ import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.ContentsImageFormatValidator;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
+import coLaon.ClaonBack.common.validator.IsHoldValidator;
 import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
@@ -24,6 +26,7 @@ import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
+import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -48,8 +51,8 @@ public class PostService {
     private final HoldInfoRepository holdInfoRepository;
     private final CenterRepository centerRepository;
     private final ClimbingHistoryRepository climbingHistoryRepository;
+    private final PostRepositorySupport postRepositorySupport;
     private final PaginationFactory paginationFactory;
-
 
     @Transactional(readOnly = true)
     public PostDetailResponseDto findPost(String userId, String postId) {
@@ -228,11 +231,11 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Pagination<PostThumbnailResponseDto> getUserPosts(
-            String loginedUserId,
+            String loggedInUserId,
             String targetUserNickname,
             Pageable pageable
     ) {
-        userRepository.findById(loginedUserId).orElseThrow(
+        userRepository.findById(loggedInUserId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
@@ -247,10 +250,10 @@ public class PostService {
         );
 
         // individual user page
-        if (!loginedUserId.equals(targetUser.getId())) {
+        if (!loggedInUserId.equals(targetUser.getId())) {
             IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
 
-            blockUserRepository.findBlock(targetUser.getId(), loginedUserId).ifPresent(
+            blockUserRepository.findBlock(targetUser.getId(), loggedInUserId).ifPresent(
                     blockUser -> {
                         throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
                     }
@@ -259,6 +262,45 @@ public class PostService {
 
         return this.paginationFactory.create(
                 postRepository.findByWriterOrderByCreatedAtDesc(targetUser, pageable).map(PostThumbnailResponseDto::from)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<PostThumbnailResponseDto> getCenterPosts(
+            String userId,
+            String centerId,
+            Optional<String> holdId,
+            Pageable pageable
+    ) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        Center center = centerRepository.findById(centerId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "암장 정보를 찾을 수 없습니다."
+                )
+        );
+
+        if (holdId.isPresent()) {
+            List<String> allHoldsByCenter = holdInfoRepository.findAllByCenter(center)
+                    .stream().map(BaseEntity::getId).collect(Collectors.toList());
+
+            IsHoldValidator.of(holdId.get(), allHoldsByCenter).validate();
+
+            return this.paginationFactory.create(
+                    postRepositorySupport.findByCenterAndHoldExceptBlockUser(center.getId(), holdId.get(), user.getId(), pageable)
+                            .map(PostThumbnailResponseDto::from)
+            );
+        }
+
+        return this.paginationFactory.create(
+                postRepositorySupport.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)
+                        .map(PostThumbnailResponseDto::from)
         );
     }
 }

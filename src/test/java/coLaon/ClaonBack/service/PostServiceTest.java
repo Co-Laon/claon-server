@@ -22,13 +22,14 @@ import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
+import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostRepository;
+import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.post.service.PostService;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.common.exception.BadRequestException;
-import coLaon.ClaonBack.post.repository.PostContentsRepository;
-import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
@@ -42,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,8 +53,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -76,6 +78,8 @@ public class PostServiceTest {
     HoldInfoRepository holdInfoRepository;
     @Mock
     ClimbingHistoryRepository climbingHistoryRepository;
+    @Mock
+    PostRepositorySupport postRepositorySupport;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -241,6 +245,79 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Success case for find post by center")
+    void successFindPostByCenter() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(this.postRepositorySupport.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)).willReturn(postPage);
+
+        // when
+        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
+                this.postService.getCenterPosts("userId", "centerId", Optional.ofNullable(null), pageable);
+
+        //then
+        assertThat(postThumbnailResponseDtoPagination.getResults())
+                .isNotNull()
+                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("testPostId", post.getThumbnailUrl()),
+                        tuple("testPostId2", post2.getThumbnailUrl())
+                );
+    }
+
+    @Test
+    @DisplayName("Success case for find post by center and hold")
+    void successFindPostByCenterAndHold() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo1));
+        given(this.postRepositorySupport.findByCenterAndHoldExceptBlockUser(center.getId(), "holdId1", user.getId(), pageable)).willReturn(postPage);
+
+        // when
+        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
+                this.postService.getCenterPosts("userId", "centerId", Optional.of("holdId1"), pageable);
+
+        //then
+        assertThat(postThumbnailResponseDtoPagination.getResults())
+                .isNotNull()
+                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("testPostId", post.getThumbnailUrl()),
+                        tuple("testPostId2", post2.getThumbnailUrl())
+                );
+    }
+
+    @Test
+    @DisplayName("Failure case for find post by center and hold with invalid hold info")
+    void failFindPostByCenterAndHold() {
+        //given
+        Pageable pageable = PageRequest.of(0, 2);
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo1));
+
+        // when
+        final BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> this.postService.getCenterPosts("userId", "centerId", Optional.of("invalidHoldId"), pageable)
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.INVALID_PARAMETER, "잘못된 홀드 정보입니다.");
+    }
+
+    @Test
     @DisplayName("Success case for find post")
     void successFindPost() {
         // given
@@ -275,8 +352,9 @@ public class PostServiceTest {
         );
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_ACCESSIBLE);
-        assertThat(ex.getMessage()).isEqualTo("비공개 계정입니다.");
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "비공개 계정입니다.");
     }
 
     @Test
@@ -469,18 +547,18 @@ public class PostServiceTest {
 
     @Test
     @DisplayName("Success case for find posts by user nickname")
-    void successFindPosts(){
+    void successFindPosts() {
         // given
-        String loginedUserId = this.user.getId();
+        String loggedInUserId = this.user.getId();
 
         Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findById(loginedUserId)).willReturn(Optional.of(this.user));
+        given(this.userRepository.findById(loggedInUserId)).willReturn(Optional.of(this.user));
         given(this.userRepository.findByNickname(this.user2.getNickname())).willReturn(Optional.of(this.user2));
-        given(this.blockUserRepository.findBlock(this.user2.getId(), loginedUserId)).willReturn(Optional.empty());
+        given(this.blockUserRepository.findBlock(this.user2.getId(), loggedInUserId)).willReturn(Optional.empty());
         given(this.postRepository.findByWriterOrderByCreatedAtDesc(this.user2, pageable)).willReturn(new PageImpl<>(List.of(this.post), pageable, 1));
 
         // when
-        Pagination<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(loginedUserId, this.user2.getNickname(), pageable);
+        Pagination<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(loggedInUserId, this.user2.getNickname(), pageable);
 
         // then
         assertThat(dtos.getResults().size()).isEqualTo(1);
@@ -488,17 +566,17 @@ public class PostServiceTest {
 
     @Test
     @DisplayName("Fail case(user is private) for find posts")
-    void failFindPosts(){
+    void failFindPosts() {
         // given
-        String loginedUserId = this.user.getId();
+        String loggedInUserId = this.user.getId();
         Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findById(loginedUserId)).willReturn(Optional.of(this.user));
+        given(this.userRepository.findById(loggedInUserId)).willReturn(Optional.of(this.user));
         given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
 
         // when
         final BadRequestException ex = assertThrows(
                 BadRequestException.class,
-                () -> this.postService.getUserPosts(loginedUserId, this.privateUser.getNickname(), pageable)
+                () -> this.postService.getUserPosts(loggedInUserId, this.privateUser.getNickname(), pageable)
         );
 
         // then

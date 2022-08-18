@@ -30,8 +30,7 @@ public class PostLikeRepositorySupport extends QuerydslRepositorySupport {
     public Page<PostLike> findAllByPost(String postId, String userId, Pageable pageable) {
         JPQLQuery<PostLike> query = jpaQueryFactory
                 .selectFrom(postLike)
-                .join(post).on(postLike.post.id.eq(post.id))
-                .join(user).on(postLike.liker.id.eq(user.id))
+                .join(postLike.liker, user)
                 .fetchJoin()
                 .where(postLike.post.id.eq(postId)
                         .and(postLike.liker.id.notIn(
