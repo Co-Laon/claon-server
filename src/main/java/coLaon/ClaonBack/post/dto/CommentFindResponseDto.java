@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.post.dto;
 
+import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.utils.RelativeTimeUtil;
 import coLaon.ClaonBack.post.domain.PostComment;
 import lombok.Data;
@@ -19,8 +20,7 @@ public class CommentFindResponseDto {
     private final String writerProfileImage;
     private final String createdAt;
     private final String updatedAt;
-    private final List<ChildCommentResponseDto> children;
-    private final Long commentCount;
+    private final Pagination<ChildCommentResponseDto> children;
 
     private CommentFindResponseDto(
             String commentId,
@@ -31,8 +31,7 @@ public class CommentFindResponseDto {
             String writerProfileImage,
             String createdAt,
             String updatedAt,
-            List<ChildCommentResponseDto> children,
-            Long commentCount
+            Pagination<ChildCommentResponseDto> children
     ) {
         this.commentId = commentId;
         this.content = content;
@@ -43,13 +42,11 @@ public class CommentFindResponseDto {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.children = children;
-        this.commentCount = commentCount;
     }
 
     public static CommentFindResponseDto from(
             PostComment postComment,
-            List<PostComment> childComments,
-            Long commentCount
+            Pagination<ChildCommentResponseDto> childComments
     ) {
         return new CommentFindResponseDto(
                 postComment.getId(),
@@ -60,8 +57,7 @@ public class CommentFindResponseDto {
                 postComment.getWriter().getImagePath(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getCreatedAt(), ZoneOffset.of("+9"))),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getUpdatedAt(), ZoneOffset.of("+9"))),
-                childComments.stream().map(ChildCommentResponseDto::from).collect(Collectors.toList()),
-                commentCount
+                childComments
         );
     }
 }
