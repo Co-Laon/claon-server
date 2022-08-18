@@ -57,6 +57,11 @@ dependencies {
 	implementation 'commons-io:commons-io:2.11.0'
 	implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
 
+	// image resize
+	implementation 'com.github.downgoon:marvin:1.5.5'
+	implementation 'com.github.downgoon:MarvinPlugins:1.5.5'
+	implementation 'org.springframework:spring-test'
+
 	// test
 	implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 	implementation 'org.mockito:mockito-junit-jupiter:4.6.1'

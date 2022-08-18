@@ -23,7 +23,7 @@ public class IsImageValidator extends Validator {
     @Override
     public void validate() {
         try {
-            if (Files.probeContentType(Path.of(Objects.requireNonNull(multipartFile.getOriginalFilename())))
+            if (!Files.probeContentType(Path.of(Objects.requireNonNull(multipartFile.getOriginalFilename())))
                     .startsWith("image")) {
                 throw new BadRequestException(
                         ErrorCode.INVALID_FORMAT,
