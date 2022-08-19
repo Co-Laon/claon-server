@@ -30,29 +30,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class ClimbingHistoryRepositoryTest {
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private CenterRepository centerRepository;
-
     @Autowired
     private PostRepository postRepository;
-
     @Autowired
     private ClimbingHistoryRepository climbingHistoryRepository;
-
     @Autowired
     private HoldInfoRepository holdInfoRepository;
 
-    private User user;
     private Post post;
     private ClimbingHistory climbingHistory;
 
     @BeforeEach
     void setUp() {
-        this.user = User.of(
+        User user = userRepository.save(User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -61,10 +55,9 @@ public class ClimbingHistoryRepositoryTest {
                 "",
                 "",
                 "instagramId"
-        );
-        user = userRepository.save(user);
+        ));
 
-        Center center = Center.of(
+        Center center = centerRepository.save(Center.of(
                 "test",
                 "test",
                 "010-1234-1234",
@@ -77,28 +70,26 @@ public class ClimbingHistoryRepositoryTest {
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
-        );
-        center = centerRepository.save(center);
+        ));
 
-        // Setting climbing History
-        HoldInfo holdInfo = HoldInfo.of("name", "dfdf", center);
-        holdInfo = holdInfoRepository.save(holdInfo);
+        HoldInfo holdInfo = holdInfoRepository.save(HoldInfo.of("name", "dfdf", center));
 
-        this.post = Post.of(
+        this.post = postRepository.save(Post.of(
                 center,
                 "testContent1",
                 user
-        );
-        post = postRepository.save(post);
+        ));
 
-        climbingHistory = ClimbingHistory.of(this.post, holdInfo, 1);
-        climbingHistory = climbingHistoryRepository.save(climbingHistory);
+        this.climbingHistory = climbingHistoryRepository.save(ClimbingHistory.of(this.post, holdInfo, 1));
     }
 
     @Test
     public void successFindByPostIds() {
+        // given
+        List<String> postIdList = List.of(this.post.getId());
+
         // when
-        List<ClimbingHistory> histories = climbingHistoryRepository.findByPostIds(List.of(this.post.getId()));
+        List<ClimbingHistory> histories = climbingHistoryRepository.findByPostIds(postIdList);
 
         // then
         assertThat(histories.size()).isEqualTo(1);
@@ -106,8 +97,11 @@ public class ClimbingHistoryRepositoryTest {
 
     @Test
     public void successDeleteAllByPost() {
+        // given
+        String postId = this.post.getId();
+
         // when
-        climbingHistoryRepository.deleteAllByPost(this.post.getId());
+        climbingHistoryRepository.deleteAllByPost(postId);
 
         // then
         assertTrue(climbingHistoryRepository.findById(climbingHistory.getId()).isEmpty());

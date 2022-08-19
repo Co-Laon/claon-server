@@ -43,7 +43,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                         "\"errorCode\" : \"" + errorCode.getCode() + "\"," +
                         "\"message\" : \"" + message + "\"," +
                         "\"timeStamp\" : \"" + LocalDateTime.now() + "\"" +
-                "}"
+                        "}"
         );
     }
 }

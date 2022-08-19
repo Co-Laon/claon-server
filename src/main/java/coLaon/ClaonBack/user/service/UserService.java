@@ -32,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -170,7 +169,7 @@ public class UserService {
         Long postCount = (long) postIds.size();
         Long postLikeCount = this.postLikeRepository.countByPostIdIn(postIds);
 
-        Set<String> userIds = this.laonRepository.getUserIdsByLaonId(user.getId());
+        List<String> userIds = this.laonRepository.getUserIdsByLaonId(user.getId());
         Long laonCount = (long) userIds.size();
 
         boolean isLaon = userIds.contains(userId);
@@ -187,6 +186,16 @@ public class UserService {
                     "이용자를 찾을 수 없습니다."
             );
         });
+
+        if (!user.getNickname().equals(dto.getNickname()))
+            this.userRepository.findByNickname(dto.getNickname()).ifPresent(
+                    u -> {
+                        throw new BadRequestException(
+                                ErrorCode.ROW_ALREADY_EXIST,
+                                "이미 존재하는 닉네임입니다."
+                        );
+                    }
+            );
 
         user.modifyUser(
                 dto.getNickname(),

@@ -19,7 +19,7 @@ public class OperatingTimeListConverter implements AttributeConverter<List<Opera
             return "";
         }
 
-        List<String> jsonList = attribute.stream().map(a -> {
+        return attribute.stream().map(a -> {
             try {
                 return objectMapper.writeValueAsString(a);
             } catch (JsonProcessingException e) {
@@ -28,9 +28,7 @@ public class OperatingTimeListConverter implements AttributeConverter<List<Opera
                         ""
                 );
             }
-        }).collect(Collectors.toList());
-
-        return String.join("&&&", jsonList);
+        }).collect(Collectors.joining("&&&"));
     }
 
     @Override

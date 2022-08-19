@@ -10,7 +10,7 @@ import coLaon.ClaonBack.common.validator.UserNickname;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserModifyRequestDto {
-    @UserNickname
+    @UserNickname(message = "잘못된 닉네임 입니다.")
     private String nickname;
     private String metropolitanActiveArea;
     private String basicLocalActiveArea;

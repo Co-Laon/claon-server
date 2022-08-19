@@ -33,8 +33,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -130,7 +128,36 @@ public class UserServiceTest {
         this.climbingHistory = ClimbingHistory.of(
                 post,
                 holdInfo,
-                2);
+                2
+        );
+    }
+
+    @Test
+    @DisplayName("Success case for set public user private account")
+    void successSetPrivateAccount() {
+        // given
+        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
+        given(this.userRepository.save(publicUser)).willReturn(publicUser);
+
+        // when
+        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope("publicUserId");
+
+        // then
+        assertThat(publicScopeResponseDto.getIsPrivate()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Success case for set private user public account")
+    void successSetPublicAccount() {
+        // given
+        given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
+        given(this.userRepository.save(privateUser)).willReturn(privateUser);
+
+        // when
+        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope("privateUserId");
+
+        // then
+        assertThat(publicScopeResponseDto.getIsPrivate()).isFalse();
     }
 
     @Test
@@ -150,32 +177,6 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Success case for modifying single user")
-    void successModifyUser() {
-        // given
-        UserModifyRequestDto dto = new UserModifyRequestDto(
-                "nickname",
-                "경기도",
-                "성남시",
-                "",
-                "hoonki",
-                "dfdf"
-        );
-
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
-        given(this.userRepository.save(this.user)).willReturn(this.user);
-
-        // when
-        UserResponseDto userResponseDto = this.userService.modifyUser("userId", dto);
-
-        // then
-        assertThat(userResponseDto)
-                .isNotNull()
-                .extracting("email", "nickname")
-                .contains("test@gmail.com", "nickname");
-    }
-
-    @Test
     @DisplayName("Success case for retrieving single other user")
     void successRetrieveUser() {
         // given
@@ -183,7 +184,7 @@ public class UserServiceTest {
         given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(user));
         given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
-        given(this.laonRepository.getUserIdsByLaonId("userId")).willReturn(Set.of("publicUserId"));
+        given(this.laonRepository.getUserIdsByLaonId("userId")).willReturn(List.of("publicUserId"));
         given(this.climbingHistoryRepository.findByPostIds(this.postIds)).willReturn(List.of(this.climbingHistory));
 
         // when
@@ -218,7 +219,7 @@ public class UserServiceTest {
         given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(privateUser));
         given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
-        given(this.laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(new HashSet<>());
+        given(this.laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(List.of());
 
         // when
         IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userNickname");
@@ -235,30 +236,28 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Success case for set public user private account")
-    void successSetPrivateAccount() {
+    @DisplayName("Success case for modifying single user")
+    void successModifyUser() {
         // given
-        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
-        given(this.userRepository.save(publicUser)).willReturn(publicUser);
+        UserModifyRequestDto dto = new UserModifyRequestDto(
+                "nickname",
+                "경기도",
+                "성남시",
+                "",
+                "hoonki",
+                "dfdf"
+        );
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
+        given(this.userRepository.save(this.user)).willReturn(this.user);
 
         // when
-        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope("publicUserId");
+        UserResponseDto userResponseDto = this.userService.modifyUser("userId", dto);
 
         // then
-        assertThat(publicScopeResponseDto.getIsPrivate()).isTrue();
-    }
-
-    @Test
-    @DisplayName("Success case for set private user public account")
-    void successSetPublicAccount() {
-        // given
-        given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
-        given(this.userRepository.save(privateUser)).willReturn(privateUser);
-
-        // when
-        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope("privateUserId");
-
-        // then
-        assertThat(publicScopeResponseDto.getIsPrivate()).isFalse();
+        assertThat(userResponseDto)
+                .isNotNull()
+                .extracting("email", "nickname")
+                .contains("test@gmail.com", "nickname");
     }
 }

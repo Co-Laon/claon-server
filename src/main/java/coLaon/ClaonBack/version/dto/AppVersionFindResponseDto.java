@@ -1,6 +1,5 @@
 package coLaon.ClaonBack.version.dto;
 
-
 import coLaon.ClaonBack.version.domain.AppVersion;
 import lombok.Data;
 

@@ -1,6 +1,5 @@
 package coLaon.ClaonBack.center.domain.converter;
 
-import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.InternalServerErrorException;
@@ -20,7 +19,7 @@ public class SectorInfoListConverter implements AttributeConverter<List<SectorIn
             return "";
         }
 
-        List<String> jsonList = attribute.stream().map(a -> {
+        return attribute.stream().map(a -> {
             try {
                 return objectMapper.writeValueAsString(a);
             } catch (JsonProcessingException e) {
@@ -29,9 +28,7 @@ public class SectorInfoListConverter implements AttributeConverter<List<SectorIn
                         ""
                 );
             }
-        }).collect(Collectors.toList());
-
-        return String.join("&&&", jsonList);
+        }).collect(Collectors.joining("&&&"));
     }
 
     @Override

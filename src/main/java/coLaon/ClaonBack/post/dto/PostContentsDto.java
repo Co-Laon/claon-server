@@ -11,5 +11,5 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class PostContentsDto {
     @NotBlank(message = "이미지 혹은 동영상을 입력해주세요.")
-    String url;
+    private String url;
 }

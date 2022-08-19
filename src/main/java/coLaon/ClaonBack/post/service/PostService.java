@@ -70,11 +70,9 @@ public class PostService {
                 )
         );
 
-        blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).ifPresent(
-                blockUser -> {
-                    throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
-                }
-        );
+        if (blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).size() > 0) {
+            throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
+        }
 
         IsPrivateValidator.of(post.getWriter().getIsPrivate()).validate();
 
@@ -253,15 +251,13 @@ public class PostService {
         if (!loggedInUserId.equals(targetUser.getId())) {
             IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
 
-            blockUserRepository.findBlock(targetUser.getId(), loggedInUserId).ifPresent(
-                    blockUser -> {
-                        throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
-                    }
-            );
+            if (blockUserRepository.findBlock(targetUser.getId(), loggedInUserId).size() > 0) {
+                throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
+            }
         }
 
         return this.paginationFactory.create(
-                postRepository.findByWriterOrderByCreatedAtDesc(targetUser, pageable).map(PostThumbnailResponseDto::from)
+                postRepository.findByWriterAndIsDeletedFalse(targetUser, pageable).map(PostThumbnailResponseDto::from)
         );
     }
 

@@ -2,17 +2,15 @@ package coLaon.ClaonBack.repository;
 
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.CenterReview;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.repository.CenterRepository;
+import coLaon.ClaonBack.center.repository.ReviewRepository;
+import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.config.QueryDslTestConfig;
-import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.post.domain.PostLike;
-import coLaon.ClaonBack.post.repository.PostLikeRepository;
-import coLaon.ClaonBack.post.repository.PostLikeRepositorySupport;
-import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
@@ -29,14 +27,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Import({QueryDslTestConfig.class, PostLikeRepositorySupport.class})
+@Import({QueryDslTestConfig.class, ReviewRepositorySupport.class})
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-public class PostLikeRepositoryTest {
+public class ReviewRepositoryTest {
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -44,14 +41,12 @@ public class PostLikeRepositoryTest {
     @Autowired
     private CenterRepository centerRepository;
     @Autowired
-    private PostRepository postRepository;
+    private ReviewRepository reviewRepository;
     @Autowired
-    private PostLikeRepository postLikeRepository;
-    @Autowired
-    private PostLikeRepositorySupport postLikeRepositorySupport;
+    private ReviewRepositorySupport reviewRepositorySupport;
 
     private User user, blockUser;
-    private Post post;
+    private Center center;
 
     @BeforeEach
     void setUp() {
@@ -82,7 +77,7 @@ public class PostLikeRepositoryTest {
                 this.blockUser
         ));
 
-        Center center = Center.of(
+        this.center = centerRepository.save(Center.of(
                 "test",
                 "test",
                 "010-1234-1234",
@@ -95,66 +90,76 @@ public class PostLikeRepositoryTest {
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
-        );
-        centerRepository.save(center);
-
-        this.post = postRepository.save(Post.of(
-                center,
-                "testContent1",
-                user,
-                List.of(),
-                Set.of()
         ));
 
-        postLikeRepository.save(PostLike.of(
-                this.user, this.post
+        reviewRepository.save(CenterReview.of(
+                2,
+                "test",
+                this.user,
+                this.center
         ));
     }
 
     @Test
-    public void successFindByLikerAndPost() {
-        // when
-        Optional<PostLike> postLike = postLikeRepository.findByLikerAndPost(this.user, this.post);
-
-        // then
-        assertThat(postLike).isPresent();
-    }
-
-    @Test
-    public void successCountByPost() {
-        // when
-        Integer countPost = postLikeRepository.countByPost(this.post);
-
-        // then
-        assertThat(countPost).isEqualTo(1);
-    }
-
-    @Test
-    public void successCountByPostIdIn() {
+    public void successSelectRanksByCenterId() {
         // given
-        List<String> postIds = List.of(post.getId());
+        String centerId = this.center.getId();
 
         // when
-        Long count = postLikeRepository.countByPostIdIn(postIds);
+        List<Integer> rankList = reviewRepository.selectRanksByCenterId(centerId);
 
         // then
-        assertThat(count).isEqualTo(1);
+        assertThat(rankList.get(0)).isEqualTo(2);
     }
 
     @Test
-    public void successFindAllByPost() {
+    public void successFindByUserIdAndCenterId() {
         // given
-        String postId = this.post.getId();
         String userId = this.user.getId();
-
-        postLikeRepository.save(PostLike.of(
-                this.blockUser, this.post
-        ));
+        String centerId = this.center.getId();
 
         // when
-        Page<PostLike> likerList = postLikeRepositorySupport.findAllByPost(postId, userId, PageRequest.of(0, 2));
+        Optional<CenterReview> centerReviewOptional = reviewRepository.findByUserIdAndCenterId(userId, centerId);
 
         // then
-        assertThat(likerList.getContent().size()).isEqualTo(1);
+        assertThat(centerReviewOptional).isPresent();
+    }
+
+    @Test
+    public void successFindByCenterExceptBlockUser() {
+        // given
+        reviewRepository.save(CenterReview.of(
+                2,
+                "test",
+                this.blockUser,
+                this.center
+        ));
+        String centerId = center.getId();
+        String userId = user.getId();
+
+        // when
+        Page<CenterReview> reviewList = reviewRepositorySupport.findByCenterExceptBlockUser(centerId, userId, PageRequest.of(0, 2));
+
+        // then
+        assertThat(reviewList.getContent().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void successCountByCenterExceptBlockUser() {
+        // given
+        reviewRepository.save(CenterReview.of(
+                2,
+                "test",
+                this.blockUser,
+                this.center
+        ));
+        String centerId = center.getId();
+        String userId = user.getId();
+
+        // when
+        Integer countCenter = reviewRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
+
+        // then
+        assertThat(countCenter).isEqualTo(1);
     }
 }

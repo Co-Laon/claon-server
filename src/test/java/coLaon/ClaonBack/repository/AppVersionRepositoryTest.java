@@ -33,8 +33,11 @@ public class AppVersionRepositoryTest {
 
     @Test
     public void successFindByKey() {
+        // given
+        String appKey = this.appVersion.getKey();
+
         // when
-        Optional<AppVersion> result = appVersionRepository.findByKey(this.appVersion.getKey());
+        Optional<AppVersion> result = appVersionRepository.findByKey(appKey);
 
         // then
         assertThat(result).isPresent();

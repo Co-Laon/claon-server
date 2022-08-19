@@ -20,7 +20,7 @@ public class IsHoldValidator extends Validator {
 
     @Override
     public void validate() {
-        if(!dstIds.contains(srcId)) {
+        if (!dstIds.contains(srcId)) {
             throw new BadRequestException(
                     ErrorCode.INVALID_PARAMETER,
                     "잘못된 홀드 정보입니다."
