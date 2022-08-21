@@ -297,6 +297,44 @@ public class PostCommentServiceTest {
     }
 
     @Test
+    @DisplayName("Success case for delete comment")
+    void successDeleteComment() {
+        // given
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
+        given(this.postCommentRepository.findById("testChildId1")).willReturn(Optional.of(childPostComment));
+
+        given(this.postCommentRepository.save(childPostComment)).willReturn(childPostComment);
+
+        // when
+        CommentResponseDto commentResponseDto = this.postCommentService.deleteComment("testUserId", "testChildId1");
+
+        // then
+        assertThat(commentResponseDto)
+                .isNotNull()
+                .extracting("commentId", "isDeleted")
+                .contains("testChildId1", true);
+    }
+
+    @Test
+    @DisplayName("Failure case for delete comment because delete by other user")
+    void failDeleteComment_Unauthorized() {
+        // given
+        given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(writer2));
+        given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
+
+        // when
+        final UnauthorizedException ex = Assertions.assertThrows(
+                UnauthorizedException.class,
+                () -> this.postCommentService.deleteComment("testUserId2", "testCommentId")
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
+    }
+
+    @Test
     @DisplayName("Success case for update comment")
     void successUpdateComment() {
         // given
@@ -330,44 +368,6 @@ public class PostCommentServiceTest {
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
                 () -> this.postCommentService.updateComment("testUserId2", "testCommentId", commentUpdateRequestDto)
-        );
-
-        // then
-        assertThat(ex)
-                .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
-    }
-
-    @Test
-    @DisplayName("Success case for delete comment")
-    void successDeleteComment() {
-        // given
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
-        given(this.postCommentRepository.findById("testChildId1")).willReturn(Optional.of(childPostComment));
-
-        given(this.postCommentRepository.save(childPostComment)).willReturn(childPostComment);
-
-        // when
-        CommentResponseDto commentResponseDto = this.postCommentService.deleteComment("testUserId", "testChildId1");
-
-        // then
-        assertThat(commentResponseDto)
-                .isNotNull()
-                .extracting("commentId", "isDeleted")
-                .contains("testChildId1", true);
-    }
-
-    @Test
-    @DisplayName("Failure case for delete comment because delete by other user")
-    void failDeleteComment_Unauthorized() {
-        // given
-        given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(writer2));
-        given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
-
-        // when
-        final UnauthorizedException ex = Assertions.assertThrows(
-                UnauthorizedException.class,
-                () -> this.postCommentService.deleteComment("testUserId2", "testCommentId")
         );
 
         // then

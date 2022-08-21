@@ -15,7 +15,9 @@ import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
+import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,12 +27,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PostRepositoryTest {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private BlockUserRepository blockUserRepository;
     @Autowired
     private CenterRepository centerRepository;
     @Autowired
@@ -53,15 +55,14 @@ public class PostRepositoryTest {
     private ClimbingHistoryRepository climbingHistoryRepository;
 
     private User user;
-    private Post post;
+    private Post deletedPost;
     private Center center;
     private HoldInfo holdInfo;
-    private ClimbingHistory climbingHistory;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         // given
-        this.user = User.of(
+        this.user = userRepository.save(User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -70,8 +71,35 @@ public class PostRepositoryTest {
                 "",
                 "",
                 "instagramId"
-        );
-        userRepository.save(user);
+        ));
+
+        userRepository.save(User.of(
+                "block@gmail.com",
+                "1264567890",
+                "testBlockNickname",
+                "경기도",
+                "성남시",
+                "",
+                "",
+                "instagramId2"
+        ));
+
+        User blockUser = userRepository.save(User.of(
+                "private@gmail.com",
+                "1264567890",
+                "testPrivateNickname",
+                "경기도",
+                "성남시",
+                "",
+                "",
+                "instagramId2"
+        ));
+
+        blockUserRepository.save(BlockUser.of(
+                this.user,
+                blockUser
+        ));
+
         Center center = Center.of(
                 "test",
                 "test",
@@ -87,56 +115,120 @@ public class PostRepositoryTest {
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         );
         this.center = centerRepository.save(center);
-        this.post = Post.of(
+
+        Post post = postRepository.save(Post.of(
                 center,
-                "testContent1",
+                "testContent",
+                user,
+                List.of(),
+                Set.of()
+        ));
+
+        Post blockedPost = postRepository.save(Post.of(
+                center,
+                "testContent",
+                blockUser,
+                List.of(),
+                Set.of()
+        ));
+        postRepository.save(blockedPost);
+
+        Post privatePost = postRepository.save(Post.of(
+                center,
+                "testContent",
+                blockUser,
+                List.of(),
+                Set.of()
+        ));
+        postRepository.save(privatePost);
+
+        this.deletedPost = Post.of(
+                center,
+                "testContent",
                 user,
                 List.of(),
                 Set.of()
         );
-        postRepository.save(post);
-        List<Post> posts = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            Post post = Post.of(this.center, "content" + i, user, List.of(), Set.of());
-            posts.add(post);
-        }
-        postRepository.saveAll(posts);
-        this.holdInfo = HoldInfo.of("hold1", "test", center);
-        holdInfoRepository.save(holdInfo);
-        this.climbingHistory = ClimbingHistory.of(post, holdInfo, 1);
-        climbingHistoryRepository.save(climbingHistory);
+        this.deletedPost.delete();
+        postRepository.save(this.deletedPost);
+
+        this.holdInfo = holdInfoRepository.save(HoldInfo.of("hold1", "test", center));
+
+        climbingHistoryRepository.save(ClimbingHistory.of(post, holdInfo, 1));
+        climbingHistoryRepository.save(ClimbingHistory.of(blockedPost, holdInfo, 1));
+        climbingHistoryRepository.save(ClimbingHistory.of(privatePost, holdInfo, 1));
     }
 
     @Test
-    public void checkSelectPostIdsByUserId(){
+    public void successFindByIdAndIsDeletedFalse() {
+        // given
+        String postId = this.deletedPost.getId();
+
         // when
-        List<String> postIds = postRepository.selectPostIdsByUserId(user.getId());
+        Optional<Post> postOptional = postRepository.findByIdAndIsDeletedFalse(postId);
 
         // then
-        assertThat(postIds.contains(post.getId())).isTrue();
+        assertThat(postOptional).isNotPresent();
     }
 
     @Test
-    public void checkFindByUserIdOrderByCreatedAtDesc(){
-        Sort sort = Sort.by(Sort.Direction.ASC, "createdAt");
-        Pageable pageable = PageRequest.of(0, 10, sort);
-        Page<Post> results = postRepository.findByWriterOrderByCreatedAtDesc(this.user, pageable);
-        assertThat(results.getTotalElements()).isEqualTo(6L);
+    public void successSelectPostIdsByUserId() {
+        // given
+        String userId = user.getId();
+
+        // when
+        List<String> postIds = postRepository.selectPostIdsByUserId(userId);
+
+        // then
+        assertThat(postIds.size()).isEqualTo(1);
     }
 
     @Test
-    public void testFindByCenterExceptBlockUser() {
-        Sort sort = Sort.by(Sort.Direction.ASC, "createdAt");
-        Pageable pageable = PageRequest.of(0, 10, sort);
-        Page<Post> results = postRepositorySupport.findByCenterExceptBlockUser(center.getId(),user.getId(), pageable);
-        assertThat(results.getTotalElements()).isEqualTo(6L);
+    public void successFindByWriterAndIsDeletedFalse() {
+        // when
+        Page<Post> postList = postRepository.findByWriterAndIsDeletedFalse(user, PageRequest.of(0, 2));
+
+        // then
+        assertThat(postList.getContent().size()).isEqualTo(1);
     }
 
     @Test
-    public void testFindByCenterAndHoldExceptBlockUser() {
-        Sort sort = Sort.by(Sort.Direction.ASC, "createdAt");
-        Pageable pageable = PageRequest.of(0, 10, sort);
-        Page<Post> results = postRepositorySupport.findByCenterAndHoldExceptBlockUser(center.getId(), holdInfo.getId(), user.getId(), pageable);
-        assertThat(results.getTotalElements()).isEqualTo(1L);
+    public void successFindByCenterExceptBlockUser() {
+        // given
+        String centerId = center.getId();
+        String userId = user.getId();
+
+        // when
+        Page<Post> results = postRepositorySupport.findByCenterExceptBlockUser(centerId, userId, PageRequest.of(0, 2));
+
+        // then
+        assertThat(results.getContent().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void successFindByCenterAndHoldExceptBlockUser() {
+        // given
+        String centerId = center.getId();
+        String userId = user.getId();
+        String holdInfoId = holdInfo.getId();
+
+        // when
+        Page<Post> results = postRepositorySupport.findByCenterAndHoldExceptBlockUser(centerId, holdInfoId, userId, PageRequest.of(0, 2));
+
+        // then
+        assertThat(results.getContent().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void successCountByCenterExceptBlockUser() {
+        // given
+        String centerId = center.getId();
+        String userId = user.getId();
+
+        // when
+        Integer countPost = postRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
+
+        // then
+        assertThat(countPost).isEqualTo(1);
     }
 }

@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, String> {
     Optional<Post> findByIdAndIsDeletedFalse(String id);
-    @Query(value = "SELECT p.id FROM TB_POST AS p WHERE p.user_id = :userId", nativeQuery = true)
+    @Query(value = "SELECT p.id FROM TB_POST AS p WHERE p.user_id = :userId AND p.is_deleted = false", nativeQuery = true)
     List<String> selectPostIdsByUserId(@Param("userId") String userId);
-    Page<Post> findByWriterOrderByCreatedAtDesc(User writer, Pageable pageable);
+    Page<Post> findByWriterAndIsDeletedFalse(User writer, Pageable pageable);
 }

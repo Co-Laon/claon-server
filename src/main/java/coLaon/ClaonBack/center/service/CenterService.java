@@ -13,13 +13,14 @@ import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
-import coLaon.ClaonBack.center.dto.CenterListOption;
+import coLaon.ClaonBack.center.dto.CenterSearchOption;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
+import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
@@ -174,7 +175,7 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<CenterPreviewResponseDto> findCenterListByOption(String userId, CenterListOption option, Pageable pageable) {
+    public Pagination<CenterPreviewResponseDto> findCenterListByOption(String userId, CenterSearchOption option, Pageable pageable) {
         userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
@@ -182,16 +183,18 @@ public class CenterService {
                 )
         );
 
-        if (option == CenterListOption.BOOKMARK) {
-            return findBookMarkedCenters(userId, pageable);
-        } else if (option == CenterListOption.MY_AROUND) {
-            return findMyAroundCenters(userId, pageable);
-        } else if (option == CenterListOption.NEW_SETTING) {
-            return findNewSettingCenters(pageable);
-        } else if (option == CenterListOption.NEWLY_REGISTERED) {
-            return findNewlyRegisteredCenters(pageable);
+        switch (option) {
+            case BOOKMARK:
+                return findBookMarkedCenters(userId, pageable);
+            case MY_AROUND:
+                return findMyAroundCenters(userId, pageable);
+            case NEW_SETTING:
+                return findNewSettingCenters(pageable);
+            case NEWLY_REGISTERED:
+                return findNewlyRegisteredCenters(pageable);
+            default:
+                throw new BadRequestException(ErrorCode.WRONG_SEARCH_OPTION, "잘못된 검색 입니다.");
         }
-        return null;
     }
 
     private Pagination<CenterPreviewResponseDto> findMyAroundCenters(String userId, Pageable pageable) {

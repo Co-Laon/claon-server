@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public interface LaonRepository extends JpaRepository<Laon, String> {
@@ -25,6 +25,6 @@ public interface LaonRepository extends JpaRepository<Laon, String> {
 
     @Query(value = "SELECT l.user_id " +
             "FROM TB_LAON AS l " +
-            "l.laon_id = :userId", nativeQuery = true)
-    Set<String> getUserIdsByLaonId(@Param("userId") String userId);
+            "WHERE l.laon_id = :userId", nativeQuery = true)
+    List<String> getUserIdsByLaonId(@Param("userId") String userId);
 }

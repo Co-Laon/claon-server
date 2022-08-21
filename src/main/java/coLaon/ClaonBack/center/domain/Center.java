@@ -133,8 +133,7 @@ public class Center extends BaseEntity {
     public void deleteRank(List<Integer> ranks, Integer deleteRank, Integer reviewerCount) {
         if (reviewerCount == 1) {
             this.reviewRank = 0;
-        }
-        else {
+        } else {
             this.reviewRank = (float) (ranks.stream().reduce(0, Integer::sum) - deleteRank) / (reviewerCount - 1);
         }
     }

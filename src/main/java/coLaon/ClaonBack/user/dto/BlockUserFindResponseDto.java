@@ -16,7 +16,7 @@ public class BlockUserFindResponseDto {
         this.blockUserProfileImage = blockUserProfileImage;
     }
 
-    public static BlockUserFindResponseDto from(BlockUser blockUser){
+    public static BlockUserFindResponseDto from(BlockUser blockUser) {
         return new BlockUserFindResponseDto(
                 blockUser.getBlockedUser().getNickname(),
                 blockUser.getUser().getImagePath()

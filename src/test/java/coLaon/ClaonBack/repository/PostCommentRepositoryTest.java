@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,12 +51,12 @@ public class PostCommentRepositoryTest {
     private PostCommentRepositorySupport postCommentRepositorySupport;
 
     private User user, blockUser;
-    private BlockUser blockUserRelation;
     private Post post;
+    private PostComment deletedComment;
 
     @BeforeEach
     void setUp() {
-        this.user = User.of(
+        this.user = userRepository.save(User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -64,10 +65,9 @@ public class PostCommentRepositoryTest {
                 "",
                 "",
                 "instagramId"
-        );
-        userRepository.save(user);
+        ));
 
-        this.blockUser = User.of(
+        this.blockUser = userRepository.save(User.of(
                 "block@gmail.com",
                 "1264567890",
                 "testBlockNickname",
@@ -76,16 +76,14 @@ public class PostCommentRepositoryTest {
                 "",
                 "",
                 "instagramId2"
-        );
-        userRepository.save(blockUser);
+        ));
 
-        this.blockUserRelation = BlockUser.of(
+        blockUserRepository.save(BlockUser.of(
                 this.user,
                 this.blockUser
-        );
-        blockUserRepository.save(blockUserRelation);
+        ));
 
-        Center center = Center.of(
+        Center center = centerRepository.save(Center.of(
                 "test",
                 "test",
                 "010-1234-1234",
@@ -98,8 +96,8 @@ public class PostCommentRepositoryTest {
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test",
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
-        );
-        centerRepository.save(center);
+        ));
+
         this.post = postRepository.save(Post.of(
                 center,
                 "testContent1",
@@ -107,11 +105,35 @@ public class PostCommentRepositoryTest {
                 List.of(),
                 Set.of()
         ));
+
+        this.deletedComment = PostComment.of(
+                "testContent1",
+                user,
+                post,
+                null
+        );
+        this.deletedComment.delete();
+        this.postCommentRepository.save(this.deletedComment);
+    }
+
+    @Test
+    public void successFindByIdAndIsDeletedFalse() {
+        // given
+        String commentId = deletedComment.getId();
+
+        // when
+        Optional<PostComment> postCommentOptional = postCommentRepository.findByIdAndIsDeletedFalse(commentId);
+
+        // then
+        assertThat(postCommentOptional).isNotPresent();
     }
 
     @Test
     public void successFindParentCommentByPost() {
         // given
+        String postId = post.getId();
+        String userId = user.getId();
+
         this.postCommentRepository.save(PostComment.of(
                 "testContent1",
                 user,
@@ -126,7 +148,7 @@ public class PostCommentRepositoryTest {
         ));
 
         // when
-        Page<PostComment> commentList = postCommentRepositorySupport.findParentCommentByPost(post.getId(), user.getId(), PageRequest.of(0, 2));
+        Page<PostComment> commentList = postCommentRepositorySupport.findParentCommentByPost(postId, userId, PageRequest.of(0, 2));
 
         // then
         assertThat(commentList.getContent().size()).isEqualTo(1);
@@ -156,8 +178,11 @@ public class PostCommentRepositoryTest {
                 parentComment
         ));
 
+        String parentCommentId = parentComment.getId();
+        String userId = user.getId();
+
         // when
-        Page<PostComment> commentList = postCommentRepositorySupport.findChildCommentByParentComment(parentComment.getId(), user.getId(), PageRequest.of(0, 2));
+        Page<PostComment> commentList = postCommentRepositorySupport.findChildCommentByParentComment(parentCommentId, userId, PageRequest.of(0, 2));
 
         // then
         assertThat(commentList.getContent().size()).isEqualTo(1);

@@ -11,7 +11,7 @@ import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
-import coLaon.ClaonBack.center.dto.CenterListOption;
+import coLaon.ClaonBack.center.dto.CenterSearchOption;
 import coLaon.ClaonBack.center.service.CenterBookmarkService;
 import coLaon.ClaonBack.center.service.CenterReviewService;
 import coLaon.ClaonBack.center.service.CenterService;
@@ -64,7 +64,11 @@ public class CenterController {
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<CenterPreviewResponseDto> getCenterList(@AuthenticationPrincipal String userId, @RequestParam("option") CenterListOption option, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public Pagination<CenterPreviewResponseDto> getCenterList(
+            @AuthenticationPrincipal String userId,
+            @RequestParam("option") CenterSearchOption option,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
         return this.centerService.findCenterListByOption(userId, option, pageable);
     }
 

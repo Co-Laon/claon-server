@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ChargeListConverter implements AttributeConverter<List<Charge>, String> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -23,7 +24,7 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
             return "";
         }
 
-        List<String> jsonList = attribute.stream().map(a -> {
+        return attribute.stream().map(a -> {
             String chargeList = a.getChargeList().stream().map(charge -> {
                 try {
                     return objectMapper.writeValueAsString(charge);
@@ -47,9 +48,7 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
                         ""
                 );
             }
-        }).collect(Collectors.toList());
-
-        return String.join("&&&", jsonList);
+        }).collect(Collectors.joining("&&&"));
     }
 
     @Override
@@ -63,7 +62,7 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
                 Map<String, String> charge = objectMapper.readValue(json, new TypeReference<>() {});
 
                 return Charge.of(
-                        List.of(charge.get("chargeList").split("&&&")).stream().map(c -> {
+                        Stream.of(charge.get("chargeList").split("&&&")).map(c -> {
                             try {
                                 return objectMapper.readValue(c, ChargeElement.class);
                             } catch (JsonProcessingException e) {

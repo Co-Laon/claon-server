@@ -16,19 +16,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-public class CenterRepositoryTest {
+public class CenterBookmarkRepositoryTest {
     @Autowired
     private CenterRepository centerRepository;
     @Autowired
@@ -37,6 +34,7 @@ public class CenterRepositoryTest {
     private CenterBookmarkRepository centerBookmarkRepository;
 
     private User user;
+    private Center center;
 
     @BeforeEach
     void setUp() {
@@ -51,7 +49,7 @@ public class CenterRepositoryTest {
                 "instagramId"
         ));
 
-        Center center = centerRepository.save(Center.of(
+        this.center = centerRepository.save(Center.of(
                 "test",
                 "test",
                 "010-1234-1234",
@@ -66,51 +64,19 @@ public class CenterRepositoryTest {
                 List.of(new SectorInfo("test sector", "1/1", "1/2"))
         ));
 
-        this.centerBookmarkRepository.save(CenterBookmark.of(center, this.user));
+        this.centerBookmarkRepository.save(CenterBookmark.of(this.center, this.user));
     }
 
     @Test
-    public void successSearchCenter() {
+    public void successFindByUserIdAndCenterId() {
         // given
-        String keyword = "tes";
+        String userId = this.user.getId();
+        String centerId = this.center.getId();
 
         // when
-        List<Center> centerList = centerRepository.searchCenter(keyword);
+        Optional<CenterBookmark> centerBookmark = centerBookmarkRepository.findByUserIdAndCenterId(userId, centerId);
 
         // then
-        assertThat(centerList.size()).isEqualTo(1);
-    }
-
-    @Test
-    public void successFindNewlyCreatedCenter() {
-        // given
-        LocalDateTime before7days = LocalDate.now().atStartOfDay().minusDays(7);
-
-        // when
-        Page<Center> page = centerRepository.findNewlyCreatedCenter(before7days, PageRequest.of(0, 2));
-
-        // then
-        assertThat(page.getTotalElements()).isEqualTo(1);
-
-        // given
-        LocalDateTime standardDate = LocalDate.now().atStartOfDay().plusDays(7);
-
-        // when
-        Page<Center> newPage = centerRepository.findNewlyCreatedCenter(standardDate, PageRequest.of(0, 2));
-
-        // then
-        assertThat(newPage.getTotalElements()).isEqualTo(0);
-    }
-
-    @Test
-    public void successFindBookmarkedCenter() {
-        // given
-        String userId = user.getId();
-
-        // when
-        Page<Center> page = centerRepository.findBookmarkedCenter(userId, PageRequest.of(0, 2));
-
-        // then
-        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(centerBookmark).isPresent();
     }
 }

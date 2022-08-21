@@ -11,7 +11,9 @@ import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterImgDto;
+import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
+import coLaon.ClaonBack.center.dto.CenterSearchOption;
 import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.ChargeDto;
 import coLaon.ClaonBack.center.dto.ChargeElementDto;
@@ -24,6 +26,8 @@ import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.center.service.CenterService;
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
@@ -37,7 +41,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
@@ -62,6 +70,8 @@ public class CenterServiceTest {
     CenterBookmarkRepository centerBookmarkRepository;
     @Mock
     PostRepositorySupport postRepositorySupport;
+    @Spy
+    PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     CenterService centerService;
@@ -287,5 +297,31 @@ public class CenterServiceTest {
                 .isNotNull()
                 .extracting(CenterSearchResponseDto::getName)
                 .contains(this.center.getName(), this.center2.getName());
+    }
+
+    @Test
+    @DisplayName("Success case for search Center by search option")
+    void successFindCenterListByOption() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+
+        // Bookmark
+        // given
+        given(this.centerRepository.findBookmarkedCenter("userId", pageable)).willReturn(new PageImpl<>(List.of(this.center, this.center2), pageable, 1));
+
+        // when
+        Pagination<CenterPreviewResponseDto> results = this.centerService.findCenterListByOption("userId", CenterSearchOption.BOOKMARK, pageable);
+
+        // then
+        assertThat(results.getResults())
+                .isNotNull()
+                .extracting(CenterPreviewResponseDto::getId, CenterPreviewResponseDto::getName)
+                .contains(
+                        tuple("center id", "test"),
+                        tuple("center id2", "test2")
+                );
+
+        // TODO: add test case about search option
     }
 }

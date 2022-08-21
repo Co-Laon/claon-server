@@ -245,79 +245,6 @@ public class PostServiceTest {
     }
 
     @Test
-    @DisplayName("Success case for find post by center")
-    void successFindPostByCenter() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2);
-        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
-
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.postRepositorySupport.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)).willReturn(postPage);
-
-        // when
-        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
-                this.postService.getCenterPosts("userId", "centerId", Optional.ofNullable(null), pageable);
-
-        //then
-        assertThat(postThumbnailResponseDtoPagination.getResults())
-                .isNotNull()
-                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
-                .contains(
-                        tuple("testPostId", post.getThumbnailUrl()),
-                        tuple("testPostId2", post2.getThumbnailUrl())
-                );
-    }
-
-    @Test
-    @DisplayName("Success case for find post by center and hold")
-    void successFindPostByCenterAndHold() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2);
-        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
-
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo1));
-        given(this.postRepositorySupport.findByCenterAndHoldExceptBlockUser(center.getId(), "holdId1", user.getId(), pageable)).willReturn(postPage);
-
-        // when
-        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
-                this.postService.getCenterPosts("userId", "centerId", Optional.of("holdId1"), pageable);
-
-        //then
-        assertThat(postThumbnailResponseDtoPagination.getResults())
-                .isNotNull()
-                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
-                .contains(
-                        tuple("testPostId", post.getThumbnailUrl()),
-                        tuple("testPostId2", post2.getThumbnailUrl())
-                );
-    }
-
-    @Test
-    @DisplayName("Failure case for find post by center and hold with invalid hold info")
-    void failFindPostByCenterAndHold() {
-        //given
-        Pageable pageable = PageRequest.of(0, 2);
-
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo1));
-
-        // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
-                () -> this.postService.getCenterPosts("userId", "centerId", Optional.of("invalidHoldId"), pageable)
-        );
-
-        // then
-        assertThat(ex)
-                .extracting("errorCode", "message")
-                .contains(ErrorCode.INVALID_PARAMETER, "잘못된 홀드 정보입니다.");
-    }
-
-    @Test
     @DisplayName("Success case for find post")
     void successFindPost() {
         // given
@@ -363,7 +290,7 @@ public class PostServiceTest {
         // given
         given(this.postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
         given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
-        given(this.blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(Optional.of(blockUser));
+        given(this.blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(List.of(blockUser));
 
         // when
         final UnauthorizedException ex = assertThrows(
@@ -432,6 +359,32 @@ public class PostServiceTest {
                             post -> post.getHoldList().size())
                     .contains("center1", 1, 1);
         }
+    }
+
+    @Test
+    @DisplayName("Failure case for create post when invalid format of post contents")
+    void failureCreatePost_InvalidFormatOfPostContents() {
+        // given
+        PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
+                "center1",
+                List.of(new ClimbingHistoryRequestDto("holdId1", 1)),
+                "testContent",
+                List.of(new PostContentsDto("test.com/test.gif"))
+        );
+
+        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+        given(this.centerRepository.findById("center1")).willReturn(Optional.of(center));
+
+        // when
+        final BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> this.postService.createPost("testUserId", postCreateRequestDto)
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.INVALID_FORMAT, "이미지 형식이 잘못되었습니다.");
     }
 
     @Test
@@ -546,6 +499,31 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Success case for find post by center")
+    void successFindPostByCenter() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(this.postRepositorySupport.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)).willReturn(postPage);
+
+        // when
+        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
+                this.postService.getCenterPosts("userId", "centerId", Optional.empty(), pageable);
+
+        //then
+        assertThat(postThumbnailResponseDtoPagination.getResults())
+                .isNotNull()
+                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("testPostId", post.getThumbnailUrl()),
+                        tuple("testPostId2", post2.getThumbnailUrl())
+                );
+    }
+
+    @Test
     @DisplayName("Success case for find posts by user nickname")
     void successFindPosts() {
         // given
@@ -554,8 +532,8 @@ public class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         given(this.userRepository.findById(loggedInUserId)).willReturn(Optional.of(this.user));
         given(this.userRepository.findByNickname(this.user2.getNickname())).willReturn(Optional.of(this.user2));
-        given(this.blockUserRepository.findBlock(this.user2.getId(), loggedInUserId)).willReturn(Optional.empty());
-        given(this.postRepository.findByWriterOrderByCreatedAtDesc(this.user2, pageable)).willReturn(new PageImpl<>(List.of(this.post), pageable, 1));
+        given(this.blockUserRepository.findBlock(this.user2.getId(), loggedInUserId)).willReturn(List.of());
+        given(this.postRepository.findByWriterAndIsDeletedFalse(this.user2, pageable)).willReturn(new PageImpl<>(List.of(this.post), pageable, 1));
 
         // when
         Pagination<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(loggedInUserId, this.user2.getNickname(), pageable);
@@ -583,5 +561,53 @@ public class PostServiceTest {
         assertThat(ex)
                 .extracting("errorCode", "message")
                 .contains(ErrorCode.NOT_ACCESSIBLE, "비공개 계정입니다.");
+    }
+
+    @Test
+    @DisplayName("Success case for find post by center and hold")
+    void successFindPostByCenterAndHold() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo1));
+        given(this.postRepositorySupport.findByCenterAndHoldExceptBlockUser(center.getId(), "holdId1", user.getId(), pageable)).willReturn(postPage);
+
+        // when
+        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
+                this.postService.getCenterPosts("userId", "centerId", Optional.of("holdId1"), pageable);
+
+        //then
+        assertThat(postThumbnailResponseDtoPagination.getResults())
+                .isNotNull()
+                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("testPostId", post.getThumbnailUrl()),
+                        tuple("testPostId2", post2.getThumbnailUrl())
+                );
+    }
+
+    @Test
+    @DisplayName("Failure case for find post by center and hold with invalid hold info")
+    void failFindPostByCenterAndHold() {
+        //given
+        Pageable pageable = PageRequest.of(0, 2);
+
+        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
+        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo1));
+
+        // when
+        final BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> this.postService.getCenterPosts("userId", "centerId", Optional.of("invalidHoldId"), pageable)
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.INVALID_PARAMETER, "잘못된 홀드 정보입니다.");
     }
 }

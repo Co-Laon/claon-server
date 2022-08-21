@@ -1,7 +1,6 @@
 package coLaon.ClaonBack.common.exception;
 
 public enum ErrorCode {
-
     /**
      * 400 Bad Request
      */
@@ -13,6 +12,7 @@ public enum ErrorCode {
     WRONG_PURPOSE(40005),
     INVALID_PARAMETER(40006),
     WRONG_STORE(40007),
+    WRONG_SEARCH_OPTION(40008),
     /**
      * 401 Unauthorized Error
      */
