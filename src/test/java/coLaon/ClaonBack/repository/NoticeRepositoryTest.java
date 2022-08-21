@@ -58,7 +58,7 @@ public class NoticeRepositoryTest {
         Page<Notice> results = noticeRepository.findAllWithPagination(pageable);
 
         // then
-        assertThat(results.getSize()).isEqualTo(1);
+        assertThat(results.getTotalElements()).isEqualTo(1L);
     }
 
     @Test
