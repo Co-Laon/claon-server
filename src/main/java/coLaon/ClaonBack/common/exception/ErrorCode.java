@@ -13,6 +13,7 @@ public enum ErrorCode {
     INVALID_PARAMETER(40006),
     WRONG_STORE(40007),
     WRONG_SEARCH_OPTION(40008),
+    WRONG_CENTER_REPORT_TYPE(40009),
     /**
      * 401 Unauthorized Error
      */

@@ -3,6 +3,8 @@ package coLaon.ClaonBack.center.web;
 import coLaon.ClaonBack.center.dto.CenterBookmarkResponseDto;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterReportCreateRequestDto;
+import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
@@ -145,5 +147,15 @@ public class CenterController {
             @PathVariable String centerId
     ) {
         this.centerBookmarkService.delete(userId, centerId);
+    }
+
+    @PostMapping(value = "/{centerId}/report")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public CenterReportResponseDto createReport(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String centerId,
+            @RequestBody CenterReportCreateRequestDto centerReportCreateRequestDto
+    ) {
+        return this.centerService.createReport(userId, centerId, centerReportCreateRequestDto);
     }
 }
