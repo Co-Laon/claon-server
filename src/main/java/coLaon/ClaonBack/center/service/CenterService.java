@@ -21,11 +21,11 @@ import coLaon.ClaonBack.center.dto.CenterSearchOption;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterReportRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
+import coLaon.ClaonBack.center.repository.CenterRepositorySupport;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
-import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
@@ -38,8 +38,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,6 +47,7 @@ import java.util.stream.Collectors;
 public class CenterService {
     private final UserRepository userRepository;
     private final CenterRepository centerRepository;
+    private final CenterRepositorySupport centerRepositorySupport;
     private final HoldInfoRepository holdInfoRepository;
     private final ReviewRepositorySupport reviewRepositorySupport;
     private final PostRepositorySupport postRepositorySupport;
@@ -192,40 +191,8 @@ public class CenterService {
                 )
         );
 
-        switch (option) {
-            case BOOKMARK:
-                return findBookMarkedCenters(userId, pageable);
-            case MY_AROUND:
-                return findMyAroundCenters(userId, pageable);
-            case NEW_SETTING:
-                return findNewSettingCenters(pageable);
-            case NEWLY_REGISTERED:
-                return findNewlyRegisteredCenters(pageable);
-            default:
-                throw new BadRequestException(ErrorCode.WRONG_SEARCH_OPTION, "잘못된 검색 입니다.");
-        }
-    }
-
-    private Pagination<CenterPreviewResponseDto> findMyAroundCenters(String userId, Pageable pageable) {
-        // TODO implement this.
-        return null;
-    }
-
-    private Pagination<CenterPreviewResponseDto> findNewSettingCenters(Pageable pageable) {
-        // TODO implement this.
-        return null;
-    }
-
-    private Pagination<CenterPreviewResponseDto> findBookMarkedCenters(String userId, Pageable pageable) {
         return paginationFactory.create(
-                centerRepository.findBookmarkedCenter(userId, pageable).map(CenterPreviewResponseDto::from)
-        );
-    }
-
-    private Pagination<CenterPreviewResponseDto> findNewlyRegisteredCenters(Pageable pageable) {
-        LocalDateTime standardDate = LocalDate.now().atStartOfDay().minusDays(7);
-        return paginationFactory.create(
-                centerRepository.findNewlyCreatedCenter(standardDate, pageable).map(CenterPreviewResponseDto::from)
+                centerRepositorySupport.findCenterByOption(userId, option, pageable)
         );
     }
 

@@ -101,18 +101,6 @@ public class ReviewRepositoryTest {
     }
 
     @Test
-    public void successSelectRanksByCenterId() {
-        // given
-        String centerId = this.center.getId();
-
-        // when
-        List<Integer> rankList = reviewRepository.selectRanksByCenterId(centerId);
-
-        // then
-        assertThat(rankList.get(0)).isEqualTo(2);
-    }
-
-    @Test
     public void successFindByUserIdAndCenterId() {
         // given
         String userId = this.user.getId();

@@ -11,10 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<CenterReview, String> {
-    @Query(value = "SELECT cr.rank " +
-            "FROM TB_CENTER_REVIEW AS cr " +
-            "WHERE cr.center_id = :centerId", nativeQuery = true)
-    List<Integer> selectRanksByCenterId(@Param("centerId") String centerId);
     @Query(value = "SELECT * "
             + "FROM TB_CENTER_REVIEW AS r "
             + "WHERE r.user_id = :userId AND r.center_id = :centerId", nativeQuery = true)

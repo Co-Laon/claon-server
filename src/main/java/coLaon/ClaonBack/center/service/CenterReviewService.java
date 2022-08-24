@@ -23,8 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class CenterReviewService {
@@ -63,9 +61,6 @@ public class CenterReviewService {
                 }
         );
 
-        List<Integer> ranks = reviewRepository.selectRanksByCenterId(centerId);
-        center.addRank(ranks, reviewCreateRequestDto.getRank(), ranks.size());
-
         return ReviewResponseDto.from(
                 reviewRepository.save(
                         CenterReview.of(
@@ -100,9 +95,6 @@ public class CenterReviewService {
 
         IdEqualValidator.of(review.getWriter().getId(), writer.getId()).validate();
 
-        List<Integer> ranks = reviewRepository.selectRanksByCenterId(review.getCenter().getId());
-        review.getCenter().changeRank(ranks, review.getRank(), updateRequestDto.getRank(), ranks.size());
-
         review.update(updateRequestDto.getRank(), updateRequestDto.getContent());
 
         return ReviewResponseDto.from(reviewRepository.save(review));
@@ -129,9 +121,6 @@ public class CenterReviewService {
 
         IdEqualValidator.of(review.getWriter().getId(), writer.getId()).validate();
 
-        List<Integer> ranks = reviewRepository.selectRanksByCenterId(review.getCenter().getId());
-        review.getCenter().deleteRank(ranks, review.getRank(), ranks.size());
-
         reviewRepository.delete(review);
 
         return ReviewResponseDto.from(review);
@@ -153,15 +142,13 @@ public class CenterReviewService {
                 )
         );
 
-        List<Integer> ranks = reviewRepository.selectRanksByCenterId(centerId);
-        center.updateRank((float) ranks.stream().mapToInt(r -> r).average().orElse(0));
-
         return ReviewListFindResponseDto.from(
                 this.paginationFactory.create(
                         reviewRepositorySupport.findByCenterExceptBlockUser(center.getId(), userId, pageable)
                                 .map(ReviewFindResponseDto::from)
                 ),
-                center
+                center,
+                reviewRepositorySupport.findRankByCenterExceptBlockUser(center.getId(), userId)
         );
     }
 }
