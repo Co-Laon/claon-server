@@ -18,7 +18,7 @@ public class HoldInfo extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "img_url", nullable = false)
+    @Column(name = "img_url", nullable = false, length = 500)
     private String img;
 
     @ManyToOne(targetEntity = Center.class)

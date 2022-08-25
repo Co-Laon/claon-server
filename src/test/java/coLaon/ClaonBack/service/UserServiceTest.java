@@ -8,6 +8,7 @@ import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.user.domain.User;
@@ -116,6 +117,9 @@ public class UserServiceTest {
         Post post = Post.of(
                 center,
                 "testContent1",
+                List.of(PostContents.of(
+                        "test.com/test.png"
+                )),
                 user
         );
         ReflectionTestUtils.setField(post, "id", "testPostId");

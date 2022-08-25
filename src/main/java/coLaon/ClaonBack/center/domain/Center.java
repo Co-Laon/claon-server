@@ -29,27 +29,27 @@ public class Center extends BaseEntity {
     private String address;
     @Column(name = "tel")
     private String tel;
-    @Column(name = "web_url")
+    @Column(name = "web_url", length = 500)
     private String webUrl;
-    @Column(name = "instagram_url")
+    @Column(name = "instagram_url", length = 500)
     private String instagramUrl;
-    @Column(name = "youtube_url")
+    @Column(name = "youtube_url", length = 500)
     private String youtubeUrl;
     @Convert(converter = CenterImgListConverter.class)
-    @Column(name = "img_list")
+    @Column(name = "img_list", length = 2000)
     private List<CenterImg> imgList;
     @Convert(converter = OperatingTimeListConverter.class)
-    @Column(name = "operating_time")
+    @Column(name = "operating_time", length = 1000)
     private List<OperatingTime> operatingTime;
     @Column(name = "facilities")
     private String facilities;
     @Convert(converter = ChargeListConverter.class)
-    @Column(name = "charge")
+    @Column(name = "charge", length = 3000)
     private List<Charge> charge;
-    @Column(name = "hold_info_img")
+    @Column(name = "hold_info_img", length = 500)
     private String holdInfoImg;
     @Convert(converter = SectorInfoListConverter.class)
-    @Column(name = "sector_info")
+    @Column(name = "sector_info", length = 2000)
     private List<SectorInfo> sectorInfo;
     @Column(name = "review_rank")
     private float reviewRank;

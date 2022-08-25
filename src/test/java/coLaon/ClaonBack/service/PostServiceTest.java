@@ -22,7 +22,6 @@ import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
-import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
@@ -71,8 +70,6 @@ public class PostServiceTest {
     @Mock
     PostLikeRepository postLikeRepository;
     @Mock
-    PostContentsRepository postContentsRepository;
-    @Mock
     CenterRepository centerRepository;
     @Mock
     HoldInfoRepository holdInfoRepository;
@@ -88,7 +85,6 @@ public class PostServiceTest {
 
     private User user, user2, blockedUser, privateUser;
     private Post post, post2, blockedPost, privatePost;
-    private PostContents postContents, postContents2;
     private HoldInfo holdInfo1;
     private Center center;
     private ClimbingHistory climbingHistory;
@@ -170,24 +166,14 @@ public class PostServiceTest {
                 center,
                 "testContent1",
                 user,
-                List.of(),
+                List.of(PostContents.of(
+                        "test.com/test.png"
+                )),
                 Set.of()
         );
         ReflectionTestUtils.setField(this.post, "id", "testPostId");
         ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(this.post, "updatedAt", LocalDateTime.now());
-
-        this.postContents = PostContents.of(
-                post,
-                "test.com/test.png"
-        );
-        ReflectionTestUtils.setField(this.postContents, "id", "testPostContentsId");
-
-        this.postContents2 = PostContents.of(
-                post2,
-                "test2.com/test.png"
-        );
-        ReflectionTestUtils.setField(this.postContents2, "id", "testPostContentsId2");
 
         this.holdInfo1 = HoldInfo.of(
                 "holdName1",
@@ -214,7 +200,9 @@ public class PostServiceTest {
                 center,
                 "testContent2",
                 user2,
-                List.of(postContents2),
+                List.of(PostContents.of(
+                        "test2.com/test.png"
+                )),
                 Set.of(climbingHistory2)
         );
         ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
@@ -262,7 +250,7 @@ public class PostServiceTest {
                         post -> post.getContentsList().get(0),
                         post -> post.getHoldList().get(0).getName(),
                         PostDetailResponseDto::getCenterName)
-                .contains(postContents2.getUrl(), holdInfo1.getName(), center.getName());
+                .contains(post2.getContentList().get(0).getUrl(), holdInfo1.getName(), center.getName());
     }
 
     @Test
@@ -307,9 +295,12 @@ public class PostServiceTest {
     @Test
     @DisplayName("Success case for create post")
     void successCreatePost() {
+        PostContents postContents = PostContents.of(
+                "test.com/test.png"
+        );
+
         try (
                 MockedStatic<Post> mockedPost = mockStatic(Post.class);
-                MockedStatic<PostContents> mockedPostContents = mockStatic(PostContents.class);
                 MockedStatic<ClimbingHistory> mockedClimbingHistory = mockStatic(ClimbingHistory.class)
         ) {
             // given
@@ -327,17 +318,11 @@ public class PostServiceTest {
             mockedPost.when(() -> Post.of(
                     center,
                     postCreateRequestDto.getContent(),
+                    List.of(postContents),
                     user
             )).thenReturn(post);
 
             given(this.postRepository.save(post)).willReturn(post);
-
-            mockedPostContents.when(() -> PostContents.of(
-                    post,
-                    "test.com/test.png"
-            )).thenReturn(postContents);
-
-            given(this.postContentsRepository.save(postContents)).willReturn(postContents);
 
             mockedClimbingHistory.when(() -> ClimbingHistory.of(
                     post,
@@ -391,7 +376,6 @@ public class PostServiceTest {
     @DisplayName("Success case for update post")
     void successUpdatePost() {
         try (
-                MockedStatic<PostContents> mockedPostContents = mockStatic(PostContents.class);
                 MockedStatic<ClimbingHistory> mockedClimbingHistory = mockStatic(ClimbingHistory.class)
         ) {
             // given
@@ -405,13 +389,6 @@ public class PostServiceTest {
             given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
             given(this.holdInfoRepository.findById("holdId1")).willReturn(Optional.of(holdInfo1));
             given(this.postRepository.save(post)).willReturn(post);
-
-            mockedPostContents.when(() -> PostContents.of(
-                    post,
-                    "test.com/test.png"
-            )).thenReturn(postContents);
-
-            given(this.postContentsRepository.save(postContents)).willReturn(postContents);
 
             mockedClimbingHistory.when(() -> ClimbingHistory.of(
                     post,

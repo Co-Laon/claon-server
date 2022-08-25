@@ -63,7 +63,7 @@ public class PostDetailResponseDto {
                         .collect(Collectors.toList()),
                 post.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(post.getCreatedAt(), ZoneOffset.of("+9"))),
-                post.getContentsList().stream().map(PostContents::getUrl).collect(Collectors.toList())
+                post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList())
         );
     }
 }

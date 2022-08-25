@@ -23,7 +23,6 @@ import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
-import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
@@ -46,7 +45,6 @@ public class PostService {
     private final UserRepository userRepository;
     private final BlockUserRepository blockUserRepository;
     private final PostRepository postRepository;
-    private final PostContentsRepository postContentsRepository;
     private final PostLikeRepository postLikeRepository;
     private final HoldInfoRepository holdInfoRepository;
     private final CenterRepository centerRepository;
@@ -104,6 +102,11 @@ public class PostService {
                 Post.of(
                         center,
                         postCreateRequestDto.getContent(),
+                        postCreateRequestDto.getContentsList().stream()
+                                .map(contents -> PostContents.of(
+                                        contents.getUrl()
+                                ))
+                                .collect(Collectors.toList()),
                         writer
                 )
         );
@@ -122,19 +125,8 @@ public class PostService {
                                 history.getClimbingCount())))
                 .collect(Collectors.toList());
 
-        List<PostContents> postContentsList = postCreateRequestDto.getContentsList()
-                .stream()
-                .map(dto -> postContentsRepository.save(PostContents.of(
-                        post,
-                        dto.getUrl())))
-                .collect(Collectors.toList());
-
         return PostResponseDto.from(
                 post,
-                postContentsList
-                        .stream()
-                        .map(PostContents::getUrl)
-                        .collect(Collectors.toList()),
                 climbingHistoryList
                         .stream()
                         .map(ClimbingHistory::getHoldInfo)
@@ -179,22 +171,17 @@ public class PostService {
                                 history.getClimbingCount())))
                 .collect(Collectors.toList());
 
-        postContentsRepository.deleteAllByPost(postId);
-        List<PostContents> postContentsList = postUpdateRequestDto.getContentsList()
-                .stream()
-                .map(dto -> postContentsRepository.save(PostContents.of(
-                        post,
-                        dto.getUrl())))
-                .collect(Collectors.toList());
-
-        post.update(postUpdateRequestDto.getContent());
+        post.update(
+                postUpdateRequestDto.getContent(),
+                postUpdateRequestDto.getContentsList().stream()
+                        .map(contents -> PostContents.of(
+                                contents.getUrl()
+                        ))
+                        .collect(Collectors.toList())
+        );
 
         return PostResponseDto.from(
                 postRepository.save(post),
-                postContentsList
-                        .stream()
-                        .map(PostContents::getUrl)
-                        .collect(Collectors.toList()),
                 climbingHistoryList
                         .stream()
                         .map(ClimbingHistory::getHoldInfo)

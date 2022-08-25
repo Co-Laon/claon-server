@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.post.dto;
 
+import coLaon.ClaonBack.post.domain.PostContents;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

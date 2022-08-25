@@ -66,11 +66,11 @@ public class PostResponseDto {
                 post.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(post.getCreatedAt(), ZoneOffset.of("+9"))),
                 post.getIsDeleted(),
-                post.getContentsList().stream().map(PostContents::getUrl).collect(Collectors.toList())
+                post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList())
         );
     }
 
-    public static PostResponseDto from(Post post, List<String> postContentsList, List<HoldInfo> holdList) {
+    public static PostResponseDto from(Post post, List<HoldInfo> holdList) {
         return new PostResponseDto(
                 post.getId(),
                 post.getCenter().getId(),
@@ -81,7 +81,7 @@ public class PostResponseDto {
                 post.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(post.getCreatedAt(), ZoneOffset.of("+9"))),
                 post.getIsDeleted(),
-                postContentsList
+                post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList())
         );
     }
 }
