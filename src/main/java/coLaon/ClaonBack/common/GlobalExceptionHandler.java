@@ -17,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @Component
@@ -25,6 +26,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {BadRequestException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionDto handleBadRequestException(BadRequestException exception) {
+        GlobalExceptionHandler.log.error("error message", exception);
+        return new ExceptionDto(exception.getErrorCode(), exception.getMessage());
+    }
+
+    @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto handleMethodArgumentTypeMismatchException(BadRequestException exception) {
         GlobalExceptionHandler.log.error("error message", exception);
         return new ExceptionDto(exception.getErrorCode(), exception.getMessage());
     }

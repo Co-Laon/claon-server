@@ -2,6 +2,7 @@ package coLaon.ClaonBack.user.web;
 
 import coLaon.ClaonBack.common.utils.CookieUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
+import coLaon.ClaonBack.user.domain.OAuth2Provider;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
 import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
@@ -47,7 +48,7 @@ public class AuthController {
     @ResponseStatus(value = HttpStatus.OK)
     public JwtDto signIn(
             HttpServletResponse response,
-            @PathVariable String provider,
+            @PathVariable OAuth2Provider provider,
             @RequestBody SignInRequestDto signInRequestDto
     ) {
         JwtDto jwtDto = this.userService.signIn(provider, signInRequestDto);

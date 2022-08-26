@@ -18,23 +18,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/notices")
 public class NoticeController {
-
     private final NoticeService noticeService;
 
     @GetMapping
-    public Pagination<NoticeResponseDto> getNoticeList(@SortDefault(sort = "createdAt", direction = Sort.Direction.DESC) @PageableDefault(size = 20) Pageable pageable){
+    public Pagination<NoticeResponseDto> getNoticeList(
+            @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC) @PageableDefault(size = 20) Pageable pageable
+    ) {
         return noticeService.getNoticeList(pageable);
     }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.OK)
-    public NoticeResponseDto createNotice(@AuthenticationPrincipal String userId, @RequestBody NoticeCreateRequestDto dto) {
+    public NoticeResponseDto createNotice(
+            @AuthenticationPrincipal String userId,
+            @RequestBody NoticeCreateRequestDto dto
+    ) {
         return noticeService.createNotice(userId, dto);
     }
 }

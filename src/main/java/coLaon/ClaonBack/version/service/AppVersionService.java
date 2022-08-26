@@ -16,8 +16,8 @@ public class AppVersionService {
     private final AppVersionRepository appVersionRepository;
 
     @Transactional(readOnly = true)
-    public AppVersionFindResponseDto findVersion(String store) {
-        AppVersion appVersion = this.appVersionRepository.findByKey(AppStore.of(store)).orElseThrow(
+    public AppVersionFindResponseDto findVersion(AppStore store) {
+        AppVersion appVersion = this.appVersionRepository.findByKey(store.getValue()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         String.format("%s 버전이 존재하지 않습니다.", store)

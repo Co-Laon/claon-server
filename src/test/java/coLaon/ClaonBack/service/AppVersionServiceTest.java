@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.service;
 
+import coLaon.ClaonBack.version.domain.AppStore;
 import coLaon.ClaonBack.version.domain.AppVersion;
 import coLaon.ClaonBack.version.dto.AppVersionFindResponseDto;
 import coLaon.ClaonBack.version.repository.AppVersionRepository;
@@ -42,7 +43,7 @@ public class AppVersionServiceTest {
         given(this.appVersionRepository.findByKey("aos")).willReturn(Optional.of(appVersion));
 
         // when
-        AppVersionFindResponseDto responseDto = this.appVersionService.findVersion("aos");
+        AppVersionFindResponseDto responseDto = this.appVersionService.findVersion(AppStore.GOOGLE);
 
         // then
         assertThat(responseDto)

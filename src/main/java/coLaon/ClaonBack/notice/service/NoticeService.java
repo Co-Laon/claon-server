@@ -14,6 +14,7 @@ import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,12 +25,14 @@ public class NoticeService {
 
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public Pagination<NoticeResponseDto> getNoticeList(Pageable pageable) {
         return this.paginationFactory.create(
                 noticeRepository.findAllWithPagination(pageable).map(NoticeResponseDto::from)
         );
     }
 
+    @Transactional
     public NoticeResponseDto createNotice(String userId, NoticeCreateRequestDto dto) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
@@ -40,7 +43,15 @@ public class NoticeService {
 
         IsAdminValidator.of(user.getEmail()).validate();
 
-        return NoticeResponseDto.from(noticeRepository.save(Notice.of(dto.getTitle(), dto.getContent(), user)));
+        return NoticeResponseDto.from(
+                noticeRepository.save(
+                        Notice.of(
+                                dto.getTitle(),
+                                dto.getContent(),
+                                user
+                        )
+                )
+        );
     }
 
 }

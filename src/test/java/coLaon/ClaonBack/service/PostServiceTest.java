@@ -15,7 +15,7 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostReport;
-import coLaon.ClaonBack.post.domain.enums.ReportType;
+import coLaon.ClaonBack.post.domain.enums.PostReportType;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
@@ -23,8 +23,8 @@ import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
-import coLaon.ClaonBack.post.dto.ReportRequestDto;
-import coLaon.ClaonBack.post.dto.ReportResponseDto;
+import coLaon.ClaonBack.post.dto.PostReportRequestDto;
+import coLaon.ClaonBack.post.dto.PostReportResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostReportRepository;
@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static coLaon.ClaonBack.post.domain.enums.ReportType.INAPPROPRIATE_POST;
+import static coLaon.ClaonBack.post.domain.enums.PostReportType.INAPPROPRIATE_POST;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -610,8 +610,8 @@ public class PostServiceTest {
     void successCreatePostReport() {
         try (MockedStatic<PostReport> mockedPostReport = mockStatic(PostReport.class)) {
             // given
-            ReportRequestDto reportRequestDto = new ReportRequestDto(
-                    "부적절한 게시글",
+            PostReportRequestDto postReportRequestDto = new PostReportRequestDto(
+                    PostReportType.INAPPROPRIATE_POST,
                     "testContent"
             );
 
@@ -619,18 +619,18 @@ public class PostServiceTest {
             given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
             given(this.postReportRepository.findByReporterAndPost(user, post)).willReturn(Optional.empty());
 
-            mockedPostReport.when(() -> PostReport.of(user, post, INAPPROPRIATE_POST, "testContent")).thenReturn(postReport);
+            mockedPostReport.when(() -> PostReport.of(user, post, PostReportType.INAPPROPRIATE_POST, "testContent")).thenReturn(postReport);
 
             given(this.postReportRepository.save(this.postReport)).willReturn(postReport);
 
             // when
-            ReportResponseDto reportResponseDto = this.postService.createReport("testUserId", "testPostId", reportRequestDto);
+            PostReportResponseDto postReportResponseDto = this.postService.createReport("testUserId", "testPostId", postReportRequestDto);
 
             // then
-            assertThat(reportResponseDto)
+            assertThat(postReportResponseDto)
                     .isNotNull()
                     .extracting("postId", "reportType")
-                    .contains("testPostId", INAPPROPRIATE_POST);
+                    .contains("testPostId", PostReportType.INAPPROPRIATE_POST);
         }
     }
 }

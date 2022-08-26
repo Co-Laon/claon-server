@@ -19,14 +19,13 @@ import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostReport;
-import coLaon.ClaonBack.post.domain.enums.ReportType;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
-import coLaon.ClaonBack.post.dto.ReportRequestDto;
-import coLaon.ClaonBack.post.dto.ReportResponseDto;
+import coLaon.ClaonBack.post.dto.PostReportRequestDto;
+import coLaon.ClaonBack.post.dto.PostReportResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostReportRepository;
@@ -295,7 +294,11 @@ public class PostService {
     }
 
     @Transactional
-    public ReportResponseDto createReport(String userId, String postId, ReportRequestDto reportRequestDto) {
+    public PostReportResponseDto createReport(
+            String userId,
+            String postId,
+            PostReportRequestDto postReportRequestDto
+    ) {
         User reporter = userRepository.findById(userId).orElseThrow(
                 () -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
@@ -319,13 +322,13 @@ public class PostService {
                 }
         );
 
-        return ReportResponseDto.from(
+        return PostReportResponseDto.from(
                 postReportRepository.save(
                         PostReport.of(
                                 reporter,
                                 post,
-                                ReportType.of(reportRequestDto.getReportType()),
-                                reportRequestDto.getContent()
+                                postReportRequestDto.getReportType(),
+                                postReportRequestDto.getContent()
                         )
                 )
         );

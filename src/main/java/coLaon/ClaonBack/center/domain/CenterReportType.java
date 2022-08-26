@@ -1,12 +1,7 @@
 package coLaon.ClaonBack.center.domain;
 
-import coLaon.ClaonBack.common.exception.BadRequestException;
-import coLaon.ClaonBack.common.exception.ErrorCode;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
 
-import java.util.Arrays;
-
-@Getter
 public enum CenterReportType {
     TELEPHONE("연락처"),
     PICTURE("사진"),
@@ -22,15 +17,8 @@ public enum CenterReportType {
         this.value = value;
     }
 
-    public static CenterReportType of(String value) {
-        return Arrays.stream(values())
-                .filter(v -> value.equalsIgnoreCase(v.value))
-                .findFirst()
-                .orElseThrow(
-                        () -> new BadRequestException(
-                                ErrorCode.WRONG_CENTER_REPORT_TYPE,
-                                String.format("'%s' is invalid : not supported", value)
-                        )
-                );
+    @JsonValue
+    public String getValue() {
+        return this.value;
     }
 }
