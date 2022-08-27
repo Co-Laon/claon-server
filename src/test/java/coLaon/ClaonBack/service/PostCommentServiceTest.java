@@ -10,6 +10,7 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
+import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.repository.PostCommentRepositorySupport;
 import coLaon.ClaonBack.post.service.PostCommentService;
 import coLaon.ClaonBack.post.domain.Post;
@@ -114,6 +115,9 @@ public class PostCommentServiceTest {
         this.post = Post.of(
                 center,
                 "testContent",
+                List.of(PostContents.of(
+                        "test.com/test.png"
+                )),
                 writer
         );
         ReflectionTestUtils.setField(this.post, "id", "testPostId");

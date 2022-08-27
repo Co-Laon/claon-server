@@ -11,7 +11,6 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
@@ -120,12 +119,6 @@ public class PostLikeServiceTest {
         ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(this.post, "updatedAt", LocalDateTime.now());
 
-        PostContents postContents2 = PostContents.of(
-                post2,
-                "test2.com/test.png"
-        );
-        ReflectionTestUtils.setField(postContents2, "id", "testPostContentsId2");
-
         this.postLike = PostLike.of(
                 user,
                 post
@@ -156,7 +149,7 @@ public class PostLikeServiceTest {
                 center,
                 "testContent2",
                 user2,
-                List.of(postContents2),
+                List.of(),
                 Set.of(climbingHistory2)
         );
         ReflectionTestUtils.setField(this.post2, "id", "testPostId2");

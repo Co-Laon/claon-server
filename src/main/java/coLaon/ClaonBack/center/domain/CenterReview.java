@@ -18,7 +18,7 @@ import javax.persistence.Table;
 public class CenterReview extends BaseEntity {
     @Column(name = "rank", nullable = false)
     private Integer rank;
-    @Column(name = "content")
+    @Column(name = "content", length = 500)
     private String content;
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)

@@ -24,7 +24,7 @@ public class ClimbingHistory extends BaseEntity {
     @JoinColumn(name = "hold_info_id", nullable = false)
     private HoldInfo holdInfo;
 
-    @Column(nullable = false)
+    @Column(name = "climbing_count", nullable = false)
     private Integer climbingCount;
 
     private ClimbingHistory(
