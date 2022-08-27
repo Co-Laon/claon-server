@@ -132,7 +132,6 @@ public class CenterReviewServiceTest {
 
             reviewMockedStatic.when(() -> CenterReview.of(5, "testContent", this.user, this.center)).thenReturn(this.review1);
 
-            given(this.reviewRepository.selectRanksByCenterId("testCenterId")).willReturn(List.of());
             given(this.reviewRepository.save(this.review1)).willReturn(this.review1);
 
             // when
@@ -175,7 +174,6 @@ public class CenterReviewServiceTest {
 
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.reviewRepository.findById("review1Id")).willReturn(Optional.of(review1));
-        given(this.reviewRepository.selectRanksByCenterId("center id")).willReturn(List.of(2));
         given(this.reviewRepository.save(this.review1)).willReturn(this.review1);
 
         // when
@@ -215,7 +213,6 @@ public class CenterReviewServiceTest {
         // given
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.reviewRepository.findById("review1Id")).willReturn(Optional.of(review1));
-        given(this.reviewRepository.selectRanksByCenterId("center id")).willReturn(List.of(2));
 
         // when
         this.centerReviewService.deleteReview("userId", "review1Id");
@@ -253,7 +250,6 @@ public class CenterReviewServiceTest {
         given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
 
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.reviewRepository.selectRanksByCenterId("centerId")).willReturn(List.of(5, 4));
         given(this.reviewRepositorySupport.findByCenterExceptBlockUser(center.getId(), "userId", pageable)).willReturn(centerReviewPage);
 
         //when

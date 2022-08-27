@@ -1,34 +1,32 @@
 package coLaon.ClaonBack.center.dto;
 
-import coLaon.ClaonBack.center.domain.Center;
+import coLaon.ClaonBack.center.domain.CenterImg;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+import java.util.Objects;
 
 @Data
+@NoArgsConstructor
 public class CenterPreviewResponseDto {
     private String id;
     private String name;
     private String thumbnailUrl;
-    private Float reviewRank;
+    private Double reviewRank;
 
-    private CenterPreviewResponseDto(
+    @QueryProjection
+    public CenterPreviewResponseDto(
             String id,
             String name,
-            String thumbnailUrl,
-            Float reviewRank
+            List<CenterImg> imgList,
+            Double reviewRank
     ) {
         this.id = id;
         this.name = name;
-        this.thumbnailUrl = thumbnailUrl;
-        this.reviewRank = reviewRank;
-    }
-
-    public static CenterPreviewResponseDto from(Center center) {
-        return new CenterPreviewResponseDto(
-                center.getId(),
-                center.getName(),
-                center.getThumbnailUrl(),
-                center.getReviewRank()
-        );
+        this.thumbnailUrl = imgList.get(0).getUrl();
+        this.reviewRank = Objects.requireNonNullElse(reviewRank, 0.0);
     }
 }
 
