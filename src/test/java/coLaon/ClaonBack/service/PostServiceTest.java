@@ -14,6 +14,8 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.domain.PostReport;
+import coLaon.ClaonBack.post.domain.enums.ReportType;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
@@ -21,9 +23,12 @@ import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
+import coLaon.ClaonBack.post.dto.ReportRequestDto;
+import coLaon.ClaonBack.post.dto.ReportResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostReportRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.post.service.PostService;
@@ -54,6 +59,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static coLaon.ClaonBack.post.domain.enums.ReportType.INAPPROPRIATE_POST;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -80,6 +86,8 @@ public class PostServiceTest {
     ClimbingHistoryRepository climbingHistoryRepository;
     @Mock
     PostRepositorySupport postRepositorySupport;
+    @Mock
+    PostReportRepository postReportRepository;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -93,6 +101,7 @@ public class PostServiceTest {
     private Center center;
     private ClimbingHistory climbingHistory;
     private BlockUser blockUser;
+    private PostReport postReport;
 
     @BeforeEach
     void setUp() {
@@ -242,6 +251,14 @@ public class PostServiceTest {
         ReflectionTestUtils.setField(this.privatePost, "id", "privatePostId");
         ReflectionTestUtils.setField(this.privatePost, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(this.privatePost, "updatedAt", LocalDateTime.now());
+
+        this.postReport = PostReport.of(
+                user,
+                post,
+                INAPPROPRIATE_POST,
+                "testContent"
+        );
+        ReflectionTestUtils.setField(this.postReport, "id", "postReportId");
     }
 
     @Test
@@ -609,5 +626,34 @@ public class PostServiceTest {
         assertThat(ex)
                 .extracting("errorCode", "message")
                 .contains(ErrorCode.INVALID_PARAMETER, "잘못된 홀드 정보입니다.");
+    }
+
+    @Test
+    @DisplayName("Success case for create post report")
+    void successCreatePostReport() {
+        try (MockedStatic<PostReport> mockedPostReport = mockStatic(PostReport.class)) {
+            // given
+            ReportRequestDto reportRequestDto = new ReportRequestDto(
+                    "부적절한 게시글",
+                    "testContent"
+            );
+
+            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
+            given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
+            given(this.postReportRepository.findByReporterAndPost(user, post)).willReturn(Optional.empty());
+
+            mockedPostReport.when(() -> PostReport.of(user, post, INAPPROPRIATE_POST, "testContent")).thenReturn(postReport);
+
+            given(this.postReportRepository.save(this.postReport)).willReturn(postReport);
+
+            // when
+            ReportResponseDto reportResponseDto = this.postService.createReport("testUserId", "testPostId", reportRequestDto);
+
+            // then
+            assertThat(reportResponseDto)
+                    .isNotNull()
+                    .extracting("postId", "reportType")
+                    .contains("testPostId", INAPPROPRIATE_POST);
+        }
     }
 }

@@ -6,6 +6,7 @@ import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
+import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import coLaon.ClaonBack.common.exception.NotFoundException;
@@ -17,14 +18,19 @@ import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
+import coLaon.ClaonBack.post.domain.PostReport;
+import coLaon.ClaonBack.post.domain.enums.ReportType;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
+import coLaon.ClaonBack.post.dto.ReportRequestDto;
+import coLaon.ClaonBack.post.dto.ReportResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostContentsRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostReportRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
@@ -52,6 +58,7 @@ public class PostService {
     private final CenterRepository centerRepository;
     private final ClimbingHistoryRepository climbingHistoryRepository;
     private final PostRepositorySupport postRepositorySupport;
+    private final PostReportRepository postReportRepository;
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
@@ -297,6 +304,43 @@ public class PostService {
         return this.paginationFactory.create(
                 postRepositorySupport.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)
                         .map(PostThumbnailResponseDto::from)
+        );
+    }
+
+    @Transactional
+    public ReportResponseDto createReport(String userId, String postId, ReportRequestDto reportRequestDto) {
+        User reporter = userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "게시글을 찾을 수 없습니다."
+                )
+        );
+
+        postReportRepository.findByReporterAndPost(reporter, post).ifPresent(
+                like -> {
+                    throw new BadRequestException(
+                            ErrorCode.ROW_ALREADY_EXIST,
+                            "이미 신고한 게시글입니다."
+                    );
+                }
+        );
+
+        return ReportResponseDto.from(
+                postReportRepository.save(
+                        PostReport.of(
+                                reporter,
+                                post,
+                                ReportType.of(reportRequestDto.getReportType()),
+                                reportRequestDto.getContent()
+                        )
+                )
         );
     }
 }

@@ -14,6 +14,8 @@ import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
+import coLaon.ClaonBack.post.dto.ReportRequestDto;
+import coLaon.ClaonBack.post.dto.ReportResponseDto;
 import coLaon.ClaonBack.post.service.PostLikeService;
 import coLaon.ClaonBack.post.service.PostCommentService;
 import coLaon.ClaonBack.post.service.PostService;
@@ -92,6 +94,16 @@ public class PostController {
             @PathVariable String postId
     ) {
         return this.postService.deletePost(postId, userId);
+    }
+
+    @PostMapping("/{postId}/report")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public ReportResponseDto createReport(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String postId,
+            @RequestBody ReportRequestDto reportRequestDto
+    ) {
+        return this.postService.createReport(userId, postId, reportRequestDto);
     }
 
     @PostMapping("/{postId}/like")
