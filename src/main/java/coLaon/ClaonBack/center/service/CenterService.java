@@ -2,6 +2,8 @@ package coLaon.ClaonBack.center.service;
 
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.CenterReport;
+import coLaon.ClaonBack.center.domain.CenterReportType;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.HoldInfo;
@@ -9,12 +11,15 @@ import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterReportCreateRequestDto;
+import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.center.dto.CenterSearchOption;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
+import coLaon.ClaonBack.center.repository.CenterReportRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
@@ -48,6 +53,7 @@ public class CenterService {
     private final ReviewRepositorySupport reviewRepositorySupport;
     private final PostRepositorySupport postRepositorySupport;
     private final CenterBookmarkRepository centerBookmarkRepository;
+    private final CenterReportRepository centerReportRepository;
     private final PaginationFactory paginationFactory;
 
     @Transactional
@@ -220,6 +226,37 @@ public class CenterService {
         LocalDateTime standardDate = LocalDate.now().atStartOfDay().minusDays(7);
         return paginationFactory.create(
                 centerRepository.findNewlyCreatedCenter(standardDate, pageable).map(CenterPreviewResponseDto::from)
+        );
+    }
+
+    public CenterReportResponseDto createReport(
+            String userId,
+            String centerId,
+            CenterReportCreateRequestDto centerReportCreateRequestDto
+    ) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                )
+        );
+
+        Center center = centerRepository.findById(centerId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "암장 정보를 찾을 수 없습니다."
+                )
+        );
+
+        return CenterReportResponseDto.from(
+                this.centerReportRepository.save(
+                        CenterReport.of(
+                                centerReportCreateRequestDto.getContent(),
+                                CenterReportType.of(centerReportCreateRequestDto.getReportType()),
+                                user,
+                                center
+                        )
+                )
         );
     }
 }

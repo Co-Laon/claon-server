@@ -3,6 +3,8 @@ package coLaon.ClaonBack.service;
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterBookmark;
 import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.CenterReport;
+import coLaon.ClaonBack.center.domain.CenterReportType;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.HoldInfo;
@@ -12,6 +14,8 @@ import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterImgDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
+import coLaon.ClaonBack.center.dto.CenterReportCreateRequestDto;
+import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterSearchOption;
 import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
@@ -22,6 +26,7 @@ import coLaon.ClaonBack.center.dto.OperatingTimeDto;
 import coLaon.ClaonBack.center.dto.SectorInfoDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
+import coLaon.ClaonBack.center.repository.CenterReportRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
@@ -70,6 +75,8 @@ public class CenterServiceTest {
     CenterBookmarkRepository centerBookmarkRepository;
     @Mock
     PostRepositorySupport postRepositorySupport;
+    @Mock
+    CenterReportRepository centerReportRepository;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -323,5 +330,45 @@ public class CenterServiceTest {
                 );
 
         // TODO: add test case about search option
+    }
+
+    @Test
+    @DisplayName("Success case for create center report")
+    void successCreateReport() {
+        CenterReport centerReport = CenterReport.of(
+                "test",
+                CenterReportType.TELEPHONE,
+                this.user,
+                this.center
+        );
+        ReflectionTestUtils.setField(centerReport, "id", "reportId");
+
+        try (MockedStatic<CenterReport> mockedCenterReport = mockStatic(CenterReport.class)) {
+            // given
+            CenterReportCreateRequestDto centerReportCreateRequestDto = new CenterReportCreateRequestDto(
+                    "test",
+                    CenterReportType.TELEPHONE.getValue()
+            );
+
+            given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
+            given(this.centerRepository.findById("center id")).willReturn(Optional.of(this.center));
+
+            mockedCenterReport.when(() -> CenterReport.of(
+                    "test",
+                    CenterReportType.TELEPHONE,
+                    this.user,
+                    this.center
+            )).thenReturn(centerReport);
+            given(this.centerReportRepository.save(centerReport)).willReturn(centerReport);
+
+            // when
+            CenterReportResponseDto centerReportResponseDto = this.centerService.createReport("userId", "center id", centerReportCreateRequestDto);
+
+            // then
+            assertThat(centerReportResponseDto)
+                    .isNotNull()
+                    .extracting(CenterReportResponseDto::getId, CenterReportResponseDto::getContent)
+                    .containsExactly(centerReport.getId(), centerReport.getContent());
+        }
     }
 }
