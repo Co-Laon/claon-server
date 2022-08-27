@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @NoArgsConstructor
@@ -26,4 +27,12 @@ public class CenterCreateRequestDto {
     private List<HoldInfoRequestDto> holdInfoList;
     private String holdInfoImg;
     private List<SectorInfoDto> sectorInfoList;
+
+    public Optional<List<HoldInfoRequestDto>> getHoldInfoList() {
+        return Optional.ofNullable(this.holdInfoList);
+    }
+
+    public Optional<List<SectorInfoDto>> getSectorInfoList() {
+        return Optional.ofNullable(this.sectorInfoList);
+    }
 }
