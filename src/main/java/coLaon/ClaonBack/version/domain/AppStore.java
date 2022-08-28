@@ -1,9 +1,6 @@
 package coLaon.ClaonBack.version.domain;
 
-import coLaon.ClaonBack.common.exception.BadRequestException;
-import coLaon.ClaonBack.common.exception.ErrorCode;
-
-import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum AppStore {
     GOOGLE("aos"),
@@ -15,16 +12,8 @@ public enum AppStore {
         this.value = value;
     }
 
-    public static String of(String value) {
-        return Arrays.stream(values())
-                .filter(v -> value.equals(v.value))
-                .findFirst()
-                .map(appStore -> appStore.value)
-                .orElseThrow(
-                        () -> new BadRequestException(
-                                ErrorCode.WRONG_STORE,
-                                "지원하지 않는 스토어 입니다."
-                        )
-                );
+    @JsonValue
+    public String getValue() {
+        return this.value;
     }
 }

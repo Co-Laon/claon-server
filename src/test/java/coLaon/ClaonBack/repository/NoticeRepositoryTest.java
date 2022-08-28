@@ -18,20 +18,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class NoticeRepositoryTest {
-
     @Autowired
     private NoticeRepository noticeRepository;
-
     @Autowired
     private UserRepository userRepository;
 
     private User adminUser;
-    private Notice notice;
-
 
     @BeforeEach
     void setUp() {
@@ -47,7 +42,7 @@ public class NoticeRepositoryTest {
                 "instagramId"
         ));
 
-        this.notice = this.noticeRepository.save(Notice.of("abcd", "sfdasfd", adminUser));
+        this.noticeRepository.save(Notice.of("abcd", "sfdasfd", adminUser));
     }
 
     @Test
@@ -59,13 +54,5 @@ public class NoticeRepositoryTest {
 
         // then
         assertThat(results.getTotalElements()).isEqualTo(1L);
-    }
-
-    @Test
-    public void successCreate(){
-        Notice notice1 = Notice.of("asdf", "sfdasfd", adminUser);
-        notice1 = noticeRepository.save(notice1);
-
-        assertThat(notice1.getId()).isNotNull();
     }
 }

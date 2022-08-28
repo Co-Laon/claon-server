@@ -14,8 +14,8 @@ import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
-import coLaon.ClaonBack.post.dto.ReportRequestDto;
-import coLaon.ClaonBack.post.dto.ReportResponseDto;
+import coLaon.ClaonBack.post.dto.PostReportRequestDto;
+import coLaon.ClaonBack.post.dto.PostReportResponseDto;
 import coLaon.ClaonBack.post.service.PostLikeService;
 import coLaon.ClaonBack.post.service.PostCommentService;
 import coLaon.ClaonBack.post.service.PostService;
@@ -98,12 +98,12 @@ public class PostController {
 
     @PostMapping("/{postId}/report")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public ReportResponseDto createReport(
+    public PostReportResponseDto createReport(
             @AuthenticationPrincipal String userId,
             @PathVariable String postId,
-            @RequestBody ReportRequestDto reportRequestDto
+            @RequestBody PostReportRequestDto postReportRequestDto
     ) {
-        return this.postService.createReport(userId, postId, reportRequestDto);
+        return this.postService.createReport(userId, postId, postReportRequestDto);
     }
 
     @PostMapping("/{postId}/like")

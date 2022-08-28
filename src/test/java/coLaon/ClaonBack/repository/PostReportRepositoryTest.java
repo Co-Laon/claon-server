@@ -9,7 +9,7 @@ import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostReport;
-import coLaon.ClaonBack.post.domain.enums.ReportType;
+import coLaon.ClaonBack.post.domain.enums.PostReportType;
 import coLaon.ClaonBack.post.repository.PostReportRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
@@ -80,7 +80,7 @@ public class PostReportRepositoryTest {
         ));
 
         postReportRepository.save(PostReport.of(
-                this.user, this.post, ReportType.INAPPROPRIATE_POST, "testContent"
+                this.user, this.post, PostReportType.INAPPROPRIATE_POST, "testContent"
         ));
     }
 

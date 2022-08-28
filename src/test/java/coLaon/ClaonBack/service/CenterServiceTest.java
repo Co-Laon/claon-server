@@ -315,7 +315,7 @@ public class CenterServiceTest {
             // given
             CenterReportCreateRequestDto centerReportCreateRequestDto = new CenterReportCreateRequestDto(
                     "test",
-                    CenterReportType.TELEPHONE.getValue()
+                    CenterReportType.TELEPHONE
             );
 
             given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));

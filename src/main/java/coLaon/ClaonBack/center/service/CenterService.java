@@ -3,7 +3,6 @@ package coLaon.ClaonBack.center.service;
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.CenterReport;
-import coLaon.ClaonBack.center.domain.CenterReportType;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.HoldInfo;
@@ -38,7 +37,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,7 +93,6 @@ public class CenterService {
                                 .collect(Collectors.toList()),
                         requestDto.getHoldInfoImg(),
                         requestDto.getSectorInfoList()
-                                .orElse(Collections.emptyList())
                                 .stream().map(dto -> SectorInfo.of(dto.getName(), dto.getStart(), dto.getEnd()))
                                 .collect(Collectors.toList())
                 )
@@ -104,7 +101,6 @@ public class CenterService {
         return CenterResponseDto.from(
                 center,
                 requestDto.getHoldInfoList()
-                        .orElse(Collections.emptyList())
                         .stream()
                         .map(holdInfo -> this.holdInfoRepository.save(
                                 HoldInfo.of(
@@ -196,6 +192,7 @@ public class CenterService {
         );
     }
 
+    @Transactional
     public CenterReportResponseDto createReport(
             String userId,
             String centerId,
@@ -219,7 +216,7 @@ public class CenterService {
                 this.centerReportRepository.save(
                         CenterReport.of(
                                 centerReportCreateRequestDto.getContent(),
-                                CenterReportType.of(centerReportCreateRequestDto.getReportType()),
+                                centerReportCreateRequestDto.getReportType(),
                                 user,
                                 center
                         )

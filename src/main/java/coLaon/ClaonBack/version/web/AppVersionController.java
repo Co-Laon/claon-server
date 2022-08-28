@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.version.web;
 
+import coLaon.ClaonBack.version.domain.AppStore;
 import coLaon.ClaonBack.version.dto.AppVersionFindResponseDto;
 import coLaon.ClaonBack.version.service.AppVersionService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class AppVersionController {
     @GetMapping(value = "/{store}")
     @ResponseStatus(value = HttpStatus.OK)
     public AppVersionFindResponseDto getAppleVersion(
-            @PathVariable String store
+            @PathVariable AppStore store
     ) {
         return this.appVersionService.findVersion(store);
     }

@@ -7,6 +7,7 @@ import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.common.domain.enums.MetropolitanArea;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.dto.CenterClimbingHistoryResponseDto;
@@ -245,7 +246,7 @@ public class UserServiceTest {
         // given
         UserModifyRequestDto dto = new UserModifyRequestDto(
                 "nickname",
-                "경기도",
+                MetropolitanArea.GYEONGGI,
                 "성남시",
                 "",
                 "hoonki",

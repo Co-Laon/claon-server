@@ -1,6 +1,5 @@
 package coLaon.ClaonBack.service;
 
-
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
@@ -12,6 +11,7 @@ import coLaon.ClaonBack.notice.dto.NoticeResponseDto;
 import coLaon.ClaonBack.notice.repository.NoticeRepository;
 import coLaon.ClaonBack.notice.service.NoticeService;
 
+import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
@@ -35,9 +36,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
 public class NoticeServiceTest {
@@ -53,7 +56,6 @@ public class NoticeServiceTest {
     NoticeService noticeService;
 
     private User adminUser, generalUser;
-
 
     @BeforeEach
     void setUp() {
@@ -89,7 +91,8 @@ public class NoticeServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         Notice sampleNotice = Notice.of("asdf", "asdfaf", this.adminUser);
         given(this.noticeRepository.findAllWithPagination(pageable)).willReturn(new PageImpl<>(List.of(sampleNotice), pageable, 1));
-        //when
+
+        // when
         Pagination<NoticeResponseDto> pagination = this.noticeService.getNoticeList(pageable);
 
         // then
@@ -99,22 +102,33 @@ public class NoticeServiceTest {
     @Test
     @DisplayName("Success case for create notice")
     void successCreateNotice() {
-        // given
         NoticeCreateRequestDto dto = new NoticeCreateRequestDto("asdf", "ASdf");
-        given(this.userRepository.findById(this.adminUser.getId())).willReturn(Optional.ofNullable(this.adminUser));
-        Notice notice = Notice.of(dto.getTitle(), dto.getContent(), this.adminUser);
-        ReflectionTestUtils.setField(notice, "id", "noticeid");
-        ReflectionTestUtils.setField(notice, "createdAt", LocalDateTime.now());
-        ReflectionTestUtils.setField(notice, "updatedAt", LocalDateTime.now());
-        given(this.noticeRepository.save(any())).willReturn(notice);
+        Notice notice = Notice.of(
+                dto.getTitle(),
+                dto.getContent(),
+                this.adminUser
+        );
 
-        //when
-        NoticeResponseDto result = this.noticeService.createNotice(this.adminUser.getId(), dto);
+        try (MockedStatic<Notice> mockedNotice = mockStatic(Notice.class)) {
+            // given
+            given(this.userRepository.findById(this.adminUser.getId())).willReturn(Optional.ofNullable(this.adminUser));
 
-        // then
-        assertThat(result.getTitle()).isEqualTo("asdf");
-        assertThat(result.getContent()).isEqualTo("ASdf");
+            mockedNotice.when(() -> Notice.of(
+                    dto.getTitle(),
+                    dto.getContent(),
+                    this.adminUser
+            )).thenReturn(notice);
 
+            given(this.noticeRepository.save(notice)).willReturn(notice);
+
+            // when
+            NoticeResponseDto result = this.noticeService.createNotice(this.adminUser.getId(), dto);
+
+            // then
+            assertThat(result)
+                    .extracting("title", "content")
+                    .contains("asdf", "ASdf");
+        }
     }
 
     @Test
@@ -124,14 +138,15 @@ public class NoticeServiceTest {
         NoticeCreateRequestDto dto = new NoticeCreateRequestDto("asdf", "ASdf");
         given(this.userRepository.findById(this.generalUser.getId())).willReturn(Optional.ofNullable(this.generalUser));
 
-        //when
+        // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
                 () -> this.noticeService.createNotice(this.generalUser.getId(), dto)
         );
+
+        // then
         assertThat(ex)
                 .extracting("errorCode", "message")
                 .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
-
     }
 }

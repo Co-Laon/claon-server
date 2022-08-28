@@ -5,6 +5,7 @@ import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -15,11 +16,13 @@ import javax.persistence.Table;
 @Table(name = "tb_notice")
 @RequiredArgsConstructor
 public class Notice extends BaseEntity {
-
+    @Column(name = "title")
     private String title;
+    @Column(name = "content", length = 1000)
     private String content;
+
     @ManyToOne(targetEntity = User.class)
-    @JoinColumn(name="writer_id")
+    @JoinColumn(name = "writer_id")
     private User writer;
 
     private Notice(String title, String content, User writer) {

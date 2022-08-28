@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.service;
 
+import coLaon.ClaonBack.common.domain.enums.MetropolitanArea;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
 import coLaon.ClaonBack.user.domain.OAuth2Provider;
@@ -78,14 +79,14 @@ public class AuthServiceTest {
                 true
         );
 
-        given(this.oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.of("google"))).willReturn(this.oAuth2UserInfoProvider);
+        given(this.oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(this.oAuth2UserInfoProvider);
         given(this.oAuth2UserInfoProvider.getUserInfo(signInRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
 
         given(this.userRepository.findByEmailAndOAuthId(oAuth2UserInfoDto.getEmail(), oAuth2UserInfoDto.getOAuthId())).willReturn(Optional.of(this.user));
         given(this.jwtUtil.createToken(this.user.getId(), true)).willReturn(jwtDto);
 
         // when
-        JwtDto result = this.userService.signIn("google", signInRequestDto);
+        JwtDto result = this.userService.signIn(OAuth2Provider.GOOGLE, signInRequestDto);
 
         // then
         assertThat(result)
@@ -126,7 +127,7 @@ public class AuthServiceTest {
                     false
             );
 
-            given(this.oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.of("google"))).willReturn(this.oAuth2UserInfoProvider);
+            given(this.oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(this.oAuth2UserInfoProvider);
             given(this.oAuth2UserInfoProvider.getUserInfo(signInRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
 
             given(this.userRepository.findByEmailAndOAuthId(oAuth2UserInfoDto.getEmail(), oAuth2UserInfoDto.getOAuthId())).willReturn(Optional.empty());
@@ -137,7 +138,7 @@ public class AuthServiceTest {
             given(this.jwtUtil.createToken(this.user.getId(), true)).willReturn(jwtDto);
 
             // when
-            JwtDto result = this.userService.signIn("google", signInRequestDto);
+            JwtDto result = this.userService.signIn(OAuth2Provider.GOOGLE, signInRequestDto);
 
             // then
             assertThat(result)
@@ -153,7 +154,7 @@ public class AuthServiceTest {
         // given
         SignUpRequestDto signUpRequestDto = new SignUpRequestDto(
                 "test",
-                "경기도",
+                MetropolitanArea.GYEONGGI,
                 "성남시",
                 "",
                 "123456",

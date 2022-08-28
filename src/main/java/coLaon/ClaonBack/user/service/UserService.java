@@ -62,10 +62,10 @@ public class UserService {
 
     @Transactional
     public JwtDto signIn(
-            String provider,
+            OAuth2Provider provider,
             SignInRequestDto signInRequestDto
     ) {
-        OAuth2UserInfoDto userInfoDto = this.oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.of(provider))
+        OAuth2UserInfoDto userInfoDto = this.oAuth2UserInfoProviderSupplier.getProvider(provider)
                 .getUserInfo(signInRequestDto.getCode());
 
         User user = this.userRepository.findByEmailAndOAuthId(userInfoDto.getEmail(), userInfoDto.getOAuthId())
@@ -110,9 +110,9 @@ public class UserService {
 
         user.signUp(
                 signUpRequestDto.getNickname(),
-                MetropolitanArea.of(signUpRequestDto.getMetropolitanActiveArea()),
+                signUpRequestDto.getMetropolitanActiveArea().getValue(),
                 BasicLocalArea.of(
-                        signUpRequestDto.getMetropolitanActiveArea(),
+                        signUpRequestDto.getMetropolitanActiveArea().getValue(),
                         signUpRequestDto.getBasicLocalActiveArea()
                 ),
                 signUpRequestDto.getImagePath(),
@@ -199,9 +199,9 @@ public class UserService {
 
         user.modifyUser(
                 dto.getNickname(),
-                MetropolitanArea.of(dto.getMetropolitanActiveArea()),
+                dto.getMetropolitanActiveArea().getValue(),
                 BasicLocalArea.of(
-                        dto.getMetropolitanActiveArea(),
+                        dto.getMetropolitanActiveArea().getValue(),
                         dto.getBasicLocalActiveArea()
                 ),
                 dto.getImagePath(),
