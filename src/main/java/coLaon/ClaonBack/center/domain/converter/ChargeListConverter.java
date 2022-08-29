@@ -48,12 +48,12 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
                         ""
                 );
             }
-        }).collect(Collectors.joining("&&&"));
+        }).collect(Collectors.joining("&&&&"));
     }
 
     @Override
     public List<Charge> convertToEntityAttribute(String dbData) {
-        List<String> jsonList = List.of(dbData.split("&&&"));
+        List<String> jsonList = List.of(dbData.split("&&&&"));
 
         return jsonList.stream().map(json -> {
             try {
