@@ -12,6 +12,7 @@ import javax.persistence.AttributeConverter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,31 +25,33 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
             return "";
         }
 
-        return attribute.stream().map(a -> {
-            String chargeList = a.getChargeList().stream().map(charge -> {
-                try {
-                    return objectMapper.writeValueAsString(charge);
-                } catch (JsonProcessingException e) {
-                    throw new InternalServerErrorException(
-                            ErrorCode.INTERNAL_SERVER_ERROR,
-                            ""
-                    );
-                }
-            }).collect(Collectors.joining("&&&"));
+        return attribute.stream()
+                .filter(Objects::nonNull)
+                .map(a -> {
+                    String chargeList = a.getChargeList().stream().map(charge -> {
+                        try {
+                            return objectMapper.writeValueAsString(charge);
+                        } catch (JsonProcessingException e) {
+                            throw new InternalServerErrorException(
+                                    ErrorCode.INTERNAL_SERVER_ERROR,
+                                    ""
+                            );
+                        }
+                    }).collect(Collectors.joining("&&&"));
 
-            Map<String, String> charge = new HashMap<>();
-            charge.put("chargeList", chargeList);
-            charge.put("image", a.getImage());
+                    Map<String, String> charge = new HashMap<>();
+                    charge.put("chargeList", chargeList);
+                    charge.put("image", a.getImage());
 
-            try {
-                return objectMapper.writeValueAsString(charge);
-            } catch (JsonProcessingException e) {
-                throw new InternalServerErrorException(
-                        ErrorCode.INTERNAL_SERVER_ERROR,
-                        ""
-                );
-            }
-        }).collect(Collectors.joining("&&&&"));
+                    try {
+                        return objectMapper.writeValueAsString(charge);
+                    } catch (JsonProcessingException e) {
+                        throw new InternalServerErrorException(
+                                ErrorCode.INTERNAL_SERVER_ERROR,
+                                ""
+                        );
+                    }
+                }).collect(Collectors.joining("&&&&"));
     }
 
     @Override
@@ -59,19 +62,22 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
             try {
                 if (json.length() == 0) return null;
 
-                Map<String, String> charge = objectMapper.readValue(json, new TypeReference<>() {});
+                Map<String, String> charge = objectMapper.readValue(json, new TypeReference<>() {
+                });
 
                 return Charge.of(
-                        Stream.of(charge.get("chargeList").split("&&&")).map(c -> {
-                            try {
-                                return objectMapper.readValue(c, ChargeElement.class);
-                            } catch (JsonProcessingException e) {
-                                throw new InternalServerErrorException(
-                                        ErrorCode.INTERNAL_SERVER_ERROR,
-                                        e.getMessage()
-                                );
-                            }
-                        }).collect(Collectors.toList()),
+                        Stream.of(charge.get("chargeList").split("&&&"))
+                                .filter(c -> !c.equals(""))
+                                .map(c -> {
+                                    try {
+                                        return objectMapper.readValue(c, ChargeElement.class);
+                                    } catch (JsonProcessingException e) {
+                                        throw new InternalServerErrorException(
+                                                ErrorCode.INTERNAL_SERVER_ERROR,
+                                                e.getMessage()
+                                        );
+                                    }
+                                }).collect(Collectors.toList()),
                         charge.get("image")
                 );
             } catch (JsonProcessingException e) {
