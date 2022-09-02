@@ -72,8 +72,8 @@ public class PostLikeServiceTest {
                 "test@gmail.com",
                 "1234567890",
                 "test",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"
@@ -84,8 +84,8 @@ public class PostLikeServiceTest {
                 "test123@gmail.com",
                 "test2345!!",
                 "test2",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId2"

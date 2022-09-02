@@ -19,8 +19,8 @@ public class UserTest {
                 "abcd",
                 "hoonki",
                 "hoonki",
-                "asdf",
-                "asdf",
+                175.0F,
+                178.0F,
                 "sdd",
                 "sdf",
                 "dfdf"
@@ -33,8 +33,8 @@ public class UserTest {
         // when
         this.user.modifyUser(
                 "newnickname",
-                "metro",
-                "basic",
+                175.0F,
+                178.0F,
                 "imagepath",
                 "dfdf",
                 "dsfsf"
@@ -42,9 +42,9 @@ public class UserTest {
 
         // then
         assertThat(this.user)
-                .extracting("nickname", "metropolitanActiveArea", "basicLocalActiveArea", "imagePath",
+                .extracting("nickname", "height", "armReach", "imagePath",
                         "instagramUserName", "instagramOAuthId")
-                .contains("newnickname", "metro", "basic", "imagepath", "dsfsf", "dfdf");
+                .contains("newnickname", 175.0F, 178.0F, "imagepath", "dsfsf", "dfdf");
     }
 
     @Test
@@ -64,8 +64,8 @@ public class UserTest {
                 "test@gmail.com",
                 "1234567890",
                 "test",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"

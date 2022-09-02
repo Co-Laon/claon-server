@@ -88,8 +88,8 @@ public class CenterServiceTest {
                 "coraon.dev@gmail.com",
                 "1234567890",
                 "userNickname1",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"
@@ -100,8 +100,8 @@ public class CenterServiceTest {
                 "test@gmail.com",
                 "1234567222",
                 "userNickname2",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId2"

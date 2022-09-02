@@ -25,8 +25,8 @@ public class UserRepositoryTest {
                 "test@gmail.com",
                 "1234567890",
                 "test",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "123456",
                 "instagramId"

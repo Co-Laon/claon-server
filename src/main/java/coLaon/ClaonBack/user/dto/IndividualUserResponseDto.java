@@ -17,8 +17,9 @@ public class IndividualUserResponseDto {
     private Long postCount;
     private Long laonCount;
     private Long likeCount;
-    private String metropolitanActiveArea;
-    private String basicLocalActiveArea;
+    private Float height;
+    private Float armReach;
+    private Float apeIndex;
     private String imagePath;
     private String instagramUrl;
     private Boolean isLaon;
@@ -66,8 +67,9 @@ public class IndividualUserResponseDto {
 
     private void processBlind(User user) {
         if (!user.getIsPrivate()) {
-            this.metropolitanActiveArea = user.getMetropolitanActiveArea();
-            this.basicLocalActiveArea = user.getBasicLocalActiveArea();
+            this.height = user.getHeight();
+            this.armReach = user.getArmReach();
+            this.apeIndex = user.getArmReach() - user.getHeight();
             if (user.getInstagramUserName() != null) {
                 this.instagramUrl = "https://instagram.com/" + user.getInstagramUserName();
             }

@@ -7,7 +7,6 @@ import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.domain.Charge;
-import coLaon.ClaonBack.common.domain.enums.MetropolitanArea;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.dto.CenterClimbingHistoryResponseDto;
@@ -67,8 +66,8 @@ public class UserServiceTest {
                 "test@gmail.com",
                 "1234567890",
                 "test",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"
@@ -79,8 +78,8 @@ public class UserServiceTest {
                 "test12@gmail.com",
                 "1234567823",
                 "test",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"
@@ -92,8 +91,8 @@ public class UserServiceTest {
                 "test@gmail.com",
                 "1234567890",
                 "test",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"
@@ -199,12 +198,12 @@ public class UserServiceTest {
         assertThat(userResponseDto)
                 .isNotNull()
                 .extracting(
-                        IndividualUserResponseDto::getMetropolitanActiveArea,
+                        IndividualUserResponseDto::getHeight,
                         IndividualUserResponseDto::getPostCount,
                         IndividualUserResponseDto::getLikeCount,
                         IndividualUserResponseDto::getLaonCount,
                         IndividualUserResponseDto::getIsLaon)
-                .contains("경기도", 1L, 5L, 1L, true);
+                .contains(175.0F, 1L, 5L, 1L, true);
 
         assertThat(userResponseDto.getCenterClimbingHistories())
                 .isNotNull()
@@ -233,8 +232,8 @@ public class UserServiceTest {
         assertThat(userResponseDto)
                 .isNotNull()
                 .extracting(
-                        IndividualUserResponseDto::getMetropolitanActiveArea,
-                        IndividualUserResponseDto::getBasicLocalActiveArea,
+                        IndividualUserResponseDto::getHeight,
+                        IndividualUserResponseDto::getArmReach,
                         IndividualUserResponseDto::getLaonCount,
                         IndividualUserResponseDto::getIsLaon)
                 .contains(null, null, 0L, false);
@@ -246,8 +245,8 @@ public class UserServiceTest {
         // given
         UserModifyRequestDto dto = new UserModifyRequestDto(
                 "nickname",
-                MetropolitanArea.GYEONGGI,
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "hoonki",
                 "dfdf"

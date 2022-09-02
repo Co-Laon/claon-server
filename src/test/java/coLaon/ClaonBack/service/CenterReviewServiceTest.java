@@ -74,8 +74,8 @@ public class CenterReviewServiceTest {
                 "test@gmail.com",
                 "1234567222",
                 "userNickname2",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId2"
@@ -86,8 +86,8 @@ public class CenterReviewServiceTest {
                 "test2@gmail.com",
                 "1234567222",
                 "userNickname3",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId3"

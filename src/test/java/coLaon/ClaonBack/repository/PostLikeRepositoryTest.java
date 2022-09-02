@@ -59,8 +59,8 @@ public class PostLikeRepositoryTest {
                 "test@gmail.com",
                 "1234567890",
                 "test",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"
@@ -70,8 +70,8 @@ public class PostLikeRepositoryTest {
                 "block@gmail.com",
                 "1264567890",
                 "testBlockNickname",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId2"

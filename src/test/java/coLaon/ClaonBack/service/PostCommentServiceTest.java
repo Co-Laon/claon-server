@@ -76,8 +76,8 @@ public class PostCommentServiceTest {
                 "test@gmail.com",
                 "1234567890",
                 "test",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"
@@ -88,8 +88,8 @@ public class PostCommentServiceTest {
                 "test123@gmail.com",
                 "1234567890",
                 "test2",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId2"
