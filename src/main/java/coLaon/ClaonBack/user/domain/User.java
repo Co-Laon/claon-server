@@ -20,10 +20,10 @@ public class User extends BaseEntity {
     private String oAuthId;
     @Column(name = "nickname", unique = true)
     private String nickname;
-    @Column(name = "metropolitan_active_area")
-    private String metropolitanActiveArea;
-    @Column(name = "basic_local_active_area")
-    private String basicLocalActiveArea;
+    @Column(name = "height")
+    private Float height;
+    @Column(name = "arm_reach")
+    private Float armReach;
     @Column(name = "image_path")
     private String imagePath;
     @Column(name = "instagram_oauth_id")
@@ -48,8 +48,8 @@ public class User extends BaseEntity {
             String email,
             String oAuthId,
             String nickname,
-            String metropolitanActiveArea,
-            String basicLocalActiveArea,
+            Float height,
+            Float armReach,
             String imagePath,
             String instagramOAuthId,
             String instagramUserName
@@ -57,8 +57,8 @@ public class User extends BaseEntity {
         this.email = email;
         this.oAuthId = oAuthId;
         this.nickname = nickname;
-        this.metropolitanActiveArea = metropolitanActiveArea;
-        this.basicLocalActiveArea = basicLocalActiveArea;
+        this.height = height;
+        this.armReach = armReach;
         this.imagePath = imagePath;
         this.instagramOAuthId = instagramOAuthId;
         this.instagramUserName = instagramUserName;
@@ -80,8 +80,8 @@ public class User extends BaseEntity {
             String email,
             String oAuthId,
             String nickname,
-            String metropolitanActiveArea,
-            String basicLocalActiveArea,
+            Float height,
+            Float armReach,
             String imagePath,
             String instagramOAuthId,
             String instagramUserName
@@ -90,8 +90,8 @@ public class User extends BaseEntity {
                 email,
                 oAuthId,
                 nickname,
-                metropolitanActiveArea,
-                basicLocalActiveArea,
+                height,
+                armReach,
                 imagePath,
                 instagramOAuthId,
                 instagramUserName
@@ -100,15 +100,15 @@ public class User extends BaseEntity {
 
     public void signUp(
             String nickname,
-            String metropolitanActiveArea,
-            String basicLocalActiveArea,
+            Float height,
+            Float armReach,
             String imagePath,
             String instagramOAuthId,
             String instagramUserName
     ) {
         this.nickname = nickname;
-        this.metropolitanActiveArea = metropolitanActiveArea;
-        this.basicLocalActiveArea = basicLocalActiveArea;
+        this.height = height;
+        this.armReach = armReach;
         this.imagePath = imagePath;
         this.instagramOAuthId = instagramOAuthId;
         this.instagramUserName = instagramUserName;
@@ -131,15 +131,15 @@ public class User extends BaseEntity {
 
     public void modifyUser(
             String nickname,
-            String metropolitanActiveArea,
-            String basicLocalActiveArea,
+            Float height,
+            Float armReach,
             String imagePath,
             String instagramUserName,
             String instagramOAuthId
     ) {
         this.nickname = nickname;
-        this.metropolitanActiveArea = metropolitanActiveArea;
-        this.basicLocalActiveArea = basicLocalActiveArea;
+        this.height = height;
+        this.armReach = armReach;
         this.imagePath = imagePath;
         this.instagramUserName = instagramUserName;
         this.instagramOAuthId = instagramOAuthId;

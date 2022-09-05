@@ -55,8 +55,8 @@ class CenterBookmarkServiceTest {
                 "coraon.dev@gmail.com",
                 "1234567890",
                 "userNickname1",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"
@@ -67,8 +67,8 @@ class CenterBookmarkServiceTest {
                 "test123@gmail.com",
                 "1234567890",
                 "test2",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId2"

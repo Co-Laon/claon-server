@@ -1,6 +1,5 @@
 package coLaon.ClaonBack.service;
 
-import coLaon.ClaonBack.common.domain.enums.MetropolitanArea;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
 import coLaon.ClaonBack.user.domain.OAuth2Provider;
@@ -51,8 +50,8 @@ public class AuthServiceTest {
                 "test@gmail.com",
                 "1234567890",
                 "test",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "123456",
                 "test"
@@ -154,8 +153,8 @@ public class AuthServiceTest {
         // given
         SignUpRequestDto signUpRequestDto = new SignUpRequestDto(
                 "test",
-                MetropolitanArea.GYEONGGI,
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "123456",
                 "test"

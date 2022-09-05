@@ -1,7 +1,5 @@
 package coLaon.ClaonBack.user.service;
 
-import coLaon.ClaonBack.common.domain.enums.BasicLocalArea;
-import coLaon.ClaonBack.common.domain.enums.MetropolitanArea;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
@@ -110,11 +108,8 @@ public class UserService {
 
         user.signUp(
                 signUpRequestDto.getNickname(),
-                signUpRequestDto.getMetropolitanActiveArea().getValue(),
-                BasicLocalArea.of(
-                        signUpRequestDto.getMetropolitanActiveArea().getValue(),
-                        signUpRequestDto.getBasicLocalActiveArea()
-                ),
+                signUpRequestDto.getHeight(),
+                signUpRequestDto.getArmReach(),
                 signUpRequestDto.getImagePath(),
                 signUpRequestDto.getInstagramOAuthId(),
                 signUpRequestDto.getInstagramUserName()
@@ -199,11 +194,8 @@ public class UserService {
 
         user.modifyUser(
                 dto.getNickname(),
-                dto.getMetropolitanActiveArea().getValue(),
-                BasicLocalArea.of(
-                        dto.getMetropolitanActiveArea().getValue(),
-                        dto.getBasicLocalActiveArea()
-                ),
+                dto.getHeight(),
+                dto.getArmReach(),
                 dto.getImagePath(),
                 dto.getInstagramUserName(),
                 dto.getInstagramOAuthId()

@@ -34,8 +34,8 @@ public class LaonRepositoryTest {
                 "test@gmail.com",
                 "1234567890",
                 "test",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"
@@ -45,8 +45,8 @@ public class LaonRepositoryTest {
                 "laon@gmail.com",
                 "1234567890",
                 "laon",
-                "경기도",
-                "성남시",
+                175.0F,
+                178.0F,
                 "",
                 "",
                 "instagramId"
