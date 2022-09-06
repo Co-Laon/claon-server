@@ -256,4 +256,15 @@ public class UserServiceTest {
                 .extracting("email", "nickname")
                 .contains("test@gmail.com", "nickname");
     }
+
+    @Test
+    @DisplayName("Success case for delete user")
+    void successDeleteUser() {
+        // given
+
+        // when
+        this.userService.delete(this.user);
+
+        // then
+    }
 }

@@ -12,9 +12,6 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.OneToMany;
-import javax.persistence.FetchType;
-import javax.persistence.CascadeType;
 
 import java.util.List;
 
@@ -51,9 +48,6 @@ public class Center extends BaseEntity {
     @Convert(converter = SectorInfoListConverter.class)
     @Column(name = "sector_info", length = 2000)
     private List<SectorInfo> sectorInfo;
-
-    @OneToMany(mappedBy = "center", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CenterBookmark> bookmarks;
 
     private Center(
             String name,
