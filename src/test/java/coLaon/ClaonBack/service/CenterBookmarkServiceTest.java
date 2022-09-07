@@ -14,7 +14,6 @@ import coLaon.ClaonBack.center.service.CenterBookmarkService;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,8 +34,6 @@ import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
 class CenterBookmarkServiceTest {
-    @Mock
-    UserRepository userRepository;
     @Mock
     CenterRepository centerRepository;
     @Mock
@@ -103,7 +100,6 @@ class CenterBookmarkServiceTest {
     void successCreateBookmarkCenter() {
         try (MockedStatic<CenterBookmark> mockedBookmarkCenter = mockStatic(CenterBookmark.class)) {
             // given
-            given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
             given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
             given(this.centerBookmarkRepository.findByUserIdAndCenterId(this.user.getId(), this.center.getId())).willReturn(Optional.empty());
 
@@ -112,7 +108,7 @@ class CenterBookmarkServiceTest {
             given(this.centerBookmarkRepository.save(this.centerBookmark)).willReturn(this.centerBookmark);
 
             // when
-            CenterBookmarkResponseDto responseDto = this.centerBookmarkService.create(this.user.getId(), this.center.getId());
+            CenterBookmarkResponseDto responseDto = this.centerBookmarkService.create(this.user, this.center.getId());
 
             // then
             assertThat(responseDto)
@@ -126,14 +122,13 @@ class CenterBookmarkServiceTest {
     @DisplayName("Failure case for create bookmarkCenter")
     void failureCreateBookmarkCenter_already_exist() {
         // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
         given(this.centerBookmarkRepository.findByUserIdAndCenterId(this.user.getId(), this.center.getId())).willReturn(Optional.of(centerBookmark));
 
         // when
         final BadRequestException ex = Assertions.assertThrows(
                 BadRequestException.class,
-                () -> this.centerBookmarkService.create(this.user.getId(), this.center.getId())
+                () -> this.centerBookmarkService.create(this.user, this.center.getId())
         );
 
         // then
@@ -146,12 +141,11 @@ class CenterBookmarkServiceTest {
     @DisplayName("Success case for delete bookmarkCenter")
     void successDeleteBookmarkCenter() {
         // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
         given(this.centerBookmarkRepository.findByUserIdAndCenterId(this.user.getId(), this.center.getId())).willReturn(Optional.of(this.centerBookmark));
 
         // when
-        CenterBookmarkResponseDto responseDto = this.centerBookmarkService.delete(this.user.getId(), this.center.getId());
+        CenterBookmarkResponseDto responseDto = this.centerBookmarkService.delete(this.user, this.center.getId());
 
         // then
         assertThat(this.centerBookmarkRepository.findAll()).isEmpty();
@@ -164,13 +158,12 @@ class CenterBookmarkServiceTest {
     @DisplayName("Failure case for delete bookmarkCenter")
     void failureDeleteBookmarkCenter_row_does_not_exist() {
         // given
-        given(this.userRepository.findById("userId2")).willReturn(Optional.of(this.user2));
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
 
         // when
         final BadRequestException ex = Assertions.assertThrows(
                 BadRequestException.class,
-                () -> this.centerBookmarkService.delete(this.user2.getId(), this.center.getId())
+                () -> this.centerBookmarkService.delete(this.user2, this.center.getId())
         );
 
         // then

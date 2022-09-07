@@ -14,10 +14,8 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
-import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CenterReviewService {
-    private final UserRepository userRepository;
     private final CenterRepository centerRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewRepositorySupport reviewRepositorySupport;
@@ -34,17 +31,10 @@ public class CenterReviewService {
 
     @Transactional
     public ReviewResponseDto createReview(
-            String userId,
+            User user,
             String centerId,
             ReviewCreateRequestDto reviewCreateRequestDto
     ) {
-        User writer = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -52,7 +42,7 @@ public class CenterReviewService {
                 )
         );
 
-        this.reviewRepository.findByUserIdAndCenterId(writer.getId(), center.getId()).ifPresent(
+        this.reviewRepository.findByUserIdAndCenterId(user.getId(), center.getId()).ifPresent(
                 review -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
@@ -66,7 +56,7 @@ public class CenterReviewService {
                         CenterReview.of(
                                 reviewCreateRequestDto.getRank(),
                                 reviewCreateRequestDto.getContent(),
-                                writer,
+                                user,
                                 center
                         )
                 )
@@ -75,17 +65,10 @@ public class CenterReviewService {
 
     @Transactional
     public ReviewResponseDto updateReview(
-            String userId,
+            User user,
             String reviewId,
             ReviewUpdateRequestDto updateRequestDto
     ) {
-        User writer = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -93,7 +76,7 @@ public class CenterReviewService {
                 )
         );
 
-        IdEqualValidator.of(review.getWriter().getId(), writer.getId()).validate();
+        IdEqualValidator.of(review.getWriter().getId(), user.getId()).validate();
 
         review.update(updateRequestDto.getRank(), updateRequestDto.getContent());
 
@@ -102,16 +85,9 @@ public class CenterReviewService {
 
     @Transactional
     public ReviewResponseDto deleteReview(
-            String userId,
+            User user,
             String reviewId
     ) {
-        User writer = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -119,7 +95,7 @@ public class CenterReviewService {
                 )
         );
 
-        IdEqualValidator.of(review.getWriter().getId(), writer.getId()).validate();
+        IdEqualValidator.of(review.getWriter().getId(), user.getId()).validate();
 
         reviewRepository.delete(review);
 
@@ -127,14 +103,11 @@ public class CenterReviewService {
     }
 
     @Transactional
-    public ReviewListFindResponseDto findReview(String userId, String centerId, Pageable pageable) {
-        userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public ReviewListFindResponseDto findReview(
+            User user,
+            String centerId,
+            Pageable pageable
+    ) {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -144,11 +117,11 @@ public class CenterReviewService {
 
         return ReviewListFindResponseDto.from(
                 this.paginationFactory.create(
-                        reviewRepositorySupport.findByCenterExceptBlockUser(center.getId(), userId, pageable)
+                        reviewRepositorySupport.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)
                                 .map(ReviewFindResponseDto::from)
                 ),
                 center,
-                reviewRepositorySupport.findRankByCenterExceptBlockUser(center.getId(), userId)
+                reviewRepositorySupport.findRankByCenterExceptBlockUser(center.getId(), user.getId())
         );
     }
 }

@@ -87,8 +87,8 @@ public class BlockUserServiceTest {
         );
 
         this.laonRelation = Laon.of(
-                this.blockUser,
-                this.publicUser
+                this.publicUser,
+                this.blockUser
         );
     }
 
@@ -98,7 +98,6 @@ public class BlockUserServiceTest {
         try (MockedStatic<BlockUser> mockedBlock = mockStatic(BlockUser.class)) {
             // given
             given(this.userRepository.findByNickname("testBlockNickname")).willReturn(Optional.of(blockUser));
-            given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
             given(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).willReturn(Optional.empty());
             given(this.laonRepository.findByLaonIdAndUserId("blockUserId", "publicUserId")).willReturn(Optional.of(this.laonRelation));
 
@@ -107,7 +106,7 @@ public class BlockUserServiceTest {
             given(this.blockUserRepository.save(this.blockUserRelation)).willReturn(this.blockUserRelation);
 
             // when
-            this.blockUserService.createBlock("publicUserId", "testBlockNickname");
+            this.blockUserService.createBlock(publicUser, "testBlockNickname");
 
             // then
             assertThat(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).isNotNull();
@@ -119,12 +118,11 @@ public class BlockUserServiceTest {
     void failCreateBlockMyself() {
         //given
         given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(publicUser));
-        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
 
         //when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.blockUserService.createBlock("publicUserId", "userNickname")
+                () -> this.blockUserService.createBlock(publicUser, "userNickname")
         );
 
         //then
@@ -138,11 +136,10 @@ public class BlockUserServiceTest {
     void successUnblockUser() {
         // given
         given(this.userRepository.findByNickname("testBlockNickname")).willReturn(Optional.of(blockUser));
-        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
         given(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).willReturn(Optional.of(blockUserRelation));
 
         // when
-        this.blockUserService.deleteBlock("publicUserId", "testBlockNickname");
+        this.blockUserService.deleteBlock(publicUser, "testBlockNickname");
 
         // then
         assertThat(this.blockUserRepository.findAll()).isEmpty();
@@ -153,13 +150,12 @@ public class BlockUserServiceTest {
     void successFindBlockUsers() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
 
         Page<BlockUser> blockUsers = new PageImpl<>(List.of(blockUserRelation), pageable, 2);
         given(this.blockUserRepository.findByUserId(publicUser.getId(), pageable)).willReturn(blockUsers);
 
         // when
-        Pagination<BlockUserFindResponseDto> blockUserFindResponseDto = this.blockUserService.findBlockUser("publicUserId", pageable);
+        Pagination<BlockUserFindResponseDto> blockUserFindResponseDto = this.blockUserService.findBlockUser(publicUser, pageable);
 
         // then
         assertThat(blockUserFindResponseDto.getResults())

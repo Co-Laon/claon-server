@@ -2,6 +2,7 @@ package coLaon.ClaonBack.post.web;
 
 import coLaon.ClaonBack.common.domain.Pagination;
 
+import coLaon.ClaonBack.config.UserAccount;
 import coLaon.ClaonBack.post.dto.ChildCommentResponseDto;
 import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
 import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
@@ -51,135 +52,135 @@ public class PostController {
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<PostThumbnailResponseDto> getCenterPosts(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @RequestParam("centerId") String centerId,
             @RequestParam(value = "holdId", required = false) Optional<String> holdId,
             @PageableDefault(size = 9, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return postService.getCenterPosts(userId, centerId, holdId, pageable);
+        return postService.getCenterPosts(userAccount.getUser(), centerId, holdId, pageable);
     }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     public PostResponseDto createPost(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @RequestBody @Valid PostCreateRequestDto postCreateRequestDto
     ) {
-        return this.postService.createPost(userId, postCreateRequestDto);
+        return this.postService.createPost(userAccount.getUser(), postCreateRequestDto);
     }
 
     @PutMapping(value = "/{postId}")
     @ResponseStatus(value = HttpStatus.OK)
     public PostResponseDto updatePost(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String postId,
             @RequestBody @Valid PostUpdateRequestDto postUpdateRequestDto
     ) {
-        return this.postService.updatePost(userId, postId, postUpdateRequestDto);
+        return this.postService.updatePost(userAccount.getUser(), postId, postUpdateRequestDto);
     }
 
     @GetMapping(value = "/{postId}")
     @ResponseStatus(value = HttpStatus.OK)
     public PostDetailResponseDto getPost(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String postId
     ) {
-        return this.postService.findPost(userId, postId);
+        return this.postService.findPost(userAccount.getUser(), postId);
     }
 
     @DeleteMapping("/{postId}")
     @ResponseStatus(value = HttpStatus.OK)
     public PostResponseDto deletePost(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String postId
     ) {
-        return this.postService.deletePost(postId, userId);
+        return this.postService.deletePost(userAccount.getUser(), postId);
     }
 
     @PostMapping("/{postId}/report")
     @ResponseStatus(value = HttpStatus.CREATED)
     public PostReportResponseDto createReport(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String postId,
             @RequestBody PostReportRequestDto postReportRequestDto
     ) {
-        return this.postService.createReport(userId, postId, postReportRequestDto);
+        return this.postService.createReport(userAccount.getUser(), postId, postReportRequestDto);
     }
 
     @PostMapping("/{postId}/like")
     @ResponseStatus(value = HttpStatus.CREATED)
     public LikeResponseDto createLike(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String postId
     ) {
-        return this.postLikeService.createLike(userId, postId);
+        return this.postLikeService.createLike(userAccount.getUser(), postId);
     }
 
     @DeleteMapping("/{postId}/like")
     @ResponseStatus(value = HttpStatus.OK)
     public LikeResponseDto deleteLike(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String postId
     ) {
-        return this.postLikeService.deleteLike(userId, postId);
+        return this.postLikeService.deleteLike(userAccount.getUser(), postId);
     }
 
     @GetMapping(value = "/{postId}/like")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<LikeFindResponseDto> findAllLike(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String postId,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) final Pageable pageable
     ) {
-        return this.postLikeService.findLikeByPost(userId, postId, pageable);
+        return this.postLikeService.findLikeByPost(userAccount.getUser(), postId, pageable);
     }
 
     @PostMapping("/{postId}/comment")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CommentResponseDto createComment(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String postId,
             @RequestBody @Valid CommentCreateRequestDto commentCreateRequestDto
     ) {
-        return this.postCommentService.createComment(userId, postId, commentCreateRequestDto);
+        return this.postCommentService.createComment(userAccount.getUser(), postId, commentCreateRequestDto);
     }
 
     @GetMapping(value = "/{postId}/comment")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<CommentFindResponseDto> findAllParentCommentAndThreeChildComment(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String postId,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 10) final Pageable pageable
     ) {
-        return this.postCommentService.findCommentsByPost(userId, postId, pageable);
+        return this.postCommentService.findCommentsByPost(userAccount.getUser(), postId, pageable);
     }
 
     @GetMapping(value = "/comment/{parentId}/children")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<ChildCommentResponseDto> findAllChildrenComment(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String parentId,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 10) final Pageable pageable
     ) {
-        return this.postCommentService.findAllChildCommentsByParent(userId, parentId, pageable);
+        return this.postCommentService.findAllChildCommentsByParent(userAccount.getUser(), parentId, pageable);
     }
 
     @PutMapping(value = "/comment/{commentId}")
     @ResponseStatus(value = HttpStatus.OK)
     public CommentResponseDto updateComment(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String commentId,
             @RequestBody @Valid CommentUpdateRequestDto updateRequestDto
     ) {
-        return this.postCommentService.updateComment(userId, commentId, updateRequestDto);
+        return this.postCommentService.updateComment(userAccount.getUser(), commentId, updateRequestDto);
     }
 
     @DeleteMapping(value = "/comment/{commentId}")
     @ResponseStatus(value = HttpStatus.OK)
     public CommentResponseDto deleteComment(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String commentId
     ) {
-        return this.postCommentService.deleteComment(userId, commentId);
+        return this.postCommentService.deleteComment(userAccount.getUser(), commentId);
     }
 }

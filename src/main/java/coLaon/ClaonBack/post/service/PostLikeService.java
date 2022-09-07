@@ -5,7 +5,6 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
-import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
@@ -14,7 +13,6 @@ import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,21 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PostLikeService {
-    private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostLikeRepositorySupport postLikeRepositorySupport;
     private final PaginationFactory paginationFactory;
 
     @Transactional
-    public LikeResponseDto createLike(String userId, String postId) {
-        User liker = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public LikeResponseDto createLike(User user, String postId) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -45,7 +35,7 @@ public class PostLikeService {
                 )
         );
 
-        postLikeRepository.findByLikerAndPost(liker, post).ifPresent(
+        postLikeRepository.findByLikerAndPost(user, post).ifPresent(
                 like -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
@@ -55,20 +45,13 @@ public class PostLikeService {
         );
 
         return LikeResponseDto.from(
-                postLikeRepository.save(PostLike.of(liker, post)),
+                postLikeRepository.save(PostLike.of(user, post)),
                 postLikeRepository.countByPost(post)
         );
     }
 
     @Transactional
-    public LikeResponseDto deleteLike(String userId, String postId) {
-        User liker = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public LikeResponseDto deleteLike(User user, String postId) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -76,7 +59,7 @@ public class PostLikeService {
                 )
         );
 
-        PostLike like = postLikeRepository.findByLikerAndPost(liker, post).orElseThrow(
+        PostLike like = postLikeRepository.findByLikerAndPost(user, post).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "좋아요 하지 않은 게시글입니다."
@@ -92,14 +75,11 @@ public class PostLikeService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<LikeFindResponseDto> findLikeByPost(String userId, String postId, Pageable pageable) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public Pagination<LikeFindResponseDto> findLikeByPost(
+            User user,
+            String postId,
+            Pageable pageable
+    ) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,

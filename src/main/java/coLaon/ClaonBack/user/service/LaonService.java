@@ -5,7 +5,6 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
-import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.NotIdEqualValidator;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
@@ -25,14 +24,7 @@ public class LaonService {
     private final PaginationFactory paginationFactory;
 
     @Transactional
-    public void createLaon(String laonNickname, String userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public void createLaon(User user, String laonNickname) {
         User laon = userRepository.findByNickname(laonNickname).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -40,7 +32,7 @@ public class LaonService {
                 )
         );
 
-        NotIdEqualValidator.of(userId, laon.getId(), Laon.domain).validate();
+        NotIdEqualValidator.of(user.getId(), laon.getId(), Laon.domain).validate();
 
         laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId()).ifPresent(
                 l -> {
@@ -51,18 +43,11 @@ public class LaonService {
                 }
         );
 
-        laonRepository.save(Laon.of(laon, user));
+        laonRepository.save(Laon.of(user, laon));
     }
 
     @Transactional
-    public void deleteLaon(String laonNickname, String userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public void deleteLaon(User user, String laonNickname) {
         User laon = userRepository.findByNickname(laonNickname).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -81,14 +66,7 @@ public class LaonService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<LaonFindResponseDto> findAllLaon(String userId, Pageable pageable) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public Pagination<LaonFindResponseDto> findAllLaon(User user, Pageable pageable) {
         return this.paginationFactory.create(
                 laonRepository.findAllByUserId(user.getId(), pageable)
                         .map(LaonFindResponseDto::from)

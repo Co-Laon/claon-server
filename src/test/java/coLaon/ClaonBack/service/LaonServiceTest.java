@@ -88,13 +88,13 @@ public class LaonServiceTest {
         ReflectionTestUtils.setField(this.user, "id", "userId");
 
         this.laonRelation = Laon.of(
-                this.laon,
-                this.user
+                this.user,
+                this.laon
         );
 
         this.laonRelation2 = Laon.of(
-                this.laon2,
-                this.user
+                this.user,
+                this.laon2
         );
     }
 
@@ -104,15 +104,14 @@ public class LaonServiceTest {
         try (MockedStatic<Laon> mockedLaon = mockStatic(Laon.class)) {
             // given
             given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(laon));
-            given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
             given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.empty());
 
-            mockedLaon.when(() -> Laon.of(this.laon, this.user)).thenReturn(this.laonRelation);
+            mockedLaon.when(() -> Laon.of(this.user, this.laon)).thenReturn(this.laonRelation);
 
             given(this.laonRepository.save(this.laonRelation)).willReturn(this.laonRelation);
 
             // when
-            this.laonService.createLaon("userNickname1", "userId");
+            this.laonService.createLaon(user, "userNickname1");
 
             // then
             assertThat(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).isNotNull();
@@ -124,12 +123,11 @@ public class LaonServiceTest {
     void failCreateLaonMyself() {
         //given
         given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(user));
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
 
         //when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.laonService.createLaon("userNickname1", "userId")
+                () -> this.laonService.createLaon(user, "userNickname1")
         );
 
         //then
@@ -143,11 +141,10 @@ public class LaonServiceTest {
     void successDeleteLaon() {
         // given
         given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(laon));
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.of(this.laonRelation));
 
         // when
-        this.laonService.deleteLaon("userNickname1", "userId");
+        this.laonService.deleteLaon(user, "userNickname1");
 
         // then
         assertThat(this.laonRepository.findAll()).isEmpty();
@@ -158,14 +155,13 @@ public class LaonServiceTest {
     void successFindLikes() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
 
         Page<Laon> laons = new PageImpl<>(List.of(laonRelation, laonRelation2), pageable, 2);
 
         given(this.laonRepository.findAllByUserId("userId", pageable)).willReturn(laons);
 
         // when
-        Pagination<LaonFindResponseDto> laonFindResponseDto = this.laonService.findAllLaon("userId", pageable);
+        Pagination<LaonFindResponseDto> laonFindResponseDto = this.laonService.findAllLaon(user, pageable);
 
         // then
         assertThat(laonFindResponseDto.getResults())

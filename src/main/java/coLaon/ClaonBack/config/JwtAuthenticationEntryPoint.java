@@ -29,6 +29,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         if (errorCode == ErrorCode.NOT_SIGN_IN) {
             this.setResponse(response, ErrorCode.NOT_SIGN_IN, "로그인 해주세요.");
         }
+
+        // User not found
+        if (errorCode == ErrorCode.USER_DOES_NOT_EXIST) {
+            this.setResponse(response, ErrorCode.USER_DOES_NOT_EXIST, "이용자를 찾을 수 없습니다.");
+        }
     }
 
     private void setResponse(

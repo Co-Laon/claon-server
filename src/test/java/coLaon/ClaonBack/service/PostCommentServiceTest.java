@@ -23,7 +23,6 @@ import coLaon.ClaonBack.post.dto.ChildCommentResponseDto;
 import coLaon.ClaonBack.post.repository.PostCommentRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,8 +50,6 @@ import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
 public class PostCommentServiceTest {
-    @Mock
-    UserRepository userRepository;
     @Mock
     PostCommentRepository postCommentRepository;
     @Mock
@@ -193,7 +190,6 @@ public class PostCommentServiceTest {
                     null
             );
 
-            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
             given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
             mockedPostComment.when(() -> PostComment.of(
@@ -206,7 +202,7 @@ public class PostCommentServiceTest {
             given(this.postCommentRepository.save(this.postComment)).willReturn(this.postComment);
 
             // when
-            CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", "testPostId", commentRequestDto);
+            CommentResponseDto commentResponseDto = this.postCommentService.createComment(writer, "testPostId", commentRequestDto);
 
             // then
             assertThat(commentResponseDto)
@@ -223,7 +219,6 @@ public class PostCommentServiceTest {
             // given
             CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testChildContent1", postComment.getId());
 
-            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
             given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
             given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
@@ -237,7 +232,7 @@ public class PostCommentServiceTest {
             given(this.postCommentRepository.save(this.childPostComment)).willReturn(this.childPostComment);
 
             // when
-            CommentResponseDto commentResponseDto = this.postCommentService.createComment("testUserId", "testPostId", commentRequestDto);
+            CommentResponseDto commentResponseDto = this.postCommentService.createComment(writer, "testPostId", commentRequestDto);
 
             // then
             assertThat(commentResponseDto)
@@ -252,7 +247,6 @@ public class PostCommentServiceTest {
     void successFindParentComments() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
         given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
         Page<PostComment> parents = new PageImpl<>(List.of(postComment, postComment2), pageable, 2);
@@ -264,7 +258,7 @@ public class PostCommentServiceTest {
         given(this.postCommentRepositorySupport.findChildCommentByParentComment(postComment2.getId(), writer.getId(), pageable)).willReturn(children2);
 
         // when
-        Pagination<CommentFindResponseDto> commentFindResponseDto = this.postCommentService.findCommentsByPost("testUserId", "testPostId", pageable);
+        Pagination<CommentFindResponseDto> commentFindResponseDto = this.postCommentService.findCommentsByPost(writer, "testPostId", pageable);
 
         // then
         assertThat(commentFindResponseDto.getResults())
@@ -283,12 +277,11 @@ public class PostCommentServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         Page<PostComment> children = new PageImpl<>(List.of(childPostComment, childPostComment2), pageable, 2);
 
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
         given(this.postCommentRepository.findByIdAndIsDeletedFalse("testCommentId")).willReturn(Optional.of(postComment));
         given(this.postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), writer.getId(), pageable)).willReturn(children);
 
         // when
-        Pagination<ChildCommentResponseDto> commentFindResponseDto = this.postCommentService.findAllChildCommentsByParent("testUserId", "testCommentId", pageable);
+        Pagination<ChildCommentResponseDto> commentFindResponseDto = this.postCommentService.findAllChildCommentsByParent(writer, "testCommentId", pageable);
 
         // then
         assertThat(commentFindResponseDto.getResults())
@@ -304,13 +297,12 @@ public class PostCommentServiceTest {
     @DisplayName("Success case for delete comment")
     void successDeleteComment() {
         // given
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
         given(this.postCommentRepository.findById("testChildId1")).willReturn(Optional.of(childPostComment));
 
         given(this.postCommentRepository.save(childPostComment)).willReturn(childPostComment);
 
         // when
-        CommentResponseDto commentResponseDto = this.postCommentService.deleteComment("testUserId", "testChildId1");
+        CommentResponseDto commentResponseDto = this.postCommentService.deleteComment(writer, "testChildId1");
 
         // then
         assertThat(commentResponseDto)
@@ -323,13 +315,12 @@ public class PostCommentServiceTest {
     @DisplayName("Failure case for delete comment because delete by other user")
     void failDeleteComment_Unauthorized() {
         // given
-        given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(writer2));
         given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.postCommentService.deleteComment("testUserId2", "testCommentId")
+                () -> this.postCommentService.deleteComment(writer2, "testCommentId")
         );
 
         // then
@@ -344,13 +335,12 @@ public class PostCommentServiceTest {
         // given
         CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent");
 
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(writer));
         given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
         given(this.postCommentRepository.save(postComment)).willReturn(postComment);
 
         // when
-        CommentResponseDto commentResponseDto = this.postCommentService.updateComment("testUserId", "testCommentId", commentUpdateRequestDto);
+        CommentResponseDto commentResponseDto = this.postCommentService.updateComment(writer, "testCommentId", commentUpdateRequestDto);
 
         // then
         assertThat(commentResponseDto)
@@ -365,13 +355,12 @@ public class PostCommentServiceTest {
         // given
         CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent");
 
-        given(this.userRepository.findById("testUserId2")).willReturn(Optional.of(writer2));
         given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
 
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.postCommentService.updateComment("testUserId2", "testCommentId", commentUpdateRequestDto)
+                () -> this.postCommentService.updateComment(writer2, "testCommentId", commentUpdateRequestDto)
         );
 
         // then

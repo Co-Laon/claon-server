@@ -5,7 +5,6 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
-import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
 import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
@@ -17,7 +16,6 @@ import coLaon.ClaonBack.post.repository.PostCommentRepository;
 import coLaon.ClaonBack.post.repository.PostCommentRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +27,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class PostCommentService {
-    private final UserRepository userRepository;
     private final PostCommentRepository postCommentRepository;
     private final PostCommentRepositorySupport postCommentRepositorySupport;
     private final PostRepository postRepository;
@@ -37,17 +34,10 @@ public class PostCommentService {
 
     @Transactional
     public CommentResponseDto createComment(
-            String userId,
+            User user,
             String postId,
             CommentCreateRequestDto commentCreateRequestDto
     ) {
-        User writer = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -59,7 +49,7 @@ public class PostCommentService {
                 postCommentRepository.save(
                         PostComment.of(
                                 commentCreateRequestDto.getContent(),
-                                writer,
+                                user,
                                 post,
                                 Optional.ofNullable(commentCreateRequestDto.getParentCommentId())
                                         .map(parentCommentId ->
@@ -76,17 +66,10 @@ public class PostCommentService {
 
     @Transactional(readOnly = true)
     public Pagination<CommentFindResponseDto> findCommentsByPost(
-            String userId,
+            User user,
             String postId,
             Pageable pageable
     ) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -110,17 +93,10 @@ public class PostCommentService {
 
     @Transactional(readOnly = true)
     public Pagination<ChildCommentResponseDto> findAllChildCommentsByParent(
-            String userId,
+            User user,
             String parentId,
             Pageable pageable
     ) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         PostComment postComment = postCommentRepository.findByIdAndIsDeletedFalse(parentId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -135,14 +111,7 @@ public class PostCommentService {
     }
 
     @Transactional
-    public CommentResponseDto deleteComment(String userId, String commentId) {
-        User writer = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public CommentResponseDto deleteComment(User user, String commentId) {
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -150,7 +119,7 @@ public class PostCommentService {
                 )
         );
 
-        IdEqualValidator.of(postComment.getWriter().getId(), writer.getId()).validate();
+        IdEqualValidator.of(postComment.getWriter().getId(), user.getId()).validate();
 
         postComment.delete();
 
@@ -159,17 +128,10 @@ public class PostCommentService {
 
     @Transactional
     public CommentResponseDto updateComment(
-            String userId,
+            User user,
             String commentId,
             CommentUpdateRequestDto commentUpdateRequestDto
     ) {
-        User writer = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -177,7 +139,7 @@ public class PostCommentService {
                 )
         );
 
-        IdEqualValidator.of(postComment.getWriter().getId(), writer.getId()).validate();
+        IdEqualValidator.of(postComment.getWriter().getId(), user.getId()).validate();
 
         postComment.updateContent(commentUpdateRequestDto.getContent());
 

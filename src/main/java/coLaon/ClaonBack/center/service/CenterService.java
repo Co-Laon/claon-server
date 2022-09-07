@@ -27,11 +27,9 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
-import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.IsAdminValidator;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,7 +41,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CenterService {
-    private final UserRepository userRepository;
     private final CenterRepository centerRepository;
     private final CenterRepositorySupport centerRepositorySupport;
     private final HoldInfoRepository holdInfoRepository;
@@ -55,16 +52,9 @@ public class CenterService {
 
     @Transactional
     public CenterResponseDto create(
-            String userId,
+            User admin,
             CenterCreateRequestDto requestDto
     ) {
-        User admin = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         IsAdminValidator.of(admin.getEmail()).validate();
 
         Center center = this.centerRepository.save(
@@ -113,14 +103,7 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public CenterDetailResponseDto findCenter(String userId, String centerId) {
-        userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public CenterDetailResponseDto findCenter(User user, String centerId) {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -128,9 +111,9 @@ public class CenterService {
                 )
         );
 
-        Boolean isBookmarked = centerBookmarkRepository.findByUserIdAndCenterId(userId, centerId).isPresent();
-        Integer postCount = postRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
-        Integer reviewCount = reviewRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
+        Boolean isBookmarked = centerBookmarkRepository.findByUserIdAndCenterId(user.getId(), centerId).isPresent();
+        Integer postCount = postRepositorySupport.countByCenterExceptBlockUser(centerId, user.getId());
+        Integer reviewCount = reviewRepositorySupport.countByCenterExceptBlockUser(centerId, user.getId());
 
         return CenterDetailResponseDto.from(
                 center,
@@ -142,14 +125,9 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public List<HoldInfoResponseDto> findHoldInfoByCenterId(String userId, String centerId) {
-        userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public List<HoldInfoResponseDto> findHoldInfoByCenterId(
+            String centerId
+    ) {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -164,14 +142,7 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public List<CenterSearchResponseDto> searchCenter(String userId, String keyword) {
-        userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public List<CenterSearchResponseDto> searchCenter(String keyword) {
         return centerRepository.searchCenter(keyword)
                 .stream()
                 .map(CenterSearchResponseDto::from)
@@ -179,32 +150,22 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<CenterPreviewResponseDto> findCenterListByOption(String userId, CenterSearchOption option, Pageable pageable) {
-        userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public Pagination<CenterPreviewResponseDto> findCenterListByOption(
+            User user,
+            CenterSearchOption option,
+            Pageable pageable
+    ) {
         return paginationFactory.create(
-                centerRepositorySupport.findCenterByOption(userId, option, pageable)
+                centerRepositorySupport.findCenterByOption(user.getId(), option, pageable)
         );
     }
 
     @Transactional
     public CenterReportResponseDto createReport(
-            String userId,
+            User user,
             String centerId,
             CenterReportCreateRequestDto centerReportCreateRequestDto
     ) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
