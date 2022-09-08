@@ -11,7 +11,6 @@ import coLaon.ClaonBack.notice.repository.NoticeRepository;
 import coLaon.ClaonBack.notice.service.NoticeService;
 
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -36,8 +34,6 @@ import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
 public class NoticeServiceTest {
-    @Mock
-    UserRepository userRepository;
     @Mock
     NoticeRepository noticeRepository;
 
@@ -103,8 +99,6 @@ public class NoticeServiceTest {
 
         try (MockedStatic<Notice> mockedNotice = mockStatic(Notice.class)) {
             // given
-            given(this.userRepository.findById(this.adminUser.getId())).willReturn(Optional.ofNullable(this.adminUser));
-
             mockedNotice.when(() -> Notice.of(
                     dto.getTitle(),
                     dto.getContent(),
@@ -114,7 +108,7 @@ public class NoticeServiceTest {
             given(this.noticeRepository.save(notice)).willReturn(notice);
 
             // when
-            NoticeResponseDto result = this.noticeService.createNotice(this.adminUser.getId(), dto);
+            NoticeResponseDto result = this.noticeService.createNotice(this.adminUser, dto);
 
             // then
             assertThat(result)
@@ -128,12 +122,11 @@ public class NoticeServiceTest {
     void failCreateNotice() {
         // given
         NoticeCreateRequestDto dto = new NoticeCreateRequestDto("asdf", "ASdf");
-        given(this.userRepository.findById(this.generalUser.getId())).willReturn(Optional.ofNullable(this.generalUser));
 
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.noticeService.createNotice(this.generalUser.getId(), dto)
+                () -> this.noticeService.createNotice(this.generalUser, dto)
         );
 
         // then

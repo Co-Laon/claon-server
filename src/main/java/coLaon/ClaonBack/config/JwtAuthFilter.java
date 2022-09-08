@@ -5,7 +5,6 @@ import coLaon.ClaonBack.common.utils.CookieUtil;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -34,8 +33,10 @@ public class JwtAuthFilter extends GenericFilterBean {
             if (this.jwtUtil.validateToken(jwtDto.getAccessToken())) {
                 if (this.jwtUtil.validateToken(jwtDto.getRefreshToken())) {
                     // Success sign-in
-                    Authentication auth = this.jwtUtil.getAuthentication(jwtDto.getAccessToken());
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                    this.jwtUtil.getAuthentication(jwtDto.getAccessToken()).ifPresentOrElse(
+                            authentication -> SecurityContextHolder.getContext().setAuthentication(authentication),
+                            () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
+                    );
                 } else {
                     // Fail sign in because expire refresh token
                     request.setAttribute("exception", ErrorCode.INVALID_JWT);
@@ -45,10 +46,13 @@ public class JwtAuthFilter extends GenericFilterBean {
                     // Success sign-in and create access and refresh token
                     String userId = this.jwtUtil.getUserId(jwtDto.getRefreshToken());
 
-                    this.cookieUtil.addToken((HttpServletResponse) response, this.jwtUtil.createToken(userId));
+                    JwtDto newToken = this.jwtUtil.createToken(userId);
+                    this.cookieUtil.addToken((HttpServletResponse) response, newToken);
 
-                    Authentication auth = this.jwtUtil.getAuthentication(jwtDto.getAccessToken());
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                    this.jwtUtil.getAuthentication(newToken.getAccessToken()).ifPresentOrElse(
+                            authentication -> SecurityContextHolder.getContext().setAuthentication(authentication),
+                            () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
+                    );
                 } else {
                     // Fail sign in because expire access and refresh token
                     request.setAttribute("exception", ErrorCode.INVALID_JWT);

@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.user.web;
 
 import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.config.UserAccount;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
@@ -36,53 +37,59 @@ public class UserController {
     @PutMapping("/public-scope")
     @ResponseStatus(value = HttpStatus.OK)
     public PublicScopeResponseDto changePublicScope(
-            @AuthenticationPrincipal String userId
+            @AuthenticationPrincipal UserAccount userAccount
     ) {
-        return this.userService.changePublicScope(userId);
+        return this.userService.changePublicScope(userAccount.getUser());
     }
 
     @GetMapping("/me")
     @ResponseStatus(value = HttpStatus.OK)
-    public UserResponseDto getUser(@AuthenticationPrincipal String userId) {
-        return userService.getUser(userId);
+    public UserResponseDto getUser(@AuthenticationPrincipal UserAccount userAccount) {
+        return userService.getUser(userAccount.getUser());
     }
 
     @PutMapping("/me")
     @ResponseStatus(value = HttpStatus.OK)
-    public UserResponseDto modifyUser(@AuthenticationPrincipal String userId, @RequestBody UserModifyRequestDto dto) {
-        return userService.modifyUser(userId, dto);
+    public UserResponseDto modifyUser(
+            @AuthenticationPrincipal UserAccount userAccount,
+            @RequestBody UserModifyRequestDto dto
+    ) {
+        return userService.modifyUser(userAccount.getUser(), dto);
     }
 
     @GetMapping("/{userNickname}")
     @ResponseStatus(value = HttpStatus.OK)
-    public IndividualUserResponseDto getPublicUser(@AuthenticationPrincipal String userId, @PathVariable String userNickname) {
-        return userService.getOtherUserInformation(userId, userNickname);
+    public IndividualUserResponseDto getPublicUser(
+            @AuthenticationPrincipal UserAccount userAccount,
+            @PathVariable String userNickname
+    ) {
+        return userService.getOtherUserInformation(userAccount.getUser(), userNickname);
     }
 
     @PostMapping(value = "/{blockNickname}/block")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createBlock(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String blockNickname
     ) {
-        this.blockUserService.createBlock(userId, blockNickname);
+        this.blockUserService.createBlock(userAccount.getUser(), blockNickname);
     }
 
     @DeleteMapping(value = "/{blockNickname}/block")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteBlock(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable String blockNickname
     ) {
-        this.blockUserService.deleteBlock(userId, blockNickname);
+        this.blockUserService.deleteBlock(userAccount.getUser(), blockNickname);
     }
 
     @GetMapping("/blocked-users")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<BlockUserFindResponseDto> findBlockUser(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) final Pageable pageable
     ) {
-        return this.blockUserService.findBlockUser(userId, pageable);
+        return this.blockUserService.findBlockUser(userAccount.getUser(), pageable);
     }
 }

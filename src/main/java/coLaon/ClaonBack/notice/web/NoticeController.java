@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.notice.web;
 
 import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.config.UserAccount;
 import coLaon.ClaonBack.notice.dto.NoticeCreateRequestDto;
 import coLaon.ClaonBack.notice.dto.NoticeResponseDto;
 import coLaon.ClaonBack.notice.service.NoticeService;
@@ -34,9 +35,9 @@ public class NoticeController {
     @PostMapping
     @ResponseStatus(value = HttpStatus.OK)
     public NoticeResponseDto createNotice(
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @RequestBody NoticeCreateRequestDto dto
     ) {
-        return noticeService.createNotice(userId, dto);
+        return noticeService.createNotice(userAccount.getUser(), dto);
     }
 }

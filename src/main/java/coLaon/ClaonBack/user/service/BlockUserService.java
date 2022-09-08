@@ -5,7 +5,6 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
-import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.NotIdEqualValidator;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
@@ -27,14 +26,10 @@ public class BlockUserService {
     private final PaginationFactory paginationFactory;
 
     @Transactional
-    public void createBlock(String userId, String blockNickname) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public void createBlock(
+            User user,
+            String blockNickname
+    ) {
         User blockUser = userRepository.findByNickname(blockNickname).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -42,7 +37,7 @@ public class BlockUserService {
                 )
         );
 
-        NotIdEqualValidator.of(userId, blockUser.getId(), BlockUser.domain).validate();
+        NotIdEqualValidator.of(user.getId(), blockUser.getId(), BlockUser.domain).validate();
 
         blockUserRepository.findByUserIdAndBlockId(user.getId(), blockUser.getId()).ifPresent(
                 b -> {
@@ -59,14 +54,10 @@ public class BlockUserService {
     }
 
     @Transactional
-    public void deleteBlock(String userId, String blockNickname) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public void deleteBlock(
+            User user,
+            String blockNickname
+    ) {
         User blockUser = userRepository.findByNickname(blockNickname).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -85,14 +76,10 @@ public class BlockUserService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<BlockUserFindResponseDto> findBlockUser(String userId, Pageable pageable) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public Pagination<BlockUserFindResponseDto> findBlockUser(
+            User user,
+            Pageable pageable
+    ) {
         return this.paginationFactory.create(
                 this.blockUserRepository.findByUserId(user.getId(), pageable)
                         .map(BlockUserFindResponseDto::from)

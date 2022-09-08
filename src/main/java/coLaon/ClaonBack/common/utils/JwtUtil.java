@@ -1,6 +1,8 @@
 package coLaon.ClaonBack.common.utils;
 
+import coLaon.ClaonBack.config.UserAccount;
 import coLaon.ClaonBack.config.dto.JwtDto;
+import coLaon.ClaonBack.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -8,13 +10,13 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -26,6 +28,8 @@ public class JwtUtil {
     private Long ACCESS_TOKEN_EXPIRE_TIME;
     @Value("${spring.jwt.refresh-token.expire-seconds}")
     private Long REFRESH_TOKEN_EXPIRE_TIME;
+
+    private final UserRepository userRepository;
 
     @PostConstruct
     protected void init() {
@@ -74,9 +78,11 @@ public class JwtUtil {
                 .compact();
     }
 
-    public Authentication getAuthentication(String token) {
+    public Optional<UsernamePasswordAuthenticationToken> getAuthentication(String token) {
         String userPk = Jwts.parser().setSigningKey(this.SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
-        return new UsernamePasswordAuthenticationToken(userPk, null, new ArrayList<>());
+
+        return this.userRepository.findById(userPk)
+                .map(user -> new UsernamePasswordAuthenticationToken(new UserAccount(user), null, new ArrayList<>()));
     }
 
     public String getUserId(String token) {

@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.user.web;
 
 import coLaon.ClaonBack.common.utils.CookieUtil;
+import coLaon.ClaonBack.config.UserAccount;
 import coLaon.ClaonBack.config.dto.JwtDto;
 import coLaon.ClaonBack.user.domain.OAuth2Provider;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
@@ -61,10 +62,10 @@ public class AuthController {
     @ResponseStatus(value = HttpStatus.CREATED)
     public UserResponseDto signUp(
             HttpServletResponse response,
-            @AuthenticationPrincipal String userId,
+            @AuthenticationPrincipal UserAccount userAccount,
             @RequestBody @Valid SignUpRequestDto signUpRequestDto
     ) {
-        UserResponseDto userResponseDto = this.userService.signUp(userId, signUpRequestDto);
+        UserResponseDto userResponseDto = this.userService.signUp(userAccount.getUser(), signUpRequestDto);
 
         this.cookieUtil.createCookie(response, "isCompletedSignUp", Boolean.TRUE.toString());
         return userResponseDto;

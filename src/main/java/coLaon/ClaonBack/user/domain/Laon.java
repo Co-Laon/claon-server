@@ -15,30 +15,30 @@ import javax.persistence.Table;
 @NoArgsConstructor
 public class Laon extends BaseEntity {
     @ManyToOne
-    @JoinColumn(name = "laon_id", nullable = false)
-    private User laon;
-
-    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "laon_id", nullable = false)
+    private User laon;
 
     public static final String domain = "라온";
 
     private Laon(
-            User laon,
-            User user
+            User user,
+            User laon
     ) {
         this.laon = laon;
         this.user = user;
     }
 
     public static Laon of(
-            User laon,
-            User user
+            User user,
+            User laon
     ) {
         return new Laon(
-                laon,
-                user
+                user,
+                laon
         );
     }
 }

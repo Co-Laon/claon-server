@@ -19,7 +19,6 @@ import coLaon.ClaonBack.post.repository.PostLikeRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.service.PostLikeService;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,8 +46,6 @@ import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
 public class PostLikeServiceTest {
-    @Mock
-    UserRepository userRepository;
     @Mock
     PostRepository postRepository;
     @Mock
@@ -162,7 +159,6 @@ public class PostLikeServiceTest {
     void successCreateLike() {
         try (MockedStatic<PostLike> mockedPostLike = mockStatic(PostLike.class)) {
             // given
-            given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
             given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
             given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.empty());
 
@@ -172,7 +168,7 @@ public class PostLikeServiceTest {
             given(this.postLikeRepository.save(this.postLike)).willReturn(postLike);
 
             // when
-            LikeResponseDto likeResponseDto = this.postLikeService.createLike("testUserId", "testPostId");
+            LikeResponseDto likeResponseDto = this.postLikeService.createLike(user, "testPostId");
 
             // then
             assertThat(likeResponseDto)
@@ -186,12 +182,11 @@ public class PostLikeServiceTest {
     @DisplayName("Success case for delete like")
     void successDeleteLike() {
         // given
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
         given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
         given(this.postLikeRepository.findByLikerAndPost(user, post)).willReturn(Optional.of(postLike));
 
         // when
-        LikeResponseDto likeResponseDto = this.postLikeService.deleteLike("testUserId", "testPostId");
+        LikeResponseDto likeResponseDto = this.postLikeService.deleteLike(user, "testPostId");
 
         // then
         assertThat(likeResponseDto)
@@ -205,7 +200,6 @@ public class PostLikeServiceTest {
     void successFindLikes() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findById("testUserId")).willReturn(Optional.of(user));
         given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
         Page<PostLike> postLikes = new PageImpl<>(List.of(postLike, postLike2), pageable, 2);
@@ -213,7 +207,7 @@ public class PostLikeServiceTest {
         given(this.postLikeRepositorySupport.findAllByPost(post.getId(), user.getId(), pageable)).willReturn(postLikes);
 
         // when
-        Pagination<LikeFindResponseDto> likeFindResponseDto = this.postLikeService.findLikeByPost("testUserId", "testPostId", pageable);
+        Pagination<LikeFindResponseDto> likeFindResponseDto = this.postLikeService.findLikeByPost(user, "testPostId", pageable);
 
         // then
         assertThat(likeFindResponseDto.getResults())

@@ -160,13 +160,12 @@ public class AuthServiceTest {
                 "test"
         );
 
-        given(this.userRepository.findById("test")).willReturn(Optional.of(this.user));
         given(this.userRepository.findByNickname("test")).willReturn(Optional.empty());
 
         given(this.userRepository.save(this.user)).willReturn(this.user);
 
         // when
-        UserResponseDto userResponseDto = this.userService.signUp(this.user.getId(), signUpRequestDto);
+        UserResponseDto userResponseDto = this.userService.signUp(this.user, signUpRequestDto);
 
         // then
         assertThat(userResponseDto)

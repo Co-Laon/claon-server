@@ -34,7 +34,6 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -57,8 +56,6 @@ import static org.mockito.Mockito.mockStatic;
 
 @ExtendWith(MockitoExtension.class)
 public class CenterServiceTest {
-    @Mock
-    UserRepository userRepository;
     @Mock
     CenterRepository centerRepository;
     @Mock
@@ -206,13 +203,12 @@ public class CenterServiceTest {
                     "test hold", "hold img test", this.center
             )).thenReturn(this.holdInfo);
 
-            given(this.userRepository.findById("adminId")).willReturn(Optional.of(this.admin));
             given(this.centerRepository.save(this.center)).willReturn(this.center);
 
             given(this.holdInfoRepository.save(this.holdInfo)).willReturn(this.holdInfo);
 
             // when
-            CenterResponseDto responseDto = this.centerService.create("adminId", requestDto);
+            CenterResponseDto responseDto = this.centerService.create(this.admin, requestDto);
 
             // then
             assertThat(responseDto)
@@ -228,12 +224,10 @@ public class CenterServiceTest {
         // given
         CenterCreateRequestDto requestDto = new CenterCreateRequestDto();
 
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
-
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.centerService.create("userId", requestDto)
+                () -> this.centerService.create(this.user, requestDto)
         );
 
         // then
@@ -246,7 +240,6 @@ public class CenterServiceTest {
     @DisplayName("Success case for find center")
     void successFindCenter() {
         // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
         given(this.centerBookmarkRepository.findByUserIdAndCenterId("userId", "centerId")).willReturn(Optional.of(centerBookmark));
         given(this.postRepositorySupport.countByCenterExceptBlockUser("centerId", "userId")).willReturn(0);
@@ -254,7 +247,7 @@ public class CenterServiceTest {
         given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
 
         //when
-        CenterDetailResponseDto centerResponseDto = centerService.findCenter("userId", "centerId");
+        CenterDetailResponseDto centerResponseDto = centerService.findCenter(this.user, "centerId");
 
         //then
         assertThat(centerResponseDto)
@@ -267,12 +260,11 @@ public class CenterServiceTest {
     @DisplayName("Success case for find HoldInfo by center")
     void successFindHoldInfoByCenter() {
         // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.centerRepository.findById("center id")).willReturn(Optional.of(this.center));
         given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
 
         // when
-        List<HoldInfoResponseDto> holdInfoResponseDto = this.centerService.findHoldInfoByCenterId("userId", "center id");
+        List<HoldInfoResponseDto> holdInfoResponseDto = this.centerService.findHoldInfoByCenterId("center id");
 
         // then
         assertThat(holdInfoResponseDto)
@@ -287,11 +279,10 @@ public class CenterServiceTest {
     @DisplayName("Success case for search Center by keyword")
     void successSearchCenterByKeyword() {
         // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
         given(this.centerRepository.searchCenter("te")).willReturn(List.of(this.center, this.center2));
 
         // when
-        List<CenterSearchResponseDto> centerSearchResponseDto = this.centerService.searchCenter("userId", "te");
+        List<CenterSearchResponseDto> centerSearchResponseDto = this.centerService.searchCenter("te");
 
         // then
         assertThat(centerSearchResponseDto)
@@ -318,7 +309,6 @@ public class CenterServiceTest {
                     CenterReportType.TELEPHONE
             );
 
-            given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
             given(this.centerRepository.findById("center id")).willReturn(Optional.of(this.center));
 
             mockedCenterReport.when(() -> CenterReport.of(
@@ -330,7 +320,7 @@ public class CenterServiceTest {
             given(this.centerReportRepository.save(centerReport)).willReturn(centerReport);
 
             // when
-            CenterReportResponseDto centerReportResponseDto = this.centerService.createReport("userId", "center id", centerReportCreateRequestDto);
+            CenterReportResponseDto centerReportResponseDto = this.centerService.createReport(user, "center id", centerReportCreateRequestDto);
 
             // then
             assertThat(centerReportResponseDto)

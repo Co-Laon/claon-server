@@ -59,14 +59,10 @@ public class PostService {
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
-    public PostDetailResponseDto findPost(String userId, String postId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public PostDetailResponseDto findPost(
+            User user,
+            String postId
+    ) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -87,14 +83,10 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto createPost(String userId, PostCreateRequestDto postCreateRequestDto) {
-        User writer = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public PostResponseDto createPost(
+            User user,
+            PostCreateRequestDto postCreateRequestDto
+    ) {
         Center center = centerRepository.findById(postCreateRequestDto.getCenterId()).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -113,7 +105,7 @@ public class PostService {
                                         contents.getUrl()
                                 ))
                                 .collect(Collectors.toList()),
-                        writer
+                        user
                 )
         );
 
@@ -142,17 +134,10 @@ public class PostService {
 
     @Transactional
     public PostResponseDto updatePost(
-            String userId,
+            User user,
             String postId,
             PostUpdateRequestDto postUpdateRequestDto
     ) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -196,14 +181,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto deletePost(String postId, String userId) {
-        User writer = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public PostResponseDto deletePost(User user, String postId) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -211,7 +189,7 @@ public class PostService {
                 )
         );
 
-        IdEqualValidator.of(post.getWriter().getId(), writer.getId()).validate();
+        IdEqualValidator.of(post.getWriter().getId(), user.getId()).validate();
 
         post.delete();
 
@@ -222,17 +200,10 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Pagination<PostThumbnailResponseDto> getUserPosts(
-            String loggedInUserId,
+            User user,
             String targetUserNickname,
             Pageable pageable
     ) {
-        userRepository.findById(loggedInUserId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         User targetUser = userRepository.findByNickname(targetUserNickname).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -241,10 +212,10 @@ public class PostService {
         );
 
         // individual user page
-        if (!loggedInUserId.equals(targetUser.getId())) {
+        if (!user.getId().equals(targetUser.getId())) {
             IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
 
-            if (blockUserRepository.findBlock(targetUser.getId(), loggedInUserId).size() > 0) {
+            if (blockUserRepository.findBlock(targetUser.getId(), user.getId()).size() > 0) {
                 throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
             }
         }
@@ -256,18 +227,11 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Pagination<PostThumbnailResponseDto> getCenterPosts(
-            String userId,
+            User user,
             String centerId,
             Optional<String> holdId,
             Pageable pageable
     ) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -295,17 +259,10 @@ public class PostService {
 
     @Transactional
     public PostReportResponseDto createReport(
-            String userId,
+            User user,
             String postId,
             PostReportRequestDto postReportRequestDto
     ) {
-        User reporter = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -313,7 +270,7 @@ public class PostService {
                 )
         );
 
-        postReportRepository.findByReporterAndPost(reporter, post).ifPresent(
+        postReportRepository.findByReporterAndPost(user, post).ifPresent(
                 like -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
@@ -325,7 +282,7 @@ public class PostService {
         return PostReportResponseDto.from(
                 postReportRepository.save(
                         PostReport.of(
-                                reporter,
+                                user,
                                 post,
                                 postReportRequestDto.getReportType(),
                                 postReportRequestDto.getContent()

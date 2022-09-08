@@ -8,9 +8,7 @@ import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
-import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.user.domain.User;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,22 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CenterBookmarkService {
-    private final UserRepository userRepository;
     private final CenterRepository centerRepository;
     private final CenterBookmarkRepository centerBookmarkRepository;
 
     @Transactional
     public CenterBookmarkResponseDto create(
-            String userId,
+            User user,
             String centerId
     ) {
-        User user = this.userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         Center center = this.centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -63,16 +53,9 @@ public class CenterBookmarkService {
 
     @Transactional
     public CenterBookmarkResponseDto delete(
-            String userId,
+            User user,
             String centerId
     ) {
-        User user = this.userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         Center center = this.centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,

@@ -3,7 +3,6 @@ package coLaon.ClaonBack.user.service;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
-import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.config.dto.JwtDto;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
@@ -77,16 +76,9 @@ public class UserService {
 
     @Transactional
     public UserResponseDto signUp(
-            String userId,
+            User user,
             SignUpRequestDto signUpRequestDto
     ) {
-        User user = this.userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
         this.userRepository.findByNickname(signUpRequestDto.getNickname()).ifPresent(
                 u -> {
                     throw new BadRequestException(
@@ -119,69 +111,47 @@ public class UserService {
     }
 
     @Transactional
-    public PublicScopeResponseDto changePublicScope(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UnauthorizedException(
-                        ErrorCode.USER_DOES_NOT_EXIST,
-                        "이용자를 찾을 수 없습니다."
-                )
-        );
-
+    public PublicScopeResponseDto changePublicScope(User user) {
         user.changePublicScope();
 
         return PublicScopeResponseDto.from(userRepository.save(user).getIsPrivate());
     }
 
     @Transactional(readOnly = true)
-    public UserResponseDto getUser(String userId) {
-        User user = this.userRepository.findById(userId).orElseThrow(() -> {
-            throw new UnauthorizedException(
-                    ErrorCode.USER_DOES_NOT_EXIST,
-                    "이용자를 찾을 수 없습니다."
-            );
-        });
-
+    public UserResponseDto getUser(User user) {
         return UserResponseDto.from(user);
     }
 
     @Transactional(readOnly = true)
-    public IndividualUserResponseDto getOtherUserInformation(String userId, String userNickname) {
-        this.userRepository.findById(userId).orElseThrow(() -> {
-            throw new UnauthorizedException(
-                    ErrorCode.USER_DOES_NOT_EXIST,
-                    "이용자를 찾을 수 없습니다."
-            );
-        });
-
-        User user = this.userRepository.findByNickname(userNickname).orElseThrow(() -> {
+    public IndividualUserResponseDto getOtherUserInformation(
+            User user,
+            String userNickname
+    ) {
+        User targetUser = this.userRepository.findByNickname(userNickname).orElseThrow(() -> {
             throw new NotFoundException(
                     ErrorCode.DATA_DOES_NOT_EXIST,
                     String.format("%s을 찾을 수 없습니다.", userNickname)
             );
         });
 
-        List<String> postIds = this.postRepository.selectPostIdsByUserId(user.getId());
+        List<String> postIds = this.postRepository.selectPostIdsByUserId(targetUser.getId());
         Long postCount = (long) postIds.size();
         Long postLikeCount = this.postLikeRepository.countByPostIdIn(postIds);
 
-        List<String> userIds = this.laonRepository.getUserIdsByLaonId(user.getId());
+        List<String> userIds = this.laonRepository.getUserIdsByLaonId(targetUser.getId());
         Long laonCount = (long) userIds.size();
 
-        boolean isLaon = userIds.contains(userId);
+        boolean isLaon = userIds.contains(user.getId());
 
         List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
-        return IndividualUserResponseDto.from(user, isLaon, postCount, laonCount, postLikeCount, climbingHistories);
+        return IndividualUserResponseDto.from(targetUser, isLaon, postCount, laonCount, postLikeCount, climbingHistories);
     }
 
     @Transactional
-    public UserResponseDto modifyUser(String userId, UserModifyRequestDto dto) {
-        User user = this.userRepository.findById(userId).orElseThrow(() -> {
-            throw new UnauthorizedException(
-                    ErrorCode.USER_DOES_NOT_EXIST,
-                    "이용자를 찾을 수 없습니다."
-            );
-        });
-
+    public UserResponseDto modifyUser(
+            User user,
+            UserModifyRequestDto dto
+    ) {
         if (!user.getNickname().equals(dto.getNickname()))
             this.userRepository.findByNickname(dto.getNickname()).ifPresent(
                     u -> {

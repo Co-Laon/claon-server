@@ -53,8 +53,8 @@ public class LaonRepositoryTest {
         ));
 
         laonRepository.save(Laon.of(
-                this.laonUser,
-                this.user
+                this.user,
+                this.laonUser
         ));
     }
 

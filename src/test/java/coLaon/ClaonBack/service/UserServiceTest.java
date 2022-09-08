@@ -140,11 +140,10 @@ public class UserServiceTest {
     @DisplayName("Success case for set public user private account")
     void successSetPrivateAccount() {
         // given
-        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
         given(this.userRepository.save(publicUser)).willReturn(publicUser);
 
         // when
-        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope("publicUserId");
+        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope(publicUser);
 
         // then
         assertThat(publicScopeResponseDto.getIsPrivate()).isTrue();
@@ -154,11 +153,10 @@ public class UserServiceTest {
     @DisplayName("Success case for set private user public account")
     void successSetPublicAccount() {
         // given
-        given(this.userRepository.findById("privateUserId")).willReturn(Optional.of(privateUser));
         given(this.userRepository.save(privateUser)).willReturn(privateUser);
 
         // when
-        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope("privateUserId");
+        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope(privateUser);
 
         // then
         assertThat(publicScopeResponseDto.getIsPrivate()).isFalse();
@@ -167,11 +165,8 @@ public class UserServiceTest {
     @Test
     @DisplayName("Success case for retrieving me")
     void successRetrieveMe() {
-        // given
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(user));
-
         // when
-        UserResponseDto userResponseDto = this.userService.getUser("userId");
+        UserResponseDto userResponseDto = this.userService.getUser(user);
 
         // then
         assertThat(userResponseDto)
@@ -184,7 +179,6 @@ public class UserServiceTest {
     @DisplayName("Success case for retrieving single other user")
     void successRetrieveUser() {
         // given
-        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
         given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(user));
         given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
@@ -192,7 +186,7 @@ public class UserServiceTest {
         given(this.climbingHistoryRepository.findByPostIds(this.postIds)).willReturn(List.of(this.climbingHistory));
 
         // when
-        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userNickname");
+        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation(publicUser, "userNickname");
 
         // then
         assertThat(userResponseDto)
@@ -219,14 +213,13 @@ public class UserServiceTest {
     @DisplayName("Success case for retrieving single other private user")
     void successRetrievePrivateUser() {
         // given
-        given(this.userRepository.findById("publicUserId")).willReturn(Optional.of(publicUser));
         given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(privateUser));
         given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
         given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
         given(this.laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(List.of());
 
         // when
-        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation("publicUserId", "userNickname");
+        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation(publicUser, "userNickname");
 
         // then
         assertThat(userResponseDto)
@@ -252,11 +245,10 @@ public class UserServiceTest {
                 "dfdf"
         );
 
-        given(this.userRepository.findById("userId")).willReturn(Optional.of(this.user));
         given(this.userRepository.save(this.user)).willReturn(this.user);
 
         // when
-        UserResponseDto userResponseDto = this.userService.modifyUser("userId", dto);
+        UserResponseDto userResponseDto = this.userService.modifyUser(user, dto);
 
         // then
         assertThat(userResponseDto)
