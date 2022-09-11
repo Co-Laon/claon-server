@@ -3,7 +3,6 @@ package coLaon.ClaonBack.user.infra;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
-import coLaon.ClaonBack.user.service.OAuth2UserInfoProvider;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;

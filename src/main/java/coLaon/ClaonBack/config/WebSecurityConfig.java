@@ -1,7 +1,5 @@
 package coLaon.ClaonBack.config;
 
-import coLaon.ClaonBack.common.utils.CookieUtil;
-import coLaon.ClaonBack.common.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -21,9 +19,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtUtil jwtUtil;
-    private final CookieUtil cookieUtil;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Value("${spring.jwt.access-token.cookie-name}")
     private String ACCESS_COOKIE_NAME;
@@ -66,7 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
 
                 .and()
-                .addFilterBefore(new JwtAuthFilter(this.jwtUtil, this.cookieUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .logout()
                 .logoutUrl("/api/**/user/sign-out")

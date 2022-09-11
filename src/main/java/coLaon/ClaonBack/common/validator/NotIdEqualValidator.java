@@ -1,6 +1,5 @@
 package coLaon.ClaonBack.common.validator;
 
-import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 

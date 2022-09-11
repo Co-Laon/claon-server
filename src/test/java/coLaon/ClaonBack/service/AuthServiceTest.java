@@ -1,7 +1,7 @@
 package coLaon.ClaonBack.service;
 
 import coLaon.ClaonBack.common.utils.JwtUtil;
-import coLaon.ClaonBack.config.dto.JwtDto;
+import coLaon.ClaonBack.common.domain.JwtDto;
 import coLaon.ClaonBack.user.domain.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
@@ -9,7 +9,7 @@ import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.repository.UserRepository;
-import coLaon.ClaonBack.user.service.OAuth2UserInfoProvider;
+import coLaon.ClaonBack.user.infra.OAuth2UserInfoProvider;
 import coLaon.ClaonBack.user.service.OAuth2UserInfoProviderSupplier;
 import coLaon.ClaonBack.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;

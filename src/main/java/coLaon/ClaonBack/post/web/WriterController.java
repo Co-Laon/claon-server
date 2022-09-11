@@ -1,7 +1,7 @@
 package coLaon.ClaonBack.post.web;
 
 import coLaon.ClaonBack.common.domain.Pagination;
-import coLaon.ClaonBack.config.UserAccount;
+import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +25,10 @@ public class WriterController {
     @GetMapping("/{nickname}/posts")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<PostThumbnailResponseDto> getIndividualUserPost(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String nickname,
             @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return postService.getUserPosts(userAccount.getUser(), nickname, pageable);
+        return postService.getUserPosts(userDetails.getUser(), nickname, pageable);
     }
 }
