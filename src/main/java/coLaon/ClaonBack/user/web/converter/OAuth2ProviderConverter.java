@@ -2,7 +2,7 @@ package coLaon.ClaonBack.user.web.converter;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
-import coLaon.ClaonBack.user.domain.OAuth2Provider;
+import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.Arrays;

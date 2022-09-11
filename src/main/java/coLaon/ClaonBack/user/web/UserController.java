@@ -96,8 +96,8 @@ public class UserController {
     @DeleteMapping
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteUser(
-            @AuthenticationPrincipal UserAccount userAccount
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        this.userService.delete(userAccount.getUser());
+        this.userService.delete(userDetails.getUser());
     }
 }

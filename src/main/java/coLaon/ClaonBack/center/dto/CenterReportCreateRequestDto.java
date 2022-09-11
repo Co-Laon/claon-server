@@ -1,6 +1,6 @@
 package coLaon.ClaonBack.center.dto;
 
-import coLaon.ClaonBack.center.domain.CenterReportType;
+import coLaon.ClaonBack.center.domain.enums.CenterReportType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.common.validator;
+package coLaon.ClaonBack.post.dto.validator;
 
 import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 

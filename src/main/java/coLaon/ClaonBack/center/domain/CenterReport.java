@@ -1,5 +1,6 @@
 package coLaon.ClaonBack.center.domain;
 
+import coLaon.ClaonBack.center.domain.enums.CenterReportType;
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;

@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public MethodArgumentNotValidExceptionDto handleConstraintViolationException(MethodArgumentNotValidException exception) {
+    public MethodArgumentNotValidExceptionDto handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         GlobalExceptionHandler.log.error("error message", exception);
         return new MethodArgumentNotValidExceptionDto(ErrorCode.INVALID_PARAMETER, exception.getMessage(), exception);
     }

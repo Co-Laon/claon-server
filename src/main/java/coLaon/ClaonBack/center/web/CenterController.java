@@ -13,7 +13,7 @@ import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
-import coLaon.ClaonBack.center.dto.CenterSearchOption;
+import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.service.CenterBookmarkService;
 import coLaon.ClaonBack.center.service.CenterReviewService;
 import coLaon.ClaonBack.center.service.CenterService;

@@ -4,7 +4,7 @@ import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterBookmark;
 import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.CenterReport;
-import coLaon.ClaonBack.center.domain.CenterReportType;
+import coLaon.ClaonBack.center.domain.enums.CenterReportType;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.HoldInfo;

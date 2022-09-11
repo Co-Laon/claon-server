@@ -1,6 +1,6 @@
 package coLaon.ClaonBack.version.web;
 
-import coLaon.ClaonBack.version.domain.AppStore;
+import coLaon.ClaonBack.version.domain.enums.AppStore;
 import coLaon.ClaonBack.version.dto.AppVersionFindResponseDto;
 import coLaon.ClaonBack.version.service.AppVersionService;
 import lombok.RequiredArgsConstructor;

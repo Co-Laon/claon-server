@@ -3,7 +3,7 @@ package coLaon.ClaonBack.user.web;
 import coLaon.ClaonBack.common.utils.CookieUtil;
 import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.common.domain.JwtDto;
-import coLaon.ClaonBack.user.domain.OAuth2Provider;
+import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
 import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;

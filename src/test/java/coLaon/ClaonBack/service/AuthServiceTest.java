@@ -2,7 +2,7 @@ package coLaon.ClaonBack.service;
 
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.common.domain.JwtDto;
-import coLaon.ClaonBack.user.domain.OAuth2Provider;
+import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;

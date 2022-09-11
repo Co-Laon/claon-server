@@ -360,31 +360,6 @@ public class PostServiceTest {
     }
 
     @Test
-    @DisplayName("Failure case for create post when invalid format of post contents")
-    void failureCreatePost_InvalidFormatOfPostContents() {
-        // given
-        PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
-                "center1",
-                List.of(new ClimbingHistoryRequestDto("holdId1", 1)),
-                "testContent",
-                List.of(new PostContentsDto("test.com/test.gif"))
-        );
-
-        given(this.centerRepository.findById("center1")).willReturn(Optional.of(center));
-
-        // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
-                () -> this.postService.createPost(user, postCreateRequestDto)
-        );
-
-        // then
-        assertThat(ex)
-                .extracting("errorCode", "message")
-                .contains(ErrorCode.INVALID_FORMAT, "이미지 형식이 잘못되었습니다.");
-    }
-
-    @Test
     @DisplayName("Success case for update post")
     void successUpdatePost() {
         try (
