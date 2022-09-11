@@ -1,6 +1,6 @@
 package coLaon.ClaonBack.common.utils;
 
-import coLaon.ClaonBack.config.dto.JwtDto;
+import coLaon.ClaonBack.common.domain.JwtDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

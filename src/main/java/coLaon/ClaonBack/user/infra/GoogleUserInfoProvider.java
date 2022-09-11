@@ -3,7 +3,6 @@ package coLaon.ClaonBack.user.infra;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
-import coLaon.ClaonBack.user.service.OAuth2UserInfoProvider;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;

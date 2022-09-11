@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.config.dto;
+package coLaon.ClaonBack.common.domain;
 
 import lombok.Getter;
 

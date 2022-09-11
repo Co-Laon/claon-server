@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.user.service;
+package coLaon.ClaonBack.user.infra;
 
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
 

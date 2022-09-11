@@ -3,7 +3,7 @@ server:
 
 spring:
   config:
-    import: optional:classpath:email-config.yml, classpath:auth-config.yml, classpath:aws-config.yml
+    import: classpath:auth-config.yml, classpath:aws-config.yml
 
   datasource:
     driver-class-name: org.postgresql.Driver
