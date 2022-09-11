@@ -1,6 +1,6 @@
 package coLaon.ClaonBack.center.web.converter;
 
-import coLaon.ClaonBack.center.dto.CenterSearchOption;
+import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import org.springframework.core.convert.converter.Converter;

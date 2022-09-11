@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.user.domain;
+package coLaon.ClaonBack.user.domain.enums;
 
 import lombok.Getter;
 

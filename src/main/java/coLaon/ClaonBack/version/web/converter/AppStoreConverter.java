@@ -2,7 +2,7 @@ package coLaon.ClaonBack.version.web.converter;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
-import coLaon.ClaonBack.version.domain.AppStore;
+import coLaon.ClaonBack.version.domain.enums.AppStore;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.Arrays;

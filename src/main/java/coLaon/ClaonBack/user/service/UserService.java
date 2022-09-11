@@ -9,7 +9,7 @@ import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
-import coLaon.ClaonBack.user.domain.OAuth2Provider;
+import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
 import coLaon.ClaonBack.user.dto.InstagramResponseDto;

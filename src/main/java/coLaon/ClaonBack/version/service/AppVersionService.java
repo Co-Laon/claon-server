@@ -2,7 +2,7 @@ package coLaon.ClaonBack.version.service;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
-import coLaon.ClaonBack.version.domain.AppStore;
+import coLaon.ClaonBack.version.domain.enums.AppStore;
 import coLaon.ClaonBack.version.domain.AppVersion;
 import coLaon.ClaonBack.version.dto.AppVersionFindResponseDto;
 import coLaon.ClaonBack.version.repository.AppVersionRepository;

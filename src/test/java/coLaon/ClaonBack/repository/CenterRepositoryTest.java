@@ -8,7 +8,7 @@ import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
-import coLaon.ClaonBack.center.dto.CenterSearchOption;
+import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.CenterRepositorySupport;

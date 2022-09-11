@@ -16,7 +16,7 @@ import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
-import coLaon.ClaonBack.center.dto.CenterSearchOption;
+import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterReportRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;

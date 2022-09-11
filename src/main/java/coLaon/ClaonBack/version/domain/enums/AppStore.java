@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.version.domain;
+package coLaon.ClaonBack.version.domain.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
