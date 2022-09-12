@@ -160,8 +160,6 @@ public class AuthServiceTest {
                 "test"
         );
 
-        given(this.userRepository.findByNickname("test")).willReturn(Optional.empty());
-
         given(this.userRepository.save(this.user)).willReturn(this.user);
 
         // when
