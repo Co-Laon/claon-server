@@ -16,10 +16,10 @@ import javax.persistence.Table;
 @Table(name = "tb_post_like")
 @NoArgsConstructor
 public class PostLike extends BaseEntity {
-    @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User liker;
-    @ManyToOne(targetEntity = Post.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Post.class)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 

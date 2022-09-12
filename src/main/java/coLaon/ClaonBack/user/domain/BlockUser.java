@@ -15,11 +15,11 @@ import javax.persistence.Table;
 @Table(name = "tb_block_user")
 @NoArgsConstructor
 public class BlockUser extends BaseEntity {
-    @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "block_user_id", nullable = false)
     private User blockedUser;
 
