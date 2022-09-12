@@ -5,6 +5,7 @@ import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -15,10 +16,10 @@ import javax.persistence.Table;
 @Table(name = "tb_post_like")
 @NoArgsConstructor
 public class PostLike extends BaseEntity {
-    @ManyToOne(targetEntity = User.class)
+    @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private User liker;
-    @ManyToOne(targetEntity = Post.class)
+    @ManyToOne(targetEntity = Post.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 

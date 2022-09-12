@@ -154,6 +154,11 @@ public class UserService {
 
         return UserResponseDto.from(this.userRepository.save(user));
     }
+
+    @Transactional
+    public void delete(User user) {
+        this.userRepository.delete(user);
+    }
 }
 
 

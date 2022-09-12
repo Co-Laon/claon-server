@@ -92,4 +92,12 @@ public class UserController {
     ) {
         return this.blockUserService.findBlockUser(userAccount.getUser(), pageable);
     }
+
+    @DeleteMapping
+    @ResponseStatus(value = HttpStatus.OK)
+    public void deleteUser(
+            @AuthenticationPrincipal UserAccount userAccount
+    ) {
+        this.userService.delete(userAccount.getUser());
+    }
 }

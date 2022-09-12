@@ -5,6 +5,7 @@ import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -20,10 +21,10 @@ public class CenterReview extends BaseEntity {
     private Integer rank;
     @Column(name = "content", length = 500)
     private String content;
-    @ManyToOne(targetEntity = User.class)
+    @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private User writer;
-    @ManyToOne(targetEntity = Center.class)
+    @ManyToOne(targetEntity = Center.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
 

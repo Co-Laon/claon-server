@@ -5,6 +5,7 @@ import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -20,13 +21,13 @@ public class PostComment extends BaseEntity {
     private String content;
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
-    @ManyToOne(targetEntity = User.class)
+    @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private User writer;
-    @ManyToOne(targetEntity = PostComment.class)
+    @ManyToOne(targetEntity = PostComment.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "parent_comment_id")
     private PostComment parentComment;
-    @ManyToOne(targetEntity = Post.class)
+    @ManyToOne(targetEntity = Post.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 

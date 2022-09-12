@@ -5,6 +5,7 @@ import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -29,7 +30,7 @@ public class CenterReport extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User reporter;
 
-    @ManyToOne(targetEntity = Center.class)
+    @ManyToOne(targetEntity = Center.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
 
