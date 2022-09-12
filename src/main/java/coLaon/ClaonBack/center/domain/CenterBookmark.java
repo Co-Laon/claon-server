@@ -5,7 +5,6 @@ import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -16,10 +15,10 @@ import javax.persistence.Table;
 @Table(name = "tb_center_bookmark")
 @NoArgsConstructor
 public class CenterBookmark extends BaseEntity {
-    @ManyToOne(targetEntity = Center.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Center.class)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
-    @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

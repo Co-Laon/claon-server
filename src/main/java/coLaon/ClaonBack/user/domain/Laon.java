@@ -15,11 +15,11 @@ import javax.persistence.Table;
 @Table(name = "tb_laon")
 @NoArgsConstructor
 public class Laon extends BaseEntity {
-    @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "laon_id", nullable = false)
     private User laon;
 
-    @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

@@ -21,10 +21,10 @@ public class CenterReview extends BaseEntity {
     private Integer rank;
     @Column(name = "content", length = 500)
     private String content;
-    @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User writer;
-    @ManyToOne(targetEntity = Center.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Center.class)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
 
