@@ -41,3 +41,6 @@ jobs:
 
       - name: Test with Gradle
         run: ./gradlew --info test
+
+      - name: Gradle build
+        run: ./gradlew build --exclude-task test
