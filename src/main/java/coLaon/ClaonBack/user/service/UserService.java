@@ -79,15 +79,6 @@ public class UserService {
             User user,
             SignUpRequestDto signUpRequestDto
     ) {
-        this.userRepository.findByNickname(signUpRequestDto.getNickname()).ifPresent(
-                u -> {
-                    throw new BadRequestException(
-                            ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 존재하는 닉네임입니다."
-                    );
-                }
-        );
-
         Optional.ofNullable(signUpRequestDto.getInstagramOAuthId()).flatMap(
                 this.userRepository::findByInstagramOAuthId).ifPresent(
                 u -> {
@@ -152,16 +143,6 @@ public class UserService {
             User user,
             UserModifyRequestDto dto
     ) {
-        if (!user.getNickname().equals(dto.getNickname()))
-            this.userRepository.findByNickname(dto.getNickname()).ifPresent(
-                    u -> {
-                        throw new BadRequestException(
-                                ErrorCode.ROW_ALREADY_EXIST,
-                                "이미 존재하는 닉네임입니다."
-                        );
-                    }
-            );
-
         user.modifyUser(
                 dto.getNickname(),
                 dto.getHeight(),
