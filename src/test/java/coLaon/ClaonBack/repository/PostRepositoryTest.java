@@ -16,8 +16,10 @@ import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.BlockUser;
+import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
+import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +47,8 @@ public class PostRepositoryTest {
     private BlockUserRepository blockUserRepository;
     @Autowired
     private CenterRepository centerRepository;
+    @Autowired
+    private LaonRepository laonRepository;
     @Autowired
     private PostRepository postRepository;
     @Autowired
@@ -95,6 +99,28 @@ public class PostRepositoryTest {
                 "instagramId2"
         ));
 
+        User user2 = userRepository.save(User.of(
+                "another@gmail.com",
+                "1264567890",
+                "testNickname",
+                175.0F,
+                178.0F,
+                "",
+                "",
+                "instagramIdAnother"
+        ));
+
+        User user3 = userRepository.save(User.of(
+                "another2@gmail.com",
+                "1264567890",
+                "testNickname2",
+                175.0F,
+                178.0F,
+                "",
+                "",
+                "instagramIdAnother2"
+        ));
+
         blockUserRepository.save(BlockUser.of(
                 this.user,
                 blockUser
@@ -124,6 +150,24 @@ public class PostRepositoryTest {
                 Set.of()
         ));
 
+       postRepository.save(Post.of(
+                center,
+                "testContent",
+                user2,
+                List.of(),
+                Set.of()
+        ));
+
+        postRepository.save(Post.of(
+                center,
+                "testContent",
+                user3,
+                List.of(),
+                Set.of()
+        ));
+
+        laonRepository.save(Laon.of(user, user3));
+
         Post blockedPost = postRepository.save(Post.of(
                 center,
                 "testContent",
@@ -131,7 +175,6 @@ public class PostRepositoryTest {
                 List.of(),
                 Set.of()
         ));
-        postRepository.save(blockedPost);
 
         Post privatePost = postRepository.save(Post.of(
                 center,
@@ -140,7 +183,6 @@ public class PostRepositoryTest {
                 List.of(),
                 Set.of()
         ));
-        postRepository.save(privatePost);
 
         this.deletedPost = Post.of(
                 center,
@@ -193,6 +235,30 @@ public class PostRepositoryTest {
     }
 
     @Test
+    public void findExceptLaonUserAndBlockUser() {
+        // given
+        String userId = user.getId();
+
+        // when
+        Page<Post> results = postRepositorySupport.findExceptLaonUserAndBlockUser(userId, PageRequest.of(0, 2));
+
+        // then
+        assertThat(results.getContent().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void findLaonUserPostsExceptBlockUser() {
+        // given
+        String userId = user.getId();
+
+        // when
+        Page<Post> results = postRepositorySupport.findLaonUserPostsExceptBlockUser(userId, PageRequest.of(0, 2));
+
+        // then
+        assertThat(results.getContent().size()).isEqualTo(1);
+    }
+
+    @Test
     public void successFindByCenterExceptBlockUser() {
         // given
         String centerId = center.getId();
@@ -202,7 +268,7 @@ public class PostRepositoryTest {
         Page<Post> results = postRepositorySupport.findByCenterExceptBlockUser(centerId, userId, PageRequest.of(0, 2));
 
         // then
-        assertThat(results.getContent().size()).isEqualTo(1);
+        assertThat(results.getContent().size()).isEqualTo(2);
     }
 
     @Test
@@ -229,6 +295,6 @@ public class PostRepositoryTest {
         Integer countPost = postRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
 
         // then
-        assertThat(countPost).isEqualTo(1);
+        assertThat(countPost).isEqualTo(3);
     }
 }

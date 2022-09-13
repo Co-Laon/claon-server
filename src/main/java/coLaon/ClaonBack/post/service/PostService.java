@@ -58,6 +58,28 @@ public class PostService {
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
+    public Pagination<PostDetailResponseDto> findHomePost(
+            User user,
+            Pageable pageable
+    ) {
+        return this.paginationFactory.create(
+                postRepositorySupport.findExceptLaonUserAndBlockUser(user.getId(), pageable).map(
+                        post -> PostDetailResponseDto.from(post, postLikeRepository.countByPost(post)))
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<PostDetailResponseDto> findHomeLaonPost(
+            User user,
+            Pageable pageable
+    ) {
+        return this.paginationFactory.create(
+                postRepositorySupport.findLaonUserPostsExceptBlockUser(user.getId(), pageable).map(
+                        post -> PostDetailResponseDto.from(post, postLikeRepository.countByPost(post)))
+        );
+    }
+
+    @Transactional(readOnly = true)
     public PostDetailResponseDto findPost(
             User user,
             String postId

@@ -10,12 +10,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
 import static coLaon.ClaonBack.post.domain.QClimbingHistory.climbingHistory;
 import static coLaon.ClaonBack.post.domain.QPost.post;
 import static coLaon.ClaonBack.user.domain.QBlockUser.blockUser;
+import static coLaon.ClaonBack.user.domain.QLaon.laon1;
 import static coLaon.ClaonBack.user.domain.QUser.user;
 
 @Repository
@@ -25,6 +27,69 @@ public class PostRepositorySupport extends QuerydslRepositorySupport {
     public PostRepositorySupport(JPAQueryFactory jpaQueryFactory) {
         super(Post.class);
         this.jpaQueryFactory = jpaQueryFactory;
+    }
+
+    public Page<Post> findLaonUserPostsExceptBlockUser(String userId, Pageable pageable) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime diff = now.minusMonths(3);
+
+        JPQLQuery<Post> query = jpaQueryFactory
+                .selectFrom(post)
+                .join(post.writer, user)
+                .fetchJoin()
+                .join(laon1)
+                .on(post.writer.id.eq(laon1.laon.id))
+                .where(post.isDeleted.isFalse()
+                        .and(post.createdAt.between(diff, now))
+                        .and(user.isPrivate.isFalse())
+                        .and(post.writer.id.ne(userId))
+                        .and(laon1.user.id.eq(userId))
+                        .and(post.id.notIn(
+                                JPAExpressions
+                                        .select(post.id)
+                                        .from(post)
+                                        .join(blockUser).on(post.writer.id.eq(blockUser.user.id))
+                                        .where(blockUser.blockedUser.id.eq(userId)))
+                        ));
+
+        long totalCount = query.fetchCount();
+        List<Post> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
+
+        return new PageImpl<>(results, pageable, totalCount);
+    }
+
+    public Page<Post> findExceptLaonUserAndBlockUser(String userId, Pageable pageable) {
+        JPQLQuery<Post> query = jpaQueryFactory
+                .selectFrom(post)
+                .join(post.writer, user)
+                .fetchJoin()
+                .where(post.isDeleted.isFalse()
+                        .and(user.isPrivate.isFalse())
+                        .and(post.writer.id.ne(userId))
+                        .and(post.id.notIn(
+                                JPAExpressions
+                                        .select(post.id)
+                                        .from(post)
+                                        .join(laon1).on(post.writer.id.eq(laon1.laon.id))
+                                        .where(laon1.user.id.eq(userId))))
+                        .and(post.id.notIn(
+                                JPAExpressions
+                                        .select(post.id)
+                                        .from(post)
+                                        .join(blockUser).on(post.writer.id.eq(blockUser.blockedUser.id))
+                                        .where(blockUser.user.id.eq(userId))))
+                        .and(post.id.notIn(
+                                JPAExpressions
+                                        .select(post.id)
+                                        .from(post)
+                                        .join(blockUser).on(post.writer.id.eq(blockUser.user.id))
+                                        .where(blockUser.blockedUser.id.eq(userId)))
+                        ));
+
+        long totalCount = query.fetchCount();
+        List<Post> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
+
+        return new PageImpl<>(results, pageable, totalCount);
     }
 
     public Page<Post> findByCenterExceptBlockUser(String centerId, String userId, Pageable pageable) {

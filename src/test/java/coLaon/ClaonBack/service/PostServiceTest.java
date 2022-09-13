@@ -250,6 +250,56 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Success case for find home post")
+    void successFindHomePost() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
+
+        given(this.postLikeRepository.countByPost(post2)).willReturn(2);
+        given(this.postLikeRepository.countByPost(post)).willReturn(3);
+
+        given(this.postRepositorySupport.findExceptLaonUserAndBlockUser(user.getId(), pageable)).willReturn(postPage);
+
+        // when
+        Pagination<PostDetailResponseDto> homePost = this.postService.findHomePost(user, pageable);
+
+        //then
+        assertThat(homePost.getResults())
+                .isNotNull()
+                .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
+                .contains(
+                        tuple("testPostId", post.getContent()),
+                        tuple("testPostId2", post2.getContent())
+                );
+    }
+
+    @Test
+    @DisplayName("Success case for find home laon post")
+    void successFindHomeLaonPost() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
+
+        given(this.postLikeRepository.countByPost(post2)).willReturn(2);
+        given(this.postLikeRepository.countByPost(post)).willReturn(3);
+
+        given(this.postRepositorySupport.findLaonUserPostsExceptBlockUser(user.getId(), pageable)).willReturn(postPage);
+
+        // when
+        Pagination<PostDetailResponseDto> homePost = this.postService.findHomeLaonPost(user, pageable);
+
+        //then
+        assertThat(homePost.getResults())
+                .isNotNull()
+                .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
+                .contains(
+                        tuple("testPostId", post.getContent()),
+                        tuple("testPostId2", post2.getContent())
+                );
+    }
+
+    @Test
     @DisplayName("Success case for find post")
     void successFindPost() {
         // given
@@ -494,8 +544,13 @@ public class PostServiceTest {
         // when
         Pagination<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(user, this.user2.getNickname(), pageable);
 
-        // then
-        assertThat(dtos.getResults().size()).isEqualTo(1);
+        //then
+        assertThat(dtos.getResults())
+                .isNotNull()
+                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("testPostId", post.getThumbnailUrl())
+                );
     }
 
     @Test
