@@ -13,10 +13,11 @@ import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterImgDto;
+import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.center.dto.CenterReportCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
-import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
+import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
 import coLaon.ClaonBack.center.dto.ChargeDto;
 import coLaon.ClaonBack.center.dto.ChargeElementDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
@@ -26,10 +27,12 @@ import coLaon.ClaonBack.center.dto.SectorInfoRequestDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterReportRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
+import coLaon.ClaonBack.center.repository.CenterRepositorySupport;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.center.repository.SectorInfoRepository;
 import coLaon.ClaonBack.center.service.CenterService;
+import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
@@ -45,6 +48,10 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
@@ -72,6 +79,8 @@ public class CenterServiceTest {
     PostRepositorySupport postRepositorySupport;
     @Mock
     CenterReportRepository centerReportRepository;
+    @Mock
+    CenterRepositorySupport centerRepositorySupport;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -284,19 +293,40 @@ public class CenterServiceTest {
     }
 
     @Test
-    @DisplayName("Success case for search Center by keyword")
-    void successSearchCenterByKeyword() {
+    @DisplayName("Success case for search Center name by keyword")
+    void successSearchCenterNameByKeyword() {
         // given
         given(this.centerRepository.searchCenter("te")).willReturn(List.of(this.center, this.center2));
 
         // when
-        List<CenterSearchResponseDto> centerSearchResponseDto = this.centerService.searchCenter("te");
+        List<CenterNameResponseDto> centerNameResponseDto = this.centerService.searchCenterName("te");
 
         // then
-        assertThat(centerSearchResponseDto)
+        assertThat(centerNameResponseDto)
                 .isNotNull()
-                .extracting(CenterSearchResponseDto::getName)
+                .extracting(CenterNameResponseDto::getName)
                 .contains(this.center.getName(), this.center2.getName());
+    }
+
+    @Test
+    @DisplayName("Success case for search Center")
+    void successSearchCenter() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<CenterPreviewResponseDto> centerPage = new PageImpl<>(List.of(new CenterPreviewResponseDto(center.getId(), center.getName(), center.getImgList(), 5.0)), pageable, 2);
+
+        given(this.centerRepositorySupport.searchCenter(this.center.getName(), pageable)).willReturn(centerPage);
+
+        // when
+        Pagination<CenterPreviewResponseDto> centerPreviewResponseDtoPagination = this.centerService.searchCenter(this.center.getName(), pageable);
+
+        // then
+        assertThat(centerPreviewResponseDtoPagination.getResults())
+                .isNotNull()
+                .extracting(CenterPreviewResponseDto::getId, CenterPreviewResponseDto::getName)
+                .contains(
+                        tuple(center.getId(), center.getName())
+                );
     }
 
     @Test

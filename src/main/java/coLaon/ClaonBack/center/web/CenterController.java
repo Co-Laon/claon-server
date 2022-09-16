@@ -6,7 +6,7 @@ import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterReportCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
-import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
+import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
 import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
@@ -77,10 +77,10 @@ public class CenterController {
 
     @GetMapping(value = "/name/{keyword}")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<CenterSearchResponseDto> searchCenter(
+    public List<CenterNameResponseDto> searchCenterName(
             @PathVariable String keyword
     ) {
-        return this.centerService.searchCenter(keyword);
+        return this.centerService.searchCenterName(keyword);
     }
 
     @GetMapping(value = "/{centerId}/hold")
@@ -156,5 +156,14 @@ public class CenterController {
             @RequestBody CenterReportCreateRequestDto centerReportCreateRequestDto
     ) {
         return this.centerService.createReport(userDetails.getUser(), centerId, centerReportCreateRequestDto);
+    }
+
+    @GetMapping(value = "/search")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Pagination<CenterPreviewResponseDto> searchCenter(
+            @RequestParam String name,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return this.centerService.searchCenter(name, pageable);
     }
 }

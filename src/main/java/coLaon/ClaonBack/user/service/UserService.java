@@ -1,5 +1,7 @@
 package coLaon.ClaonBack.user.service;
 
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
@@ -17,13 +19,16 @@ import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
+import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
+import coLaon.ClaonBack.user.repository.UserRepositorySupport;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +39,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserRepositorySupport userRepositorySupport;
     private final ClimbingHistoryRepository climbingHistoryRepository;
     private final LaonRepository laonRepository;
     private final PostRepository postRepository;
@@ -41,6 +47,7 @@ public class UserService {
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
     private final JwtUtil jwtUtil;
+    private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
     public DuplicatedCheckResponseDto nicknameDuplicatedCheck(String nickname) {
@@ -136,6 +143,20 @@ public class UserService {
 
         List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
         return IndividualUserResponseDto.from(targetUser, isLaon, postCount, laonCount, postLikeCount, climbingHistories);
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<UserPreviewResponseDto> searchUser(
+            User user,
+            String nickname,
+            Pageable pageable
+    ) {
+        return paginationFactory.create(
+                this.userRepositorySupport.searchUser(user.getId(), nickname, pageable).map(
+                        u -> UserPreviewResponseDto.from(
+                                u,
+                                laonRepository.findByLaonIdAndUserId(u.getId(), user.getId()).isPresent()))
+        );
     }
 
     @Transactional

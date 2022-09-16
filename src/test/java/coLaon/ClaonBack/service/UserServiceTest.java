@@ -6,6 +6,8 @@ import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.dto.CenterClimbingHistoryResponseDto;
@@ -17,9 +19,11 @@ import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
+import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
+import coLaon.ClaonBack.user.repository.UserRepositorySupport;
 import coLaon.ClaonBack.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +31,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -43,6 +52,8 @@ public class UserServiceTest {
     @Mock
     UserRepository userRepository;
     @Mock
+    UserRepositorySupport userRepositorySupport;
+    @Mock
     PostRepository postRepository;
     @Mock
     PostLikeRepository postLikeRepository;
@@ -50,6 +61,8 @@ public class UserServiceTest {
     LaonRepository laonRepository;
     @Mock
     ClimbingHistoryRepository climbingHistoryRepository;
+    @Spy
+    PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     UserService userService;
@@ -76,7 +89,7 @@ public class UserServiceTest {
         this.privateUser = User.of(
                 "test12@gmail.com",
                 "1234567823",
-                "test",
+                "private user",
                 175.0F,
                 178.0F,
                 "",
@@ -228,6 +241,28 @@ public class UserServiceTest {
                         IndividualUserResponseDto::getLaonCount,
                         IndividualUserResponseDto::getIsLaon)
                 .contains(null, null, 0L, false);
+    }
+
+    @Test
+    @DisplayName("Success case for search user")
+    void successSearchUser() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<User> userPage = new PageImpl<>(List.of(privateUser), pageable, 2);
+
+        given(this.userRepositorySupport.searchUser(user.getId(), privateUser.getNickname(), pageable)).willReturn(userPage);
+        given(this.laonRepository.findByLaonIdAndUserId(privateUser.getId(), user.getId())).willReturn(Optional.empty());
+
+        // when
+        Pagination<UserPreviewResponseDto> userPreviewResponseDtoPagination = this.userService.searchUser(user, privateUser.getNickname(), pageable);
+
+        // then
+        assertThat(userPreviewResponseDtoPagination.getResults())
+                .isNotNull()
+                .extracting(UserPreviewResponseDto::getNickname, UserPreviewResponseDto::getImagePath)
+                .contains(
+                        tuple(privateUser.getNickname(), privateUser.getImagePath())
+                );
     }
 
     @Test
