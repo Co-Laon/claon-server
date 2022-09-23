@@ -3,7 +3,6 @@ package coLaon.ClaonBack.center.domain;
 import coLaon.ClaonBack.center.domain.converter.CenterImgListConverter;
 import coLaon.ClaonBack.center.domain.converter.ChargeListConverter;
 import coLaon.ClaonBack.center.domain.converter.OperatingTimeListConverter;
-import coLaon.ClaonBack.center.domain.converter.SectorInfoListConverter;
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,9 +44,6 @@ public class Center extends BaseEntity {
     private List<Charge> charge;
     @Column(name = "hold_info_img", length = 500)
     private String holdInfoImg;
-    @Convert(converter = SectorInfoListConverter.class)
-    @Column(name = "sector_info", length = 2000)
-    private List<SectorInfo> sectorInfo;
 
     private Center(
             String name,
@@ -60,8 +56,7 @@ public class Center extends BaseEntity {
             List<OperatingTime> operatingTime,
             String facilities,
             List<Charge> charge,
-            String holdInfoImg,
-            List<SectorInfo> sectorInfo
+            String holdInfoImg
     ) {
         this.name = name;
         this.address = address;
@@ -74,7 +69,6 @@ public class Center extends BaseEntity {
         this.facilities = facilities;
         this.charge = charge;
         this.holdInfoImg = holdInfoImg;
-        this.sectorInfo = sectorInfo;
     }
 
     public static Center of(
@@ -88,8 +82,7 @@ public class Center extends BaseEntity {
             List<OperatingTime> operatingTimeList,
             String facilities,
             List<Charge> chargeList,
-            String holdInfoImg,
-            List<SectorInfo> sectorInfoList
+            String holdInfoImg
     ) {
         return new Center(
                 name,
@@ -102,8 +95,7 @@ public class Center extends BaseEntity {
                 operatingTimeList,
                 facilities,
                 chargeList,
-                holdInfoImg,
-                sectorInfoList
+                holdInfoImg
         );
     }
 }

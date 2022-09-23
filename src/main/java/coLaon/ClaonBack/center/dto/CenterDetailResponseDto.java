@@ -2,6 +2,7 @@ package coLaon.ClaonBack.center.dto;
 
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.HoldInfo;
+import coLaon.ClaonBack.center.domain.SectorInfo;
 import lombok.Data;
 
 import java.util.List;
@@ -20,10 +21,9 @@ public class CenterDetailResponseDto {
     private List<OperatingTimeDto> operatingTimeList;
     private String facilities;
     private List<ChargeDto> chargeList;
-    private String chargeImg;
     private List<HoldInfoResponseDto> holdInfoList;
     private String holdInfoImg;
-    private List<SectorInfoDto> sectorInfoList;
+    private List<SectorInfoResponseDto> sectorInfoList;
     private Boolean isBookmarked;
     private Integer postCount;
     private Integer reviewCount;
@@ -42,7 +42,7 @@ public class CenterDetailResponseDto {
             List<ChargeDto> chargeList,
             List<HoldInfoResponseDto> holdInfoList,
             String holdInfoImg,
-            List<SectorInfoDto> sectorInfoList,
+            List<SectorInfoResponseDto> sectorInfoList,
             Boolean isBookmarked,
             Integer postCount,
             Integer reviewCount
@@ -69,6 +69,7 @@ public class CenterDetailResponseDto {
     public static CenterDetailResponseDto from(
             Center center,
             List<HoldInfo> holdInfoList,
+            List<SectorInfo> sectorInfoList,
             Boolean isBookmarked,
             Integer postCount,
             Integer reviewCount
@@ -87,7 +88,7 @@ public class CenterDetailResponseDto {
                 center.getCharge().stream().map(ChargeDto::from).collect(Collectors.toList()),
                 holdInfoList.stream().map(HoldInfoResponseDto::from).collect(Collectors.toList()),
                 center.getHoldInfoImg(),
-                center.getSectorInfo().stream().map(SectorInfoDto::from).collect(Collectors.toList()),
+                sectorInfoList.stream().map(SectorInfoResponseDto::from).collect(Collectors.toList()),
                 isBookmarked,
                 postCount,
                 reviewCount

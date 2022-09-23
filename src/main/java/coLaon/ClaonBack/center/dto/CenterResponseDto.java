@@ -2,6 +2,7 @@ package coLaon.ClaonBack.center.dto;
 
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.HoldInfo;
+import coLaon.ClaonBack.center.domain.SectorInfo;
 import lombok.Data;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class CenterResponseDto {
     private List<ChargeDto> chargeList;
     private List<HoldInfoResponseDto> holdInfoList;
     private String holdInfoImg;
-    private List<SectorInfoDto> sectorInfoList;
+    private List<SectorInfoResponseDto> sectorInfoList;
 
     private CenterResponseDto(
             String id,
@@ -38,7 +39,7 @@ public class CenterResponseDto {
             List<ChargeDto> chargeList,
             List<HoldInfoResponseDto> holdInfoList,
             String holdInfoImg,
-            List<SectorInfoDto> sectorInfoList
+            List<SectorInfoResponseDto> sectorInfoList
     ) {
         this.id = id;
         this.name = name;
@@ -56,7 +57,7 @@ public class CenterResponseDto {
         this.sectorInfoList = sectorInfoList;
     }
 
-    public static CenterResponseDto from(Center center, List<HoldInfo> holdInfoList) {
+    public static CenterResponseDto from(Center center, List<HoldInfo> holdInfoList, List<SectorInfo> sectorInfoList) {
         return new CenterResponseDto(
                 center.getId(),
                 center.getName(),
@@ -71,7 +72,7 @@ public class CenterResponseDto {
                 center.getCharge().stream().map(ChargeDto::from).collect(Collectors.toList()),
                 holdInfoList.stream().map(HoldInfoResponseDto::from).collect(Collectors.toList()),
                 center.getHoldInfoImg(),
-                center.getSectorInfo().stream().map(SectorInfoDto::from).collect(Collectors.toList())
+                sectorInfoList.stream().map(SectorInfoResponseDto::from).collect(Collectors.toList())
         );
     }
 }

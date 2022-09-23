@@ -20,7 +20,7 @@ public class CenterBookmarkResponseDto {
     private String facilities;
     private List<ChargeDto> chargeList;
     private String holdInfoImg;
-    private List<SectorInfoDto> sectorInfoList;
+    private List<SectorInfoResponseDto> sectorInfoList;
     private Boolean isBookmarked;
 
     private CenterBookmarkResponseDto(
@@ -36,7 +36,6 @@ public class CenterBookmarkResponseDto {
             String facilities,
             List<ChargeDto> chargeList,
             String holdInfoImg,
-            List<SectorInfoDto> sectorInfoList,
             Boolean isBookmarked
     ) {
         this.centerId = centerId;
@@ -51,7 +50,6 @@ public class CenterBookmarkResponseDto {
         this.facilities = facilities;
         this.chargeList = chargeList;
         this.holdInfoImg = holdInfoImg;
-        this.sectorInfoList = sectorInfoList;
         this.isBookmarked = isBookmarked;
     }
 
@@ -69,7 +67,6 @@ public class CenterBookmarkResponseDto {
                 bookmarkCenter.getCenter().getFacilities(),
                 bookmarkCenter.getCenter().getCharge().stream().map(ChargeDto::from).collect(Collectors.toList()),
                 bookmarkCenter.getCenter().getHoldInfoImg(),
-                bookmarkCenter.getCenter().getSectorInfo().stream().map(SectorInfoDto::from).collect(Collectors.toList()),
                 isBookmarked
         );
     }
