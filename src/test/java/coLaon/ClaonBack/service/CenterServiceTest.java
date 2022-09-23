@@ -21,13 +21,14 @@ import coLaon.ClaonBack.center.dto.ChargeDto;
 import coLaon.ClaonBack.center.dto.ChargeElementDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
 import coLaon.ClaonBack.center.dto.OperatingTimeDto;
-import coLaon.ClaonBack.center.dto.SectorInfoDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
+import coLaon.ClaonBack.center.dto.SectorInfoRequestDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterReportRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
+import coLaon.ClaonBack.center.repository.SectorInfoRepository;
 import coLaon.ClaonBack.center.service.CenterService;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -46,6 +47,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,6 +62,8 @@ public class CenterServiceTest {
     CenterRepository centerRepository;
     @Mock
     HoldInfoRepository holdInfoRepository;
+    @Mock
+    SectorInfoRepository sectorInfoRepository;
     @Mock
     ReviewRepositorySupport reviewRepositorySupport;
     @Mock
@@ -77,6 +81,7 @@ public class CenterServiceTest {
     private User admin, user;
     private Center center, center2;
     private HoldInfo holdInfo, holdInfo2;
+    private SectorInfo sectorInfo;
     private CenterBookmark centerBookmark;
 
     @BeforeEach
@@ -116,8 +121,7 @@ public class CenterServiceTest {
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
                 List.of(new Charge (List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
-                "hold info img test",
-                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+                "hold info img test"
         );
         ReflectionTestUtils.setField(this.center, "id", "center id");
 
@@ -132,13 +136,14 @@ public class CenterServiceTest {
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
                 List.of(new Charge (List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
-                "hold info img test",
-                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+                "hold info img test"
         );
         ReflectionTestUtils.setField(this.center2, "id", "center id2");
 
         this.holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
         this.holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
+        this.sectorInfo = SectorInfo.of("test sector", LocalDate.of(2022, 1, 1), LocalDate.of(2022, 1, 1), this.center);
+
         this.centerBookmark = CenterBookmark.of(center, user);
         ReflectionTestUtils.setField(this.centerBookmark, "id", "bookMarkId");
     }
@@ -150,7 +155,6 @@ public class CenterServiceTest {
         OperatingTime operatingTime = OperatingTime.of("매일", "10:00", "23:00");
         ChargeElement chargeElement = ChargeElement.of("자유 패키지", "330,000");
         Charge charge = Charge.of(List.of(chargeElement), "charge image");
-        SectorInfo sectorInfo = SectorInfo.of("test sector", "1/1", "1/2");
 
         try (
                 MockedStatic<Center> mockedCenter = mockStatic(Center.class);
@@ -175,14 +179,13 @@ public class CenterServiceTest {
                     List.of(new ChargeDto(List.of(new ChargeElementDto("자유 패키지", "330,000")), "charge image")),
                     List.of(new HoldInfoRequestDto("test hold", "hold img test")),
                     "hold info img test",
-                    List.of(new SectorInfoDto("test sector", "1/1", "1/2"))
+                    List.of(new SectorInfoRequestDto("test sector", "2022/1/1", "2022/1/2"))
             );
 
             mockedCenterImg.when(() -> CenterImg.of("img test")).thenReturn(centerImg);
             mockedOperatingTime.when(() -> OperatingTime.of("매일", "10:00", "23:00")).thenReturn(operatingTime);
             mockedChargeElement.when(() -> ChargeElement.of("자유 패키지", "330,000")).thenReturn(chargeElement);
             mockedCharge.when(() -> Charge.of(List.of(chargeElement), "charge image")).thenReturn(charge);
-            mockedSectorInfo.when(() -> SectorInfo.of("test sector", "1/1", "1/2")).thenReturn(sectorInfo);
 
             mockedCenter.when(() -> Center.of(
                     "test",
@@ -195,17 +198,21 @@ public class CenterServiceTest {
                     List.of(operatingTime),
                     "facilities test",
                     List.of(charge),
-                    "hold info img test",
-                    List.of(sectorInfo)
+                    "hold info img test"
             )).thenReturn(this.center);
 
             mockedHoldInfo.when(() -> HoldInfo.of(
                     "test hold", "hold img test", this.center
             )).thenReturn(this.holdInfo);
 
+            mockedSectorInfo.when(() -> SectorInfo.of(
+                    "test sector", "2022/1/1", "2022/1/2", this.center
+            )).thenReturn(this.sectorInfo);
+
             given(this.centerRepository.save(this.center)).willReturn(this.center);
 
             given(this.holdInfoRepository.save(this.holdInfo)).willReturn(this.holdInfo);
+            given(this.sectorInfoRepository.save(this.sectorInfo)).willReturn(this.sectorInfo);
 
             // when
             CenterResponseDto responseDto = this.centerService.create(this.admin, requestDto);
@@ -245,6 +252,7 @@ public class CenterServiceTest {
         given(this.postRepositorySupport.countByCenterExceptBlockUser("centerId", "userId")).willReturn(0);
         given(this.reviewRepositorySupport.countByCenterExceptBlockUser("centerId", "userId")).willReturn(2);
         given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
+        given(this.sectorInfoRepository.findAllByCenter(center)).willReturn(List.of(sectorInfo));
 
         //when
         CenterDetailResponseDto centerResponseDto = centerService.findCenter(this.user, "centerId");

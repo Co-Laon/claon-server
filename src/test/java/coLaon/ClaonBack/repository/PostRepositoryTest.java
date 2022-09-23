@@ -6,7 +6,6 @@ import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
-import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.config.QueryDslTestConfig;
@@ -137,8 +136,7 @@ public class PostRepositoryTest {
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
-                "hold info img test",
-                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+                "hold info img test"
         );
         this.center = centerRepository.save(center);
 

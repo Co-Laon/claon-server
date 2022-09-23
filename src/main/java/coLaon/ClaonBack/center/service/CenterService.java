@@ -23,6 +23,7 @@ import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.CenterRepositorySupport;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
+import coLaon.ClaonBack.center.repository.SectorInfoRepository;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
@@ -44,6 +45,7 @@ public class CenterService {
     private final CenterRepository centerRepository;
     private final CenterRepositorySupport centerRepositorySupport;
     private final HoldInfoRepository holdInfoRepository;
+    private final SectorInfoRepository sectorInfoRepository;
     private final ReviewRepositorySupport reviewRepositorySupport;
     private final PostRepositorySupport postRepositorySupport;
     private final CenterBookmarkRepository centerBookmarkRepository;
@@ -81,10 +83,7 @@ public class CenterService {
                                                 .collect(Collectors.toList()),
                                         dto.getImage()))
                                 .collect(Collectors.toList()),
-                        requestDto.getHoldInfoImg(),
-                        requestDto.getSectorInfoList()
-                                .stream().map(dto -> SectorInfo.of(dto.getName(), dto.getStart(), dto.getEnd()))
-                                .collect(Collectors.toList())
+                        requestDto.getHoldInfoImg()
                 )
         );
 
@@ -96,6 +95,16 @@ public class CenterService {
                                 HoldInfo.of(
                                         holdInfo.getName(),
                                         holdInfo.getImg(),
+                                        center
+                                )))
+                        .collect(Collectors.toList()),
+                requestDto.getSectorInfoList()
+                        .stream()
+                        .map(dto -> this.sectorInfoRepository.save(
+                                SectorInfo.of(
+                                        dto.getName(),
+                                        dto.getStart(),
+                                        dto.getEnd(),
                                         center
                                 )))
                         .collect(Collectors.toList())
@@ -118,6 +127,7 @@ public class CenterService {
         return CenterDetailResponseDto.from(
                 center,
                 holdInfoRepository.findAllByCenter(center),
+                sectorInfoRepository.findAllByCenter(center),
                 isBookmarked,
                 postCount,
                 reviewCount
