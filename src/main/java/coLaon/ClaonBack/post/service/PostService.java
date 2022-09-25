@@ -11,7 +11,6 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
-import coLaon.ClaonBack.common.validator.ContentsImageFormatValidator;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
 import coLaon.ClaonBack.common.validator.IsHoldValidator;
 import coLaon.ClaonBack.common.validator.IsPrivateValidator;
@@ -59,6 +58,28 @@ public class PostService {
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
+    public Pagination<PostDetailResponseDto> findHomePost(
+            User user,
+            Pageable pageable
+    ) {
+        return this.paginationFactory.create(
+                postRepositorySupport.findExceptLaonUserAndBlockUser(user.getId(), pageable).map(
+                        post -> PostDetailResponseDto.from(post, postLikeRepository.countByPost(post)))
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<PostDetailResponseDto> findHomeLaonPost(
+            User user,
+            Pageable pageable
+    ) {
+        return this.paginationFactory.create(
+                postRepositorySupport.findLaonUserPostsExceptBlockUser(user.getId(), pageable).map(
+                        post -> PostDetailResponseDto.from(post, postLikeRepository.countByPost(post)))
+        );
+    }
+
+    @Transactional(readOnly = true)
     public PostDetailResponseDto findPost(
             User user,
             String postId
@@ -70,7 +91,7 @@ public class PostService {
                 )
         );
 
-        if (blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).size() > 0) {
+        if (!blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).isEmpty()) {
             throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
         }
 
@@ -93,8 +114,6 @@ public class PostService {
                         "암장 정보를 찾을 수 없습니다."
                 )
         );
-
-        ContentsImageFormatValidator.of(postCreateRequestDto.getContentsList()).validate();
 
         Post post = this.postRepository.save(
                 Post.of(

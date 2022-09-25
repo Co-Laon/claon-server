@@ -5,7 +5,6 @@ import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.OperatingTime;
-import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
@@ -110,8 +109,7 @@ public class UserServiceTest {
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
-                "hold info img test",
-                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+                "hold info img test"
         );
 
         Post post = Post.of(

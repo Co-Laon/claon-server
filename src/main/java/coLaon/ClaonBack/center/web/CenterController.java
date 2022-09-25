@@ -13,12 +13,12 @@ import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
-import coLaon.ClaonBack.center.dto.CenterSearchOption;
+import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.service.CenterBookmarkService;
 import coLaon.ClaonBack.center.service.CenterReviewService;
 import coLaon.ClaonBack.center.service.CenterService;
 import coLaon.ClaonBack.common.domain.Pagination;
-import coLaon.ClaonBack.config.UserAccount;
+import coLaon.ClaonBack.user.domain.UserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -50,29 +50,29 @@ public class CenterController {
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterResponseDto create(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody CenterCreateRequestDto centerCreateRequestDto
     ) {
-        return this.centerService.create(userAccount.getUser(), centerCreateRequestDto);
+        return this.centerService.create(userDetails.getUser(), centerCreateRequestDto);
     }
 
     @GetMapping(value = "/{centerId}")
     @ResponseStatus(value = HttpStatus.OK)
     public CenterDetailResponseDto findCenter(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String centerId
     ) {
-        return this.centerService.findCenter(userAccount.getUser(), centerId);
+        return this.centerService.findCenter(userDetails.getUser(), centerId);
     }
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<CenterPreviewResponseDto> getCenterList(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam("option") CenterSearchOption option,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return this.centerService.findCenterListByOption(userAccount.getUser(), option, pageable);
+        return this.centerService.findCenterListByOption(userDetails.getUser(), option, pageable);
     }
 
     @GetMapping(value = "/name/{keyword}")
@@ -94,67 +94,67 @@ public class CenterController {
     @PostMapping("/{centerId}/review")
     @ResponseStatus(value = HttpStatus.CREATED)
     public ReviewResponseDto createReview(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String centerId,
             @RequestBody @Valid ReviewCreateRequestDto reviewCreateRequestDto
     ) {
-        return this.centerReviewService.createReview(userAccount.getUser(), centerId, reviewCreateRequestDto);
+        return this.centerReviewService.createReview(userDetails.getUser(), centerId, reviewCreateRequestDto);
     }
 
     @PutMapping(value = "/review/{reviewId}")
     @ResponseStatus(value = HttpStatus.OK)
     public ReviewResponseDto updateReview(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String reviewId,
             @RequestBody @Valid ReviewUpdateRequestDto updateRequestDto
     ) {
-        return this.centerReviewService.updateReview(userAccount.getUser(), reviewId, updateRequestDto);
+        return this.centerReviewService.updateReview(userDetails.getUser(), reviewId, updateRequestDto);
     }
 
     @DeleteMapping(value = "/review/{reviewId}")
     @ResponseStatus(value = HttpStatus.OK)
     public ReviewResponseDto deleteReview(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String reviewId
     ) {
-        return this.centerReviewService.deleteReview(userAccount.getUser(), reviewId);
+        return this.centerReviewService.deleteReview(userDetails.getUser(), reviewId);
     }
 
     @GetMapping(value = "/{centerId}/review")
     @ResponseStatus(value = HttpStatus.OK)
     public ReviewListFindResponseDto findReviewByCenter(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String centerId,
             @PageableDefault(size = 5) final Pageable pageable
     ) {
-        return this.centerReviewService.findReview(userAccount.getUser(), centerId, pageable);
+        return this.centerReviewService.findReview(userDetails.getUser(), centerId, pageable);
     }
 
     @PostMapping(value = "/{centerId}/bookmark")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterBookmarkResponseDto create(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String centerId
     ) {
-        return this.centerBookmarkService.create(userAccount.getUser(), centerId);
+        return this.centerBookmarkService.create(userDetails.getUser(), centerId);
     }
 
     @DeleteMapping(value = "/{centerId}/bookmark")
     @ResponseStatus(value = HttpStatus.OK)
     public void delete(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String centerId
     ) {
-        this.centerBookmarkService.delete(userAccount.getUser(), centerId);
+        this.centerBookmarkService.delete(userDetails.getUser(), centerId);
     }
 
     @PostMapping(value = "/{centerId}/report")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterReportResponseDto createReport(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String centerId,
             @RequestBody CenterReportCreateRequestDto centerReportCreateRequestDto
     ) {
-        return this.centerService.createReport(userAccount.getUser(), centerId, centerReportCreateRequestDto);
+        return this.centerService.createReport(userDetails.getUser(), centerId, centerReportCreateRequestDto);
     }
 }

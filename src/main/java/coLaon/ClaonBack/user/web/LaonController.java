@@ -1,7 +1,7 @@
 package coLaon.ClaonBack.user.web;
 
 import coLaon.ClaonBack.common.domain.Pagination;
-import coLaon.ClaonBack.config.UserAccount;
+import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
 import coLaon.ClaonBack.user.service.LaonService;
 import lombok.RequiredArgsConstructor;
@@ -28,27 +28,27 @@ public class LaonController {
     @PostMapping(value = "/{laonNickname}")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createLaon(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String laonNickname
     ) {
-        this.laonService.createLaon(userAccount.getUser(), laonNickname);
+        this.laonService.createLaon(userDetails.getUser(), laonNickname);
     }
 
     @DeleteMapping(value = "/{laonNickname}")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteLaon(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String laonNickname
     ) {
-        this.laonService.deleteLaon(userAccount.getUser(), laonNickname);
+        this.laonService.deleteLaon(userDetails.getUser(), laonNickname);
     }
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<LaonFindResponseDto> findAllLaon(
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) final Pageable pageable
     ) {
-        return this.laonService.findAllLaon(userAccount.getUser(), pageable);
+        return this.laonService.findAllLaon(userDetails.getUser(), pageable);
     }
 }

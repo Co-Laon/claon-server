@@ -6,7 +6,6 @@ import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
-import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.common.domain.Pagination;
@@ -166,8 +165,7 @@ public class PostServiceTest {
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
-                "hold info img test",
-                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+                "hold info img test"
         );
         ReflectionTestUtils.setField(this.center, "id", "center1");
 
@@ -247,6 +245,56 @@ public class PostServiceTest {
                 "testContent"
         );
         ReflectionTestUtils.setField(this.postReport, "id", "postReportId");
+    }
+
+    @Test
+    @DisplayName("Success case for find home post")
+    void successFindHomePost() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
+
+        given(this.postLikeRepository.countByPost(post2)).willReturn(2);
+        given(this.postLikeRepository.countByPost(post)).willReturn(3);
+
+        given(this.postRepositorySupport.findExceptLaonUserAndBlockUser(user.getId(), pageable)).willReturn(postPage);
+
+        // when
+        Pagination<PostDetailResponseDto> homePost = this.postService.findHomePost(user, pageable);
+
+        //then
+        assertThat(homePost.getResults())
+                .isNotNull()
+                .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
+                .contains(
+                        tuple("testPostId", post.getContent()),
+                        tuple("testPostId2", post2.getContent())
+                );
+    }
+
+    @Test
+    @DisplayName("Success case for find home laon post")
+    void successFindHomeLaonPost() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
+
+        given(this.postLikeRepository.countByPost(post2)).willReturn(2);
+        given(this.postLikeRepository.countByPost(post)).willReturn(3);
+
+        given(this.postRepositorySupport.findLaonUserPostsExceptBlockUser(user.getId(), pageable)).willReturn(postPage);
+
+        // when
+        Pagination<PostDetailResponseDto> homePost = this.postService.findHomeLaonPost(user, pageable);
+
+        //then
+        assertThat(homePost.getResults())
+                .isNotNull()
+                .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
+                .contains(
+                        tuple("testPostId", post.getContent()),
+                        tuple("testPostId2", post2.getContent())
+                );
     }
 
     @Test
@@ -357,31 +405,6 @@ public class PostServiceTest {
                             post -> post.getHoldList().size())
                     .contains("center1", 1, 1);
         }
-    }
-
-    @Test
-    @DisplayName("Failure case for create post when invalid format of post contents")
-    void failureCreatePost_InvalidFormatOfPostContents() {
-        // given
-        PostCreateRequestDto postCreateRequestDto = new PostCreateRequestDto(
-                "center1",
-                List.of(new ClimbingHistoryRequestDto("holdId1", 1)),
-                "testContent",
-                List.of(new PostContentsDto("test.com/test.gif"))
-        );
-
-        given(this.centerRepository.findById("center1")).willReturn(Optional.of(center));
-
-        // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
-                () -> this.postService.createPost(user, postCreateRequestDto)
-        );
-
-        // then
-        assertThat(ex)
-                .extracting("errorCode", "message")
-                .contains(ErrorCode.INVALID_FORMAT, "이미지 형식이 잘못되었습니다.");
     }
 
     @Test
@@ -519,8 +542,13 @@ public class PostServiceTest {
         // when
         Pagination<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(user, this.user2.getNickname(), pageable);
 
-        // then
-        assertThat(dtos.getResults().size()).isEqualTo(1);
+        //then
+        assertThat(dtos.getResults())
+                .isNotNull()
+                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("testPostId", post.getThumbnailUrl())
+                );
     }
 
     @Test

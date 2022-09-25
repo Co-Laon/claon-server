@@ -1,7 +1,7 @@
 package coLaon.ClaonBack.center.dto;
 
 import coLaon.ClaonBack.center.domain.CenterReport;
-import coLaon.ClaonBack.center.domain.CenterReportType;
+import coLaon.ClaonBack.center.domain.enums.CenterReportType;
 import lombok.Data;
 
 @Data

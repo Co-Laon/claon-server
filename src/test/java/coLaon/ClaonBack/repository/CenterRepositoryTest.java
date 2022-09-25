@@ -6,9 +6,8 @@ import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.OperatingTime;
-import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
-import coLaon.ClaonBack.center.dto.CenterSearchOption;
+import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.CenterRepositorySupport;
@@ -70,8 +69,7 @@ public class CenterRepositoryTest {
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
-                "hold info img test",
-                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+                "hold info img test"
         ));
 
         this.center = centerRepository.save(Center.of(
@@ -85,8 +83,7 @@ public class CenterRepositoryTest {
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
-                "hold info img test",
-                List.of(new SectorInfo("test sector", "1/1", "1/2"))
+                "hold info img test"
         ));
 
         this.centerBookmarkRepository.save(CenterBookmark.of(center, this.user));

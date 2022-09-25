@@ -27,13 +27,13 @@ public class CenterCreateRequestDto {
     private List<ChargeDto> chargeList;
     private List<HoldInfoRequestDto> holdInfoList;
     private String holdInfoImg;
-    private List<SectorInfoDto> sectorInfoList;
+    private List<SectorInfoRequestDto> sectorInfoList;
 
     public List<HoldInfoRequestDto> getHoldInfoList() {
         return Objects.requireNonNullElse(this.holdInfoList, Collections.emptyList());
     }
 
-    public List<SectorInfoDto> getSectorInfoList() {
+    public List<SectorInfoRequestDto> getSectorInfoList() {
         return Objects.requireNonNullElse(this.sectorInfoList, Collections.emptyList());
     }
 }

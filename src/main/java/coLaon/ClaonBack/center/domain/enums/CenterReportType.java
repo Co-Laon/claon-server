@@ -1,4 +1,4 @@
-package coLaon.ClaonBack.center.domain;
+package coLaon.ClaonBack.center.domain.enums;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;

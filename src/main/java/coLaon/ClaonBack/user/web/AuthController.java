@@ -1,9 +1,9 @@
 package coLaon.ClaonBack.user.web;
 
 import coLaon.ClaonBack.common.utils.CookieUtil;
-import coLaon.ClaonBack.config.UserAccount;
-import coLaon.ClaonBack.config.dto.JwtDto;
-import coLaon.ClaonBack.user.domain.OAuth2Provider;
+import coLaon.ClaonBack.user.domain.UserDetails;
+import coLaon.ClaonBack.common.domain.JwtDto;
+import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
 import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
@@ -62,10 +62,10 @@ public class AuthController {
     @ResponseStatus(value = HttpStatus.CREATED)
     public UserResponseDto signUp(
             HttpServletResponse response,
-            @AuthenticationPrincipal UserAccount userAccount,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody @Valid SignUpRequestDto signUpRequestDto
     ) {
-        UserResponseDto userResponseDto = this.userService.signUp(userAccount.getUser(), signUpRequestDto);
+        UserResponseDto userResponseDto = this.userService.signUp(userDetails.getUser(), signUpRequestDto);
 
         this.cookieUtil.createCookie(response, "isCompletedSignUp", Boolean.TRUE.toString());
         return userResponseDto;

@@ -1,11 +1,15 @@
 package coLaon.ClaonBack.config;
 
+import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.utils.CookieUtil;
 import coLaon.ClaonBack.common.utils.JwtUtil;
-import coLaon.ClaonBack.config.dto.JwtDto;
+import coLaon.ClaonBack.common.domain.JwtDto;
+import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -15,11 +19,16 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Optional;
 
+@Component
 @RequiredArgsConstructor
-public class JwtAuthFilter extends GenericFilterBean {
+public class JwtAuthenticationFilter extends GenericFilterBean {
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
+
+    private final UserRepository userRepository;
 
     @Override
     public void doFilter(
@@ -33,7 +42,7 @@ public class JwtAuthFilter extends GenericFilterBean {
             if (this.jwtUtil.validateToken(jwtDto.getAccessToken())) {
                 if (this.jwtUtil.validateToken(jwtDto.getRefreshToken())) {
                     // Success sign-in
-                    this.jwtUtil.getAuthentication(jwtDto.getAccessToken()).ifPresentOrElse(
+                    this.getAuthentication(this.jwtUtil.getUserId(jwtDto.getAccessToken())).ifPresentOrElse(
                             authentication -> SecurityContextHolder.getContext().setAuthentication(authentication),
                             () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
                     );
@@ -49,7 +58,7 @@ public class JwtAuthFilter extends GenericFilterBean {
                     JwtDto newToken = this.jwtUtil.createToken(userId);
                     this.cookieUtil.addToken((HttpServletResponse) response, newToken);
 
-                    this.jwtUtil.getAuthentication(newToken.getAccessToken()).ifPresentOrElse(
+                    this.getAuthentication(this.jwtUtil.getUserId(newToken.getAccessToken())).ifPresentOrElse(
                             authentication -> SecurityContextHolder.getContext().setAuthentication(authentication),
                             () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
                     );
@@ -64,5 +73,10 @@ public class JwtAuthFilter extends GenericFilterBean {
         }
 
         chain.doFilter(request, response);
+    }
+
+    private Optional<UsernamePasswordAuthenticationToken> getAuthentication(String userPk) {
+        return this.userRepository.findById(userPk)
+                .map(user -> new UsernamePasswordAuthenticationToken(new UserDetails(user), null, new ArrayList<>()));
     }
 }

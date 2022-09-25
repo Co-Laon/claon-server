@@ -1,6 +1,6 @@
 package coLaon.ClaonBack.service;
 
-import coLaon.ClaonBack.version.domain.AppStore;
+import coLaon.ClaonBack.version.domain.enums.AppStore;
 import coLaon.ClaonBack.version.domain.AppVersion;
 import coLaon.ClaonBack.version.dto.AppVersionFindResponseDto;
 import coLaon.ClaonBack.version.repository.AppVersionRepository;

@@ -2,7 +2,7 @@ package coLaon.ClaonBack.center.repository;
 
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
-import coLaon.ClaonBack.center.dto.CenterSearchOption;
+import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.dto.QCenterPreviewResponseDto;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
