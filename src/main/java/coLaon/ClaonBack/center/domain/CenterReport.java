@@ -5,6 +5,8 @@ import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,6 +34,7 @@ public class CenterReport extends BaseEntity {
 
     @ManyToOne(targetEntity = Center.class)
     @JoinColumn(name = "center_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Center center;
 
     private CenterReport(

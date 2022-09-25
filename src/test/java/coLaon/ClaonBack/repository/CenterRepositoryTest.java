@@ -23,8 +23,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,6 +42,8 @@ public class CenterRepositoryTest {
     private CenterBookmarkRepository centerBookmarkRepository;
 
     private User user;
+
+    private Center center;
 
     @BeforeEach
     void setUp() {
@@ -70,7 +72,7 @@ public class CenterRepositoryTest {
                 "hold info img test"
         ));
 
-        centerRepository.save(Center.of(
+        this.center = centerRepository.save(Center.of(
                 "center name",
                 "test",
                 "010-1234-1234",
@@ -115,5 +117,17 @@ public class CenterRepositoryTest {
 
         // then
         assertThat(results.getContent().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void successDeleteCenter() {
+        // given
+        centerRepository.deleteById(center.getId());
+        centerRepository.flush();
+        // when & then
+        Optional<Center> resultCenter = centerRepository.findById(this.center.getId());
+        Optional<CenterBookmark> resultCenterBookmark = centerBookmarkRepository.findByUserIdAndCenterId(user.getId(), this.center.getId());
+        assertThat(resultCenter.isPresent()).isFalse();
+        assertThat(resultCenterBookmark.isPresent()).isFalse();
     }
 }

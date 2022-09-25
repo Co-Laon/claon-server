@@ -3,6 +3,8 @@ package coLaon.ClaonBack.user.domain;
 import coLaon.ClaonBack.common.domain.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -17,10 +19,12 @@ import javax.persistence.Table;
 public class BlockUser extends BaseEntity {
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "block_user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User blockedUser;
 
     public static final String domain = "차단";
