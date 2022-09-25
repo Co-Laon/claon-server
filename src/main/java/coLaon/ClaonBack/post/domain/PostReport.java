@@ -5,6 +5,8 @@ import coLaon.ClaonBack.post.domain.enums.PostReportType;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -31,6 +33,7 @@ public class PostReport extends BaseEntity {
     private User reporter;
     @ManyToOne(targetEntity = Post.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Post post;
 
     private PostReport(
