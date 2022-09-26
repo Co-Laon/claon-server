@@ -30,6 +30,20 @@ public class CenterRepositorySupport extends QuerydslRepositorySupport {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
+    public Page<CenterPreviewResponseDto> searchCenter(String name, Pageable pageable) {
+        JPQLQuery<CenterPreviewResponseDto> query = jpaQueryFactory
+                .select(new QCenterPreviewResponseDto(center.id, center.name, center.imgList, centerReview.rank.avg()))
+                .from(centerReview)
+                .rightJoin(centerReview.center, center)
+                .where(center.name.containsIgnoreCase(name))
+                .groupBy(center.id);
+
+        long totalCount = query.fetchCount();
+        List<CenterPreviewResponseDto> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
+
+        return new PageImpl<>(results, pageable, totalCount);
+    }
+
     public Page<CenterPreviewResponseDto> findCenterByOption(String userId, CenterSearchOption option, Pageable pageable) {
         JPQLQuery<CenterPreviewResponseDto> query = jpaQueryFactory
                 .select(new QCenterPreviewResponseDto(center.id, center.name, center.imgList, centerReview.rank.avg()))
@@ -40,9 +54,6 @@ public class CenterRepositorySupport extends QuerydslRepositorySupport {
         switch (option) {
             case BOOKMARK:
                 query = findBookMarkedCenters(query, userId);
-                break;
-            case MY_AROUND:
-                query = findMyAroundCenters(query, userId);
                 break;
             case NEW_SETTING:
                 query = findNewSettingCenters(query);
@@ -56,11 +67,6 @@ public class CenterRepositorySupport extends QuerydslRepositorySupport {
         List<CenterPreviewResponseDto> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
 
         return new PageImpl<>(results, pageable, totalCount);
-    }
-
-    private JPQLQuery<CenterPreviewResponseDto> findMyAroundCenters(JPQLQuery<CenterPreviewResponseDto> query, String userId) {
-        // TODO implement this.
-        return query;
     }
 
     private JPQLQuery<CenterPreviewResponseDto> findNewSettingCenters(JPQLQuery<CenterPreviewResponseDto> query) {

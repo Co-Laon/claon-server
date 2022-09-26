@@ -3,6 +3,7 @@ package coLaon.ClaonBack.repository;
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterBookmark;
 import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.CenterReview;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.OperatingTime;
@@ -11,6 +12,7 @@ import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.CenterRepositorySupport;
+import coLaon.ClaonBack.center.repository.ReviewRepository;
 import coLaon.ClaonBack.config.QueryDslTestConfig;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -40,6 +42,8 @@ public class CenterRepositoryTest {
     private UserRepository userRepository;
     @Autowired
     private CenterBookmarkRepository centerBookmarkRepository;
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     private User user;
 
@@ -87,10 +91,12 @@ public class CenterRepositoryTest {
         ));
 
         this.centerBookmarkRepository.save(CenterBookmark.of(center, this.user));
+
+        this.reviewRepository.save(CenterReview.of(5, "test", this.user, center));
     }
 
     @Test
-    public void successSearchCenter() {
+    public void successSearchCenterName() {
         // given
         String keyword = "tes";
 
@@ -99,6 +105,18 @@ public class CenterRepositoryTest {
 
         // then
         assertThat(centerList.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void successSearchCenter() {
+        // given
+        String name = "tes";
+
+        // when
+        Page<CenterPreviewResponseDto> centerPage = centerRepositorySupport.searchCenter(name, PageRequest.of(0, 2));
+
+        // then
+        assertThat(centerPage.getContent().get(0).getName()).isEqualTo("test");
     }
 
     @Test

@@ -13,7 +13,7 @@ import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterReportCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
-import coLaon.ClaonBack.center.dto.CenterSearchResponseDto;
+import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
@@ -152,10 +152,10 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public List<CenterSearchResponseDto> searchCenter(String keyword) {
+    public List<CenterNameResponseDto> searchCenterName(String keyword) {
         return centerRepository.searchCenter(keyword)
                 .stream()
-                .map(CenterSearchResponseDto::from)
+                .map(CenterNameResponseDto::from)
                 .collect(Collectors.toList());
     }
 
@@ -192,6 +192,16 @@ public class CenterService {
                                 center
                         )
                 )
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<CenterPreviewResponseDto> searchCenter(
+            String name,
+            Pageable pageable
+    ) {
+        return paginationFactory.create(
+                centerRepositorySupport.searchCenter(name, pageable)
         );
     }
 }

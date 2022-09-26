@@ -5,6 +5,7 @@ import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
+import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
 import coLaon.ClaonBack.user.service.BlockUserService;
 import coLaon.ClaonBack.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,6 +48,16 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     public UserResponseDto getUser(@AuthenticationPrincipal UserDetails userDetails) {
         return userService.getUser(userDetails.getUser());
+    }
+
+    @GetMapping("/search")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Pagination<UserPreviewResponseDto> searchUser(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam String nickname,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return userService.searchUser(userDetails.getUser(), nickname, pageable);
     }
 
     @PutMapping("/me")
