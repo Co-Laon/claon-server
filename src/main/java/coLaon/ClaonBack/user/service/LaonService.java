@@ -10,6 +10,7 @@ import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
+import coLaon.ClaonBack.user.repository.LaonRepositorySupport;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LaonService {
     private final UserRepository userRepository;
     private final LaonRepository laonRepository;
+    private final LaonRepositorySupport laonRepositorySupport;
     private final PaginationFactory paginationFactory;
 
     @Transactional
@@ -68,7 +70,7 @@ public class LaonService {
     @Transactional(readOnly = true)
     public Pagination<LaonFindResponseDto> findAllLaon(User user, Pageable pageable) {
         return this.paginationFactory.create(
-                laonRepository.findAllByUserId(user.getId(), pageable)
+                laonRepositorySupport.findAllByUserId(user.getId(), pageable)
                         .map(LaonFindResponseDto::from)
         );
     }

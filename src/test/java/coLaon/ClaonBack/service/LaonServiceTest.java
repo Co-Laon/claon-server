@@ -8,6 +8,7 @@ import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
+import coLaon.ClaonBack.user.repository.LaonRepositorySupport;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import coLaon.ClaonBack.user.service.LaonService;
 import org.junit.jupiter.api.Assertions;
@@ -40,6 +41,8 @@ public class LaonServiceTest {
     UserRepository userRepository;
     @Mock
     LaonRepository laonRepository;
+    @Mock
+    LaonRepositorySupport laonRepositorySupport;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -158,7 +161,7 @@ public class LaonServiceTest {
 
         Page<Laon> laons = new PageImpl<>(List.of(laonRelation, laonRelation2), pageable, 2);
 
-        given(this.laonRepository.findAllByUserId("userId", pageable)).willReturn(laons);
+        given(this.laonRepositorySupport.findAllByUserId("userId", pageable)).willReturn(laons);
 
         // when
         Pagination<LaonFindResponseDto> laonFindResponseDto = this.laonService.findAllLaon(user, pageable);

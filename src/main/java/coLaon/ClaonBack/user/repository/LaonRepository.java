@@ -18,11 +18,6 @@ public interface LaonRepository extends JpaRepository<Laon, String> {
             "WHERE l.laon_id = :laonId AND l.user_id = :userId", nativeQuery = true)
     Optional<Laon> findByLaonIdAndUserId(@Param("laonId") String laonId, @Param("userId") String userId);
 
-    @Query(value = "SELECT * " +
-            "FROM TB_LAON AS l " +
-            "WHERE l.user_id = :userId", nativeQuery = true)
-    Page<Laon> findAllByUserId(@Param("userId") String userId, Pageable pageable);
-
     @Query(value = "SELECT l.user_id " +
             "FROM TB_LAON AS l " +
             "WHERE l.laon_id = :userId", nativeQuery = true)
