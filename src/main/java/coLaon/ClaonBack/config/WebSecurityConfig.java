@@ -1,5 +1,8 @@
 package coLaon.ClaonBack.config;
 
+import coLaon.ClaonBack.common.utils.CookieUtil;
+import coLaon.ClaonBack.common.utils.JwtUtil;
+import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -19,8 +22,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
+
+    private final UserRepository userRepository;
 
     @Value("${spring.jwt.access-token.cookie-name}")
     private String ACCESS_COOKIE_NAME;
@@ -36,7 +41,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
 
                 .exceptionHandling()
-                .authenticationEntryPoint(this.jwtAuthenticationEntryPoint)
+                .authenticationEntryPoint(this.jwtAuthenticationEntryPoint())
 
                 .and()
                 .sessionManagement()
@@ -63,7 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
 
                 .and()
-                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(this.jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 
                 .logout()
                 .logoutUrl("/api/**/user/sign-out")
@@ -90,5 +95,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
+        return new JwtAuthenticationEntryPoint();
+    }
+
+    private JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtUtil, cookieUtil, userRepository);
     }
 }
