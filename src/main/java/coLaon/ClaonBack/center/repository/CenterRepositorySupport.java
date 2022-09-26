@@ -20,6 +20,7 @@ import java.util.Objects;
 import static coLaon.ClaonBack.center.domain.QCenter.center;
 import static coLaon.ClaonBack.center.domain.QCenterBookmark.centerBookmark;
 import static coLaon.ClaonBack.center.domain.QCenterReview.centerReview;
+import static coLaon.ClaonBack.center.domain.QSectorInfo.sectorInfo;
 
 @Repository
 public class CenterRepositorySupport extends QuerydslRepositorySupport {
@@ -70,8 +71,13 @@ public class CenterRepositorySupport extends QuerydslRepositorySupport {
     }
 
     private JPQLQuery<CenterPreviewResponseDto> findNewSettingCenters(JPQLQuery<CenterPreviewResponseDto> query) {
-        // TODO implement this.
-        return query;
+        LocalDate standardPlus = LocalDate.now().plusDays(2);
+        LocalDate standardMinus = LocalDate.now().minusDays(2);
+
+        return query
+                .join(sectorInfo).on(sectorInfo.center.id.eq(center.id))
+                .where(sectorInfo.end.isNotNull()
+                        .and(sectorInfo.end.between(standardMinus, standardPlus)));
     }
 
     private JPQLQuery<CenterPreviewResponseDto> findBookMarkedCenters(JPQLQuery<CenterPreviewResponseDto> query, String userId) {
@@ -81,7 +87,7 @@ public class CenterRepositorySupport extends QuerydslRepositorySupport {
     }
 
     private JPQLQuery<CenterPreviewResponseDto> findNewlyRegisteredCenters(JPQLQuery<CenterPreviewResponseDto> query) {
-        LocalDateTime standardDate = LocalDate.now().atStartOfDay().minusDays(7);
+        LocalDateTime standardDate = LocalDate.now().atStartOfDay().minusMonths(1);
         return query
                 .where(center.createdAt.after(standardDate));
     }
