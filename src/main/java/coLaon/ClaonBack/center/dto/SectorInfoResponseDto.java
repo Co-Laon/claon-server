@@ -27,11 +27,21 @@ public class SectorInfoResponseDto {
     public static SectorInfoResponseDto from(
             SectorInfo sectorInfo
     ) {
+        String startDate = "";
+        String endDate = "";
+        if (sectorInfo.getStart() != null) {
+            startDate = sectorInfo.getStart().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        }
+
+        if (sectorInfo.getEnd() != null) {
+            endDate = sectorInfo.getEnd().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        }
+
         return new SectorInfoResponseDto(
                 sectorInfo.getId(),
                 sectorInfo.getName(),
-                sectorInfo.getStart().format(DateTimeFormatter.ofPattern("yyyy/MM/dd")),
-                sectorInfo.getEnd().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))
+                startDate,
+                endDate
         );
     }
 }
