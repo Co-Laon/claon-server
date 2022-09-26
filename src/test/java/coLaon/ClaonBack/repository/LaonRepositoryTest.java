@@ -1,14 +1,19 @@
 package coLaon.ClaonBack.repository;
 
+import coLaon.ClaonBack.config.QueryDslTestConfig;
+import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
+import coLaon.ClaonBack.user.repository.LaonRepositorySupport;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -18,6 +23,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Import({QueryDslTestConfig.class, LaonRepositorySupport.class})
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class LaonRepositoryTest {
@@ -25,8 +31,12 @@ public class LaonRepositoryTest {
     private UserRepository userRepository;
     @Autowired
     private LaonRepository laonRepository;
+    @Autowired
+    private BlockUserRepository blockUserRepository;
+    @Autowired
+    private LaonRepositorySupport laonRepositorySupport;
 
-    private User user, laonUser;
+    private User user, laonUser, blockUser;
 
     @BeforeEach
     void setUp() {
@@ -52,10 +62,28 @@ public class LaonRepositoryTest {
                 "instagramId"
         ));
 
+        this.blockUser = userRepository.save(User.of(
+                "block@gmail.com",
+                "1234567890",
+                "block",
+                175.0F,
+                178.0F,
+                "",
+                "",
+                "instagramBlockId"
+        ));
+
         laonRepository.save(Laon.of(
                 this.user,
                 this.laonUser
         ));
+
+        laonRepository.save(Laon.of(
+                this.user,
+                this.blockUser
+        ));
+
+        blockUserRepository.save(BlockUser.of(blockUser, user));
     }
 
     @Test
@@ -77,7 +105,7 @@ public class LaonRepositoryTest {
         String userId = user.getId();
 
         // when
-        Page<Laon> laonList = laonRepository.findAllByUserId(userId, PageRequest.of(0, 2));
+        Page<Laon> laonList = laonRepositorySupport.findAllByUserId(userId, PageRequest.of(0, 2));
 
         // then
         assertThat(laonList.getContent().size()).isEqualTo(1);
