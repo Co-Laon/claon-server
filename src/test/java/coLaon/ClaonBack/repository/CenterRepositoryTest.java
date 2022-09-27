@@ -1,18 +1,20 @@
 package coLaon.ClaonBack.repository;
 
 import coLaon.ClaonBack.center.domain.Center;
-import coLaon.ClaonBack.center.domain.CenterBookmark;
 import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.CenterReview;
 import coLaon.ClaonBack.center.domain.Charge;
-import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.OperatingTime;
+import coLaon.ClaonBack.center.domain.ChargeElement;
+import coLaon.ClaonBack.center.domain.CenterBookmark;
+import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.CenterRepositorySupport;
 import coLaon.ClaonBack.center.repository.ReviewRepository;
+import coLaon.ClaonBack.center.repository.SectorInfoRepository;
 import coLaon.ClaonBack.config.QueryDslTestConfig;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -25,6 +27,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +48,8 @@ public class CenterRepositoryTest {
     private CenterBookmarkRepository centerBookmarkRepository;
     @Autowired
     private ReviewRepository reviewRepository;
+    @Autowired
+    private SectorInfoRepository sectorInfoRepository;
 
     private User user;
 
@@ -93,6 +99,26 @@ public class CenterRepositoryTest {
         this.centerBookmarkRepository.save(CenterBookmark.of(center, this.user));
 
         this.reviewRepository.save(CenterReview.of(5, "test", this.user, center));
+
+        this.sectorInfoRepository.save(SectorInfo.of(
+                "testSectorInfo",
+                LocalDate.of(
+                        LocalDate.now().getYear(),
+                        LocalDate.now().getMonthValue(),
+                        LocalDate.now().getDayOfMonth() - 2),
+                LocalDate.of(
+                        LocalDate.now().getYear(),
+                        LocalDate.now().getMonthValue(),
+                        LocalDate.now().getDayOfMonth() + 1),
+                center)
+        );
+
+        this.sectorInfoRepository.save(SectorInfo.of(
+                "testSectorInfo2",
+                "",
+                "",
+                center
+        ));
     }
 
     @Test
@@ -135,6 +161,12 @@ public class CenterRepositoryTest {
 
         // then
         assertThat(results.getContent().size()).isEqualTo(2);
+
+        // when
+        results = centerRepositorySupport.findCenterByOption(userId, CenterSearchOption.NEW_SETTING, PageRequest.of(0, 2));
+
+        // then
+        assertThat(results.getContent().size()).isEqualTo(1);
     }
 
     @Test
