@@ -13,9 +13,9 @@ import java.util.Optional;
 
 @Component
 public class CookieUtil {
-    @Value("${spring.jwt.access-token.cookie-name}")
+    @Value("${spring.jwt.access-token.name}")
     private String ACCESS_COOKIE_NAME;
-    @Value("${spring.jwt.refresh-token.cookie-name}")
+    @Value("${spring.jwt.refresh-token.name}")
     private String REFRESH_COOKIE_NAME;
     @Value("${spring.jwt.access-token.expire-seconds}")
     private Long ACCESS_TOKEN_EXPIRE_TIME;
@@ -24,8 +24,8 @@ public class CookieUtil {
 
     public void createCookie(
             HttpServletResponse res,
-            String cookieName,
-            String value
+            String value,
+            String cookieName
     ) {
         int maxAge;
         if (Objects.equals(cookieName, this.ACCESS_COOKIE_NAME))
