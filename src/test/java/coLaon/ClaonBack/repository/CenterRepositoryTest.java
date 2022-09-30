@@ -102,14 +102,8 @@ public class CenterRepositoryTest {
 
         this.sectorInfoRepository.save(SectorInfo.of(
                 "testSectorInfo",
-                LocalDate.of(
-                        LocalDate.now().getYear(),
-                        LocalDate.now().getMonthValue(),
-                        LocalDate.now().getDayOfMonth() - 2),
-                LocalDate.of(
-                        LocalDate.now().getYear(),
-                        LocalDate.now().getMonthValue(),
-                        LocalDate.now().getDayOfMonth() + 1),
+                LocalDate.now().minusDays(2),
+                LocalDate.now().plusDays(1),
                 center)
         );
 
