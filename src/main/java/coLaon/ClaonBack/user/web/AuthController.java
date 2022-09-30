@@ -1,6 +1,6 @@
 package coLaon.ClaonBack.user.web;
 
-import coLaon.ClaonBack.common.utils.CookieUtil;
+import coLaon.ClaonBack.common.utils.HeaderUtil;
 import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.common.domain.JwtDto;
 import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
@@ -29,7 +29,7 @@ import javax.validation.Valid;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
     private final UserService userService;
-    private final CookieUtil cookieUtil;
+    private final HeaderUtil headerUtil;
 
     @GetMapping("/nickname/{nickname}/duplicate-check")
     @ResponseStatus(value = HttpStatus.OK)
@@ -54,7 +54,7 @@ public class AuthController {
     ) {
         JwtDto jwtDto = this.userService.signIn(provider, signInRequestDto);
 
-        this.cookieUtil.addToken(response, jwtDto);
+        this.headerUtil.addToken(response, jwtDto);
         return jwtDto;
     }
 
@@ -67,7 +67,7 @@ public class AuthController {
     ) {
         UserResponseDto userResponseDto = this.userService.signUp(userDetails.getUser(), signUpRequestDto);
 
-        this.cookieUtil.createCookie(response, "isCompletedSignUp", Boolean.TRUE.toString());
+        this.headerUtil.createHeader(response, "isCompletedSignUp", Boolean.TRUE.toString());
         return userResponseDto;
     }
 }

@@ -1,8 +1,8 @@
 package coLaon.ClaonBack.config;
 
+import coLaon.ClaonBack.common.utils.HeaderUtil;
 import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.common.exception.ErrorCode;
-import coLaon.ClaonBack.common.utils.CookieUtil;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.common.domain.JwtDto;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -24,7 +24,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class JwtAuthenticationFilter extends GenericFilterBean {
     private final JwtUtil jwtUtil;
-    private final CookieUtil cookieUtil;
+    private final HeaderUtil headerUtil;
 
     private final UserRepository userRepository;
 
@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             ServletResponse response,
             FilterChain chain
     ) throws IOException, ServletException {
-        JwtDto jwtDto = this.cookieUtil.resolveToken((HttpServletRequest) request);
+        JwtDto jwtDto = this.headerUtil.resolveToken((HttpServletRequest) request);
 
         if (jwtDto.getAccessToken() != null && jwtDto.getRefreshToken() != null) {
             if (this.jwtUtil.validateToken(jwtDto.getAccessToken())) {
@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                     String userId = this.jwtUtil.getUserId(jwtDto.getRefreshToken());
 
                     JwtDto newToken = this.jwtUtil.createToken(userId);
-                    this.cookieUtil.addToken((HttpServletResponse) response, newToken);
+                    this.headerUtil.addToken((HttpServletResponse) response, newToken);
 
                     this.getAuthentication(this.jwtUtil.getUserId(newToken.getAccessToken())).ifPresentOrElse(
                             authentication -> SecurityContextHolder.getContext().setAuthentication(authentication),

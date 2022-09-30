@@ -1,10 +1,9 @@
 package coLaon.ClaonBack.config;
 
-import coLaon.ClaonBack.common.utils.CookieUtil;
+import coLaon.ClaonBack.common.utils.HeaderUtil;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,14 +22,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtUtil jwtUtil;
-    private final CookieUtil cookieUtil;
+    private final HeaderUtil headerUtil;
 
     private final UserRepository userRepository;
-
-    @Value("${spring.jwt.access-token.cookie-name}")
-    private String ACCESS_COOKIE_NAME;
-    @Value("${spring.jwt.refresh-token.cookie-name}")
-    private String REFRESH_COOKIE_NAME;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -69,8 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(this.jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 
                 .logout()
-                .logoutUrl("/api/**/user/sign-out")
-                .deleteCookies(this.ACCESS_COOKIE_NAME, this.REFRESH_COOKIE_NAME);
+                .logoutUrl("/api/**/user/sign-out");
     }
 
     @Override
@@ -100,6 +93,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtUtil, cookieUtil, userRepository);
+        return new JwtAuthenticationFilter(jwtUtil, headerUtil, userRepository);
     }
 }
