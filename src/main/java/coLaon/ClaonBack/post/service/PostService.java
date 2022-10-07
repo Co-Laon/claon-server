@@ -32,7 +32,6 @@ import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -46,7 +45,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PostService {
-    private final UserRepository userRepository;
     private final BlockUserRepository blockUserRepository;
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
@@ -214,33 +212,6 @@ public class PostService {
 
         return PostResponseDto.from(
                 this.postRepository.save(post)
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public Pagination<PostThumbnailResponseDto> getUserPosts(
-            User user,
-            String targetUserNickname,
-            Pageable pageable
-    ) {
-        User targetUser = userRepository.findByNickname(targetUserNickname).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", targetUserNickname)
-                )
-        );
-
-        // individual user page
-        if (!user.getId().equals(targetUser.getId())) {
-            IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
-
-            if (blockUserRepository.findBlock(targetUser.getId(), user.getId()).size() > 0) {
-                throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
-            }
-        }
-
-        return this.paginationFactory.create(
-                postRepository.findByWriterAndIsDeletedFalse(targetUser, pageable).map(PostThumbnailResponseDto::from)
         );
     }
 

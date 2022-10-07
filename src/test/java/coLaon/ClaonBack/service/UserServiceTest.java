@@ -8,6 +8,8 @@ import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
+import coLaon.ClaonBack.common.exception.BadRequestException;
+import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.dto.CenterClimbingHistoryResponseDto;
@@ -16,14 +18,17 @@ import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
+import coLaon.ClaonBack.user.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import coLaon.ClaonBack.user.repository.UserRepositorySupport;
+import coLaon.ClaonBack.user.service.PostPort;
 import coLaon.ClaonBack.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,9 +47,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +66,10 @@ public class UserServiceTest {
     PostLikeRepository postLikeRepository;
     @Mock
     LaonRepository laonRepository;
+    @Mock
+    BlockUserRepository blockUserRepository;
+    @Mock
+    PostPort postPort;
     @Mock
     ClimbingHistoryRepository climbingHistoryRepository;
     @Spy
@@ -241,6 +252,60 @@ public class UserServiceTest {
                         IndividualUserResponseDto::getLaonCount,
                         IndividualUserResponseDto::getIsLaon)
                 .contains(null, null, 0L, false);
+    }
+
+    @Test
+    @DisplayName("Success case for find posts by user nickname")
+    void successFindPosts() {
+        // given
+        Post post = Post.of(
+                center,
+                "testContent1",
+                user,
+                List.of(PostContents.of(
+                        "test.com/test.png"
+                )),
+                Set.of()
+        );
+        ReflectionTestUtils.setField(post, "id", "testPostId");
+        ReflectionTestUtils.setField(post, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(post, "updatedAt", LocalDateTime.now());
+
+        Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findByNickname(this.publicUser.getNickname())).willReturn(Optional.of(this.publicUser));
+        given(this.blockUserRepository.findBlock(this.publicUser.getId(), user.getId())).willReturn(List.of());
+        Pagination<PostThumbnailResponseDto> postPagination = paginationFactory.create(new PageImpl<>(List.of(PostThumbnailResponseDto.from(post)), pageable, 1));
+        given(this.postPort.findPostsByUser(this.publicUser, pageable)).willReturn(postPagination);
+
+        // when
+        Pagination<PostThumbnailResponseDto> dtos = this.userService.findPostsByUser(user, this.publicUser.getNickname(), pageable);
+
+        //then
+        assertThat(dtos.getResults())
+                .isNotNull()
+                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("testPostId", post.getThumbnailUrl())
+                );
+    }
+
+    @Test
+    @DisplayName("Fail case(user is private) for find posts")
+    void failFindPosts() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
+
+        // when
+        final BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> this.userService.findPostsByUser(user, this.privateUser.getNickname(), pageable)
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, "비공개 계정입니다.");
     }
 
     @Test

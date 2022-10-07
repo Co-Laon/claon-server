@@ -36,7 +36,6 @@ import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -67,8 +66,6 @@ import static org.mockito.Mockito.mockStatic;
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
     @Mock
-    UserRepository userRepository;
-    @Mock
     BlockUserRepository blockUserRepository;
     @Mock
     PostRepository postRepository;
@@ -90,7 +87,7 @@ public class PostServiceTest {
     @InjectMocks
     PostService postService;
 
-    private User user, user2, blockedUser, privateUser;
+    private User user, user2, blockedUser;
     private Post post, post2, blockedPost, privatePost;
     private HoldInfo holdInfo1;
     private Center center;
@@ -141,7 +138,7 @@ public class PostServiceTest {
                 blockedUser
         );
 
-        this.privateUser = User.of(
+        User privateUser = User.of(
                 "test123@gmail.com",
                 "test2345!!",
                 "privateUser",
@@ -151,8 +148,8 @@ public class PostServiceTest {
                 "",
                 "instagramId2"
         );
-        this.privateUser.changePublicScope();
-        ReflectionTestUtils.setField(this.privateUser, "id", "privateUserId");
+        privateUser.changePublicScope();
+        ReflectionTestUtils.setField(privateUser, "id", "privateUserId");
 
         this.center = Center.of(
                 "testCenter",
@@ -528,46 +525,6 @@ public class PostServiceTest {
                         tuple("testPostId", post.getThumbnailUrl()),
                         tuple("testPostId2", post2.getThumbnailUrl())
                 );
-    }
-
-    @Test
-    @DisplayName("Success case for find posts by user nickname")
-    void successFindPosts() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findByNickname(this.user2.getNickname())).willReturn(Optional.of(this.user2));
-        given(this.blockUserRepository.findBlock(this.user2.getId(), user.getId())).willReturn(List.of());
-        given(this.postRepository.findByWriterAndIsDeletedFalse(this.user2, pageable)).willReturn(new PageImpl<>(List.of(this.post), pageable, 1));
-
-        // when
-        Pagination<PostThumbnailResponseDto> dtos = this.postService.getUserPosts(user, this.user2.getNickname(), pageable);
-
-        //then
-        assertThat(dtos.getResults())
-                .isNotNull()
-                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
-                .contains(
-                        tuple("testPostId", post.getThumbnailUrl())
-                );
-    }
-
-    @Test
-    @DisplayName("Fail case(user is private) for find posts")
-    void failFindPosts() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
-
-        // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
-                () -> this.postService.getUserPosts(user, this.privateUser.getNickname(), pageable)
-        );
-
-        // then
-        assertThat(ex)
-                .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, "비공개 계정입니다.");
     }
 
     @Test
