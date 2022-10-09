@@ -1,6 +1,5 @@
-package coLaon.ClaonBack.post.dto;
+package coLaon.ClaonBack.user.dto;
 
-import coLaon.ClaonBack.user.dto.CenterPreviewResponseDto;
 import lombok.Data;
 
 import java.util.List;
