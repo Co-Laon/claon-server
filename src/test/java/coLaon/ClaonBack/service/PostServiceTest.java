@@ -16,7 +16,7 @@ import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostReport;
 import coLaon.ClaonBack.post.domain.enums.PostReportType;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
-import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
+import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
@@ -244,8 +244,8 @@ public class PostServiceTest {
     }
 
     @Test
-    @DisplayName("Success case for find home post")
-    void successFindHomePost() {
+    @DisplayName("Success case for find posts")
+    void successFindPosts() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
         Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
@@ -256,35 +256,10 @@ public class PostServiceTest {
         given(this.postRepositorySupport.findExceptLaonUserAndBlockUser(user.getId(), pageable)).willReturn(postPage);
 
         // when
-        Pagination<PostDetailResponseDto> homePost = this.postService.findHomePost(user, pageable);
+        Pagination<PostDetailResponseDto> posts = this.postService.findPosts(user, pageable);
 
         //then
-        assertThat(homePost.getResults())
-                .isNotNull()
-                .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
-                .contains(
-                        tuple("testPostId", post.getContent()),
-                        tuple("testPostId2", post2.getContent())
-                );
-    }
-
-    @Test
-    @DisplayName("Success case for find home laon post")
-    void successFindHomeLaonPost() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2);
-        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
-
-        given(this.postLikeRepository.countByPost(post2)).willReturn(2);
-        given(this.postLikeRepository.countByPost(post)).willReturn(3);
-
-        given(this.postRepositorySupport.findLaonUserPostsExceptBlockUser(user.getId(), pageable)).willReturn(postPage);
-
-        // when
-        Pagination<PostDetailResponseDto> homePost = this.postService.findHomeLaonPost(user, pageable);
-
-        //then
-        assertThat(homePost.getResults())
+        assertThat(posts.getResults())
                 .isNotNull()
                 .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
                 .contains(

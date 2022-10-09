@@ -6,6 +6,7 @@ import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.validator.NotIdEqualValidator;
+import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
@@ -24,6 +25,7 @@ public class LaonService {
     private final LaonRepository laonRepository;
     private final LaonRepositorySupport laonRepositorySupport;
     private final PaginationFactory paginationFactory;
+    private final PostPort postPort;
 
     @Transactional
     public void createLaon(User user, String laonNickname) {
@@ -73,5 +75,13 @@ public class LaonService {
                 laonRepositorySupport.findAllByUserId(user.getId(), pageable)
                         .map(LaonFindResponseDto::from)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<PostDetailResponseDto> findLaonPost(
+            User user,
+            Pageable pageable
+    ) {
+        return postPort.findLaonPost(user, pageable);
     }
 }

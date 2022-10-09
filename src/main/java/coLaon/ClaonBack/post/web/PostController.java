@@ -10,7 +10,7 @@ import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
-import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
+import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.dto.PostReportRequestDto;
@@ -167,5 +167,14 @@ public class PostController {
             @PathVariable String commentId
     ) {
         return this.postCommentService.deleteComment(userDetails.getUser(), commentId);
+    }
+
+    @GetMapping
+    @ResponseStatus(value = HttpStatus.OK)
+    public Pagination<PostDetailResponseDto> getPosts(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return this.postService.findPosts(userDetails.getUser(), pageable);
     }
 }

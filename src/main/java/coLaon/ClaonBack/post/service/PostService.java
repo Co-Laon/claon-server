@@ -17,7 +17,7 @@ import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostReport;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
-import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
+import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.dto.PostReportRequestDto;
@@ -53,23 +53,12 @@ public class PostService {
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
-    public Pagination<PostDetailResponseDto> findHomePost(
+    public Pagination<PostDetailResponseDto> findPosts(
             User user,
             Pageable pageable
     ) {
         return this.paginationFactory.create(
                 postRepositorySupport.findExceptLaonUserAndBlockUser(user.getId(), pageable).map(
-                        post -> PostDetailResponseDto.from(post, postLikeRepository.countByPost(post)))
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public Pagination<PostDetailResponseDto> findHomeLaonPost(
-            User user,
-            Pageable pageable
-    ) {
-        return this.paginationFactory.create(
-                postRepositorySupport.findLaonUserPostsExceptBlockUser(user.getId(), pageable).map(
                         post -> PostDetailResponseDto.from(post, postLikeRepository.countByPost(post)))
         );
     }
