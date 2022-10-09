@@ -8,6 +8,7 @@ import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
+import coLaon.ClaonBack.center.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
 import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,6 +48,17 @@ public class CenterController {
     private final CenterService centerService;
     private final CenterReviewService centerReviewService;
     private final CenterBookmarkService centerBookmarkService;
+
+    @GetMapping(value = "/{centerId}/posts")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Pagination<PostThumbnailResponseDto> getCenterPosts(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String centerId,
+            @RequestParam(value = "holdId", required = false) Optional<String> holdId,
+            @PageableDefault(size = 9, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return centerService.getCenterPosts(userDetails.getUser(), centerId, holdId, pageable);
+    }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)

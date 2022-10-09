@@ -17,6 +17,7 @@ import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
+import coLaon.ClaonBack.center.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterReportRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
@@ -24,12 +25,13 @@ import coLaon.ClaonBack.center.repository.CenterRepositorySupport;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.center.repository.SectorInfoRepository;
+import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.validator.IsAdminValidator;
-import coLaon.ClaonBack.post.repository.PostRepositorySupport;
+import coLaon.ClaonBack.common.validator.IsHoldValidator;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,7 +50,7 @@ public class CenterService {
     private final HoldInfoRepository holdInfoRepository;
     private final SectorInfoRepository sectorInfoRepository;
     private final ReviewRepositorySupport reviewRepositorySupport;
-    private final PostRepositorySupport postRepositorySupport;
+    private final PostPort postPort;
     private final CenterBookmarkRepository centerBookmarkRepository;
     private final CenterReportRepository centerReportRepository;
     private final PaginationFactory paginationFactory;
@@ -121,7 +124,7 @@ public class CenterService {
         );
 
         Boolean isBookmarked = centerBookmarkRepository.findByUserIdAndCenterId(user.getId(), centerId).isPresent();
-        Integer postCount = postRepositorySupport.countByCenterExceptBlockUser(centerId, user.getId());
+        Integer postCount = postPort.countByCenterExceptBlockUser(centerId, user.getId());
         Integer reviewCount = reviewRepositorySupport.countByCenterExceptBlockUser(centerId, user.getId());
 
         return CenterDetailResponseDto.from(
@@ -203,5 +206,31 @@ public class CenterService {
         return paginationFactory.create(
                 centerRepositorySupport.searchCenter(name, pageable)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<PostThumbnailResponseDto> getCenterPosts(
+            User user,
+            String centerId,
+            Optional<String> holdId,
+            Pageable pageable
+    ) {
+        Center center = centerRepository.findById(centerId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "암장 정보를 찾을 수 없습니다."
+                )
+        );
+
+        if (holdId.isPresent()) {
+            List<String> allHoldsByCenter = holdInfoRepository.findAllByCenter(center)
+                    .stream().map(BaseEntity::getId).collect(Collectors.toList());
+
+            IsHoldValidator.of(holdId.get(), allHoldsByCenter).validate();
+
+            return this.postPort.findByCenterAndHoldExceptBlockUser(center.getId(), holdId.get(), user.getId(), pageable);
+        }
+
+        return this.postPort.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable);
     }
 }

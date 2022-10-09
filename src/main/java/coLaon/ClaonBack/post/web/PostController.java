@@ -12,7 +12,6 @@ import coLaon.ClaonBack.post.dto.LikeResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
-import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.dto.PostReportRequestDto;
 import coLaon.ClaonBack.post.dto.PostReportResponseDto;
@@ -33,12 +32,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,17 +44,6 @@ public class PostController {
     private final PostService postService;
     private final PostCommentService postCommentService;
     private final PostLikeService postLikeService;
-
-    @GetMapping
-    @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<PostThumbnailResponseDto> getCenterPosts(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam("centerId") String centerId,
-            @RequestParam(value = "holdId", required = false) Optional<String> holdId,
-            @PageableDefault(size = 9, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        return postService.getCenterPosts(userDetails.getUser(), centerId, holdId, pageable);
-    }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)

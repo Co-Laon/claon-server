@@ -17,7 +17,6 @@ import coLaon.ClaonBack.post.domain.PostReport;
 import coLaon.ClaonBack.post.domain.enums.PostReportType;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
-import coLaon.ClaonBack.post.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
@@ -501,76 +500,6 @@ public class PostServiceTest {
         assertThat(ex)
                 .extracting("errorCode", "message")
                 .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
-    }
-
-    @Test
-    @DisplayName("Success case for find post by center")
-    void successFindPostByCenter() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2);
-        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
-
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.postRepositorySupport.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)).willReturn(postPage);
-
-        // when
-        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
-                this.postService.getCenterPosts(user, "centerId", Optional.empty(), pageable);
-
-        //then
-        assertThat(postThumbnailResponseDtoPagination.getResults())
-                .isNotNull()
-                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
-                .contains(
-                        tuple("testPostId", post.getThumbnailUrl()),
-                        tuple("testPostId2", post2.getThumbnailUrl())
-                );
-    }
-
-    @Test
-    @DisplayName("Success case for find post by center and hold")
-    void successFindPostByCenterAndHold() {
-        // given
-        Pageable pageable = PageRequest.of(0, 2);
-        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
-
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo1));
-        given(this.postRepositorySupport.findByCenterAndHoldExceptBlockUser(center.getId(), "holdId1", user.getId(), pageable)).willReturn(postPage);
-
-        // when
-        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
-                this.postService.getCenterPosts(user, "centerId", Optional.of("holdId1"), pageable);
-
-        //then
-        assertThat(postThumbnailResponseDtoPagination.getResults())
-                .isNotNull()
-                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
-                .contains(
-                        tuple("testPostId", post.getThumbnailUrl()),
-                        tuple("testPostId2", post2.getThumbnailUrl())
-                );
-    }
-
-    @Test
-    @DisplayName("Failure case for find post by center and hold with invalid hold info")
-    void failFindPostByCenterAndHold() {
-        //given
-        Pageable pageable = PageRequest.of(0, 2);
-
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo1));
-
-        // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
-                () -> this.postService.getCenterPosts(user, "centerId", Optional.of("invalidHoldId"), pageable)
-        );
-
-        // then
-        assertThat(ex)
-                .extracting("errorCode", "message")
-                .contains(ErrorCode.INVALID_PARAMETER, "잘못된 홀드 정보입니다.");
     }
 
     @Test
