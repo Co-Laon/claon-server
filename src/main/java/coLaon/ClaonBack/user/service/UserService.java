@@ -5,8 +5,10 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.common.domain.JwtDto;
+import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
@@ -15,6 +17,7 @@ import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
 import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
+import coLaon.ClaonBack.user.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
@@ -23,6 +26,7 @@ import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import coLaon.ClaonBack.user.repository.UserRepositorySupport;
@@ -41,6 +45,8 @@ public class UserService {
     private final UserRepositorySupport userRepositorySupport;
     private final ClimbingHistoryRepository climbingHistoryRepository;
     private final LaonRepository laonRepository;
+    private final BlockUserRepository blockUserRepository;
+    private final PostPort postPort;
     private final PostRepository postRepository;
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
@@ -140,6 +146,31 @@ public class UserService {
 
         List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
         return IndividualUserResponseDto.from(targetUser, isLaon, postCount, laonCount, climbingHistories);
+    }
+
+    @Transactional
+    public Pagination<PostThumbnailResponseDto> findPostsByUser(
+            User user,
+            String nickname,
+            Pageable pageable
+    ) {
+        User targetUser = userRepository.findByNickname(nickname).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        String.format("%s을 찾을 수 없습니다.", nickname)
+                )
+        );
+
+        // individual user page
+        if (!user.getId().equals(targetUser.getId())) {
+            IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
+
+            if (blockUserRepository.findBlock(targetUser.getId(), user.getId()).size() > 0) {
+                throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
+            }
+        }
+
+        return postPort.findPostsByUser(targetUser, pageable);
     }
 
     @Transactional(readOnly = true)
