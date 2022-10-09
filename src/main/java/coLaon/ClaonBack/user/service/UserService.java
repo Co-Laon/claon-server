@@ -9,9 +9,7 @@ import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.common.domain.JwtDto;
 import coLaon.ClaonBack.common.validator.IsPrivateValidator;
-import coLaon.ClaonBack.post.domain.ClimbingHistory;
-import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
-import coLaon.ClaonBack.post.repository.PostRepository;
+import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
@@ -43,11 +41,9 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final UserRepositorySupport userRepositorySupport;
-    private final ClimbingHistoryRepository climbingHistoryRepository;
     private final LaonRepository laonRepository;
     private final BlockUserRepository blockUserRepository;
     private final PostPort postPort;
-    private final PostRepository postRepository;
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
     private final JwtUtil jwtUtil;
@@ -136,7 +132,7 @@ public class UserService {
             );
         });
 
-        List<String> postIds = this.postRepository.selectPostIdsByUserId(targetUser.getId());
+        List<String> postIds = this.postPort.selectPostIdsByUserId(targetUser.getId());
         Long postCount = (long) postIds.size();
 
         List<String> userIds = this.laonRepository.getUserIdsByLaonId(targetUser.getId());
@@ -144,7 +140,8 @@ public class UserService {
 
         boolean isLaon = userIds.contains(user.getId());
 
-        List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
+        List<CenterClimbingHistoryResponseDto> climbingHistories = postPort.findClimbingHistoryByPostIds(postIds);
+
         return IndividualUserResponseDto.from(targetUser, isLaon, postCount, laonCount, climbingHistories);
     }
 

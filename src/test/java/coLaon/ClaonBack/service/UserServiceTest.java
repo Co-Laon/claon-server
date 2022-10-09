@@ -12,10 +12,12 @@ import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
-import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.post.repository.PostRepository;
+import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
+import coLaon.ClaonBack.user.dto.CenterPreviewResponseDto;
+import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
+import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.user.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
@@ -46,6 +48,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -59,15 +62,11 @@ public class UserServiceTest {
     @Mock
     UserRepositorySupport userRepositorySupport;
     @Mock
-    PostRepository postRepository;
-    @Mock
     LaonRepository laonRepository;
     @Mock
     BlockUserRepository blockUserRepository;
     @Mock
     PostPort postPort;
-    @Mock
-    ClimbingHistoryRepository climbingHistoryRepository;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -198,9 +197,23 @@ public class UserServiceTest {
     void successRetrieveUser() {
         // given
         given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(user));
-        given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(postIds);
+        given(this.postPort.selectPostIdsByUserId("userId")).willReturn(postIds);
         given(this.laonRepository.getUserIdsByLaonId("userId")).willReturn(List.of("publicUserId"));
-        given(this.climbingHistoryRepository.findByPostIds(this.postIds)).willReturn(List.of(this.climbingHistory));
+
+        CenterClimbingHistoryResponseDto historyDto = CenterClimbingHistoryResponseDto.from(
+                CenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
+                List.of(ClimbingHistoryResponseDto.from(
+                        HoldInfoResponseDto.of(
+                                climbingHistory.getHoldInfo().getId(),
+                                climbingHistory.getHoldInfo().getName(),
+                                climbingHistory.getHoldInfo().getImg(),
+                                climbingHistory.getHoldInfo().getCrayonImageUrl()
+                        ),
+                        climbingHistory.getClimbingCount()
+                ))
+        );
+
+        given(this.postPort.findClimbingHistoryByPostIds((this.postIds))).willReturn(List.of(historyDto));
 
         // when
         IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation(publicUser, "userNickname");
@@ -230,8 +243,23 @@ public class UserServiceTest {
     void successRetrievePrivateUser() {
         // given
         given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(privateUser));
-        given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
+        given(this.postPort.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
         given(this.laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(List.of());
+
+        CenterClimbingHistoryResponseDto historyDto = CenterClimbingHistoryResponseDto.from(
+                CenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
+                List.of(ClimbingHistoryResponseDto.from(
+                        HoldInfoResponseDto.of(
+                                climbingHistory.getHoldInfo().getId(),
+                                climbingHistory.getHoldInfo().getName(),
+                                climbingHistory.getHoldInfo().getImg(),
+                                climbingHistory.getHoldInfo().getCrayonImageUrl()
+                        ),
+                        climbingHistory.getClimbingCount()
+                ))
+        );
+
+        given(this.postPort.findClimbingHistoryByPostIds((this.postIds))).willReturn(List.of(historyDto));
 
         // when
         IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation(publicUser, "userNickname");
@@ -243,8 +271,9 @@ public class UserServiceTest {
                         IndividualUserResponseDto::getHeight,
                         IndividualUserResponseDto::getArmReach,
                         IndividualUserResponseDto::getLaonCount,
+                        IndividualUserResponseDto::getClimbCount,
                         IndividualUserResponseDto::getIsLaon)
-                .contains(null, null, 0L, false);
+                .contains(null, null, 0L, 2L, false);
     }
 
     @Test
@@ -267,7 +296,23 @@ public class UserServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         given(this.userRepository.findByNickname(this.publicUser.getNickname())).willReturn(Optional.of(this.publicUser));
         given(this.blockUserRepository.findBlock(this.publicUser.getId(), user.getId())).willReturn(List.of());
-        Pagination<PostThumbnailResponseDto> postPagination = paginationFactory.create(new PageImpl<>(List.of(PostThumbnailResponseDto.from(post)), pageable, 1));
+        Pagination<PostThumbnailResponseDto> postPagination = paginationFactory.create(new PageImpl<>(
+                List.of(PostThumbnailResponseDto.from(
+                        post.getId(),
+                        post.getThumbnailUrl(),
+                        post.getCenter().getName(),
+                        post.getClimbingHistorySet().stream().map(history ->
+                                ClimbingHistoryResponseDto.from(
+                                        HoldInfoResponseDto.of(
+                                                history.getHoldInfo().getId(),
+                                                history.getHoldInfo().getName(),
+                                                history.getHoldInfo().getImg(),
+                                                history.getHoldInfo().getCrayonImageUrl()
+                                        ),
+                                        history.getClimbingCount()))
+                                .collect(Collectors.toList()))),
+                pageable,
+                1));
         given(this.postPort.findPostsByUser(this.publicUser, pageable)).willReturn(postPagination);
 
         // when

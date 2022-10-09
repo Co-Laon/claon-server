@@ -1,12 +1,8 @@
 package coLaon.ClaonBack.user.dto;
 
-import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
-import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.post.dto.ClimbingHistoryResponseDto;
 import lombok.Data;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 public class PostThumbnailResponseDto {
@@ -27,17 +23,18 @@ public class PostThumbnailResponseDto {
         this.climbingHistories = climbingHistories;
     }
 
-    public static PostThumbnailResponseDto from(Post post) {
+    public static PostThumbnailResponseDto from(
+            String postId,
+            String thumbnailUrl,
+            String centerName,
+            List<ClimbingHistoryResponseDto> climbingHistories
+
+    ) {
         return new PostThumbnailResponseDto(
-                post.getId(),
-                post.getThumbnailUrl(),
-                post.getCenter().getName(),
-                post.getClimbingHistorySet().stream().map(
-                                climbingHistory -> ClimbingHistoryResponseDto.from(
-                                        HoldInfoResponseDto.from(climbingHistory.getHoldInfo()),
-                                        climbingHistory.getClimbingCount()
-                                ))
-                        .collect(Collectors.toList())
+                postId,
+                thumbnailUrl,
+                centerName,
+                climbingHistories
         );
     }
 }

@@ -45,4 +45,13 @@ public class HoldInfo extends BaseEntity {
     ) {
         return new HoldInfo(name, img, center);
     }
+
+    public String getCrayonImageUrl() {
+        String[] holdInfoImageUrl = this.getImg().split("hold/");
+
+        String crayonImageUrl = "";
+        if (holdInfoImageUrl.length == 2)
+            crayonImageUrl = holdInfoImageUrl[0] + "crayon/" + holdInfoImageUrl[1];
+        return crayonImageUrl;
+    }
 }

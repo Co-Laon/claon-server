@@ -1,6 +1,5 @@
-package coLaon.ClaonBack.post.dto;
+package coLaon.ClaonBack.user.dto;
 
-import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import lombok.Data;
 
 @Data
