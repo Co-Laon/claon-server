@@ -9,7 +9,6 @@ import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.common.domain.JwtDto;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
-import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
 import coLaon.ClaonBack.user.domain.User;
@@ -43,7 +42,6 @@ public class UserService {
     private final ClimbingHistoryRepository climbingHistoryRepository;
     private final LaonRepository laonRepository;
     private final PostRepository postRepository;
-    private final PostLikeRepository postLikeRepository;
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
     private final JwtUtil jwtUtil;
@@ -134,7 +132,6 @@ public class UserService {
 
         List<String> postIds = this.postRepository.selectPostIdsByUserId(targetUser.getId());
         Long postCount = (long) postIds.size();
-        Long postLikeCount = this.postLikeRepository.countByPostIdIn(postIds);
 
         List<String> userIds = this.laonRepository.getUserIdsByLaonId(targetUser.getId());
         Long laonCount = (long) userIds.size();
@@ -142,7 +139,7 @@ public class UserService {
         boolean isLaon = userIds.contains(user.getId());
 
         List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
-        return IndividualUserResponseDto.from(targetUser, isLaon, postCount, laonCount, postLikeCount, climbingHistories);
+        return IndividualUserResponseDto.from(targetUser, isLaon, postCount, laonCount, climbingHistories);
     }
 
     @Transactional(readOnly = true)

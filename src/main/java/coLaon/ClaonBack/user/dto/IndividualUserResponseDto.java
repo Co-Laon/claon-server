@@ -16,7 +16,7 @@ public class IndividualUserResponseDto {
     private String nickname;
     private Long postCount;
     private Long laonCount;
-    private Long likeCount;
+    private Long climbCount;
     private Float height;
     private Float armReach;
     private Float apeIndex;
@@ -31,14 +31,12 @@ public class IndividualUserResponseDto {
             Boolean isLaon,
             Long postCount,
             Long laonCount,
-            Long likeCount,
             List<ClimbingHistory> histories
     ) {
         this.nickname = user.getNickname();
         this.isLaon = isLaon;
         this.postCount = postCount;
         this.laonCount = laonCount;
-        this.likeCount = likeCount;
         this.isPrivate = user.getIsPrivate();
         this.imagePath = user.getImagePath();
 
@@ -52,7 +50,6 @@ public class IndividualUserResponseDto {
             Boolean isLaon,
             Long postCount,
             Long laonCount,
-            Long likeCount,
             List<ClimbingHistory> histories
     ) {
         return new IndividualUserResponseDto(
@@ -60,7 +57,6 @@ public class IndividualUserResponseDto {
                 isLaon,
                 postCount,
                 laonCount,
-                likeCount,
                 histories
         );
     }
@@ -77,8 +73,15 @@ public class IndividualUserResponseDto {
     }
 
     private void setHistoryDto(List<ClimbingHistory> histories) {
-        Map<String, Map<HoldInfoResponseDto, Integer>> historyMap = histories.stream().collect(
-                Collectors.groupingBy(history -> history.getPost().getCenter().getName(),
+        this.climbCount = histories.stream()
+                .mapToLong(ClimbingHistory::getClimbingCount)
+                .sum();
+
+        Map<CenterPreviewResponseDto, Map<HoldInfoResponseDto, Integer>> historyMap = histories.stream().collect(
+                Collectors.groupingBy(history -> CenterPreviewResponseDto.of(
+                                history.getPost().getCenter().getThumbnailUrl(),
+                                history.getPost().getCenter().getName()
+                        ),
                         Collectors.toMap(
                                 history -> HoldInfoResponseDto.from(history.getHoldInfo()),
                                 ClimbingHistory::getClimbingCount,

@@ -10,11 +10,9 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
-import coLaon.ClaonBack.post.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
@@ -55,8 +53,6 @@ public class UserServiceTest {
     UserRepositorySupport userRepositorySupport;
     @Mock
     PostRepository postRepository;
-    @Mock
-    PostLikeRepository postLikeRepository;
     @Mock
     LaonRepository laonRepository;
     @Mock
@@ -192,7 +188,6 @@ public class UserServiceTest {
         // given
         given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(user));
         given(this.postRepository.selectPostIdsByUserId("userId")).willReturn(postIds);
-        given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
         given(this.laonRepository.getUserIdsByLaonId("userId")).willReturn(List.of("publicUserId"));
         given(this.climbingHistoryRepository.findByPostIds(this.postIds)).willReturn(List.of(this.climbingHistory));
 
@@ -205,15 +200,14 @@ public class UserServiceTest {
                 .extracting(
                         IndividualUserResponseDto::getHeight,
                         IndividualUserResponseDto::getPostCount,
-                        IndividualUserResponseDto::getLikeCount,
                         IndividualUserResponseDto::getLaonCount,
                         IndividualUserResponseDto::getIsLaon)
-                .contains(175.0F, 1L, 5L, 1L, true);
+                .contains(175.0F, 1L, 1L, true);
 
         assertThat(userResponseDto.getCenterClimbingHistories())
                 .isNotNull()
                 .extracting(
-                        CenterClimbingHistoryResponseDto::getCenterName,
+                        center -> center.getCenter().getCenterName(),
                         history -> history.getClimbingHistories().get(0).getClimbingCount())
                 .containsExactly(
                         tuple(center.getName(), 2)
@@ -226,7 +220,6 @@ public class UserServiceTest {
         // given
         given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(privateUser));
         given(this.postRepository.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
-        given(this.postLikeRepository.countByPostIdIn(postIds)).willReturn(5L);
         given(this.laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(List.of());
 
         // when
