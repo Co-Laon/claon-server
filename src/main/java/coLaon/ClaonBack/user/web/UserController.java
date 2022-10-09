@@ -37,7 +37,7 @@ public class UserController {
     private final UserService userService;
     private final BlockUserService blockUserService;
 
-    @PutMapping("/public-scope")
+    @PutMapping("/me/scope")
     @ResponseStatus(value = HttpStatus.OK)
     public PublicScopeResponseDto changePublicScope(
             @AuthenticationPrincipal UserDetails userDetails
@@ -70,7 +70,7 @@ public class UserController {
         return userService.modifyUser(userDetails.getUser(), dto);
     }
 
-    @GetMapping("/{userNickname}")
+    @GetMapping("/name/{userNickname}")
     @ResponseStatus(value = HttpStatus.OK)
     public IndividualUserResponseDto getPublicUser(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -79,7 +79,7 @@ public class UserController {
         return userService.getOtherUserInformation(userDetails.getUser(), userNickname);
     }
 
-    @GetMapping("/{nickname}/posts")
+    @GetMapping("/name/{nickname}/posts")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<PostThumbnailResponseDto> findPostsByUser(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -89,7 +89,7 @@ public class UserController {
         return userService.findPostsByUser(userDetails.getUser(), nickname, pageable);
     }
 
-    @PostMapping(value = "/{blockNickname}/block")
+    @PostMapping(value = "/name/{blockNickname}/block")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createBlock(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -98,7 +98,7 @@ public class UserController {
         this.blockUserService.createBlock(userDetails.getUser(), blockNickname);
     }
 
-    @DeleteMapping(value = "/{blockNickname}/block")
+    @DeleteMapping(value = "/name/{blockNickname}/block")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteBlock(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -107,7 +107,7 @@ public class UserController {
         this.blockUserService.deleteBlock(userDetails.getUser(), blockNickname);
     }
 
-    @GetMapping("/blocked-users")
+    @GetMapping("/block")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<BlockUserFindResponseDto> findBlockUser(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -116,7 +116,7 @@ public class UserController {
         return this.blockUserService.findBlockUser(userDetails.getUser(), pageable);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/me")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteUser(
             @AuthenticationPrincipal UserDetails userDetails

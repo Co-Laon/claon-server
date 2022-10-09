@@ -6,7 +6,10 @@ import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
+import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
+import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
+import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
@@ -26,6 +29,8 @@ public class PostToUserAdapter implements PostPort {
     private final PostRepository postRepository;
     private final ClimbingHistoryRepository climbingHistoryRepository;
     private final PaginationFactory paginationFactory;
+    private final PostRepositorySupport postRepositorySupport;
+    private final PostLikeRepository postLikeRepository;
 
     @Override
     public Pagination<PostThumbnailResponseDto> findPostsByUser(User user, Pageable pageable) {
@@ -85,5 +90,14 @@ public class PostToUserAdapter implements PostPort {
                                 .map(en -> ClimbingHistoryResponseDto.from(en.getKey(), en.getValue()))
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Pagination<PostDetailResponseDto> findLaonPost(User user, Pageable pageable) {
+        return this.paginationFactory.create(
+                postRepositorySupport.findLaonUserPostsExceptBlockUser(user.getId(), pageable).map(
+                        post -> PostDetailResponseDto.from(post, postLikeRepository.countByPost(post))
+                )
+        );
     }
 }

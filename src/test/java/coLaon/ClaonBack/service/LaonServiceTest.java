@@ -1,9 +1,21 @@
 package coLaon.ClaonBack.service;
 
+import coLaon.ClaonBack.center.domain.Center;
+import coLaon.ClaonBack.center.domain.CenterImg;
+import coLaon.ClaonBack.center.domain.Charge;
+import coLaon.ClaonBack.center.domain.ChargeElement;
+import coLaon.ClaonBack.center.domain.HoldInfo;
+import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
+import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.post.domain.PostContents;
+import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
+import coLaon.ClaonBack.post.repository.PostLikeRepository;
+import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
@@ -11,6 +23,7 @@ import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.LaonRepositorySupport;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import coLaon.ClaonBack.user.service.LaonService;
+import coLaon.ClaonBack.user.service.PostPort;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,8 +40,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -43,14 +58,25 @@ public class LaonServiceTest {
     LaonRepository laonRepository;
     @Mock
     LaonRepositorySupport laonRepositorySupport;
+    @Mock
+    PostPort postPort;
+    @Mock
+    PostLikeRepository postLikeRepository;
+    @Mock
+    PostRepositorySupport postRepositorySupport;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     LaonService laonService;
 
-    private User user, laon, laon2;
+    private User user, user2, laon, laon2;
     private Laon laonRelation, laonRelation2;
+    private Center center;
+    private HoldInfo holdInfo;
+    private Post post1, post2;
+    private ClimbingHistory climbingHistory;
+
 
     @BeforeEach
     void setUp() {
@@ -78,6 +104,35 @@ public class LaonServiceTest {
         );
         ReflectionTestUtils.setField(this.laon2, "id", "laonId2");
 
+        this.holdInfo = HoldInfo.of(
+                "holdName1",
+                "/hold1.png",
+                center
+        );
+        ReflectionTestUtils.setField(this.holdInfo, "id", "holdId1");
+
+        this.center = Center.of(
+                "testCenter",
+                "testAddress",
+                "010-1234-1234",
+                "https://test.com",
+                "https://instagram.com/test",
+                "https://youtube.com/channel/test",
+                List.of(new CenterImg("img test")),
+                List.of(new OperatingTime("매일", "10:00", "23:00")),
+                "facilities test",
+                List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
+                "hold info img test"
+        );
+        ReflectionTestUtils.setField(this.center, "id", "center1");
+
+        this.climbingHistory = ClimbingHistory.of(
+                this.post1,
+                holdInfo,
+                0
+        );
+        ReflectionTestUtils.setField(this.climbingHistory, "id", "climbingId");
+
         this.user = User.of(
                 "test@gmail.com",
                 "1234567222",
@@ -90,6 +145,18 @@ public class LaonServiceTest {
         );
         ReflectionTestUtils.setField(this.user, "id", "userId");
 
+        this.user2 = User.of(
+                "test123@gmail.com",
+                "test2345!!",
+                "test2",
+                175.0F,
+                178.0F,
+                "",
+                "",
+                "instagramId2"
+        );
+        ReflectionTestUtils.setField(this.user2, "id", "testUserId2");
+
         this.laonRelation = Laon.of(
                 this.user,
                 this.laon
@@ -99,6 +166,33 @@ public class LaonServiceTest {
                 this.user,
                 this.laon2
         );
+
+        this.post1 = Post.of(
+                center,
+                "testContent1",
+                user,
+                List.of(PostContents.of(
+                        "test.com/test.png"
+                )),
+                Set.of()
+        );
+        ReflectionTestUtils.setField(this.post1, "id", "testPostId");
+        ReflectionTestUtils.setField(this.post1, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.post1, "updatedAt", LocalDateTime.now());
+
+        this.post2 = Post.of(
+                center,
+                "testContent2",
+                user2,
+                List.of(PostContents.of(
+                        "test2.com/test.png"
+                )),
+                Set.of(climbingHistory)
+        );
+        ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
+        ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.post2, "updatedAt", LocalDateTime.now());
+
     }
 
     @Test
@@ -173,6 +267,29 @@ public class LaonServiceTest {
                 .containsExactly(
                         tuple(this.laon.getNickname(), this.laon.getImagePath()),
                         tuple(this.laon2.getNickname(), this.laon2.getImagePath())
+                );
+    }
+
+    @Test
+    @DisplayName("Success case for find laon posts")
+    void successFindLaonPost() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+
+        Pagination<PostDetailResponseDto> postPagination = paginationFactory.create(new PageImpl<>(List.of(PostDetailResponseDto.from(post1, 3),
+                PostDetailResponseDto.from(post2, 2)), pageable, 2));
+        given(this.postPort.findLaonPost(user, pageable)).willReturn(postPagination);
+
+        // when
+        Pagination<PostDetailResponseDto> post = this.laonService.findLaonPost(user, pageable);
+
+        //then
+        assertThat(post.getResults())
+                .isNotNull()
+                .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
+                .contains(
+                        tuple("testPostId", post1.getContent()),
+                        tuple("testPostId2", post2.getContent())
                 );
     }
 }

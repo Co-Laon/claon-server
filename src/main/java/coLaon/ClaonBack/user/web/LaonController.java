@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.user.web;
 
 import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
 import coLaon.ClaonBack.user.service.LaonService;
@@ -50,5 +51,14 @@ public class LaonController {
             @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) final Pageable pageable
     ) {
         return this.laonService.findAllLaon(userDetails.getUser(), pageable);
+    }
+
+    @GetMapping("/posts")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Pagination<PostDetailResponseDto> getLaonPost(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return this.laonService.findLaonPost(userDetails.getUser(), pageable);
     }
 }

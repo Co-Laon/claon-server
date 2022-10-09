@@ -98,7 +98,7 @@ public class UserRepositoryTest {
         Page<User> userPage = userRepositorySupport.searchUser(user.getId(), nickname, PageRequest.of(0, 2));
 
         // then
-        assertThat(userPage.getContent().size()).isEqualTo(1);
+        assertThat(userPage.getContent()).hasSize(1);
         assertThat(userPage.getContent().get(0).getNickname()).isEqualTo("search");
     }
 
