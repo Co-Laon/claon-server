@@ -23,6 +23,7 @@ import coLaon.ClaonBack.center.dto.ChargeElementDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
 import coLaon.ClaonBack.center.dto.OperatingTimeDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
+import coLaon.ClaonBack.center.dto.PostThumbnailResponseDto;
 import coLaon.ClaonBack.center.dto.SectorInfoRequestDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterReportRepository;
@@ -32,10 +33,15 @@ import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.center.repository.SectorInfoRepository;
 import coLaon.ClaonBack.center.service.CenterService;
+import coLaon.ClaonBack.center.service.PostPort;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
+import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
+import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import org.junit.jupiter.api.Assertions;
@@ -55,11 +61,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -76,11 +85,11 @@ public class CenterServiceTest {
     @Mock
     CenterBookmarkRepository centerBookmarkRepository;
     @Mock
-    PostRepositorySupport postRepositorySupport;
-    @Mock
     CenterReportRepository centerReportRepository;
     @Mock
     CenterRepositorySupport centerRepositorySupport;
+    @Mock
+    PostPort postPort;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -89,6 +98,7 @@ public class CenterServiceTest {
 
     private User admin, user;
     private Center center, center2;
+    private Post post, post2;
     private HoldInfo holdInfo, holdInfo2;
     private SectorInfo sectorInfo;
     private CenterBookmark centerBookmark;
@@ -149,12 +159,132 @@ public class CenterServiceTest {
         );
         ReflectionTestUtils.setField(this.center2, "id", "center id2");
 
+        this.post = Post.of(
+                center,
+                "testContent1",
+                user,
+                List.of(PostContents.of(
+                        "test.com/test.png"
+                )),
+                Set.of()
+        );
+        ReflectionTestUtils.setField(this.post, "id", "testPostId");
+        ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.post, "updatedAt", LocalDateTime.now());
+
+        ClimbingHistory climbingHistory = ClimbingHistory.of(
+                this.post,
+                holdInfo,
+                1
+        );
+        ReflectionTestUtils.setField(climbingHistory, "id", "climbingId");
+
+        this.post2 = Post.of(
+                center,
+                "testContent2",
+                user,
+                List.of(PostContents.of(
+                        "test2.com/test.png"
+                )),
+                Set.of(climbingHistory)
+        );
+        ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
+        ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(this.post2, "updatedAt", LocalDateTime.now());
+
         this.holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
+        ReflectionTestUtils.setField(this.holdInfo, "id", "holdId1");
+
         this.holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
         this.sectorInfo = SectorInfo.of("test sector", LocalDate.of(2022, 1, 1), LocalDate.of(2022, 1, 1), this.center);
 
         this.centerBookmark = CenterBookmark.of(center, user);
         ReflectionTestUtils.setField(this.centerBookmark, "id", "bookMarkId");
+    }
+
+    @Test
+    @DisplayName("Success case for find post by center")
+    void successFindPostByCenter() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
+
+        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+
+        Pagination<PostThumbnailResponseDto> postPagination = paginationFactory.create(
+                new PageImpl<>(
+                        List.of(
+                                PostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()),
+                                PostThumbnailResponseDto.from(post2.getId(), post2.getThumbnailUrl())
+                        ), pageable, 2)
+        );
+        given(this.postPort.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)).willReturn(postPagination);
+
+        // when
+        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
+                this.centerService.getCenterPosts(user, "centerId", Optional.empty(), pageable);
+
+        //then
+        assertThat(postThumbnailResponseDtoPagination.getResults())
+                .isNotNull()
+                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("testPostId", post.getThumbnailUrl()),
+                        tuple("testPostId2", post2.getThumbnailUrl())
+                );
+    }
+
+    @Test
+    @DisplayName("Success case for find post by center and hold")
+    void successFindPostByCenterAndHold() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
+
+        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo));
+
+        Pagination<PostThumbnailResponseDto> postPagination = paginationFactory.create(
+                new PageImpl<>(
+                        List.of(
+                                PostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()),
+                                PostThumbnailResponseDto.from(post2.getId(), post2.getThumbnailUrl())
+                        ), pageable, 2)
+        );
+        given(this.postPort.findByCenterAndHoldExceptBlockUser(center.getId(), "holdId1", user.getId(), pageable)).willReturn(postPagination);
+
+        // when
+        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
+                this.centerService.getCenterPosts(user, "centerId", Optional.of("holdId1"), pageable);
+
+        //then
+        assertThat(postThumbnailResponseDtoPagination.getResults())
+                .isNotNull()
+                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("testPostId", post.getThumbnailUrl())
+                );
+    }
+
+    @Test
+    @DisplayName("Failure case for find post by center and hold with invalid hold info")
+    void failFindPostByCenterAndHold() {
+        //given
+        Pageable pageable = PageRequest.of(0, 2);
+
+        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo));
+
+        // when
+        final BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> this.centerService.getCenterPosts(user, "centerId", Optional.of("invalidHoldId"), pageable)
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.INVALID_PARAMETER, "잘못된 홀드 정보입니다.");
     }
 
     @Test
@@ -258,7 +388,7 @@ public class CenterServiceTest {
         // given
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
         given(this.centerBookmarkRepository.findByUserIdAndCenterId("userId", "centerId")).willReturn(Optional.of(centerBookmark));
-        given(this.postRepositorySupport.countByCenterExceptBlockUser("centerId", "userId")).willReturn(0);
+        given(this.postPort.countByCenterExceptBlockUser("centerId", "userId")).willReturn(0);
         given(this.reviewRepositorySupport.countByCenterExceptBlockUser("centerId", "userId")).willReturn(2);
         given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
         given(this.sectorInfoRepository.findAllByCenter(center)).willReturn(List.of(sectorInfo));
