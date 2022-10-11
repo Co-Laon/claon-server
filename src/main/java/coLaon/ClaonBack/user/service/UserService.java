@@ -15,7 +15,7 @@ import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
 import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
-import coLaon.ClaonBack.user.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
@@ -146,7 +146,7 @@ public class UserService {
     }
 
     @Transactional
-    public Pagination<PostThumbnailResponseDto> findPostsByUser(
+    public Pagination<UserPostThumbnailResponseDto> findPostsByUser(
             User user,
             String nickname,
             Pageable pageable

@@ -6,7 +6,7 @@ import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.validator.NotIdEqualValidator;
-import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
+import coLaon.ClaonBack.user.dto.UserPostDetailResponseDto;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
@@ -78,7 +78,7 @@ public class LaonService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<PostDetailResponseDto> findLaonPost(
+    public Pagination<UserPostDetailResponseDto> findLaonPost(
             User user,
             Pageable pageable
     ) {

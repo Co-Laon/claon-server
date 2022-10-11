@@ -1,6 +1,6 @@
 package coLaon.ClaonBack.post.service;
 
-import coLaon.ClaonBack.center.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
 import coLaon.ClaonBack.center.service.PostPort;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
@@ -16,18 +16,18 @@ public class PostToCenterAdapter implements PostPort {
     private final PaginationFactory paginationFactory;
 
     @Override
-    public Pagination<PostThumbnailResponseDto> findByCenterAndHoldExceptBlockUser(String centerId, String holdId, String userId, Pageable pageable) {
+    public Pagination<CenterPostThumbnailResponseDto> findByCenterAndHoldExceptBlockUser(String centerId, String holdId, String userId, Pageable pageable) {
         return this.paginationFactory.create(
                 postRepositorySupport.findByCenterAndHoldExceptBlockUser(centerId, holdId, userId, pageable)
-                            .map((post) -> PostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()))
+                            .map((post) -> CenterPostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()))
             );
     }
 
     @Override
-    public Pagination<PostThumbnailResponseDto> findByCenterExceptBlockUser(String centerId, String userId, Pageable pageable) {
+    public Pagination<CenterPostThumbnailResponseDto> findByCenterExceptBlockUser(String centerId, String userId, Pageable pageable) {
         return this.paginationFactory.create(
                 postRepositorySupport.findByCenterExceptBlockUser(centerId, userId, pageable)
-                        .map((post) -> PostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()))
+                        .map((post) -> CenterPostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()))
         );
     }
 

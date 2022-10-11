@@ -17,11 +17,11 @@ import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostReport;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
-import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
-import coLaon.ClaonBack.post.dto.PostResponseDto;
-import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
+import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostReportRequestDto;
 import coLaon.ClaonBack.post.dto.PostReportResponseDto;
+import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostReportRepository;
@@ -81,10 +81,7 @@ public class PostService {
 
         IsPrivateValidator.of(post.getWriter().getIsPrivate()).validate();
 
-        return PostDetailResponseDto.from(
-                post,
-                postLikeRepository.countByPost(post)
-        );
+        return PostDetailResponseDto.from(post, postLikeRepository.countByPost(post));
     }
 
     @Transactional
@@ -114,8 +111,7 @@ public class PostService {
 
         List<ClimbingHistory> climbingHistoryList = Optional.ofNullable(postCreateRequestDto.getClimbingHistories())
                 .orElse(Collections.emptyList())
-                .stream()
-                .map(history ->
+                .stream().map(history ->
                         climbingHistoryRepository.save(ClimbingHistory.of(
                                 post,
                                 holdInfoRepository.findById(history.getHoldId()).orElseThrow(
@@ -126,13 +122,7 @@ public class PostService {
                                 history.getClimbingCount())))
                 .collect(Collectors.toList());
 
-        return PostResponseDto.from(
-                post,
-                climbingHistoryList
-                        .stream()
-                        .map(ClimbingHistory::getHoldInfo)
-                        .collect(Collectors.toList())
-        );
+        return PostResponseDto.from(post, climbingHistoryList);
     }
 
     @Transactional
@@ -151,10 +141,10 @@ public class PostService {
         IdEqualValidator.of(post.getWriter().getId(), user.getId()).validate();
 
         climbingHistoryRepository.deleteAllByPost(postId);
+
         List<ClimbingHistory> climbingHistoryList = Optional.ofNullable(postUpdateRequestDto.getClimbingHistories())
                 .orElse(Collections.emptyList())
-                .stream()
-                .map(history ->
+                .stream().map(history ->
                         climbingHistoryRepository.save(ClimbingHistory.of(
                                 post,
                                 holdInfoRepository.findById(history.getHoldId()).orElseThrow(
@@ -174,13 +164,7 @@ public class PostService {
                         .collect(Collectors.toList())
         );
 
-        return PostResponseDto.from(
-                postRepository.save(post),
-                climbingHistoryList
-                        .stream()
-                        .map(ClimbingHistory::getHoldInfo)
-                        .collect(Collectors.toList())
-        );
+        return PostResponseDto.from(postRepository.save(post), climbingHistoryList);
     }
 
     @Transactional
@@ -196,9 +180,7 @@ public class PostService {
 
         post.delete();
 
-        return PostResponseDto.from(
-                this.postRepository.save(post)
-        );
+        return PostResponseDto.from(this.postRepository.save(post));
     }
 
     @Transactional

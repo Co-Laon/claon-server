@@ -3,7 +3,7 @@ package coLaon.ClaonBack.user.web;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
-import coLaon.ClaonBack.user.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
@@ -81,7 +81,7 @@ public class UserController {
 
     @GetMapping("/name/{nickname}/posts")
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<PostThumbnailResponseDto> findPostsByUser(
+    public Pagination<UserPostThumbnailResponseDto> findPostsByUser(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String nickname,
             @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable

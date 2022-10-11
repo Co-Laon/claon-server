@@ -17,7 +17,7 @@ import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
-import coLaon.ClaonBack.center.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterReportRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
@@ -209,7 +209,7 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<PostThumbnailResponseDto> getCenterPosts(
+    public Pagination<CenterPostThumbnailResponseDto> getCenterPosts(
             User user,
             String centerId,
             Optional<String> holdId,

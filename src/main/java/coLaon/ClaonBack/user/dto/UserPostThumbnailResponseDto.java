@@ -5,13 +5,13 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class PostThumbnailResponseDto {
+public class UserPostThumbnailResponseDto {
     private final String postId;
     private final String thumbnailUrl;
     private final String centerName;
-    private List<ClimbingHistoryResponseDto> climbingHistories;
+    private final List<ClimbingHistoryResponseDto> climbingHistories;
 
-    private PostThumbnailResponseDto(
+    private UserPostThumbnailResponseDto(
             String postId,
             String thumbnailUrl,
             String centerName,
@@ -23,14 +23,14 @@ public class PostThumbnailResponseDto {
         this.climbingHistories = climbingHistories;
     }
 
-    public static PostThumbnailResponseDto from(
+    public static UserPostThumbnailResponseDto from(
             String postId,
             String thumbnailUrl,
             String centerName,
             List<ClimbingHistoryResponseDto> climbingHistories
 
     ) {
-        return new PostThumbnailResponseDto(
+        return new UserPostThumbnailResponseDto(
                 postId,
                 thumbnailUrl,
                 centerName,
