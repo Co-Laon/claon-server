@@ -14,9 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.Objects;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -28,11 +25,8 @@ public class S3Util {
     @Value("${cloud.aws.s3.bucket}")
     public String bucket;
 
-    public String upload(MultipartFile uploadFile, String dirName) {
-        String fileFormatName = Objects.requireNonNull(uploadFile.getContentType())
-                .substring(uploadFile.getContentType().lastIndexOf("/") + 1);
-        String fileName = dirName + "/" + LocalDate.now() + "/" + UUID.randomUUID() + "." + fileFormatName;
-        MultipartFile resizedFile = imageUtil.resizeImage(uploadFile, fileFormatName, fileName);
+    public String uploadImage(MultipartFile uploadFile, String fileName, String fileExtension) {
+        MultipartFile resizedFile = imageUtil.resizeImage(uploadFile, fileExtension, fileName);
         ObjectMetadata objectMetadata = getObjectMetadata(uploadFile, resizedFile);
 
         return putS3(resizedFile, fileName, objectMetadata);
@@ -45,7 +39,7 @@ public class S3Util {
         } catch (IOException e) {
             throw new InternalServerErrorException(
                     ErrorCode.INTERNAL_SERVER_ERROR,
-                    "이미지 업로드를 실패했습니다."
+                    "S3 업로드를 실패했습니다."
             );
         }
         return amazonS3Client.getUrl(bucket, fileName).toString();
