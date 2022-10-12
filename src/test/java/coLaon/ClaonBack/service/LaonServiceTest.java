@@ -13,12 +13,12 @@ import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
-import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
-import coLaon.ClaonBack.post.repository.PostLikeRepository;
-import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
+import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
+import coLaon.ClaonBack.user.dto.UserPostDetailResponseDto;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.LaonRepositorySupport;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -44,6 +44,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -60,10 +61,6 @@ public class LaonServiceTest {
     LaonRepositorySupport laonRepositorySupport;
     @Mock
     PostPort postPort;
-    @Mock
-    PostLikeRepository postLikeRepository;
-    @Mock
-    PostRepositorySupport postRepositorySupport;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -73,10 +70,7 @@ public class LaonServiceTest {
     private User user, user2, laon, laon2;
     private Laon laonRelation, laonRelation2;
     private Center center;
-    private HoldInfo holdInfo;
     private Post post1, post2;
-    private ClimbingHistory climbingHistory;
-
 
     @BeforeEach
     void setUp() {
@@ -104,12 +98,12 @@ public class LaonServiceTest {
         );
         ReflectionTestUtils.setField(this.laon2, "id", "laonId2");
 
-        this.holdInfo = HoldInfo.of(
+        HoldInfo holdInfo = HoldInfo.of(
                 "holdName1",
                 "/hold1.png",
                 center
         );
-        ReflectionTestUtils.setField(this.holdInfo, "id", "holdId1");
+        ReflectionTestUtils.setField(holdInfo, "id", "holdId1");
 
         this.center = Center.of(
                 "testCenter",
@@ -126,12 +120,12 @@ public class LaonServiceTest {
         );
         ReflectionTestUtils.setField(this.center, "id", "center1");
 
-        this.climbingHistory = ClimbingHistory.of(
+        ClimbingHistory climbingHistory = ClimbingHistory.of(
                 this.post1,
                 holdInfo,
                 0
         );
-        ReflectionTestUtils.setField(this.climbingHistory, "id", "climbingId");
+        ReflectionTestUtils.setField(climbingHistory, "id", "climbingId");
 
         this.user = User.of(
                 "test@gmail.com",
@@ -276,17 +270,61 @@ public class LaonServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 2);
 
-        Pagination<PostDetailResponseDto> postPagination = paginationFactory.create(new PageImpl<>(List.of(PostDetailResponseDto.from(post1, 3),
-                PostDetailResponseDto.from(post2, 2)), pageable, 2));
+        Pagination<UserPostDetailResponseDto> postPagination = paginationFactory.create(
+                new PageImpl<>(List.of(
+                        UserPostDetailResponseDto.from(
+                                post1.getId(),
+                                post1.getCenter().getId(),
+                                post1.getCenter().getName(),
+                                post1.getWriter().getImagePath(),
+                                post1.getWriter().getNickname(),
+                                1,
+                                post1.getContent(),
+                                post1.getCreatedAt(),
+                                post1.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
+                                post1.getClimbingHistorySet().stream()
+                                        .map(history -> ClimbingHistoryResponseDto.from(
+                                                HoldInfoResponseDto.of(
+                                                        history.getHoldInfo().getId(),
+                                                        history.getHoldInfo().getName(),
+                                                        history.getHoldInfo().getImg(),
+                                                        history.getHoldInfo().getCrayonImageUrl()
+                                                ),
+                                                history.getClimbingCount()
+                                        ))
+                                        .collect(Collectors.toList())),
+                        UserPostDetailResponseDto.from(
+                                post2.getId(),
+                                post2.getCenter().getId(),
+                                post2.getCenter().getName(),
+                                post2.getWriter().getImagePath(),
+                                post2.getWriter().getNickname(),
+                                1,
+                                post2.getContent(),
+                                post2.getCreatedAt(),
+                                post2.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
+                                post2.getClimbingHistorySet().stream()
+                                        .map(history -> ClimbingHistoryResponseDto.from(
+                                                HoldInfoResponseDto.of(
+                                                        history.getHoldInfo().getId(),
+                                                        history.getHoldInfo().getName(),
+                                                        history.getHoldInfo().getImg(),
+                                                        history.getHoldInfo().getCrayonImageUrl()
+                                                ),
+                                                history.getClimbingCount()
+                                        ))
+                                        .collect(Collectors.toList())))
+                , pageable, 2)
+        );
         given(this.postPort.findLaonPost(user, pageable)).willReturn(postPagination);
 
         // when
-        Pagination<PostDetailResponseDto> post = this.laonService.findLaonPost(user, pageable);
+        Pagination<UserPostDetailResponseDto> post = this.laonService.findLaonPost(user, pageable);
 
         //then
         assertThat(post.getResults())
                 .isNotNull()
-                .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
+                .extracting(UserPostDetailResponseDto::getPostId, UserPostDetailResponseDto::getContent)
                 .contains(
                         tuple("testPostId", post1.getContent()),
                         tuple("testPostId2", post2.getContent())

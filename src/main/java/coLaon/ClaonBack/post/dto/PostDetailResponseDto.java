@@ -1,16 +1,15 @@
-package coLaon.ClaonBack.user.dto;
+package coLaon.ClaonBack.post.dto;
 
-import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.common.utils.RelativeTimeUtil;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
+import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
+import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Data
@@ -21,10 +20,10 @@ public class PostDetailResponseDto {
     private final String userProfile;
     private final String userNickname;
     private final Integer likeCount;
-    private final List<HoldInfoResponseDto> holdList;
     private final String content;
     private final String createdAt;
     private final List<String> contentsList;
+    private final List<ClimbingHistoryResponseDto> climbingHistories;
 
     private PostDetailResponseDto(
             String postId,
@@ -33,10 +32,10 @@ public class PostDetailResponseDto {
             String userProfile,
             String userNickname,
             Integer likeCount,
-            List<HoldInfoResponseDto> holdList,
             String content,
             String createdAt,
-            List<String> contentsList
+            List<String> contentsList,
+            List<ClimbingHistoryResponseDto> climbingHistories
     ) {
         this.postId = postId;
         this.centerId = centerId;
@@ -44,10 +43,10 @@ public class PostDetailResponseDto {
         this.userProfile = userProfile;
         this.userNickname = userNickname;
         this.likeCount = likeCount;
-        this.holdList = holdList;
         this.content = content;
         this.createdAt = createdAt;
         this.contentsList = contentsList;
+        this.climbingHistories = climbingHistories;
     }
 
     public static PostDetailResponseDto from(Post post, Integer likeCount) {
@@ -58,12 +57,19 @@ public class PostDetailResponseDto {
                 post.getWriter().getImagePath(),
                 post.getWriter().getNickname(),
                 likeCount,
-                Optional.ofNullable(post.getClimbingHistorySet()).orElseGet(Collections::emptySet).stream()
-                        .map(climbingHistory -> HoldInfoResponseDto.from(climbingHistory.getHoldInfo()))
-                        .collect(Collectors.toList()),
                 post.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(post.getCreatedAt(), ZoneOffset.of("+9"))),
-                post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList())
+                post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
+                post.getClimbingHistorySet().stream().map(
+                                climbingHistory -> ClimbingHistoryResponseDto.from(
+                                        HoldInfoResponseDto.of(
+                                                climbingHistory.getHoldInfo().getId(),
+                                                climbingHistory.getHoldInfo().getName(),
+                                                climbingHistory.getHoldInfo().getImg(),
+                                                climbingHistory.getHoldInfo().getCrayonImageUrl()
+                                        ),
+                                        climbingHistory.getClimbingCount()))
+                        .collect(Collectors.toList())
         );
     }
 }

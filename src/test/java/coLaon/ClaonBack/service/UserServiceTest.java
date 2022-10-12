@@ -18,7 +18,7 @@ import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
-import coLaon.ClaonBack.user.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
@@ -296,8 +296,8 @@ public class UserServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         given(this.userRepository.findByNickname(this.publicUser.getNickname())).willReturn(Optional.of(this.publicUser));
         given(this.blockUserRepository.findBlock(this.publicUser.getId(), user.getId())).willReturn(List.of());
-        Pagination<PostThumbnailResponseDto> postPagination = paginationFactory.create(new PageImpl<>(
-                List.of(PostThumbnailResponseDto.from(
+        Pagination<UserPostThumbnailResponseDto> postPagination = paginationFactory.create(new PageImpl<>(
+                List.of(UserPostThumbnailResponseDto.from(
                         post.getId(),
                         post.getThumbnailUrl(),
                         post.getCenter().getName(),
@@ -316,12 +316,12 @@ public class UserServiceTest {
         given(this.postPort.findPostsByUser(this.publicUser, pageable)).willReturn(postPagination);
 
         // when
-        Pagination<PostThumbnailResponseDto> dtos = this.userService.findPostsByUser(user, this.publicUser.getNickname(), pageable);
+        Pagination<UserPostThumbnailResponseDto> dtos = this.userService.findPostsByUser(user, this.publicUser.getNickname(), pageable);
 
         //then
         assertThat(dtos.getResults())
                 .isNotNull()
-                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .extracting(UserPostThumbnailResponseDto::getPostId, UserPostThumbnailResponseDto::getThumbnailUrl)
                 .contains(
                         tuple("testPostId", post.getThumbnailUrl())
                 );

@@ -8,7 +8,7 @@ import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
-import coLaon.ClaonBack.center.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
 import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
@@ -51,7 +51,7 @@ public class CenterController {
 
     @GetMapping(value = "/{centerId}/posts")
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<PostThumbnailResponseDto> getCenterPosts(
+    public Pagination<CenterPostThumbnailResponseDto> getCenterPosts(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String centerId,
             @RequestParam(value = "holdId", required = false) Optional<String> holdId,

@@ -23,7 +23,7 @@ import coLaon.ClaonBack.center.dto.ChargeElementDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
 import coLaon.ClaonBack.center.dto.OperatingTimeDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
-import coLaon.ClaonBack.center.dto.PostThumbnailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
 import coLaon.ClaonBack.center.dto.SectorInfoRequestDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterReportRepository;
@@ -42,7 +42,6 @@ import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
-import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -211,23 +210,23 @@ public class CenterServiceTest {
 
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
 
-        Pagination<PostThumbnailResponseDto> postPagination = paginationFactory.create(
+        Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
                 new PageImpl<>(
                         List.of(
-                                PostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()),
-                                PostThumbnailResponseDto.from(post2.getId(), post2.getThumbnailUrl())
+                                CenterPostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()),
+                                CenterPostThumbnailResponseDto.from(post2.getId(), post2.getThumbnailUrl())
                         ), pageable, 2)
         );
         given(this.postPort.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)).willReturn(postPagination);
 
         // when
-        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
+        Pagination<CenterPostThumbnailResponseDto> postThumbnailResponseDtoPagination =
                 this.centerService.getCenterPosts(user, "centerId", Optional.empty(), pageable);
 
         //then
         assertThat(postThumbnailResponseDtoPagination.getResults())
                 .isNotNull()
-                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .extracting(CenterPostThumbnailResponseDto::getPostId, CenterPostThumbnailResponseDto::getThumbnailUrl)
                 .contains(
                         tuple("testPostId", post.getThumbnailUrl()),
                         tuple("testPostId2", post2.getThumbnailUrl())
@@ -244,23 +243,23 @@ public class CenterServiceTest {
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
         given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo));
 
-        Pagination<PostThumbnailResponseDto> postPagination = paginationFactory.create(
+        Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
                 new PageImpl<>(
                         List.of(
-                                PostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()),
-                                PostThumbnailResponseDto.from(post2.getId(), post2.getThumbnailUrl())
+                                CenterPostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()),
+                                CenterPostThumbnailResponseDto.from(post2.getId(), post2.getThumbnailUrl())
                         ), pageable, 2)
         );
         given(this.postPort.findByCenterAndHoldExceptBlockUser(center.getId(), "holdId1", user.getId(), pageable)).willReturn(postPagination);
 
         // when
-        Pagination<PostThumbnailResponseDto> postThumbnailResponseDtoPagination =
+        Pagination<CenterPostThumbnailResponseDto> postThumbnailResponseDtoPagination =
                 this.centerService.getCenterPosts(user, "centerId", Optional.of("holdId1"), pageable);
 
         //then
         assertThat(postThumbnailResponseDtoPagination.getResults())
                 .isNotNull()
-                .extracting(PostThumbnailResponseDto::getPostId, PostThumbnailResponseDto::getThumbnailUrl)
+                .extracting(CenterPostThumbnailResponseDto::getPostId, CenterPostThumbnailResponseDto::getThumbnailUrl)
                 .contains(
                         tuple("testPostId", post.getThumbnailUrl())
                 );

@@ -10,28 +10,28 @@ import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
+import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
+import coLaon.ClaonBack.post.domain.Post;
+import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostReport;
 import coLaon.ClaonBack.post.domain.enums.PostReportType;
-import coLaon.ClaonBack.post.dto.PostResponseDto;
-import coLaon.ClaonBack.user.dto.PostDetailResponseDto;
-import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.ClimbingHistoryRequestDto;
 import coLaon.ClaonBack.post.dto.PostContentsDto;
-import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
+import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
+import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostReportRequestDto;
 import coLaon.ClaonBack.post.dto.PostReportResponseDto;
+import coLaon.ClaonBack.post.dto.PostResponseDto;
+import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostReportRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.post.service.PostService;
-import coLaon.ClaonBack.post.domain.Post;
-import coLaon.ClaonBack.post.domain.PostContents;
-import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
@@ -56,9 +56,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import static coLaon.ClaonBack.post.domain.enums.PostReportType.INAPPROPRIATE_POST;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -283,9 +283,8 @@ public class PostServiceTest {
                 .isNotNull()
                 .extracting(
                         post -> post.getContentsList().get(0),
-                        post -> post.getHoldList().get(0).getName(),
                         PostDetailResponseDto::getCenterName)
-                .contains(post2.getContentList().get(0).getUrl(), holdInfo1.getName(), center.getName());
+                .contains(post2.getContentList().get(0).getUrl(), center.getName());
     }
 
     @Test
@@ -372,9 +371,8 @@ public class PostServiceTest {
                     .isNotNull()
                     .extracting(
                             PostResponseDto::getCenterId,
-                            post -> post.getContentsList().size(),
-                            post -> post.getHoldList().size())
-                    .contains("center1", 1, 1);
+                            post -> post.getContentsList().size())
+                    .contains("center1", 1);
         }
     }
 
@@ -411,9 +409,8 @@ public class PostServiceTest {
                     .isNotNull()
                     .extracting(
                             PostResponseDto::getCenterId,
-                            post -> post.getContentsList().size(),
-                            post -> post.getHoldList().size())
-                    .contains("center1", 1, 1);
+                            post -> post.getContentsList().size())
+                    .contains("center1", 1);
         }
     }
 
