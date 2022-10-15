@@ -24,11 +24,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -122,5 +124,13 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         this.userService.delete(userDetails.getUser());
+    }
+
+    @PostMapping("/me/profile")
+    @ResponseStatus(value = HttpStatus.OK)
+    public String uploadProfile(
+            @RequestPart MultipartFile image
+    ) {
+        return this.userService.uploadProfile(image);
     }
 }

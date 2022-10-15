@@ -8,6 +8,7 @@ import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.common.domain.JwtDto;
+import coLaon.ClaonBack.common.validator.IsImageValidator;
 import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
@@ -24,6 +25,7 @@ import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
+import coLaon.ClaonBack.user.infra.ProfileImageUploader;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -32,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +50,7 @@ public class UserService {
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
     private final JwtUtil jwtUtil;
+    private final ProfileImageUploader profileImageUploader;
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
@@ -204,6 +208,12 @@ public class UserService {
     @Transactional
     public void delete(User user) {
         this.userRepository.delete(user);
+    }
+
+    public String uploadProfile(MultipartFile image) {
+        IsImageValidator.of(image).validate();
+
+        return this.profileImageUploader.uploadProfile(image);
     }
 }
 
