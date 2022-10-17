@@ -41,6 +41,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 	// querydsl
 	implementation 'com.querydsl:querydsl-jpa'
 	implementation 'com.querydsl:querydsl-core'

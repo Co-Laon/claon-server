@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -69,5 +70,13 @@ public class AuthController {
 
         this.headerUtil.createHeader(response, "isCompletedSignUp", Boolean.TRUE.toString());
         return userResponseDto;
+    }
+
+    @PostMapping("/sign-out")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void signOut(
+            HttpServletRequest request
+    ) {
+        this.userService.signOut(this.headerUtil.resolveToken(request));
     }
 }

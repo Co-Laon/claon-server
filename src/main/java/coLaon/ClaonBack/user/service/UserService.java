@@ -112,6 +112,10 @@ public class UserService {
         return UserResponseDto.from(userRepository.save(user));
     }
 
+    public void signOut(JwtDto jwtDto) {
+        this.jwtUtil.deleteRefreshToken(jwtDto.getRefreshToken());
+    }
+
     @Transactional
     public PublicScopeResponseDto changePublicScope(User user) {
         user.changePublicScope();

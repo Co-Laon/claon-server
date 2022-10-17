@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.config;
 
 import coLaon.ClaonBack.common.utils.HeaderUtil;
+import coLaon.ClaonBack.common.utils.RefreshTokenUtil;
 import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.utils.JwtUtil;
@@ -25,6 +26,7 @@ import java.util.Optional;
 public class JwtAuthenticationFilter extends GenericFilterBean {
     private final JwtUtil jwtUtil;
     private final HeaderUtil headerUtil;
+    private final RefreshTokenUtil refreshTokenUtil;
 
     private final UserRepository userRepository;
 
@@ -51,14 +53,17 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             } else {
                 if (this.jwtUtil.validateToken(jwtDto.getRefreshToken())) {
                     // Success sign-in and create access and refresh token
-                    String userId = this.jwtUtil.getUserId(jwtDto.getRefreshToken());
+                    this.refreshTokenUtil.findByToken(jwtDto.getRefreshToken()).ifPresentOrElse(
+                            token -> {
+                                JwtDto newToken = this.jwtUtil.reissueToken(jwtDto.getRefreshToken(), token.getUserId());
+                                this.headerUtil.addToken((HttpServletResponse) response, newToken);
 
-                    JwtDto newToken = this.jwtUtil.createToken(userId);
-                    this.headerUtil.addToken((HttpServletResponse) response, newToken);
-
-                    this.getAuthentication(this.jwtUtil.getUserId(newToken.getAccessToken())).ifPresentOrElse(
-                            authentication -> SecurityContextHolder.getContext().setAuthentication(authentication),
-                            () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
+                                this.getAuthentication(this.jwtUtil.getUserId(newToken.getAccessToken())).ifPresentOrElse(
+                                        authentication -> SecurityContextHolder.getContext().setAuthentication(authentication),
+                                        () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
+                                );
+                            },
+                            () -> request.setAttribute("exception", ErrorCode.INVALID_JWT)
                     );
                 } else {
                     // Fail sign in because expire access and refresh token
