@@ -3,7 +3,7 @@ server:
 
 spring:
   config:
-    import: classpath:auth-config.yml, classpath:prod-database-config.yml, classpath:aws-config.yml
+    import: classpath:auth-config.yml, classpath:prod-database-config.yml, classpath:aws-config.yml, classpath:prod-redis-config.yml
 
   jpa:
     hibernate:

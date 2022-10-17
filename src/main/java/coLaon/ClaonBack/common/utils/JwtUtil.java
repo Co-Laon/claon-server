@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.common.utils;
 
 import coLaon.ClaonBack.common.domain.JwtDto;
+import coLaon.ClaonBack.common.domain.RefreshToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -16,6 +17,8 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
+    private final RefreshTokenUtil refreshTokenUtil;
+
     @Value("${spring.jwt.secret-key}")
     private String SECRET_KEY;
 
@@ -40,9 +43,12 @@ public class JwtUtil {
                 isCompletedSignUp);
     }
 
-    public JwtDto createToken(
+    public JwtDto reissueToken(
+            String refreshToken,
             String userPk
     ) {
+        this.refreshTokenUtil.delete(refreshToken);
+
         Date now = new Date();
         return JwtDto.of(
                 generateAccessToken(userPk, now),
@@ -61,14 +67,19 @@ public class JwtUtil {
     }
 
     private String generateRefreshToken(String userPk, Date now) {
-        Claims claims = Jwts.claims().setSubject(userPk);
-
-        return Jwts.builder()
-                .setClaims(claims)
+        String token = Jwts.builder()
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + this.REFRESH_TOKEN_EXPIRE_TIME))
                 .signWith(SignatureAlgorithm.HS256, this.SECRET_KEY)
                 .compact();
+
+        this.refreshTokenUtil.save(RefreshToken.of(token, userPk));
+
+        return token;
+    }
+
+    public void deleteRefreshToken(String refreshToken) {
+        this.refreshTokenUtil.delete(refreshToken);
     }
 
     public String getUserId(String token) {

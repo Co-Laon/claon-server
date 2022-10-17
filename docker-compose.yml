@@ -1,6 +1,6 @@
 version: "3"
 services:
-  media_service_database:
+  claon_database:
     container_name: claon_db
     image: postgres:9.3
     ports:
@@ -9,3 +9,11 @@ services:
       POSTGRES_DB: "claon_db"
       POSTGRES_USER: "colaon_user"
       POSTGRES_PASSWORD: "colaon_password"
+  redis:
+    image: redis:6.0.5
+    container_name: claon_redis
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    ports:
+      - "6379:6379"

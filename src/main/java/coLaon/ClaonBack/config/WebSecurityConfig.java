@@ -2,6 +2,7 @@ package coLaon.ClaonBack.config;
 
 import coLaon.ClaonBack.common.utils.HeaderUtil;
 import coLaon.ClaonBack.common.utils.JwtUtil;
+import coLaon.ClaonBack.common.utils.RefreshTokenUtil;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtUtil jwtUtil;
     private final HeaderUtil headerUtil;
+    private final RefreshTokenUtil refreshTokenUtil;
 
     private final UserRepository userRepository;
 
@@ -60,10 +62,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
 
                 .and()
-                .addFilterBefore(this.jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-
-                .logout()
-                .logoutUrl("/api/**/user/sign-out");
+                .addFilterBefore(this.jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
@@ -94,6 +93,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtUtil, headerUtil, userRepository);
+        return new JwtAuthenticationFilter(jwtUtil, headerUtil, refreshTokenUtil, userRepository);
     }
 }
