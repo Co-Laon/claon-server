@@ -32,8 +32,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
@@ -176,5 +178,13 @@ public class PostController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return this.postService.findPosts(userDetails.getUser(), pageable);
+    }
+
+    @PostMapping("/contents")
+    @ResponseStatus(value = HttpStatus.OK)
+    public String uploadContents(
+            @RequestPart MultipartFile image
+    ) {
+        return this.postService.uploadContents(image);
     }
 }

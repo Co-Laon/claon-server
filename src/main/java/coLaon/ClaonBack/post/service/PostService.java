@@ -11,6 +11,7 @@ import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
+import coLaon.ClaonBack.common.validator.IsImageValidator;
 import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
@@ -22,6 +23,7 @@ import coLaon.ClaonBack.post.dto.PostReportRequestDto;
 import coLaon.ClaonBack.post.dto.PostReportResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
+import coLaon.ClaonBack.post.infra.PostContentsUploader;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostReportRepository;
@@ -33,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +53,7 @@ public class PostService {
     private final ClimbingHistoryRepository climbingHistoryRepository;
     private final PostRepositorySupport postRepositorySupport;
     private final PostReportRepository postReportRepository;
+    private final PostContentsUploader postContentsUploader;
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
@@ -215,5 +219,11 @@ public class PostService {
                         )
                 )
         );
+    }
+
+    public String uploadContents(MultipartFile image) {
+        IsImageValidator.of(image).validate();
+
+        return this.postContentsUploader.uploadContents(image);
     }
 }
