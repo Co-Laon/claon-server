@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class ProfileImageUploader {
+public class ProfileImageManager {
     private final S3Util s3Util;
     private final String profileDirName = "profile";
 
@@ -21,5 +21,9 @@ public class ProfileImageUploader {
         String fileName = this.profileDirName + "/" + LocalDate.now() + "/" + UUID.randomUUID() + "." + fileExtension;
 
         return this.s3Util.uploadImage(image, fileName, fileExtension);
+    }
+
+    public void deleteProfile(String imagePath) {
+        this.s3Util.deleteImage(imagePath, profileDirName);
     }
 }

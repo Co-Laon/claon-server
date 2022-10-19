@@ -133,4 +133,12 @@ public class UserController {
     ) {
         return this.userService.uploadProfile(image);
     }
+
+    @DeleteMapping("/me/profile")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void deleteProfile(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        this.userService.deleteProfile(userDetails.getUser());
+    }
 }
