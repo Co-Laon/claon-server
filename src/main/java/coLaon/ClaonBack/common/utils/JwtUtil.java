@@ -95,4 +95,14 @@ public class JwtUtil {
             return false;
         }
     }
+
+    public boolean isExpiredToken(String jwtToken) {
+        try {
+            Jws<Claims> claims = Jwts.parser().setSigningKey(this.SECRET_KEY).parseClaimsJws(jwtToken);
+
+            return claims.getBody().getExpiration().before(new Date());
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

@@ -43,18 +43,20 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         if (jwtDto.getAccessToken() != null && jwtDto.getRefreshToken() != null) {
             if (this.jwtUtil.validateToken(jwtDto.getAccessToken())) {
                 if (this.jwtUtil.validateToken(jwtDto.getRefreshToken())) {
-                    // Success sign-in
+                    // Success sign-in because access token and refresh token are valid
                     this.getAuthentication(this.jwtUtil.getUserId(jwtDto.getAccessToken())).ifPresentOrElse(
                             authentication -> SecurityContextHolder.getContext().setAuthentication(authentication),
                             () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
                     );
                 } else {
-                    // Fail sign in because expire refresh token
+                    // Fail sign in because refresh token is invalid format or expired
                     request.setAttribute("exception", ErrorCode.INVALID_JWT);
                 }
             } else {
-                if (this.jwtUtil.validateToken(jwtDto.getRefreshToken())) {
-                    // Success sign-in and create access and refresh token
+                if (this.jwtUtil.validateToken(jwtDto.getRefreshToken()) &&
+                        this.jwtUtil.isExpiredToken(jwtDto.getAccessToken())) {
+                    // Success sign-in because refresh token is valid and access token is valid format but expired
+                    // Reissue access and refresh token
                     this.refreshTokenUtil.findByToken(jwtDto.getRefreshToken()).ifPresentOrElse(
                             token -> {
                                 JwtDto newToken = this.jwtUtil.reissueToken(jwtDto.getRefreshToken(), token.getUserId());
@@ -68,7 +70,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                             () -> request.setAttribute("exception", ErrorCode.INVALID_JWT)
                     );
                 } else {
-                    // Fail sign in because expire access and refresh token
+                    // Fail sign in because access token is invalid format or refresh token is invalid format or expired
                     request.setAttribute("exception", ErrorCode.INVALID_JWT);
                 }
             }
