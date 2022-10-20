@@ -7,9 +7,10 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.utils.JwtUtil;
 import coLaon.ClaonBack.common.domain.JwtDto;
 import coLaon.ClaonBack.user.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -22,7 +23,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 
-@AllArgsConstructor
+@Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends GenericFilterBean {
     private final JwtUtil jwtUtil;
     private final HeaderUtil headerUtil;

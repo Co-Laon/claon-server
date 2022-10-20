@@ -1,9 +1,5 @@
 package coLaon.ClaonBack.config;
 
-import coLaon.ClaonBack.common.utils.HeaderUtil;
-import coLaon.ClaonBack.common.utils.JwtUtil;
-import coLaon.ClaonBack.common.utils.RefreshTokenUtil;
-import coLaon.ClaonBack.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,11 +18,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtUtil jwtUtil;
-    private final HeaderUtil headerUtil;
-    private final RefreshTokenUtil refreshTokenUtil;
-
-    private final UserRepository userRepository;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -35,7 +28,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
 
                 .exceptionHandling()
-                .authenticationEntryPoint(this.jwtAuthenticationEntryPoint())
+                .authenticationEntryPoint(this.jwtAuthenticationEntryPoint)
 
                 .and()
                 .sessionManagement()
@@ -62,7 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
 
                 .and()
-                .addFilterBefore(this.jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
@@ -86,13 +79,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
-        return new JwtAuthenticationEntryPoint();
-    }
-
-    private JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtUtil, headerUtil, refreshTokenUtil, userRepository);
     }
 }
