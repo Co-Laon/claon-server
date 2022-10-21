@@ -11,12 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -25,7 +23,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends GenericFilterBean {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final HeaderUtil headerUtil;
     private final RefreshTokenUtil refreshTokenUtil;
@@ -33,12 +31,12 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     private final UserRepository userRepository;
 
     @Override
-    public void doFilter(
-            ServletRequest request,
-            ServletResponse response,
+    public void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
             FilterChain chain
     ) throws IOException, ServletException {
-        JwtDto jwtDto = this.headerUtil.resolveToken((HttpServletRequest) request);
+        JwtDto jwtDto = this.headerUtil.resolveToken(request);
 
         if (jwtDto.getAccessToken() == null || jwtDto.getRefreshToken() == null) {
             // no tokens
@@ -65,7 +63,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                 this.refreshTokenUtil.findByToken(jwtDto.getRefreshToken()).ifPresentOrElse(
                         token -> {
                             JwtDto newToken = this.jwtUtil.reissueToken(jwtDto.getRefreshToken(), token.getUserId());
-                            this.headerUtil.addToken((HttpServletResponse) response, newToken);
+                            this.headerUtil.addToken(response, newToken);
 
                             this.getAuthentication(this.jwtUtil.getUserId(newToken.getAccessToken())).ifPresentOrElse(
                                     auth -> SecurityContextHolder.getContext().setAuthentication(auth),
