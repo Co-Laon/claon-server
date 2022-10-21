@@ -40,43 +40,47 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     ) throws IOException, ServletException {
         JwtDto jwtDto = this.headerUtil.resolveToken((HttpServletRequest) request);
 
-        if (jwtDto.getAccessToken() != null && jwtDto.getRefreshToken() != null) {
-            if (this.jwtUtil.validateToken(jwtDto.getAccessToken())) {
-                if (this.jwtUtil.validateToken(jwtDto.getRefreshToken())) {
-                    // Success sign-in because access token and refresh token are valid
-                    this.getAuthentication(this.jwtUtil.getUserId(jwtDto.getAccessToken())).ifPresentOrElse(
-                            authentication -> SecurityContextHolder.getContext().setAuthentication(authentication),
-                            () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
-                    );
-                } else {
-                    // Fail sign in because refresh token is invalid format or expired
-                    request.setAttribute("exception", ErrorCode.INVALID_JWT);
-                }
-            } else {
-                if (this.jwtUtil.validateToken(jwtDto.getRefreshToken()) &&
-                        this.jwtUtil.isExpiredToken(jwtDto.getAccessToken())) {
-                    // Success sign-in because refresh token is valid and access token is valid format but expired
-                    // Reissue access and refresh token
-                    this.refreshTokenUtil.findByToken(jwtDto.getRefreshToken()).ifPresentOrElse(
-                            token -> {
-                                JwtDto newToken = this.jwtUtil.reissueToken(jwtDto.getRefreshToken(), token.getUserId());
-                                this.headerUtil.addToken((HttpServletResponse) response, newToken);
-
-                                this.getAuthentication(this.jwtUtil.getUserId(newToken.getAccessToken())).ifPresentOrElse(
-                                        authentication -> SecurityContextHolder.getContext().setAuthentication(authentication),
-                                        () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
-                                );
-                            },
-                            () -> request.setAttribute("exception", ErrorCode.INVALID_JWT)
-                    );
-                } else {
-                    // Fail sign in because access token is invalid format or refresh token is invalid format or expired
-                    request.setAttribute("exception", ErrorCode.INVALID_JWT);
-                }
-            }
-        } else {
+        if (jwtDto.getAccessToken() == null || jwtDto.getRefreshToken() == null) {
             // no tokens
             request.setAttribute("exception", ErrorCode.NOT_SIGN_IN);
+            chain.doFilter(request, response);
+            return;
+        }
+
+        if (this.jwtUtil.validateToken(jwtDto.getAccessToken())) {
+            if (this.jwtUtil.validateToken(jwtDto.getRefreshToken())) {
+                // Success sign-in because access token and refresh token are valid
+                this.getAuthentication(this.jwtUtil.getUserId(jwtDto.getAccessToken())).ifPresentOrElse(
+                        auth -> SecurityContextHolder.getContext().setAuthentication(auth),
+                        () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
+                );
+            } else {
+                // Fail sign in because refresh token is invalid format or expired
+                request.setAttribute("exception", ErrorCode.INVALID_JWT);
+            }
+        } else if (this.jwtUtil.isExpiredToken(jwtDto.getAccessToken())) {
+            if (this.jwtUtil.validateToken(jwtDto.getRefreshToken())) {
+                // Success sign-in because refresh token is valid and access token is valid format but expired
+                // Reissue access and refresh token
+                this.refreshTokenUtil.findByToken(jwtDto.getRefreshToken()).ifPresentOrElse(
+                        token -> {
+                            JwtDto newToken = this.jwtUtil.reissueToken(jwtDto.getRefreshToken(), token.getUserId());
+                            this.headerUtil.addToken((HttpServletResponse) response, newToken);
+
+                            this.getAuthentication(this.jwtUtil.getUserId(newToken.getAccessToken())).ifPresentOrElse(
+                                    auth -> SecurityContextHolder.getContext().setAuthentication(auth),
+                                    () -> request.setAttribute("exception", ErrorCode.USER_DOES_NOT_EXIST)
+                            );
+                        },
+                        () -> request.setAttribute("exception", ErrorCode.INVALID_JWT)
+                );
+            } else {
+                // Fail sign in because refresh token is invalid format or expired
+                request.setAttribute("exception", ErrorCode.INVALID_JWT);
+            }
+        } else {
+            // Fail sign in because access token is invalid format
+            request.setAttribute("exception", ErrorCode.INVALID_JWT);
         }
 
         chain.doFilter(request, response);
