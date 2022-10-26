@@ -7,8 +7,15 @@ import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.ApiKey;
+import springfox.documentation.service.AuthorizationScope;
+import springfox.documentation.service.SecurityReference;
+import springfox.documentation.service.SecurityScheme;
 import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
+
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
@@ -21,6 +28,8 @@ public class SwaggerConfig {
         return new Docket(DocumentationType.OAS_30)
                 .ignoredParameterTypes(AuthenticationPrincipal.class)
                 .useDefaultResponseMessages(false)
+                .securityContexts(List.of(securityContext()))
+                .securitySchemes(apiKey())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("coLaon.ClaonBack"))
                 .paths(PathSelectors.any())
@@ -34,5 +43,24 @@ public class SwaggerConfig {
                 .version(this.version)
                 .description(this.description)
                 .build();
+    }
+
+    private List<SecurityScheme> apiKey() {
+        return List.of(
+                new ApiKey("access-token", "access-token", "header"),
+                new ApiKey("refresh-token", "refresh-token", "header"));
+    }
+
+    private SecurityContext securityContext() {
+        return SecurityContext.builder().securityReferences(defaultAuth()).build();
+    }
+
+    private List<SecurityReference> defaultAuth() {
+        AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
+        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+        authorizationScopes[0] = authorizationScope;
+        return List.of(
+                new SecurityReference("access-token", authorizationScopes),
+                new SecurityReference("refresh-token", authorizationScopes));
     }
 }
