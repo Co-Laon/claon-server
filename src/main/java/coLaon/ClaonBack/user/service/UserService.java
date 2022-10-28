@@ -102,8 +102,8 @@ public class UserService {
 
         user.signUp(
                 signUpRequestDto.getNickname(),
-                signUpRequestDto.getHeight(),
-                signUpRequestDto.getArmReach(),
+                signUpRequestDto.getHeight().orElse(0.0f),
+                signUpRequestDto.getArmReach().orElse(0.0f),
                 signUpRequestDto.getImagePath(),
                 signUpRequestDto.getInstagramOAuthId(),
                 signUpRequestDto.getInstagramUserName()
@@ -199,8 +199,8 @@ public class UserService {
     ) {
         user.modifyUser(
                 dto.getNickname(),
-                dto.getHeight(),
-                dto.getArmReach(),
+                dto.getHeight().orElse(0.0f),
+                dto.getArmReach().orElse(0.0f),
                 dto.getImagePath(),
                 dto.getInstagramUserName(),
                 dto.getInstagramOAuthId()
