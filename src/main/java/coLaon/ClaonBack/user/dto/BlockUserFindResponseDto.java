@@ -19,7 +19,7 @@ public class BlockUserFindResponseDto {
     public static BlockUserFindResponseDto from(BlockUser blockUser) {
         return new BlockUserFindResponseDto(
                 blockUser.getBlockedUser().getNickname(),
-                blockUser.getUser().getImagePath()
+                blockUser.getBlockedUser().getImagePath()
         );
     }
 }

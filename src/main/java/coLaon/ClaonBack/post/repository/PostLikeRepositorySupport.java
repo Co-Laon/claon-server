@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static coLaon.ClaonBack.post.domain.QPostLike.postLike;
-import static coLaon.ClaonBack.post.domain.QPost.post;
 import static coLaon.ClaonBack.user.domain.QBlockUser.blockUser;
 import static coLaon.ClaonBack.user.domain.QUser.user;
 

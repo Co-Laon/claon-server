@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.user.repository;
 
 import coLaon.ClaonBack.user.domain.BlockUser;
+import coLaon.ClaonBack.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,10 +19,10 @@ public interface BlockUserRepository extends JpaRepository<BlockUser, String> {
             "WHERE b.user_id = :userId AND b.block_user_id = :blockUserId", nativeQuery = true)
     Optional<BlockUser> findByUserIdAndBlockId(@Param("userId") String userId, @Param("blockUserId") String blockUserId);
 
-    @Query(value = "SELECT * " +
-            "FROM TB_BLOCK_USER AS b " +
-            "WHERE b.user_id = :userId", nativeQuery = true)
-    Page<BlockUser> findByUserId(@Param("userId") String userId, Pageable pageable);
+    @Query(value = "SELECT b " +
+            "FROM BlockUser AS b JOIN FETCH b.blockedUser " +
+            "WHERE b.user = :user", countQuery = "SELECT count(b) FROM BlockUser b WHERE b.user = :user")
+    Page<BlockUser> findByUser(@Param("user") User user, Pageable pageable);
 
     @Query(value = "SELECT * " +
             "FROM TB_BLOCK_USER As b " +
