@@ -78,10 +78,9 @@ public class BlockUserRepositoryTest {
     @Test
     public void successFindByUserId() {
         // given
-        String userId = user.getId();
 
         // when
-        Page<BlockUser> blockUserList = blockUserRepository.findByUserId(userId, PageRequest.of(0, 2));
+        Page<BlockUser> blockUserList = blockUserRepository.findByUser(user, PageRequest.of(0, 2));
 
         // then
         assertThat(blockUserList.getContent().size()).isEqualTo(1);

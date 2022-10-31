@@ -113,7 +113,7 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<BlockUserFindResponseDto> findBlockUser(
             @AuthenticationPrincipal UserDetails userDetails,
-            @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) final Pageable pageable
+            @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) Pageable pageable
     ) {
         return this.blockUserService.findBlockUser(userDetails.getUser(), pageable);
     }

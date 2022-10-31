@@ -81,7 +81,7 @@ public class BlockUserService {
             Pageable pageable
     ) {
         return this.paginationFactory.create(
-                this.blockUserRepository.findByUserId(user.getId(), pageable)
+                this.blockUserRepository.findByUser(user, pageable)
                         .map(BlockUserFindResponseDto::from)
         );
     }

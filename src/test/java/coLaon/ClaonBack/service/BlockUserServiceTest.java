@@ -152,7 +152,7 @@ public class BlockUserServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
 
         Page<BlockUser> blockUsers = new PageImpl<>(List.of(blockUserRelation), pageable, 2);
-        given(this.blockUserRepository.findByUserId(publicUser.getId(), pageable)).willReturn(blockUsers);
+        given(this.blockUserRepository.findByUser(publicUser, pageable)).willReturn(blockUsers);
 
         // when
         Pagination<BlockUserFindResponseDto> blockUserFindResponseDto = this.blockUserService.findBlockUser(publicUser, pageable);
