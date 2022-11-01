@@ -1,11 +1,15 @@
 package coLaon.ClaonBack.config;
 
+import coLaon.ClaonBack.common.domain.SwaggerPageable;
+import com.fasterxml.classmate.TypeResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.schema.AlternateTypeRules;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.AuthorizationScope;
@@ -25,8 +29,11 @@ public class SwaggerConfig {
 
     @Bean
     public Docket api() {
+        TypeResolver typeResolver = new TypeResolver();
+
         return new Docket(DocumentationType.OAS_30)
                 .ignoredParameterTypes(AuthenticationPrincipal.class)
+                .alternateTypeRules(AlternateTypeRules.newRule(typeResolver.resolve(Pageable.class), typeResolver.resolve(SwaggerPageable.class)))
                 .useDefaultResponseMessages(false)
                 .securityContexts(List.of(securityContext()))
                 .securitySchemes(apiKey())
