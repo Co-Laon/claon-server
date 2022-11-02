@@ -4,6 +4,7 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,13 @@ public class S3Util {
     public String bucket;
 
     public String uploadImage(MultipartFile uploadFile, String fileName, String fileExtension) {
+        if(amazonS3Client.doesObjectExist(bucket, fileName)) {
+            throw new InternalServerErrorException(
+                    ErrorCode.INTERNAL_SERVER_ERROR,
+                    "S3 업로드를 실패했습니다."
+            );
+        }
+
         MultipartFile resizedFile = imageUtil.resizeImage(uploadFile, fileExtension, fileName);
         ObjectMetadata objectMetadata = getObjectMetadata(uploadFile, resizedFile);
 
@@ -51,5 +59,17 @@ public class S3Util {
         objectMetadata.setContentType(file.getContentType());
 
         return objectMetadata;
+    }
+
+    public void deleteImage(String imagePath, String dirName) {
+        String key = imagePath.substring(imagePath.indexOf(dirName));
+        if (!amazonS3Client.doesObjectExist(bucket, key)) {
+            throw new InternalServerErrorException(
+                    ErrorCode.INTERNAL_SERVER_ERROR,
+                    "S3 삭제를 실패했습니다."
+            );
+        }
+        DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucket, key);
+        this.amazonS3Client.deleteObject(deleteObjectRequest);
     }
 }

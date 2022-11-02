@@ -25,7 +25,7 @@ import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
-import coLaon.ClaonBack.user.infra.ProfileImageUploader;
+import coLaon.ClaonBack.user.infra.ProfileImageManager;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -50,7 +50,7 @@ public class UserService {
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
     private final JwtUtil jwtUtil;
-    private final ProfileImageUploader profileImageUploader;
+    private final ProfileImageManager profileImageManager;
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
@@ -217,8 +217,17 @@ public class UserService {
     public String uploadProfile(MultipartFile image) {
         IsImageValidator.of(image).validate();
 
-        return this.profileImageUploader.uploadProfile(image);
+        return this.profileImageManager.uploadProfile(image);
+    }
+
+    public void deleteProfile(User user) {
+        if (user.getImagePath().equals("")) {
+            throw new BadRequestException(
+                    ErrorCode.INTERNAL_SERVER_ERROR,
+                    "프로필 이미지가 존재하지 않습니다."
+            );
+        }
+
+        this.profileImageManager.deleteProfile(user.getImagePath());
     }
 }
-
-
