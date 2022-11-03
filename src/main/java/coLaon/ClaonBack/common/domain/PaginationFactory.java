@@ -15,10 +15,14 @@ public class PaginationFactory {
     }
 
     private <T> Integer buildNextPageNum(Page<T> p) {
-        return Math.min(p.getPageable().getPageNumber() + 1, (int) Math.max(p.getTotalElements() - 1, 0));
+        if (p.getTotalPages() - 1 < p.getPageable().getPageNumber() + 1) return -1;
+
+        return Math.min(p.getPageable().getPageNumber() + 1, Math.max(p.getTotalPages() - 1, 0));
     }
 
     private <T> Integer buildPreviousPageNum(Page<T> p) {
+        if (p.getPageable().getPageNumber() - 1 < 0) return -1;
+
         return Math.max(0, p.getPageable().getPageNumber() - 1);
     }
 }
