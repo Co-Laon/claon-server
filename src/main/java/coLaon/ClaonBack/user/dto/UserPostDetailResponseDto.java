@@ -15,6 +15,7 @@ public class UserPostDetailResponseDto {
     private final String centerName;
     private final String userProfile;
     private final String userNickname;
+    private final Boolean isLike;
     private final Integer likeCount;
     private final String content;
     private final String createdAt;
@@ -27,6 +28,7 @@ public class UserPostDetailResponseDto {
             String centerName,
             String userProfile,
             String userNickname,
+            Boolean isLike,
             Integer likeCount,
             String content,
             String createdAt,
@@ -38,6 +40,7 @@ public class UserPostDetailResponseDto {
         this.centerName = centerName;
         this.userProfile = userProfile;
         this.userNickname = userNickname;
+        this.isLike = isLike;
         this.likeCount = likeCount;
         this.content = content;
         this.createdAt = createdAt;
@@ -51,6 +54,7 @@ public class UserPostDetailResponseDto {
             String centerName,
             String writerImagePath,
             String writerNickname,
+            Boolean isLike,
             Integer likeCount,
             String content,
             LocalDateTime createdAt,
@@ -63,6 +67,7 @@ public class UserPostDetailResponseDto {
                 centerName,
                 writerImagePath,
                 writerNickname,
+                isLike,
                 likeCount,
                 content,
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(createdAt, ZoneOffset.of("+9"))),

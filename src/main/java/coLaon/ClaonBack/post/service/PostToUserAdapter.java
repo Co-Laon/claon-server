@@ -103,6 +103,7 @@ public class PostToUserAdapter implements PostPort {
                                 post.getCenter().getName(),
                                 post.getWriter().getImagePath(),
                                 post.getWriter().getNickname(),
+                                postLikeRepository.findByLikerAndPost(user, post).isPresent(),
                                 postLikeRepository.countByPost(post),
                                 post.getContent(),
                                 post.getCreatedAt(),
