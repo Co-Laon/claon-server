@@ -89,7 +89,7 @@ public class PostController {
     public PostReportResponseDto createReport(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String postId,
-            @RequestBody PostReportRequestDto postReportRequestDto
+            @RequestBody @Valid PostReportRequestDto postReportRequestDto
     ) {
         return this.postService.createReport(userDetails.getUser(), postId, postReportRequestDto);
     }
@@ -117,7 +117,7 @@ public class PostController {
     public Pagination<LikeFindResponseDto> findAllLike(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String postId,
-            @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) final Pageable pageable
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable
     ) {
         return this.postLikeService.findLikeByPost(userDetails.getUser(), postId, pageable);
     }
@@ -137,7 +137,7 @@ public class PostController {
     public Pagination<CommentFindResponseDto> findAllParentCommentAndThreeChildComment(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String postId,
-            @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 10) final Pageable pageable
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.ASC) final Pageable pageable
     ) {
         return this.postCommentService.findCommentsByPost(userDetails.getUser(), postId, pageable);
     }
@@ -147,7 +147,7 @@ public class PostController {
     public Pagination<ChildCommentResponseDto> findAllChildrenComment(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String parentId,
-            @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 10) final Pageable pageable
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.ASC) final Pageable pageable
     ) {
         return this.postCommentService.findAllChildCommentsByParent(userDetails.getUser(), parentId, pageable);
     }

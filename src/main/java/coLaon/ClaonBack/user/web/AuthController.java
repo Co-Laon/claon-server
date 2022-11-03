@@ -41,7 +41,7 @@ public class AuthController {
     @PostMapping("/instagram/account")
     @ResponseStatus(value = HttpStatus.OK)
     public InstagramResponseDto getInstagramAccount(
-            @RequestBody SignInRequestDto signInRequestDto
+            @RequestBody @Valid SignInRequestDto signInRequestDto
     ) {
         return this.userService.getInstagramAccount(signInRequestDto);
     }
@@ -51,7 +51,7 @@ public class AuthController {
     public JwtDto signIn(
             HttpServletResponse response,
             @PathVariable OAuth2Provider provider,
-            @RequestBody SignInRequestDto signInRequestDto
+            @RequestBody @Valid SignInRequestDto signInRequestDto
     ) {
         JwtDto jwtDto = this.userService.signIn(provider, signInRequestDto);
 

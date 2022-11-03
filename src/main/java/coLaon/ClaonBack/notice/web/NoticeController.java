@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/notices")
@@ -27,7 +28,7 @@ public class NoticeController {
 
     @GetMapping
     public Pagination<NoticeResponseDto> getNoticeList(
-            @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC) @PageableDefault(size = 20) Pageable pageable
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return noticeService.getNoticeList(pageable);
     }
@@ -36,7 +37,7 @@ public class NoticeController {
     @ResponseStatus(value = HttpStatus.OK)
     public NoticeResponseDto createNotice(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody NoticeCreateRequestDto dto
+            @RequestBody @Valid NoticeCreateRequestDto dto
     ) {
         return noticeService.createNotice(userDetails.getUser(), dto);
     }

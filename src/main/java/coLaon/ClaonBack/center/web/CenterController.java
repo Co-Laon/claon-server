@@ -64,7 +64,7 @@ public class CenterController {
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterResponseDto create(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody CenterCreateRequestDto centerCreateRequestDto
+            @RequestBody @Valid CenterCreateRequestDto centerCreateRequestDto
     ) {
         return this.centerService.create(userDetails.getUser(), centerCreateRequestDto);
     }
@@ -166,7 +166,7 @@ public class CenterController {
     public CenterReportResponseDto createReport(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String centerId,
-            @RequestBody CenterReportCreateRequestDto centerReportCreateRequestDto
+            @RequestBody @Valid CenterReportCreateRequestDto centerReportCreateRequestDto
     ) {
         return this.centerService.createReport(userDetails.getUser(), centerId, centerReportCreateRequestDto);
     }

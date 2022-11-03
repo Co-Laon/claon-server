@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -31,6 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
@@ -67,7 +68,7 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     public UserResponseDto modifyUser(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody UserModifyRequestDto dto
+            @RequestBody @Valid UserModifyRequestDto dto
     ) {
         return userService.modifyUser(userDetails.getUser(), dto);
     }
@@ -113,7 +114,7 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<BlockUserFindResponseDto> findBlockUser(
             @AuthenticationPrincipal UserDetails userDetails,
-            @SortDefault(sort = "createdAt", direction = Sort.Direction.ASC) @PageableDefault(size = 20) Pageable pageable
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return this.blockUserService.findBlockUser(userDetails.getUser(), pageable);
     }
