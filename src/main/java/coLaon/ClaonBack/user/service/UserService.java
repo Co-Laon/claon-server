@@ -24,6 +24,7 @@ import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+import coLaon.ClaonBack.user.dto.TestSignInRequestDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.infra.ProfileImageManager;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
@@ -52,6 +53,20 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final ProfileImageManager profileImageManager;
     private final PaginationFactory paginationFactory;
+
+    // TODO: DELETE
+    @Transactional
+    public JwtDto test(
+            TestSignInRequestDto signInRequestDto
+    ) {
+        User user = this.userRepository.findByEmailAndOAuthId(signInRequestDto.getEmail(), signInRequestDto.getOAuthId())
+                .orElseGet(() -> this.userRepository.save(User.createNewUser(signInRequestDto.getEmail(), signInRequestDto.getOAuthId())));
+
+        return this.jwtUtil.createToken(
+                user.getId(),
+                user.isSignupCompleted()
+        );
+    }
 
     @Transactional(readOnly = true)
     public DuplicatedCheckResponseDto nicknameDuplicatedCheck(String nickname) {

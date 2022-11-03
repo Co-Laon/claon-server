@@ -49,7 +49,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/**/auth/nickname/**/duplicate-check",
                         "/api/**/auth/instagram/account",
                         "/api/**/auth/sign-in/**",
-                        "/api/**/app-versions/**"
+                        "/api/**/app-versions/**",
+                        // TODO: DELETE
+                        "/api/**/auth/test/token"
                 )
                 .permitAll()
                 .anyRequest().authenticated()
