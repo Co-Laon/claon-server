@@ -63,7 +63,10 @@ public class PostService {
     ) {
         return this.paginationFactory.create(
                 postRepositorySupport.findExceptLaonUserAndBlockUser(user.getId(), pageable).map(
-                        post -> PostDetailResponseDto.from(post, postLikeRepository.countByPost(post)))
+                        post -> PostDetailResponseDto.from(
+                                post,
+                                postLikeRepository.findByLikerAndPost(user, post).isPresent(),
+                                postLikeRepository.countByPost(post)))
         );
     }
 
@@ -85,7 +88,11 @@ public class PostService {
 
         IsPrivateValidator.of(post.getWriter().getIsPrivate()).validate();
 
-        return PostDetailResponseDto.from(post, postLikeRepository.countByPost(post));
+        return PostDetailResponseDto.from(
+                post,
+                postLikeRepository.findByLikerAndPost(user, post).isPresent(),
+                postLikeRepository.countByPost(post)
+        );
     }
 
     @Transactional
