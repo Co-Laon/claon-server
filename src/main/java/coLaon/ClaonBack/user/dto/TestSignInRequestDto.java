@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TestSignInRequestDto {
     private String email;
-    private String oAuthId;
+    private String id;
 }
