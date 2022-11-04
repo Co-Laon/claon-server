@@ -26,6 +26,9 @@ public class S3Util {
     @Value("${cloud.aws.s3.bucket}")
     public String bucket;
 
+    @Value("${cloud.aws.region.static}")
+    private String region;
+
     public String uploadImage(MultipartFile uploadFile, String fileName, String fileExtension) {
         if(amazonS3Client.doesObjectExist(bucket, fileName)) {
             throw new InternalServerErrorException(
@@ -61,14 +64,17 @@ public class S3Util {
         return objectMetadata;
     }
 
-    public void deleteImage(String imagePath, String dirName) {
-        String key = imagePath.substring(imagePath.indexOf(dirName));
+    public void deleteImage(String imagePath) {
+        String domainName = "https://" + bucket + ".s3." + region + ".amazonaws.com/";
+        String key = imagePath.substring(imagePath.indexOf(imagePath.split(domainName)[1]));
+        
         if (!amazonS3Client.doesObjectExist(bucket, key)) {
             throw new InternalServerErrorException(
                     ErrorCode.INTERNAL_SERVER_ERROR,
                     "S3 삭제를 실패했습니다."
             );
         }
+
         DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucket, key);
         this.amazonS3Client.deleteObject(deleteObjectRequest);
     }

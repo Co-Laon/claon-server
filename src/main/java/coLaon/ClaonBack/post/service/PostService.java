@@ -11,19 +11,21 @@ import coLaon.ClaonBack.common.exception.InternalServerErrorException;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
+import coLaon.ClaonBack.common.validator.IsExistUrlValidator;
 import coLaon.ClaonBack.common.validator.IsImageValidator;
 import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.domain.PostReport;
+import coLaon.ClaonBack.post.dto.PostContentsUrlDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostReportRequestDto;
 import coLaon.ClaonBack.post.dto.PostReportResponseDto;
 import coLaon.ClaonBack.post.dto.PostResponseDto;
 import coLaon.ClaonBack.post.dto.PostUpdateRequestDto;
-import coLaon.ClaonBack.post.infra.PostContentsUploader;
+import coLaon.ClaonBack.post.infra.PostContentsImageManager;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostReportRepository;
@@ -53,7 +55,7 @@ public class PostService {
     private final ClimbingHistoryRepository climbingHistoryRepository;
     private final PostRepositorySupport postRepositorySupport;
     private final PostReportRepository postReportRepository;
-    private final PostContentsUploader postContentsUploader;
+    private final PostContentsImageManager postContentsImageManager;
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
@@ -231,6 +233,21 @@ public class PostService {
     public String uploadContents(MultipartFile image) {
         IsImageValidator.of(image).validate();
 
-        return this.postContentsUploader.uploadContents(image);
+        return this.postContentsImageManager.uploadContents(image);
+    }
+
+    public void deleteContents(User user, String postId, PostContentsUrlDto postContentsUrlDto) {
+        Post post = this.postRepository.findById(postId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "게시글을 찾을 수 없습니다."
+                )
+        );
+
+        String imagePath = postContentsUrlDto.getUrl();
+        IdEqualValidator.of(post.getWriter().getId(), user.getId())
+                .linkWith(IsExistUrlValidator.of(post.getContentList(), imagePath)).validate();
+
+        this.postContentsImageManager.deleteContents(imagePath);
     }
 }

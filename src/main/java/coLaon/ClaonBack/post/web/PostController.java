@@ -8,6 +8,7 @@ import coLaon.ClaonBack.post.dto.CommentResponseDto;
 import coLaon.ClaonBack.post.dto.CommentUpdateRequestDto;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
 import coLaon.ClaonBack.post.dto.LikeResponseDto;
+import coLaon.ClaonBack.post.dto.PostContentsUrlDto;
 import coLaon.ClaonBack.post.dto.PostCreateRequestDto;
 import coLaon.ClaonBack.post.dto.PostDetailResponseDto;
 import coLaon.ClaonBack.post.dto.PostReportRequestDto;
@@ -22,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -180,11 +180,21 @@ public class PostController {
         return this.postService.findPosts(userDetails.getUser(), pageable);
     }
 
-    @PostMapping("/contents")
+    @PostMapping(value = "/contents")
     @ResponseStatus(value = HttpStatus.OK)
     public String uploadContents(
             @RequestPart MultipartFile image
     ) {
         return this.postService.uploadContents(image);
+    }
+
+    @DeleteMapping(value = "/{postId}/contents")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void deleteContents(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String postId,
+            @RequestBody @Valid PostContentsUrlDto postContentsUrlDto
+    ) {
+        this.postService.deleteContents(userDetails.getUser(), postId, postContentsUrlDto);
     }
 }

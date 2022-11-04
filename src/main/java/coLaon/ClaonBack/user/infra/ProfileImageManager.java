@@ -24,6 +24,6 @@ public class ProfileImageManager {
     }
 
     public void deleteProfile(String imagePath) {
-        this.s3Util.deleteImage(imagePath, profileDirName);
+        this.s3Util.deleteImage(imagePath);
     }
 }
