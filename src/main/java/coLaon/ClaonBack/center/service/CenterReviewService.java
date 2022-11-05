@@ -38,7 +38,7 @@ public class CenterReviewService {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장 정보를 찾을 수 없습니다."
+                        "암장을 찾을 수 없습니다."
                 )
         );
 
@@ -46,7 +46,7 @@ public class CenterReviewService {
                 review -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 작성된 리뷰가 존재합니다."
+                            "이미 작성된 리뷰가 있습니다."
                     );
                 }
         );
@@ -72,7 +72,7 @@ public class CenterReviewService {
         CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "리뷰 정보를 찾을 수 없습니다."
+                        "리뷰를 찾을 수 없습니다."
                 )
         );
 
@@ -91,7 +91,7 @@ public class CenterReviewService {
         CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "리뷰 정보를 찾을 수 없습니다."
+                        "리뷰를 찾을 수 없습니다."
                 )
         );
 
@@ -111,7 +111,7 @@ public class CenterReviewService {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장 정보를 찾을 수 없습니다."
+                        "암장을 찾을 수 없습니다."
                 )
         );
 

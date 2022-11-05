@@ -33,7 +33,7 @@ public class S3Util {
         if(amazonS3Client.doesObjectExist(bucket, fileName)) {
             throw new InternalServerErrorException(
                     ErrorCode.INTERNAL_SERVER_ERROR,
-                    "S3 업로드를 실패했습니다."
+                    "S3 객체 업로드를 실패했습니다."
             );
         }
 
@@ -50,7 +50,7 @@ public class S3Util {
         } catch (IOException e) {
             throw new InternalServerErrorException(
                     ErrorCode.INTERNAL_SERVER_ERROR,
-                    "S3 업로드를 실패했습니다."
+                    "S3 객체 업로드를 실패했습니다."
             );
         }
         return amazonS3Client.getUrl(bucket, fileName).toString();
@@ -71,7 +71,7 @@ public class S3Util {
         if (!amazonS3Client.doesObjectExist(bucket, key)) {
             throw new InternalServerErrorException(
                     ErrorCode.INTERNAL_SERVER_ERROR,
-                    "S3 삭제를 실패했습니다."
+                    "S3 객체 삭제를 실패했습니다."
             );
         }
 

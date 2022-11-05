@@ -39,7 +39,7 @@ public class PostLikeService {
                 like -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 좋아요 한 게시글입니다."
+                            "이미 좋아요 했습니다."
                     );
                 }
         );
@@ -62,7 +62,7 @@ public class PostLikeService {
         PostLike like = postLikeRepository.findByLikerAndPost(user, post).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "좋아요 하지 않은 게시글입니다."
+                        "아직 좋아요 하지 않았습니다."
                 )
         );
 

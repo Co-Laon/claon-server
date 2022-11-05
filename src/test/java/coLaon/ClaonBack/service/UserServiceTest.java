@@ -10,6 +10,7 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.user.domain.User;
@@ -334,15 +335,15 @@ public class UserServiceTest {
         given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
 
         // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
+        final UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
                 () -> this.userService.findPostsByUser(user, this.privateUser.getNickname(), pageable)
         );
 
         // then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, "비공개 계정입니다.");
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s은 비공개 상태입니다.", privateUser.getNickname()));
     }
 
     @Test

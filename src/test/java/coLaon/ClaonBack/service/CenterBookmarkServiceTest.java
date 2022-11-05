@@ -132,7 +132,7 @@ class CenterBookmarkServiceTest {
         // then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.ROW_ALREADY_EXIST, "이미 즐겨찾기에 등록된 암장입니다.");
+                .contains(ErrorCode.ROW_ALREADY_EXIST, "이미 즐겨찾기에 등록되어 있습니다.");
     }
 
     @Test
@@ -167,6 +167,6 @@ class CenterBookmarkServiceTest {
         // then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.ROW_DOES_NOT_EXIST, "즐겨찾기에 등록되지 않은 암장입니다.");
+                .contains(ErrorCode.ROW_DOES_NOT_EXIST, "아직 즐겨찾기에 등록되지 않았습니다.");
     }
 }

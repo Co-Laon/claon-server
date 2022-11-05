@@ -85,10 +85,13 @@ public class PostService {
         );
 
         if (!blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).isEmpty()) {
-            throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
+            throw new UnauthorizedException(
+                    ErrorCode.NOT_ACCESSIBLE,
+                    String.format("%s을 찾을 수 없습니다.", post.getWriter().getNickname())
+            );
         }
 
-        IsPrivateValidator.of(post.getWriter().getIsPrivate()).validate();
+        IsPrivateValidator.of(post.getWriter().getNickname(), post.getWriter().getIsPrivate()).validate();
 
         return PostDetailResponseDto.from(
                 post,
@@ -105,7 +108,7 @@ public class PostService {
         Center center = centerRepository.findById(postCreateRequestDto.getCenterId()).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장 정보를 찾을 수 없습니다."
+                        "암장을 찾을 수 없습니다."
                 )
         );
 

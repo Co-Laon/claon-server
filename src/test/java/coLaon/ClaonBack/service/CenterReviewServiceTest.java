@@ -156,7 +156,7 @@ public class CenterReviewServiceTest {
         // then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.ROW_ALREADY_EXIST, "이미 작성된 리뷰가 존재합니다.");
+                .contains(ErrorCode.ROW_ALREADY_EXIST, "이미 작성된 리뷰가 있습니다.");
     }
 
     @Test

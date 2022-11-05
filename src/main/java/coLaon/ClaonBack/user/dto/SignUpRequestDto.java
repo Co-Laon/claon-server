@@ -12,7 +12,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignUpRequestDto {
-    @UserNickname(message = "잘못된 닉네임 입니다.")
+    @UserNickname
     private String nickname;
     private Float height;
     private Float armReach;

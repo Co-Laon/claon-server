@@ -15,11 +15,12 @@ import java.util.List;
 @AllArgsConstructor
 public class PostUpdateRequestDto {
     @Valid
-    @ClimbingHistorySize(message = "1개 이상 10개 이하의 등반 기록을 입력 가능합니다.")
+    @ClimbingHistorySize(message = "1-10회 등반 기록을 입력해주세요.")
     private List<ClimbingHistoryRequestDto> climbingHistories;
+    @Size(max = 500, message = "500자 이내로 내용을 입력해주세요.")
     private String content;
     @Valid
-    @NotNull(message = "이미지 혹은 동영상을 업로드해야 합니다.")
-    @Size(min = 1, max = 10, message = "이미지 혹은 동영상 1개 이상 10개 이하로 업로드해야 합니다.")
+    @NotNull(message = "이미지를 업로드 해주세요.")
+    @Size(min = 1, max = 10, message = "1-10개 이미지를 업로드 해주세요.")
     private List<PostContentsDto> contentsList;
 }

@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +29,7 @@ public class HoldInfoRepositoryTest {
     private HoldInfoRepository holdInfoRepository;
 
     private Center center;
+    private HoldInfo holdInfo;
 
     @BeforeEach
     void setUp() {
@@ -45,7 +47,7 @@ public class HoldInfoRepositoryTest {
                 "hold info img test"
         ));
 
-        holdInfoRepository.save(HoldInfo.of(
+        this.holdInfo = holdInfoRepository.save(HoldInfo.of(
                 "test",
                 "test.jpg",
                 this.center
@@ -59,5 +61,17 @@ public class HoldInfoRepositoryTest {
 
         // then
         assertThat(holdInfoList.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void successFindByIdAndCenter() {
+        // given
+        String holdInfoId = this.holdInfo.getId();
+
+        // when
+        Optional<HoldInfo> holdInfo = holdInfoRepository.findByIdAndCenter(holdInfoId, this.center);
+
+        // then
+        assertThat(holdInfo.isPresent()).isTrue();
     }
 }
