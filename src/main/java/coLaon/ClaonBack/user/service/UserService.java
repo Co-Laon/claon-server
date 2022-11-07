@@ -59,8 +59,10 @@ public class UserService {
     public JwtDto test(
             TestSignInRequestDto signInRequestDto
     ) {
-        User user = this.userRepository.findByEmailAndOAuthId(signInRequestDto.getEmail(), signInRequestDto.getOAuthId())
-                .orElseGet(() -> this.userRepository.save(User.createNewUser(signInRequestDto.getEmail(), signInRequestDto.getOAuthId())));
+        System.out.println(signInRequestDto.getEmail());
+        System.out.println(signInRequestDto.getId());
+        User user = this.userRepository.findByEmailAndOAuthId(signInRequestDto.getEmail(), signInRequestDto.getId())
+                .orElseGet(() -> this.userRepository.save(User.createNewUser(signInRequestDto.getEmail(), signInRequestDto.getId())));
 
         return this.jwtUtil.createToken(
                 user.getId(),
