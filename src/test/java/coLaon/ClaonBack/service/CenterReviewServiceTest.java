@@ -6,11 +6,7 @@ import coLaon.ClaonBack.center.domain.CenterReview;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.OperatingTime;
-import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
-import coLaon.ClaonBack.center.dto.ReviewFindResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
+import coLaon.ClaonBack.center.dto.*;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
@@ -237,13 +233,14 @@ public class CenterReviewServiceTest {
         Page<CenterReview> centerReviewPage = new PageImpl<>(List.of(review1, review2), pageable, 2);
 
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(this.reviewRepository.findByUserIdAndCenterId("userId", center.getId())).willReturn(Optional.of(review1));
         given(this.reviewRepositorySupport.findByCenterExceptBlockUser(center.getId(), "userId", pageable)).willReturn(centerReviewPage);
 
         //when
-        ReviewListFindResponseDto reviewListFindResponseDto = this.centerReviewService.findReview(user, "centerId", pageable);
+        ReviewBundleFindResponseDto reviewBundleFindResponseDto = this.centerReviewService.findReview(user, "centerId", pageable);
 
         // then
-        assertThat(reviewListFindResponseDto.getReviewFindResponseDtoPagination().getResults())
+        assertThat(reviewBundleFindResponseDto.getOtherReviewFindResponseDtoPagination().getResults())
                 .isNotNull()
                 .extracting(ReviewFindResponseDto::getReviewId, ReviewFindResponseDto::getRank)
                 .contains(

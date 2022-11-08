@@ -1,19 +1,6 @@
 package coLaon.ClaonBack.center.web;
 
-import coLaon.ClaonBack.center.dto.CenterBookmarkResponseDto;
-import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
-import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
-import coLaon.ClaonBack.center.dto.CenterReportCreateRequestDto;
-import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
-import coLaon.ClaonBack.center.dto.CenterResponseDto;
-import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
-import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
-import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
-import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
-import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
+import coLaon.ClaonBack.center.dto.*;
 import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.service.CenterBookmarkService;
 import coLaon.ClaonBack.center.service.CenterReviewService;
@@ -135,7 +122,7 @@ public class CenterController {
 
     @GetMapping(value = "/{centerId}/review")
     @ResponseStatus(value = HttpStatus.OK)
-    public ReviewListFindResponseDto findReviewByCenter(
+    public ReviewBundleFindResponseDto findReviewByCenter(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String centerId,
             @PageableDefault(size = 5) final Pageable pageable

@@ -2,11 +2,7 @@ package coLaon.ClaonBack.center.service;
 
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterReview;
-import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
-import coLaon.ClaonBack.center.dto.ReviewFindResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewResponseDto;
-import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
+import coLaon.ClaonBack.center.dto.*;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
@@ -103,7 +99,7 @@ public class CenterReviewService {
     }
 
     @Transactional
-    public ReviewListFindResponseDto findReview(
+    public ReviewBundleFindResponseDto findReview(
             User user,
             String centerId,
             Pageable pageable
@@ -115,13 +111,16 @@ public class CenterReviewService {
                 )
         );
 
-        return ReviewListFindResponseDto.from(
+        return ReviewBundleFindResponseDto.from(
+                center.getId(),
+                reviewRepositorySupport.findRankByCenterExceptBlockUser(center.getId(), user.getId()),
+                reviewRepository.findByUserIdAndCenterId(user.getId(), center.getId())
+                        .map(ReviewFindResponseDto::from)
+                        .orElse(null),
                 this.paginationFactory.create(
                         reviewRepositorySupport.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)
                                 .map(ReviewFindResponseDto::from)
-                ),
-                center,
-                reviewRepositorySupport.findRankByCenterExceptBlockUser(center.getId(), user.getId())
+                )
         );
     }
 }
