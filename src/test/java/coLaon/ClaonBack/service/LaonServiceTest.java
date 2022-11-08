@@ -19,6 +19,7 @@ import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostDetailResponseDto;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.LaonRepositorySupport;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -57,6 +58,8 @@ public class LaonServiceTest {
     UserRepository userRepository;
     @Mock
     LaonRepository laonRepository;
+    @Mock
+    BlockUserRepository blockUserRepository;
     @Mock
     LaonRepositorySupport laonRepositorySupport;
     @Mock
@@ -196,6 +199,7 @@ public class LaonServiceTest {
             // given
             given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(laon));
             given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.empty());
+            given(this.blockUserRepository.findBlock(this.user.getId(), this.laon.getId())).willReturn(List.of());
 
             mockedLaon.when(() -> Laon.of(this.user, this.laon)).thenReturn(this.laonRelation);
 
