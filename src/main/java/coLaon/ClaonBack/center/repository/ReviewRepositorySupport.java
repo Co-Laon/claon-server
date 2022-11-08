@@ -26,6 +26,33 @@ public class ReviewRepositorySupport extends QuerydslRepositorySupport {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
+    public Page<CenterReview> findByCenterExceptBlockUserAndSelf(String centerId, String userId, Pageable pageable) {
+        JPQLQuery<CenterReview> query = jpaQueryFactory
+                .selectFrom(centerReview)
+                .join(centerReview.writer, user)
+                .fetchJoin()
+                .where(centerReview.center.id.eq(centerId)
+                        .and(centerReview.writer.id.ne(userId))
+                        .and(centerReview.id.notIn(
+                                JPAExpressions
+                                        .select(centerReview.id)
+                                        .from(centerReview)
+                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.blockedUser.id))
+                                        .where(blockUser.user.id.eq(userId))))
+                        .and(centerReview.id.notIn(
+                                JPAExpressions
+                                        .select(centerReview.id)
+                                        .from(centerReview)
+                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.user.id))
+                                        .where(blockUser.blockedUser.id.eq(userId)))
+                        ));
+
+        long totalCount = query.fetchCount();
+        List<CenterReview> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
+
+        return new PageImpl<>(results, pageable, totalCount);
+    }
+
     public Page<CenterReview> findByCenterExceptBlockUser(String centerId, String userId, Pageable pageable) {
         JPQLQuery<CenterReview> query = jpaQueryFactory
                 .selectFrom(centerReview)

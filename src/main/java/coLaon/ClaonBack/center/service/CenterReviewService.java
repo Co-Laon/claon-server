@@ -2,7 +2,11 @@ package coLaon.ClaonBack.center.service;
 
 import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterReview;
-import coLaon.ClaonBack.center.dto.*;
+import coLaon.ClaonBack.center.dto.ReviewBundleFindResponseDto;
+import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
+import coLaon.ClaonBack.center.dto.ReviewFindResponseDto;
+import coLaon.ClaonBack.center.dto.ReviewResponseDto;
+import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
@@ -118,7 +122,7 @@ public class CenterReviewService {
                         .map(ReviewFindResponseDto::from)
                         .orElse(null),
                 this.paginationFactory.create(
-                        reviewRepositorySupport.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)
+                        reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(center.getId(), user.getId(), pageable)
                                 .map(ReviewFindResponseDto::from)
                 )
         );

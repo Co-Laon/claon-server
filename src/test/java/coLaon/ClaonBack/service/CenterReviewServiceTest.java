@@ -234,7 +234,7 @@ public class CenterReviewServiceTest {
 
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
         given(this.reviewRepository.findByUserIdAndCenterId("userId", center.getId())).willReturn(Optional.of(review1));
-        given(this.reviewRepositorySupport.findByCenterExceptBlockUser(center.getId(), "userId", pageable)).willReturn(centerReviewPage);
+        given(this.reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(center.getId(), "userId", pageable)).willReturn(centerReviewPage);
 
         //when
         ReviewBundleFindResponseDto reviewBundleFindResponseDto = this.centerReviewService.findReview(user, "centerId", pageable);
