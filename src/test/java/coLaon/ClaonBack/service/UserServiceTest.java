@@ -15,7 +15,7 @@ import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
-import coLaon.ClaonBack.user.dto.CenterPreviewResponseDto;
+import coLaon.ClaonBack.user.dto.UserCenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
@@ -201,7 +201,7 @@ public class UserServiceTest {
         given(this.laonRepository.getUserIdsByLaonId("userId")).willReturn(List.of("publicUserId"));
 
         CenterClimbingHistoryResponseDto historyDto = CenterClimbingHistoryResponseDto.from(
-                CenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
+                UserCenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
                 List.of(ClimbingHistoryResponseDto.from(
                         HoldInfoResponseDto.of(
                                 climbingHistory.getHoldInfo().getId(),
@@ -247,7 +247,7 @@ public class UserServiceTest {
         given(this.laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(List.of());
 
         CenterClimbingHistoryResponseDto historyDto = CenterClimbingHistoryResponseDto.from(
-                CenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
+                UserCenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
                 List.of(ClimbingHistoryResponseDto.from(
                         HoldInfoResponseDto.of(
                                 climbingHistory.getHoldInfo().getId(),

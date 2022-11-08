@@ -3,11 +3,11 @@ package coLaon.ClaonBack.user.dto;
 import lombok.Data;
 
 @Data
-public class CenterPreviewResponseDto {
+public class UserCenterPreviewResponseDto {
     private final String centerImage;
     private final String centerName;
 
-    private CenterPreviewResponseDto(
+    private UserCenterPreviewResponseDto(
             String centerImage,
             String centerName
     ) {
@@ -15,10 +15,10 @@ public class CenterPreviewResponseDto {
         this.centerName = centerName;
     }
 
-    public static CenterPreviewResponseDto of(
+    public static UserCenterPreviewResponseDto of(
             String centerImage,
             String centerName
     ) {
-        return new CenterPreviewResponseDto(centerImage, centerName);
+        return new UserCenterPreviewResponseDto(centerImage, centerName);
     }
 }
