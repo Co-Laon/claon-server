@@ -1,0 +1,30 @@
+name: CD
+on:
+  workflow_call:
+    secrets:
+      HOST:
+        required: true
+      USERNAME:
+        required: true
+      SSH_KEY:
+        required: true
+  push:
+    branches: [ develop ]
+    paths-ignore:
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            cd claon-server
+            sudo ./start.sh
