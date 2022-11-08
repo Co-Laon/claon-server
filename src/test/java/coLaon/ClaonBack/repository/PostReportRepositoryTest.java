@@ -74,7 +74,7 @@ public class PostReportRepositoryTest {
                 "testContent1",
                 user,
                 List.of(),
-                Set.of()
+                List.of()
         ));
 
         postReportRepository.save(PostReport.of(

@@ -20,7 +20,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -46,7 +45,7 @@ public class Post extends BaseEntity {
 
     @BatchSize(size = 10)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private Set<ClimbingHistory> climbingHistorySet;
+    private List<ClimbingHistory> climbingHistoryList;
 
     public String getThumbnailUrl() {
         if (this.getContentList().size() == 0) {
@@ -73,14 +72,14 @@ public class Post extends BaseEntity {
             String content,
             User writer,
             List<PostContents> contentList,
-            Set<ClimbingHistory> climbingHistorySet
+            List<ClimbingHistory> climbingHistoryList
     ) {
         this.center = center;
         this.content = content;
         this.isDeleted = false;
         this.writer = writer;
         this.contentList = contentList;
-        this.climbingHistorySet = climbingHistorySet;
+        this.climbingHistoryList = climbingHistoryList;
     }
 
     public static Post of(
@@ -101,15 +100,15 @@ public class Post extends BaseEntity {
             Center center,
             String content,
             User writer,
-            List<PostContents> contentsSet,
-            Set<ClimbingHistory> climbingHistorySet
+            List<PostContents> contentsList,
+            List<ClimbingHistory> climbingHistoryList
     ) {
         return new Post(
                 center,
                 content,
                 writer,
-                contentsSet,
-                climbingHistorySet
+                contentsList,
+                climbingHistoryList
         );
     }
 

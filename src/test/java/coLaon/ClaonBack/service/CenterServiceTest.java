@@ -165,7 +165,7 @@ public class CenterServiceTest {
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
-                Set.of()
+                List.of()
         );
         ReflectionTestUtils.setField(this.post, "id", "testPostId");
         ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
@@ -185,7 +185,7 @@ public class CenterServiceTest {
                 List.of(PostContents.of(
                         "test2.com/test.png"
                 )),
-                Set.of(climbingHistory)
+                List.of(climbingHistory)
         );
         ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
         ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());

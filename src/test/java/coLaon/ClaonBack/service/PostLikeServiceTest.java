@@ -108,7 +108,7 @@ public class PostLikeServiceTest {
                 "testContent1",
                 user,
                 List.of(),
-                Set.of()
+                List.of()
         );
         ReflectionTestUtils.setField(this.post, "id", "testPostId");
         ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
@@ -145,7 +145,7 @@ public class PostLikeServiceTest {
                 "testContent2",
                 user2,
                 List.of(),
-                Set.of(climbingHistory2)
+                List.of(climbingHistory2)
         );
         ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
         ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());

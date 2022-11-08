@@ -41,7 +41,7 @@ public class PostToUserAdapter implements PostPort {
                                 post.getId(),
                                 post.getThumbnailUrl(),
                                 post.getCenter().getName(),
-                                post.getClimbingHistorySet().stream()
+                                post.getClimbingHistoryList().stream()
                                         .map(history -> ClimbingHistoryResponseDto.from(
                                                 HoldInfoResponseDto.of(
                                                         history.getHoldInfo().getId(),
@@ -108,7 +108,7 @@ public class PostToUserAdapter implements PostPort {
                                 post.getContent(),
                                 post.getCreatedAt(),
                                 post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
-                                post.getClimbingHistorySet().stream()
+                                post.getClimbingHistoryList().stream()
                                 .map(history -> ClimbingHistoryResponseDto.from(
                                         HoldInfoResponseDto.of(
                                                 history.getHoldInfo().getId(),

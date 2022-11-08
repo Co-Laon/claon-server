@@ -64,7 +64,7 @@ public class PostDetailResponseDto {
                 post.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(post.getCreatedAt(), ZoneOffset.of("+9"))),
                 post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
-                post.getClimbingHistorySet().stream().map(
+                post.getClimbingHistoryList().stream().map(
                                 climbingHistory -> ClimbingHistoryResponseDto.from(
                                         HoldInfoResponseDto.of(
                                                 climbingHistory.getHoldInfo().getId(),
