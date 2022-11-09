@@ -9,8 +9,8 @@ import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
+import coLaon.ClaonBack.center.dto.ReviewBundleFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
-import coLaon.ClaonBack.center.dto.ReviewListFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
@@ -135,7 +135,7 @@ public class CenterController {
 
     @GetMapping(value = "/{centerId}/review")
     @ResponseStatus(value = HttpStatus.OK)
-    public ReviewListFindResponseDto findReviewByCenter(
+    public ReviewBundleFindResponseDto findReviewByCenter(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String centerId,
             @PageableDefault(size = 5) final Pageable pageable
