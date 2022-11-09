@@ -148,4 +148,23 @@ public class ReviewRepositoryTest {
         // then
         assertThat(countCenter).isEqualTo(1);
     }
+
+    @Test
+    public void successFindByCenterExceptBlockUserAndSelf() {
+        // given
+        reviewRepository.save(CenterReview.of(
+                2,
+                "test",
+                this.blockUser,
+                this.center
+        ));
+        String centerId = center.getId();
+        String userId = user.getId();
+
+        // when
+        Page<CenterReview> reviewList = reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(centerId, userId, PageRequest.of(0, 2));
+
+        // then
+        assertThat(reviewList.getContent().size()).isEqualTo(0);
+    }
 }

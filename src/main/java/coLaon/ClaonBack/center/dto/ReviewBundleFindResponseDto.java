@@ -7,27 +7,27 @@ import lombok.Data;
 public class ReviewBundleFindResponseDto {
     private final String centerId;
     private final Double rank;
-    private final ReviewFindResponseDto selfReviewFindResponseDto;
-    private final Pagination<ReviewFindResponseDto> otherReviewFindResponseDtoPagination;
+    private final ReviewFindResponseDto selfReview;
+    private final Pagination<ReviewFindResponseDto> otherReviewsPagination;
 
     private ReviewBundleFindResponseDto(
             String centerId,
             Double rank,
-            ReviewFindResponseDto selfReviewFindResponseDto,
-            Pagination<ReviewFindResponseDto> otherReviewFindResponseDtoPagination
+            ReviewFindResponseDto selfReview,
+            Pagination<ReviewFindResponseDto> otherReviewsPagination
     ) {
         this.centerId = centerId;
         this.rank = rank;
-        this.selfReviewFindResponseDto = selfReviewFindResponseDto;
-        this.otherReviewFindResponseDtoPagination = otherReviewFindResponseDtoPagination;
+        this.selfReview = selfReview;
+        this.otherReviewsPagination = otherReviewsPagination;
     }
 
     public static ReviewBundleFindResponseDto from(
             String centerId,
             Double rank,
-            ReviewFindResponseDto selfReviewFindResponseDto,
-            Pagination<ReviewFindResponseDto> otherReviewFindResponseDtoPagination
+            ReviewFindResponseDto selfReview,
+            Pagination<ReviewFindResponseDto> otherReviewsPagination
     ) {
-        return new ReviewBundleFindResponseDto(centerId, rank, selfReviewFindResponseDto, otherReviewFindResponseDtoPagination);
+        return new ReviewBundleFindResponseDto(centerId, rank, selfReview, otherReviewsPagination);
     }
 }

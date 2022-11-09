@@ -240,7 +240,7 @@ public class CenterReviewServiceTest {
         ReviewBundleFindResponseDto reviewBundleFindResponseDto = this.centerReviewService.findReview(user, "centerId", pageable);
 
         // then
-        assertThat(reviewBundleFindResponseDto.getOtherReviewFindResponseDtoPagination().getResults())
+        assertThat(reviewBundleFindResponseDto.getOtherReviewsPagination().getResults())
                 .isNotNull()
                 .extracting(ReviewFindResponseDto::getReviewId, ReviewFindResponseDto::getRank)
                 .contains(
