@@ -6,11 +6,11 @@ import java.util.List;
 
 @Data
 public class CenterClimbingHistoryResponseDto {
-    private CenterPreviewResponseDto center;
+    private UserCenterPreviewResponseDto center;
     private List<ClimbingHistoryResponseDto> climbingHistories;
 
     private CenterClimbingHistoryResponseDto(
-            CenterPreviewResponseDto center,
+            UserCenterPreviewResponseDto center,
             List<ClimbingHistoryResponseDto> climbingHistories
     ) {
         this.center = center;
@@ -18,7 +18,7 @@ public class CenterClimbingHistoryResponseDto {
     }
 
     public static CenterClimbingHistoryResponseDto from(
-            CenterPreviewResponseDto center,
+            UserCenterPreviewResponseDto center,
             List<ClimbingHistoryResponseDto> climbingHistories
     ) {
         return new CenterClimbingHistoryResponseDto(
