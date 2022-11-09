@@ -101,7 +101,7 @@ public class PostCommentRepositoryTest {
                 "testContent1",
                 user,
                 List.of(),
-                Set.of()
+                List.of()
         ));
 
         this.deletedComment = PostComment.of(

@@ -145,7 +145,7 @@ public class PostRepositoryTest {
                 "testContent",
                 user,
                 List.of(),
-                Set.of()
+                List.of()
         ));
 
        postRepository.save(Post.of(
@@ -153,7 +153,7 @@ public class PostRepositoryTest {
                 "testContent",
                 user2,
                 List.of(),
-                Set.of()
+                List.of()
         ));
 
         postRepository.save(Post.of(
@@ -161,7 +161,7 @@ public class PostRepositoryTest {
                 "testContent",
                 user3,
                 List.of(),
-                Set.of()
+                List.of()
         ));
 
         laonRepository.save(Laon.of(user, user3));
@@ -171,7 +171,7 @@ public class PostRepositoryTest {
                 "testContent",
                 blockUser,
                 List.of(),
-                Set.of()
+                List.of()
         ));
 
         Post privatePost = postRepository.save(Post.of(
@@ -179,7 +179,7 @@ public class PostRepositoryTest {
                 "testContent",
                 blockUser,
                 List.of(),
-                Set.of()
+                List.of()
         ));
 
         this.deletedPost = Post.of(
@@ -187,7 +187,7 @@ public class PostRepositoryTest {
                 "testContent",
                 user,
                 List.of(),
-                Set.of()
+                List.of()
         );
         this.deletedPost.delete();
         postRepository.save(this.deletedPost);

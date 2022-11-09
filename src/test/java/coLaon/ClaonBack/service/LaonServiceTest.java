@@ -43,7 +43,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -168,7 +167,7 @@ public class LaonServiceTest {
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
-                Set.of()
+                List.of()
         );
         ReflectionTestUtils.setField(this.post1, "id", "testPostId");
         ReflectionTestUtils.setField(this.post1, "createdAt", LocalDateTime.now());
@@ -181,7 +180,7 @@ public class LaonServiceTest {
                 List.of(PostContents.of(
                         "test2.com/test.png"
                 )),
-                Set.of(climbingHistory)
+                List.of(climbingHistory)
         );
         ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
         ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());
@@ -283,7 +282,7 @@ public class LaonServiceTest {
                                 post1.getContent(),
                                 post1.getCreatedAt(),
                                 post1.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
-                                post1.getClimbingHistorySet().stream()
+                                post1.getClimbingHistoryList().stream()
                                         .map(history -> ClimbingHistoryResponseDto.from(
                                                 HoldInfoResponseDto.of(
                                                         history.getHoldInfo().getId(),
@@ -305,7 +304,7 @@ public class LaonServiceTest {
                                 post2.getContent(),
                                 post2.getCreatedAt(),
                                 post2.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
-                                post2.getClimbingHistorySet().stream()
+                                post2.getClimbingHistoryList().stream()
                                         .map(history -> ClimbingHistoryResponseDto.from(
                                                 HoldInfoResponseDto.of(
                                                         history.getHoldInfo().getId(),

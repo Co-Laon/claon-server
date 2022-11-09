@@ -47,7 +47,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -287,7 +286,7 @@ public class UserServiceTest {
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
-                Set.of()
+                List.of()
         );
         ReflectionTestUtils.setField(post, "id", "testPostId");
         ReflectionTestUtils.setField(post, "createdAt", LocalDateTime.now());
@@ -301,7 +300,7 @@ public class UserServiceTest {
                         post.getId(),
                         post.getThumbnailUrl(),
                         post.getCenter().getName(),
-                        post.getClimbingHistorySet().stream().map(history ->
+                        post.getClimbingHistoryList().stream().map(history ->
                                 ClimbingHistoryResponseDto.from(
                                         HoldInfoResponseDto.of(
                                                 history.getHoldInfo().getId(),
