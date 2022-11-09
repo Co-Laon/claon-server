@@ -10,8 +10,8 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NoticeCreateRequestDto {
-    @NotBlank(message = "공지사항 제목을 입력해주세요.")
+    @NotBlank(message = "제목을 입력해주세요.")
     private String title;
-    @NotBlank(message = "공지사항 내용을 입력해주세요.")
+    @NotBlank(message = "내용을 입력해주세요.")
     private String content;
 }

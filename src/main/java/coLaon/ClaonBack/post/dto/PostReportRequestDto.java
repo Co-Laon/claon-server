@@ -7,13 +7,15 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostReportRequestDto {
-    @NotNull(message = "신고 유형을 입력해주세요.")
+    @NotNull(message = "유형을 선택해주세요.")
     private PostReportType reportType;
-    @NotBlank(message = "신고 내용을 입력해주세요.")
+    @NotBlank(message = "내용을 입력해주세요.")
+    @Size(max = 1000, message = "1000자 이내로 내용을 입력해주세요.")
     private String content;
 }

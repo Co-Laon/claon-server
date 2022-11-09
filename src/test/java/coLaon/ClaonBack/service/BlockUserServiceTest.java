@@ -128,7 +128,7 @@ public class BlockUserServiceTest {
         //then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("자기 자신은 %s이 불가능합니다.", BlockUser.domain));
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("자신을 %s할 수 없습니다.", BlockUser.domain));
     }
 
     @Test

@@ -24,7 +24,6 @@ import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
-import coLaon.ClaonBack.user.dto.TestSignInRequestDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.infra.ProfileImageManager;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
@@ -53,22 +52,6 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final ProfileImageManager profileImageManager;
     private final PaginationFactory paginationFactory;
-
-    // TODO: DELETE
-    @Transactional
-    public JwtDto test(
-            TestSignInRequestDto signInRequestDto
-    ) {
-        System.out.println(signInRequestDto.getEmail());
-        System.out.println(signInRequestDto.getId());
-        User user = this.userRepository.findByEmailAndOAuthId(signInRequestDto.getEmail(), signInRequestDto.getId())
-                .orElseGet(() -> this.userRepository.save(User.createNewUser(signInRequestDto.getEmail(), signInRequestDto.getId())));
-
-        return this.jwtUtil.createToken(
-                user.getId(),
-                user.isSignupCompleted()
-        );
-    }
 
     @Transactional(readOnly = true)
     public DuplicatedCheckResponseDto nicknameDuplicatedCheck(String nickname) {
@@ -185,10 +168,13 @@ public class UserService {
 
         // individual user page
         if (!user.getId().equals(targetUser.getId())) {
-            IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
+            IsPrivateValidator.of(targetUser.getNickname(), targetUser.getIsPrivate()).validate();
 
-            if (blockUserRepository.findBlock(targetUser.getId(), user.getId()).size() > 0) {
-                throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
+            if (!blockUserRepository.findBlock(targetUser.getId(), user.getId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", nickname)
+                );
             }
         }
 
@@ -239,9 +225,9 @@ public class UserService {
 
     public void deleteProfile(User user) {
         if (user.getImagePath().equals("")) {
-            throw new BadRequestException(
-                    ErrorCode.INTERNAL_SERVER_ERROR,
-                    "프로필 이미지가 존재하지 않습니다."
+            throw new NotFoundException(
+                    ErrorCode.DATA_DOES_NOT_EXIST,
+                    "프로필 이미지를 찾을 수 없습니다."
             );
         }
 

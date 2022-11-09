@@ -14,6 +14,6 @@ import javax.validation.constraints.NotNull;
 public class CenterReportCreateRequestDto {
     @NotBlank(message = "요청 내용을 입력해주세요.")
     private String content;
-    @NotNull(message = "요청 부분을 입력해주세요.")
+    @NotNull(message = "요청 부분을 선택해주세요.")
     private CenterReportType reportType;
 }

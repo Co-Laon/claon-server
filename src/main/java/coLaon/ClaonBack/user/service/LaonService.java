@@ -42,7 +42,7 @@ public class LaonService {
                 l -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 라온 관계입니다."
+                            String.format("%s을 이미 라온했습니다.", laonNickname)
                     );
                 }
         );
@@ -62,7 +62,7 @@ public class LaonService {
         Laon laonRelation = laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "라온 관계가 아닙니다."
+                        String.format("%s을 아직 라온하지 않았습니다.", laonNickname)
                 )
         );
 

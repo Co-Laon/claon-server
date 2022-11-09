@@ -20,7 +20,7 @@ public class AppVersionService {
         AppVersion appVersion = this.appVersionRepository.findByKey(store.getValue()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        String.format("%s 버전이 존재하지 않습니다.", store)
+                        String.format("%s 버전을 찾을 수 없습니다.", store)
                 )
         );
 

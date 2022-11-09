@@ -27,13 +27,13 @@ public class IsImageValidator extends Validator {
                     .startsWith("image")) {
                 throw new BadRequestException(
                         ErrorCode.INVALID_FORMAT,
-                        "이미지 파일 형식이 올바르지 않습니다."
+                        "이미지만 업로드 가능합니다."
                 );
             }
         } catch (IOException e) {
             throw new BadRequestException(
                     ErrorCode.INVALID_FORMAT,
-                    "이미지 파일이 올바르지 않습니다."
+                    "잘못된 파일입니다."
             );
         }
 

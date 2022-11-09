@@ -9,7 +9,6 @@ import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
-import coLaon.ClaonBack.user.dto.TestSignInRequestDto;
 import coLaon.ClaonBack.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,16 +31,6 @@ import javax.validation.Valid;
 public class AuthController {
     private final UserService userService;
     private final HeaderUtil headerUtil;
-
-    // TODO: DELETE
-    @PostMapping("/test/token")
-    @ResponseStatus(value = HttpStatus.OK)
-    public JwtDto test(
-            @RequestBody @Valid TestSignInRequestDto signInRequestDto
-    ) {
-        return this.userService.test(signInRequestDto);
-    }
-
 
     @GetMapping("/nickname/{nickname}/duplicate-check")
     @ResponseStatus(value = HttpStatus.OK)

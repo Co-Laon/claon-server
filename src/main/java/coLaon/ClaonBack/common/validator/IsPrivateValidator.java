@@ -2,24 +2,33 @@ package coLaon.ClaonBack.common.validator;
 
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 
 public class IsPrivateValidator extends Validator {
+    private final String userNickname;
     private final Boolean isPrivate;
 
-    private IsPrivateValidator(Boolean isPrivate) {
+    private IsPrivateValidator(
+            String userNickname,
+            Boolean isPrivate
+    ) {
+        this.userNickname = userNickname;
         this.isPrivate = isPrivate;
     }
 
-    public static IsPrivateValidator of(Boolean isPrivate) {
-        return new IsPrivateValidator(isPrivate);
+    public static IsPrivateValidator of(
+            String userNickname,
+            Boolean isPrivate
+    ) {
+        return new IsPrivateValidator(userNickname, isPrivate);
     }
 
     @Override
     public void validate() {
         if (this.isPrivate) {
-            throw new BadRequestException(
+            throw new UnauthorizedException(
                     ErrorCode.NOT_ACCESSIBLE,
-                    "비공개 계정입니다."
+                    String.format("%s은 비공개 상태입니다.", userNickname)
             );
         }
 

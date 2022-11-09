@@ -27,7 +27,7 @@ public class CenterBookmarkService {
         Center center = this.centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장 정보를 찾을 수 없습니다."
+                        "암장을 찾을 수 없습니다."
                 )
         );
 
@@ -35,7 +35,7 @@ public class CenterBookmarkService {
                 bookmarkCenter -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 즐겨찾기에 등록된 암장입니다."
+                            "이미 즐겨찾기에 등록되어 있습니다."
                     );
                 }
         );
@@ -59,14 +59,14 @@ public class CenterBookmarkService {
         Center center = this.centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장 정보를 찾을 수 없습니다."
+                        "암장을 찾을 수 없습니다."
                 )
         );
 
         CenterBookmark bookmarkCenter = this.centerBookmarkRepository.findByUserIdAndCenterId(user.getId(), center.getId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "즐겨찾기에 등록되지 않은 암장입니다."
+                        "아직 즐겨찾기에 등록되지 않았습니다."
                 )
         );
 
