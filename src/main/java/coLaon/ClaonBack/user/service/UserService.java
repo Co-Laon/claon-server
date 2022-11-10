@@ -20,6 +20,7 @@ import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
+import coLaon.ClaonBack.user.dto.UserDetailResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
@@ -124,8 +125,16 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponseDto getUser(User user) {
-        return UserResponseDto.from(user);
+    public UserDetailResponseDto retrieveMe(User user) {
+        List<String> postIds = this.postPort.selectPostIdsByUserId(user.getId());
+        Long postCount = (long) postIds.size();
+
+        List<String> userIds = this.laonRepository.getUserIdsByLaonId(user.getId());
+        Long laonCount = (long) userIds.size();
+
+        List<CenterClimbingHistoryResponseDto> climbingHistories = postPort.findClimbingHistoryByPostIds(postIds);
+
+        return UserDetailResponseDto.from(user, postCount, laonCount, climbingHistories);
     }
 
     @Transactional(readOnly = true)
@@ -215,6 +224,11 @@ public class UserService {
     @Transactional
     public void delete(User user) {
         this.userRepository.delete(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponseDto retrieveMyAccount(User user) {
+        return UserResponseDto.from(user);
     }
 
     public String uploadProfile(MultipartFile image) {
