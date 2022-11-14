@@ -3,6 +3,7 @@ package coLaon.ClaonBack.user.web;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
+import coLaon.ClaonBack.user.dto.UserDetailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
@@ -50,8 +51,8 @@ public class UserController {
 
     @GetMapping("/me")
     @ResponseStatus(value = HttpStatus.OK)
-    public UserResponseDto getUser(@AuthenticationPrincipal UserDetails userDetails) {
-        return userService.getUser(userDetails.getUser());
+    public UserDetailResponseDto retrieveMe(@AuthenticationPrincipal UserDetails userDetails) {
+        return userService.retrieveMe(userDetails.getUser());
     }
 
     @GetMapping("/search")
@@ -64,7 +65,7 @@ public class UserController {
         return userService.searchUser(userDetails.getUser(), nickname, pageable);
     }
 
-    @PutMapping("/me")
+    @PutMapping("/me/account")
     @ResponseStatus(value = HttpStatus.OK)
     public UserResponseDto modifyUser(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -125,6 +126,14 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         this.userService.delete(userDetails.getUser());
+    }
+
+    @GetMapping("/me/account")
+    @ResponseStatus(value = HttpStatus.OK)
+    public UserResponseDto retrieveMyAccount(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return this.userService.retrieveMyAccount(userDetails.getUser());
     }
 
     @PostMapping("/me/profile")

@@ -35,7 +35,7 @@ public enum CenterReportType {
                 .orElseThrow(
                         () -> new BadRequestException(
                                 ErrorCode.WRONG_CENTER_REPORT_TYPE,
-                                String.format("'%s' is invalid : not supported", value)
+                                String.format("%s은 지원하지 않는 요청 부분입니다.", value)
                         )
                 );
     }

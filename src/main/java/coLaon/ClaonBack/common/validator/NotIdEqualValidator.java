@@ -23,7 +23,7 @@ public class NotIdEqualValidator extends Validator {
         if (srcId.equals(dstId)) {
             throw new UnauthorizedException(
                     ErrorCode.NOT_ACCESSIBLE,
-                    String.format("자기 자신은 %s이 불가능합니다.", domain)
+                    String.format("자신을 %s할 수 없습니다.", domain)
             );
         }
 

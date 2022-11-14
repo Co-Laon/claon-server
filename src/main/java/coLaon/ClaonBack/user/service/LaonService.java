@@ -5,11 +5,13 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.NotIdEqualValidator;
 import coLaon.ClaonBack.user.dto.UserPostDetailResponseDto;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.LaonRepositorySupport;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LaonService {
     private final UserRepository userRepository;
     private final LaonRepository laonRepository;
+    private final BlockUserRepository blockUserRepository;
     private final LaonRepositorySupport laonRepositorySupport;
     private final PaginationFactory paginationFactory;
     private final PostPort postPort;
@@ -38,11 +41,18 @@ public class LaonService {
 
         NotIdEqualValidator.of(user.getId(), laon.getId(), Laon.domain).validate();
 
+        if (!blockUserRepository.findBlock(user.getId(), laon.getId()).isEmpty()) {
+            throw new UnauthorizedException(
+                    ErrorCode.NOT_ACCESSIBLE,
+                    String.format("%s을 찾을 수 없습니다.", laonNickname)
+            );
+        }
+
         laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId()).ifPresent(
                 l -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 라온 관계입니다."
+                            String.format("%s을 이미 라온했습니다.", laonNickname)
                     );
                 }
         );
@@ -62,7 +72,7 @@ public class LaonService {
         Laon laonRelation = laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        "라온 관계가 아닙니다."
+                        String.format("%s을 아직 라온하지 않았습니다.", laonNickname)
                 )
         );
 

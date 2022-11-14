@@ -101,7 +101,7 @@ public class PostLikeRepositoryTest {
                 "testContent1",
                 user,
                 List.of(),
-                Set.of()
+                List.of()
         ));
 
         postLikeRepository.save(PostLike.of(

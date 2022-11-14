@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class PostContentsUploader {
+public class PostContentsImageManager {
     private final S3Util s3Util;
     private final String imageContentsDirName = "post/image";
 
@@ -21,5 +21,9 @@ public class PostContentsUploader {
         String fileName = this.imageContentsDirName + "/" + LocalDate.now() + "/" + UUID.randomUUID() + "." + fileExtension;
 
         return this.s3Util.uploadImage(image, fileName, fileExtension);
+    }
+
+    public void deleteContents(String imagePath) {
+        this.s3Util.deleteImage(imagePath);
     }
 }

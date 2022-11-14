@@ -10,7 +10,7 @@ import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
-import coLaon.ClaonBack.user.dto.CenterPreviewResponseDto;
+import coLaon.ClaonBack.user.dto.UserCenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostDetailResponseDto;
@@ -41,7 +41,7 @@ public class PostToUserAdapter implements PostPort {
                                 post.getId(),
                                 post.getThumbnailUrl(),
                                 post.getCenter().getName(),
-                                post.getClimbingHistorySet().stream()
+                                post.getClimbingHistoryList().stream()
                                         .map(history -> ClimbingHistoryResponseDto.from(
                                                 HoldInfoResponseDto.of(
                                                         history.getHoldInfo().getId(),
@@ -65,8 +65,8 @@ public class PostToUserAdapter implements PostPort {
     public List<CenterClimbingHistoryResponseDto> findClimbingHistoryByPostIds(List<String> postIds) {
         List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
 
-        Map<CenterPreviewResponseDto, Map<HoldInfoResponseDto, Integer>> historyMap = climbingHistories.stream().collect(
-                Collectors.groupingBy(history -> CenterPreviewResponseDto.of(
+        Map<UserCenterPreviewResponseDto, Map<HoldInfoResponseDto, Integer>> historyMap = climbingHistories.stream().collect(
+                Collectors.groupingBy(history -> UserCenterPreviewResponseDto.of(
                                 history.getPost().getCenter().getThumbnailUrl(),
                                 history.getPost().getCenter().getName()
                         ),
@@ -108,7 +108,7 @@ public class PostToUserAdapter implements PostPort {
                                 post.getContent(),
                                 post.getCreatedAt(),
                                 post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
-                                post.getClimbingHistorySet().stream()
+                                post.getClimbingHistoryList().stream()
                                 .map(history -> ClimbingHistoryResponseDto.from(
                                         HoldInfoResponseDto.of(
                                                 history.getHoldInfo().getId(),

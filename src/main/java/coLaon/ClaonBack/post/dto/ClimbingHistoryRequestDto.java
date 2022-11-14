@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClimbingHistoryRequestDto {
-    @NotBlank(message = "홀드가 선택해주세요.")
+    @NotBlank(message = "홀드를 선택해주세요.")
     private String holdId;
     @NotNull(message = "등반 횟수를 입력해주세요.")
     private Integer climbingCount;

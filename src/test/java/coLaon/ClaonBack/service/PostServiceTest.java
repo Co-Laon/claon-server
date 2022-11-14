@@ -172,7 +172,7 @@ public class PostServiceTest {
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
-                Set.of()
+                List.of()
         );
         ReflectionTestUtils.setField(this.post, "id", "testPostId");
         ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
@@ -206,7 +206,7 @@ public class PostServiceTest {
                 List.of(PostContents.of(
                         "test2.com/test.png"
                 )),
-                Set.of(climbingHistory2)
+                List.of(climbingHistory2)
         );
         ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
         ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());
@@ -217,7 +217,7 @@ public class PostServiceTest {
                 "testContent3",
                 blockedUser,
                 List.of(),
-                Set.of()
+                List.of()
         );
         ReflectionTestUtils.setField(this.blockedPost, "id", "blockedPostId");
         ReflectionTestUtils.setField(this.blockedPost, "createdAt", LocalDateTime.now());
@@ -228,7 +228,7 @@ public class PostServiceTest {
                 "testContent4",
                 privateUser,
                 List.of(),
-                Set.of()
+                List.of()
         );
         ReflectionTestUtils.setField(this.privatePost, "id", "privatePostId");
         ReflectionTestUtils.setField(this.privatePost, "createdAt", LocalDateTime.now());
@@ -294,15 +294,15 @@ public class PostServiceTest {
         given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
 
         // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
+        final UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
                 () -> this.postService.findPost(user, "privatePostId")
         );
 
         // then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, "비공개 계정입니다.");
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s은 비공개 상태입니다.", privatePost.getWriter().getNickname()));
     }
 
     @Test
@@ -321,7 +321,7 @@ public class PostServiceTest {
         // then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s을 찾을 수 없습니다.", blockedPost.getWriter().getNickname()));
     }
 
     @Test

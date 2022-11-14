@@ -19,6 +19,7 @@ import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostDetailResponseDto;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.LaonRepositorySupport;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -43,7 +44,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,6 +57,8 @@ public class LaonServiceTest {
     UserRepository userRepository;
     @Mock
     LaonRepository laonRepository;
+    @Mock
+    BlockUserRepository blockUserRepository;
     @Mock
     LaonRepositorySupport laonRepositorySupport;
     @Mock
@@ -168,7 +170,7 @@ public class LaonServiceTest {
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
-                Set.of()
+                List.of()
         );
         ReflectionTestUtils.setField(this.post1, "id", "testPostId");
         ReflectionTestUtils.setField(this.post1, "createdAt", LocalDateTime.now());
@@ -181,7 +183,7 @@ public class LaonServiceTest {
                 List.of(PostContents.of(
                         "test2.com/test.png"
                 )),
-                Set.of(climbingHistory)
+                List.of(climbingHistory)
         );
         ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
         ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());
@@ -196,6 +198,7 @@ public class LaonServiceTest {
             // given
             given(this.userRepository.findByNickname("userNickname1")).willReturn(Optional.of(laon));
             given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.empty());
+            given(this.blockUserRepository.findBlock(this.user.getId(), this.laon.getId())).willReturn(List.of());
 
             mockedLaon.when(() -> Laon.of(this.user, this.laon)).thenReturn(this.laonRelation);
 
@@ -224,7 +227,7 @@ public class LaonServiceTest {
         //then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("자기 자신은 %s이 불가능합니다.", Laon.domain));
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("자신을 %s할 수 없습니다.", Laon.domain));
     }
 
     @Test
@@ -283,7 +286,7 @@ public class LaonServiceTest {
                                 post1.getContent(),
                                 post1.getCreatedAt(),
                                 post1.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
-                                post1.getClimbingHistorySet().stream()
+                                post1.getClimbingHistoryList().stream()
                                         .map(history -> ClimbingHistoryResponseDto.from(
                                                 HoldInfoResponseDto.of(
                                                         history.getHoldInfo().getId(),
@@ -305,7 +308,7 @@ public class LaonServiceTest {
                                 post2.getContent(),
                                 post2.getCreatedAt(),
                                 post2.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
-                                post2.getClimbingHistorySet().stream()
+                                post2.getClimbingHistoryList().stream()
                                         .map(history -> ClimbingHistoryResponseDto.from(
                                                 HoldInfoResponseDto.of(
                                                         history.getHoldInfo().getId(),

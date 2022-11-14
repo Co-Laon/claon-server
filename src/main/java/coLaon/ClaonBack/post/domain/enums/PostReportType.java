@@ -31,7 +31,7 @@ public enum PostReportType {
                 .orElseThrow(
                         () -> new BadRequestException(
                                 ErrorCode.INVALID_PARAMETER,
-                                "잘못된 신고 사유입니다."
+                                "잘못된 신고 유형입니다."
                         )
                 );
     }

@@ -38,6 +38,7 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.Post;
@@ -165,7 +166,7 @@ public class CenterServiceTest {
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
-                Set.of()
+                List.of()
         );
         ReflectionTestUtils.setField(this.post, "id", "testPostId");
         ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
@@ -185,7 +186,7 @@ public class CenterServiceTest {
                 List.of(PostContents.of(
                         "test2.com/test.png"
                 )),
-                Set.of(climbingHistory)
+                List.of(climbingHistory)
         );
         ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
         ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());
@@ -241,7 +242,7 @@ public class CenterServiceTest {
         Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
 
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo));
+        given(this.holdInfoRepository.findByIdAndCenter("holdId1", center)).willReturn(Optional.of(holdInfo));
 
         Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
                 new PageImpl<>(
@@ -272,18 +273,17 @@ public class CenterServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
 
         given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo));
 
         // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
+        final NotFoundException ex = assertThrows(
+                NotFoundException.class,
                 () -> this.centerService.getCenterPosts(user, "centerId", Optional.of("invalidHoldId"), pageable)
         );
 
         // then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.INVALID_PARAMETER, "잘못된 홀드 정보입니다.");
+                .contains(ErrorCode.DATA_DOES_NOT_EXIST, "홀드를 찾을 수 없습니다.");
     }
 
     @Test

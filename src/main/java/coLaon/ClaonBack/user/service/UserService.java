@@ -20,6 +20,7 @@ import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.SignInRequestDto;
 import coLaon.ClaonBack.user.dto.SignUpRequestDto;
+import coLaon.ClaonBack.user.dto.UserDetailResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
@@ -124,8 +125,16 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponseDto getUser(User user) {
-        return UserResponseDto.from(user);
+    public UserDetailResponseDto retrieveMe(User user) {
+        List<String> postIds = this.postPort.selectPostIdsByUserId(user.getId());
+        Long postCount = (long) postIds.size();
+
+        List<String> userIds = this.laonRepository.getUserIdsByLaonId(user.getId());
+        Long laonCount = (long) userIds.size();
+
+        List<CenterClimbingHistoryResponseDto> climbingHistories = postPort.findClimbingHistoryByPostIds(postIds);
+
+        return UserDetailResponseDto.from(user, postCount, laonCount, climbingHistories);
     }
 
     @Transactional(readOnly = true)
@@ -168,10 +177,13 @@ public class UserService {
 
         // individual user page
         if (!user.getId().equals(targetUser.getId())) {
-            IsPrivateValidator.of(targetUser.getIsPrivate()).validate();
+            IsPrivateValidator.of(targetUser.getNickname(), targetUser.getIsPrivate()).validate();
 
-            if (blockUserRepository.findBlock(targetUser.getId(), user.getId()).size() > 0) {
-                throw new UnauthorizedException(ErrorCode.NOT_ACCESSIBLE, "조회가 불가능한 이용자입니다.");
+            if (!blockUserRepository.findBlock(targetUser.getId(), user.getId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", nickname)
+                );
             }
         }
 
@@ -214,6 +226,11 @@ public class UserService {
         this.userRepository.delete(user);
     }
 
+    @Transactional(readOnly = true)
+    public UserResponseDto retrieveMyAccount(User user) {
+        return UserResponseDto.from(user);
+    }
+
     public String uploadProfile(MultipartFile image) {
         IsImageValidator.of(image).validate();
 
@@ -222,9 +239,9 @@ public class UserService {
 
     public void deleteProfile(User user) {
         if (user.getImagePath().equals("")) {
-            throw new BadRequestException(
-                    ErrorCode.INTERNAL_SERVER_ERROR,
-                    "프로필 이미지가 존재하지 않습니다."
+            throw new NotFoundException(
+                    ErrorCode.DATA_DOES_NOT_EXIST,
+                    "프로필 이미지를 찾을 수 없습니다."
             );
         }
 

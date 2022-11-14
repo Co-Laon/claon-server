@@ -8,16 +8,17 @@ import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
-import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
-import coLaon.ClaonBack.user.dto.CenterPreviewResponseDto;
+import coLaon.ClaonBack.user.dto.UserCenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
+import coLaon.ClaonBack.user.dto.UserDetailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
@@ -47,7 +48,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -183,13 +183,19 @@ public class UserServiceTest {
     @DisplayName("Success case for retrieving me")
     void successRetrieveMe() {
         // when
-        UserResponseDto userResponseDto = this.userService.getUser(user);
+        UserDetailResponseDto userResponseDto = this.userService.retrieveMe(user);
 
         // then
         assertThat(userResponseDto)
                 .isNotNull()
-                .extracting("email", "instagramUserName", "isPrivate")
-                .contains("test@gmail.com", "instagramId", false);
+                .extracting("instagramUrl", "isPrivate")
+                .contains("https://instagram.com/instagramId", false);
+    }
+
+    @Test
+    @DisplayName("Success case for retrieve my account")
+    void successRetrieveMyAccount() {
+
     }
 
     @Test
@@ -201,7 +207,7 @@ public class UserServiceTest {
         given(this.laonRepository.getUserIdsByLaonId("userId")).willReturn(List.of("publicUserId"));
 
         CenterClimbingHistoryResponseDto historyDto = CenterClimbingHistoryResponseDto.from(
-                CenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
+                UserCenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
                 List.of(ClimbingHistoryResponseDto.from(
                         HoldInfoResponseDto.of(
                                 climbingHistory.getHoldInfo().getId(),
@@ -247,7 +253,7 @@ public class UserServiceTest {
         given(this.laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(List.of());
 
         CenterClimbingHistoryResponseDto historyDto = CenterClimbingHistoryResponseDto.from(
-                CenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
+                UserCenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
                 List.of(ClimbingHistoryResponseDto.from(
                         HoldInfoResponseDto.of(
                                 climbingHistory.getHoldInfo().getId(),
@@ -287,7 +293,7 @@ public class UserServiceTest {
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
-                Set.of()
+                List.of()
         );
         ReflectionTestUtils.setField(post, "id", "testPostId");
         ReflectionTestUtils.setField(post, "createdAt", LocalDateTime.now());
@@ -301,7 +307,7 @@ public class UserServiceTest {
                         post.getId(),
                         post.getThumbnailUrl(),
                         post.getCenter().getName(),
-                        post.getClimbingHistorySet().stream().map(history ->
+                        post.getClimbingHistoryList().stream().map(history ->
                                 ClimbingHistoryResponseDto.from(
                                         HoldInfoResponseDto.of(
                                                 history.getHoldInfo().getId(),
@@ -335,15 +341,15 @@ public class UserServiceTest {
         given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
 
         // when
-        final BadRequestException ex = assertThrows(
-                BadRequestException.class,
+        final UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
                 () -> this.userService.findPostsByUser(user, this.privateUser.getNickname(), pageable)
         );
 
         // then
         assertThat(ex)
                 .extracting("errorCode", "message")
-                .contains(ErrorCode.NOT_ACCESSIBLE, "비공개 계정입니다.");
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s은 비공개 상태입니다.", privateUser.getNickname()));
     }
 
     @Test

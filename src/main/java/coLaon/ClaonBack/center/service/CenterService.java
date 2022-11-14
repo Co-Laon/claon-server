@@ -25,13 +25,11 @@ import coLaon.ClaonBack.center.repository.CenterRepositorySupport;
 import coLaon.ClaonBack.center.repository.HoldInfoRepository;
 import coLaon.ClaonBack.center.repository.ReviewRepositorySupport;
 import coLaon.ClaonBack.center.repository.SectorInfoRepository;
-import coLaon.ClaonBack.common.domain.BaseEntity;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.validator.IsAdminValidator;
-import coLaon.ClaonBack.common.validator.IsHoldValidator;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -119,7 +117,7 @@ public class CenterService {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장 정보를 찾을 수 없습니다."
+                        "암장을 찾을 수 없습니다."
                 )
         );
 
@@ -144,7 +142,7 @@ public class CenterService {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장 정보를 찾을 수 없습니다."
+                        "암장을 찾을 수 없습니다."
                 )
         );
 
@@ -182,7 +180,7 @@ public class CenterService {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장 정보를 찾을 수 없습니다."
+                        "암장을 찾을 수 없습니다."
                 )
         );
 
@@ -218,15 +216,17 @@ public class CenterService {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장 정보를 찾을 수 없습니다."
+                        "암장을 찾을 수 없습니다."
                 )
         );
 
         if (holdId.isPresent()) {
-            List<String> allHoldsByCenter = holdInfoRepository.findAllByCenter(center)
-                    .stream().map(BaseEntity::getId).collect(Collectors.toList());
-
-            IsHoldValidator.of(holdId.get(), allHoldsByCenter).validate();
+            holdInfoRepository.findByIdAndCenter(holdId.get(), center).orElseThrow(
+                    () -> new NotFoundException(
+                            ErrorCode.DATA_DOES_NOT_EXIST,
+                            "홀드를 찾을 수 없습니다."
+                    )
+            );
 
             return this.postPort.findByCenterAndHoldExceptBlockUser(center.getId(), holdId.get(), user.getId(), pageable);
         }

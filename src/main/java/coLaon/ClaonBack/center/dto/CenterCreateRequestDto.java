@@ -13,9 +13,9 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CenterCreateRequestDto {
-    @NotBlank(message = "암장 이름을 입력 해주세요.")
+    @NotBlank(message = "이름을 입력해주세요.")
     private String name;
-    @NotBlank(message = "암장 주소를 입력 해주세요.")
+    @NotBlank(message = "주소를 입력해주세요.")
     private String address;
     private String tel;
     private String webUrl;
