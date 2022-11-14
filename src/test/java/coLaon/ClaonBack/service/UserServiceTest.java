@@ -8,7 +8,6 @@ import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
-import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
@@ -19,6 +18,7 @@ import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.UserCenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
+import coLaon.ClaonBack.user.dto.UserDetailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
@@ -183,13 +183,19 @@ public class UserServiceTest {
     @DisplayName("Success case for retrieving me")
     void successRetrieveMe() {
         // when
-        UserResponseDto userResponseDto = this.userService.getUser(user);
+        UserDetailResponseDto userResponseDto = this.userService.retrieveMe(user);
 
         // then
         assertThat(userResponseDto)
                 .isNotNull()
-                .extracting("email", "instagramUserName", "isPrivate")
-                .contains("test@gmail.com", "instagramId", false);
+                .extracting("instagramUrl", "isPrivate")
+                .contains("https://instagram.com/instagramId", false);
+    }
+
+    @Test
+    @DisplayName("Success case for retrieve my account")
+    void successRetrieveMyAccount() {
+
     }
 
     @Test
