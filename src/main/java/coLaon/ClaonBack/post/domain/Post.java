@@ -26,7 +26,7 @@ import java.util.List;
 @Table(name = "tb_post")
 @NoArgsConstructor
 public class Post extends BaseEntity {
-    @ManyToOne(targetEntity = Center.class)
+    @ManyToOne(targetEntity = Center.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
     @Column(name = "content", length = 500)
@@ -38,13 +38,13 @@ public class Post extends BaseEntity {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
-    @ManyToOne(targetEntity = User.class)
+    @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User writer;
 
     @BatchSize(size = 10)
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClimbingHistory> climbingHistoryList;
 
     public String getThumbnailUrl() {

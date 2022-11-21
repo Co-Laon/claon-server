@@ -4,26 +4,26 @@ import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.center.domain.CenterBookmark;
 import coLaon.ClaonBack.center.domain.CenterImg;
 import coLaon.ClaonBack.center.domain.CenterReport;
-import coLaon.ClaonBack.center.domain.enums.CenterReportType;
 import coLaon.ClaonBack.center.domain.Charge;
 import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
+import coLaon.ClaonBack.center.domain.enums.CenterReportType;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterImgDto;
+import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
+import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
 import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.center.dto.CenterReportCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
-import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
 import coLaon.ClaonBack.center.dto.ChargeDto;
 import coLaon.ClaonBack.center.dto.ChargeElementDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
-import coLaon.ClaonBack.center.dto.OperatingTimeDto;
 import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
-import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
+import coLaon.ClaonBack.center.dto.OperatingTimeDto;
 import coLaon.ClaonBack.center.dto.SectorInfoRequestDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterReportRepository;
@@ -36,7 +36,6 @@ import coLaon.ClaonBack.center.service.CenterService;
 import coLaon.ClaonBack.center.service.PostPort;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
-import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
@@ -64,7 +63,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -139,7 +137,7 @@ public class CenterServiceTest {
                 List.of(new CenterImg("img test")),
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
-                List.of(new Charge (List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
+                List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test"
         );
         ReflectionTestUtils.setField(this.center, "id", "center id");
@@ -154,7 +152,7 @@ public class CenterServiceTest {
                 List.of(new CenterImg("img test")),
                 List.of(new OperatingTime("매일", "10:00", "23:00")),
                 "facilities test",
-                List.of(new Charge (List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
+                List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test"
         );
         ReflectionTestUtils.setField(this.center2, "id", "center id2");

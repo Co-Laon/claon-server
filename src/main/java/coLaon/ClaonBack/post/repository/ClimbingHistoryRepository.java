@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ClimbingHistoryRepository extends JpaRepository<ClimbingHistory, String> {
-    @Query("SELECT h FROM ClimbingHistory as h LEFT JOIN FETCH h.post as p LEFT JOIN FETCH p.center WHERE p.id IN :postIds")
+    @Query("SELECT h FROM ClimbingHistory as h JOIN FETCH h.holdInfo JOIN FETCH h.post as p JOIN FETCH p.center WHERE p.id IN :postIds")
     List<ClimbingHistory> findByPostIds(@Param("postIds") List<String> postIds);
 
     @Modifying(clearAutomatically = true)

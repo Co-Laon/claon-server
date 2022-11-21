@@ -4,6 +4,7 @@ import coLaon.ClaonBack.config.QueryDslTestConfig;
 import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.Laon;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.dto.LaonFindResponseDto;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.LaonRepositorySupport;
@@ -105,7 +106,7 @@ public class LaonRepositoryTest {
         String userId = user.getId();
 
         // when
-        Page<Laon> laonList = laonRepositorySupport.findAllByUserId(userId, PageRequest.of(0, 2));
+        Page<LaonFindResponseDto> laonList = laonRepositorySupport.findAllByUserId(userId, PageRequest.of(0, 2));
 
         // then
         assertThat(laonList.getContent().size()).isEqualTo(1);
