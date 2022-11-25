@@ -134,7 +134,7 @@ public class PostController {
 
     @GetMapping(value = "/{postId}/comment")
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<CommentFindResponseDto> findAllParentCommentAndThreeChildComment(
+    public Pagination<CommentFindResponseDto> findAllParentComment(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String postId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.ASC) final Pageable pageable

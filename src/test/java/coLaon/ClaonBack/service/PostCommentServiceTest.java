@@ -247,13 +247,16 @@ public class PostCommentServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
 
-        Page<PostComment> parents = new PageImpl<>(List.of(postComment, postComment2), pageable, 2);
-        Page<PostComment> children1 = new PageImpl<>(List.of(childPostComment, childPostComment2, childPostComment4), pageable, 2);
-        Page<PostComment> children2 = new PageImpl<>(List.of(childPostComment3), pageable, 2);
+        Page<CommentFindResponseDto> parents = new PageImpl<>(
+                List.of(
+                        new CommentFindResponseDto(postComment, 0, writer.getNickname()),
+                        new CommentFindResponseDto(postComment2, 0, writer.getNickname())
+                ),
+                pageable,
+                2
+        );
 
-        given(this.postCommentRepositorySupport.findParentCommentByPost(post.getId(), writer.getId(), pageable)).willReturn(parents);
-        given(this.postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), writer.getId(), pageable)).willReturn(children1);
-        given(this.postCommentRepositorySupport.findChildCommentByParentComment(postComment2.getId(), writer.getId(), pageable)).willReturn(children2);
+        given(this.postCommentRepositorySupport.findParentCommentByPost(post.getId(), writer.getId(), writer.getNickname(), pageable)).willReturn(parents);
 
         // when
         Pagination<CommentFindResponseDto> commentFindResponseDto = this.postCommentService.findCommentsByPost(writer, "testPostId", pageable);
