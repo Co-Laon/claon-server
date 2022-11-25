@@ -23,6 +23,7 @@ public class PostDetailResponseDto {
     private final Integer likeCount;
     private final String content;
     private final String createdAt;
+    private final Boolean isOwner;
     private final List<String> contentsList;
     private final List<ClimbingHistoryResponseDto> climbingHistories;
 
@@ -36,6 +37,7 @@ public class PostDetailResponseDto {
             Integer likeCount,
             String content,
             String createdAt,
+            Boolean isOwner,
             List<String> contentsList,
             List<ClimbingHistoryResponseDto> climbingHistories
     ) {
@@ -48,11 +50,12 @@ public class PostDetailResponseDto {
         this.likeCount = likeCount;
         this.content = content;
         this.createdAt = createdAt;
+        this.isOwner = isOwner;
         this.contentsList = contentsList;
         this.climbingHistories = climbingHistories;
     }
 
-    public static PostDetailResponseDto from(Post post, Boolean isLike, Integer likeCount) {
+    public static PostDetailResponseDto from(Post post, Boolean isOwner, Boolean isLike, Integer likeCount) {
         return new PostDetailResponseDto(
                 post.getId(),
                 post.getCenter().getId(),
@@ -63,6 +66,7 @@ public class PostDetailResponseDto {
                 likeCount,
                 post.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(post.getCreatedAt(), ZoneOffset.of("+9"))),
+                isOwner,
                 post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
                 post.getClimbingHistoryList().stream().map(
                                 climbingHistory -> ClimbingHistoryResponseDto.from(
