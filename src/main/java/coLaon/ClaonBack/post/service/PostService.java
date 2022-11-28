@@ -67,6 +67,7 @@ public class PostService {
                 postRepositorySupport.findExceptLaonUserAndBlockUser(user.getId(), pageable).map(
                         post -> PostDetailResponseDto.from(
                                 post,
+                                post.getWriter().getNickname().equals(user.getNickname()),
                                 postLikeRepository.findByLikerAndPost(user, post).isPresent(),
                                 postLikeRepository.countByPost(post)))
         );
@@ -95,6 +96,7 @@ public class PostService {
 
         return PostDetailResponseDto.from(
                 post,
+                post.getWriter().getNickname().equals(user.getNickname()),
                 postLikeRepository.findByLikerAndPost(user, post).isPresent(),
                 postLikeRepository.countByPost(post)
         );
