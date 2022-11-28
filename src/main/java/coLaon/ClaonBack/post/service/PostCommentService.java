@@ -96,7 +96,7 @@ public class PostCommentService {
 
         return this.paginationFactory.create(
                 postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), user.getId(), pageable)
-                        .map(ChildCommentResponseDto::from)
+                        .map(childComment -> ChildCommentResponseDto.from(childComment, user.getNickname()))
         );
     }
 

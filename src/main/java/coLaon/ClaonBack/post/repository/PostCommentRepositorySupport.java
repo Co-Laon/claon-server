@@ -69,6 +69,8 @@ public class PostCommentRepositorySupport extends QuerydslRepositorySupport {
     public Page<PostComment> findChildCommentByParentComment(String postCommentId, String userId, Pageable pageable) {
         JPQLQuery<PostComment> query = jpaQueryFactory
                 .selectFrom(postComment)
+                .join(postComment.writer, user)
+                .fetchJoin()
                 .where(postComment.parentComment.id.eq(postCommentId)
                         .and(postComment.isDeleted.isFalse())
                         .and(postComment.id.notIn(

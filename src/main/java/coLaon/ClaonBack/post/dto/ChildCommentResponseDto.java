@@ -17,6 +17,7 @@ public class ChildCommentResponseDto {
     private final String writerProfileImage;
     private final String createdAt;
     private final String updatedAt;
+    private final Boolean isOwner;
 
     private ChildCommentResponseDto(
             String commentId,
@@ -26,7 +27,8 @@ public class ChildCommentResponseDto {
             String writerNickname,
             String writerProfileImage,
             String createdAt,
-            String updatedAt
+            String updatedAt,
+            Boolean isOwner
     ) {
         this.commentId = commentId;
         this.content = content;
@@ -36,9 +38,10 @@ public class ChildCommentResponseDto {
         this.writerProfileImage = writerProfileImage;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.isOwner = isOwner;
     }
 
-    public static ChildCommentResponseDto from(PostComment postComment) {
+    public static ChildCommentResponseDto from(PostComment postComment, String userNickname) {
         return new ChildCommentResponseDto(
                 postComment.getId(),
                 postComment.getContent(),
@@ -47,7 +50,8 @@ public class ChildCommentResponseDto {
                 postComment.getWriter().getNickname(),
                 postComment.getWriter().getImagePath(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getCreatedAt(), ZoneOffset.of("+9"))),
-                RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getUpdatedAt(), ZoneOffset.of("+9")))
+                RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getUpdatedAt(), ZoneOffset.of("+9"))),
+                postComment.getWriter().getNickname().equals(userNickname)
         );
     }
 }
