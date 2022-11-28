@@ -9,6 +9,7 @@ import coLaon.ClaonBack.center.repository.CenterRepository;
 import coLaon.ClaonBack.config.QueryDslTestConfig;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
+import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
 import coLaon.ClaonBack.post.repository.PostCommentRepository;
 import coLaon.ClaonBack.post.repository.PostCommentRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostRepository;
@@ -145,7 +146,7 @@ public class PostCommentRepositoryTest {
         ));
 
         // when
-        Page<PostComment> commentList = postCommentRepositorySupport.findParentCommentByPost(postId, userId, PageRequest.of(0, 2));
+        Page<CommentFindResponseDto> commentList = postCommentRepositorySupport.findParentCommentByPost(postId, userId, user.getNickname(), PageRequest.of(0, 2));
 
         // then
         assertThat(commentList.getContent().size()).isEqualTo(1);
