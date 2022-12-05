@@ -8,16 +8,16 @@ import coLaon.ClaonBack.center.domain.ChargeElement;
 import coLaon.ClaonBack.center.domain.HoldInfo;
 import coLaon.ClaonBack.center.domain.OperatingTime;
 import coLaon.ClaonBack.center.domain.SectorInfo;
+import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterHoldInfoResponseDto;
+import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
+import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.center.dto.CenterReportCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
-import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
-import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
-import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
-import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
-import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
 import coLaon.ClaonBack.center.repository.CenterReportRepository;
 import coLaon.ClaonBack.center.repository.CenterRepository;
@@ -136,7 +136,7 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public List<HoldInfoResponseDto> findHoldInfoByCenterId(
+    public List<CenterHoldInfoResponseDto> findHoldInfoByCenterId(
             String centerId
     ) {
         Center center = centerRepository.findById(centerId).orElseThrow(
@@ -148,7 +148,7 @@ public class CenterService {
 
         return holdInfoRepository.findAllByCenter(center)
                 .stream()
-                .map(HoldInfoResponseDto::from)
+                .map(CenterHoldInfoResponseDto::from)
                 .collect(Collectors.toList());
     }
 

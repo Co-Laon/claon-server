@@ -14,6 +14,7 @@ import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
+import coLaon.ClaonBack.user.dto.HistoryGroupByMonthDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.InstagramResponseDto;
 import coLaon.ClaonBack.user.dto.OAuth2UserInfoDto;
@@ -48,6 +49,7 @@ public class UserService {
     private final LaonRepository laonRepository;
     private final BlockUserRepository blockUserRepository;
     private final PostPort postPort;
+    private final CenterPort centerPort;
     private final OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
     private final InstagramUserInfoProvider instagramUserInfoProvider;
     private final JwtUtil jwtUtil;
@@ -246,5 +248,20 @@ public class UserService {
         }
 
         this.profileImageManager.deleteProfile(user.getImagePath());
+    }
+
+    @Transactional(readOnly = true)
+    public List<HistoryGroupByMonthDto> findHistoryByCenterIdAndUserId(
+            User user,
+            String centerId
+    ) {
+        if (!this.centerPort.existsByCenterId(centerId)) {
+            throw new NotFoundException(
+                    ErrorCode.DATA_DOES_NOT_EXIST,
+                    "암장을 찾을 수 없습니다."
+            );
+        }
+
+        return this.postPort.findByCenterIdAndUserId(centerId, user.getId());
     }
 }

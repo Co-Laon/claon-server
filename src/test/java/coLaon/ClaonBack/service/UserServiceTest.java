@@ -15,6 +15,8 @@ import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
+import coLaon.ClaonBack.user.dto.HistoryByCenterFindResponseDto;
+import coLaon.ClaonBack.user.dto.HistoryGroupByMonthDto;
 import coLaon.ClaonBack.user.dto.UserCenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
@@ -29,6 +31,7 @@ import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
 import coLaon.ClaonBack.user.repository.UserRepositorySupport;
+import coLaon.ClaonBack.user.service.CenterPort;
 import coLaon.ClaonBack.user.service.PostPort;
 import coLaon.ClaonBack.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +49,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -67,6 +71,8 @@ public class UserServiceTest {
     BlockUserRepository blockUserRepository;
     @Mock
     PostPort postPort;
+    @Mock
+    CenterPort centerPort;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
@@ -75,7 +81,8 @@ public class UserServiceTest {
 
     private User user, privateUser, publicUser;
     private Center center;
-    private ClimbingHistory climbingHistory;
+    private Post post2, post3;
+    private ClimbingHistory climbingHistory, climbingHistory2;
     private List<String> postIds;
 
     @BeforeEach
@@ -130,6 +137,14 @@ public class UserServiceTest {
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test"
         );
+        ReflectionTestUtils.setField(center, "id", "centerId");
+
+
+        HoldInfo holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
+        ReflectionTestUtils.setField(holdInfo, "id", "holdId1");
+
+        HoldInfo holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
+        ReflectionTestUtils.setField(holdInfo2, "id", "holdId2");
 
         Post post = Post.of(
                 center,
@@ -144,13 +159,45 @@ public class UserServiceTest {
         ReflectionTestUtils.setField(post, "updatedAt", LocalDateTime.now());
 
         this.postIds = List.of(post.getId());
-        HoldInfo holdInfo = HoldInfo.of("name", "dfdf", center);
-        ReflectionTestUtils.setField(holdInfo, "id", "test");
+
         this.climbingHistory = ClimbingHistory.of(
-                post,
+                post2,
                 holdInfo,
                 2
         );
+
+        this.climbingHistory2 = ClimbingHistory.of(
+                post3,
+                holdInfo2,
+                1
+        );
+        ReflectionTestUtils.setField(climbingHistory2, "id", "climbingId2");
+
+        this.post2 = Post.of(
+                center,
+                "testContent1",
+                user,
+                List.of(PostContents.of(
+                        "test.com/test.png"
+                )),
+                List.of(climbingHistory)
+        );
+        ReflectionTestUtils.setField(post2, "id", "testPostId2");
+        ReflectionTestUtils.setField(post2, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(post2, "updatedAt", LocalDateTime.now());
+
+        this.post3 = Post.of(
+                center,
+                "testContent2",
+                user,
+                List.of(PostContents.of(
+                        "test2.com/test.png"
+                )),
+                List.of(climbingHistory2)
+        );
+        ReflectionTestUtils.setField(post3, "id", "testPostId3");
+        ReflectionTestUtils.setField(post3, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(post3, "updatedAt", LocalDateTime.now());
     }
 
     @Test
@@ -408,5 +455,56 @@ public class UserServiceTest {
         this.userService.delete(this.user);
 
         // then
+    }
+
+    @Test
+    @DisplayName("Success case for find history using center and user")
+    void successFindByCenterIdAndUserId() {
+        // given
+        given(this.centerPort.existsByCenterId("centerId")).willReturn(true);
+
+        ClimbingHistoryResponseDto climbingHistoryResponseDto1 = ClimbingHistoryResponseDto.from(
+                HoldInfoResponseDto.of(
+                        climbingHistory.getHoldInfo().getId(),
+                        climbingHistory.getHoldInfo().getName(),
+                        climbingHistory.getHoldInfo().getImg(),
+                        climbingHistory.getHoldInfo().getCrayonImageUrl()
+                ),
+                climbingHistory.getClimbingCount()
+        );
+
+        ClimbingHistoryResponseDto climbingHistoryResponseDto2 = ClimbingHistoryResponseDto.from(
+                HoldInfoResponseDto.of(
+                        climbingHistory2.getHoldInfo().getId(),
+                        climbingHistory2.getHoldInfo().getName(),
+                        climbingHistory2.getHoldInfo().getImg(),
+                        climbingHistory2.getHoldInfo().getCrayonImageUrl()
+                ),
+                climbingHistory2.getClimbingCount()
+        );
+
+        List<HistoryByCenterFindResponseDto> histories = List.of(
+                HistoryByCenterFindResponseDto.from(
+                        post2.getId(),
+                        post2.getCreatedAt(),
+                        List.of(climbingHistoryResponseDto1)),
+                HistoryByCenterFindResponseDto.from(
+                        post3.getId(),
+                        post3.getCreatedAt(),
+                        List.of(climbingHistoryResponseDto2))
+        );
+
+        List<HistoryGroupByMonthDto> historyGroup = List.of(HistoryGroupByMonthDto.from(post2.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM")), histories));
+
+        given(this.postPort.findByCenterIdAndUserId("centerId", "userId")).willReturn(historyGroup);
+
+        // when
+        List<HistoryGroupByMonthDto> results = this.userService.findHistoryByCenterIdAndUserId(user, center.getId());
+
+        // then
+        assertThat(results.get(0))
+                .isNotNull()
+                .extracting("date", "histories")
+                .contains(historyGroup.get(0).getDate(), historyGroup.get(0).getHistories());
     }
 }

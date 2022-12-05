@@ -10,9 +10,11 @@ import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
-import coLaon.ClaonBack.user.dto.UserCenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
+import coLaon.ClaonBack.user.dto.HistoryByCenterFindResponseDto;
+import coLaon.ClaonBack.user.dto.HistoryGroupByMonthDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
+import coLaon.ClaonBack.user.dto.UserCenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostDetailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.service.PostPort;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -109,17 +112,44 @@ public class PostToUserAdapter implements PostPort {
                                 post.getCreatedAt(),
                                 post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
                                 post.getClimbingHistoryList().stream()
-                                .map(history -> ClimbingHistoryResponseDto.from(
-                                        HoldInfoResponseDto.of(
-                                                history.getHoldInfo().getId(),
-                                                history.getHoldInfo().getName(),
-                                                history.getHoldInfo().getImg(),
-                                                history.getHoldInfo().getCrayonImageUrl()
-                                        ),
-                                        history.getClimbingCount()
-                                ))
-                                .collect(Collectors.toList()))
+                                        .map(history -> ClimbingHistoryResponseDto.from(
+                                                HoldInfoResponseDto.of(
+                                                        history.getHoldInfo().getId(),
+                                                        history.getHoldInfo().getName(),
+                                                        history.getHoldInfo().getImg(),
+                                                        history.getHoldInfo().getCrayonImageUrl()
+                                                ),
+                                                history.getClimbingCount()
+                                        ))
+                                        .collect(Collectors.toList()))
                 )
         );
+    }
+
+    @Override
+    public List<HistoryGroupByMonthDto> findByCenterIdAndUserId(String centerId, String userId) {
+        Map<String, List<HistoryByCenterFindResponseDto>> historyMap = this.postRepositorySupport.findByCenterIdAndUserId(centerId, userId).
+                stream().map(post -> HistoryByCenterFindResponseDto.from(
+                        post.getId(),
+                        post.getCreatedAt(),
+                        post.getClimbingHistoryList().stream()
+                                .map(climbingHistory -> ClimbingHistoryResponseDto.from(
+                                        HoldInfoResponseDto.of(
+                                                climbingHistory.getHoldInfo().getId(),
+                                                climbingHistory.getHoldInfo().getName(),
+                                                climbingHistory.getHoldInfo().getImg(),
+                                                climbingHistory.getHoldInfo().getCrayonImageUrl()
+                                        ),
+                                        climbingHistory.getClimbingCount()
+                                )).collect(Collectors.toList())
+                )).collect(Collectors.groupingBy(history -> history.getCreatedAt().substring(0, history.getCreatedAt().lastIndexOf('.'))));
+
+        List<HistoryGroupByMonthDto> historyGroups = historyMap.entrySet().stream()
+                .map(history -> HistoryGroupByMonthDto.from(
+                        history.getKey(),
+                        history.getValue()
+                )).sorted(Comparator.comparing(HistoryGroupByMonthDto::getDate).reversed()).collect(Collectors.toList());
+
+        return historyGroups;
     }
 }
