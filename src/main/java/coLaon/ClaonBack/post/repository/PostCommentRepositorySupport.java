@@ -1,6 +1,9 @@
 package coLaon.ClaonBack.post.repository;
 
 import coLaon.ClaonBack.post.domain.PostComment;
+import coLaon.ClaonBack.post.dto.CommentFindResponseDto;
+import coLaon.ClaonBack.post.dto.QCommentFindResponseDto;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -15,6 +18,7 @@ import java.util.Objects;
 
 import static coLaon.ClaonBack.post.domain.QPostComment.postComment;
 import static coLaon.ClaonBack.user.domain.QBlockUser.blockUser;
+import static coLaon.ClaonBack.user.domain.QUser.user;
 
 @Repository
 public class PostCommentRepositorySupport extends QuerydslRepositorySupport {
@@ -25,9 +29,20 @@ public class PostCommentRepositorySupport extends QuerydslRepositorySupport {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
-    public Page<PostComment> findParentCommentByPost(String postId, String userId, Pageable pageable) {
-        JPQLQuery<PostComment> query = jpaQueryFactory
-                .selectFrom(postComment)
+    public Page<CommentFindResponseDto> findParentCommentByPost(
+            String postId,
+            String userId,
+            String userNickname,
+            Pageable pageable
+    ) {
+        JPQLQuery<CommentFindResponseDto> query = jpaQueryFactory
+                .select(new QCommentFindResponseDto(
+                        postComment,
+                        postComment.childComments.size(),
+                        Expressions.as(Expressions.constant(userNickname), "userNickname")))
+                .from(postComment)
+                .join(postComment.writer, user)
+                .fetchJoin()
                 .where(postComment.post.id.eq(postId)
                         .and(postComment.isDeleted.isFalse())
                         .and(postComment.parentComment.isNull())
@@ -46,7 +61,7 @@ public class PostCommentRepositorySupport extends QuerydslRepositorySupport {
                         ));
 
         long totalCount = query.fetchCount();
-        List<PostComment> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
+        List<CommentFindResponseDto> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
 
         return new PageImpl<>(results, pageable, totalCount);
     }
@@ -54,6 +69,8 @@ public class PostCommentRepositorySupport extends QuerydslRepositorySupport {
     public Page<PostComment> findChildCommentByParentComment(String postCommentId, String userId, Pageable pageable) {
         JPQLQuery<PostComment> query = jpaQueryFactory
                 .selectFrom(postComment)
+                .join(postComment.writer, user)
+                .fetchJoin()
                 .where(postComment.parentComment.id.eq(postCommentId)
                         .and(postComment.isDeleted.isFalse())
                         .and(postComment.id.notIn(

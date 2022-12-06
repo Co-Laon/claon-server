@@ -17,7 +17,6 @@ import coLaon.ClaonBack.post.repository.PostCommentRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,16 +77,7 @@ public class PostCommentService {
         );
 
         return this.paginationFactory.create(
-                postCommentRepositorySupport.findParentCommentByPost(post.getId(), user.getId(), pageable)
-                        .map(parent ->
-                                CommentFindResponseDto.from(
-                                        parent,
-                                        this.paginationFactory.create(postCommentRepositorySupport.findChildCommentByParentComment(
-                                                        parent.getId(),
-                                                        user.getId(),
-                                                        PageRequest.of(0, pageable.getPageSize()))
-                                                .map(ChildCommentResponseDto::from))
-                                ))
+                postCommentRepositorySupport.findParentCommentByPost(post.getId(), user.getId(), user.getNickname(), pageable)
         );
     }
 
@@ -106,7 +96,7 @@ public class PostCommentService {
 
         return this.paginationFactory.create(
                 postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), user.getId(), pageable)
-                        .map(ChildCommentResponseDto::from)
+                        .map(childComment -> ChildCommentResponseDto.from(childComment, user.getNickname()))
         );
     }
 

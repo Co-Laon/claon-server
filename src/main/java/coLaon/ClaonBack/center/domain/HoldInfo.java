@@ -8,6 +8,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -23,7 +24,7 @@ public class HoldInfo extends BaseEntity {
     @Column(name = "img_url", nullable = false, length = 500)
     private String img;
 
-    @ManyToOne(targetEntity = Center.class)
+    @ManyToOne(targetEntity = Center.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "center_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Center center;

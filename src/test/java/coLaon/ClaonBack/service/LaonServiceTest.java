@@ -250,9 +250,12 @@ public class LaonServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 2);
 
-        Page<Laon> laons = new PageImpl<>(List.of(laonRelation, laonRelation2), pageable, 2);
+        Page<LaonFindResponseDto> laonPage = new PageImpl<>(List.of(
+                new LaonFindResponseDto(laonRelation.getLaon().getNickname(), laonRelation.getLaon().getImagePath()),
+                new LaonFindResponseDto(laonRelation2.getLaon().getNickname(), laonRelation2.getLaon().getImagePath())
+        ), pageable, 2);
 
-        given(this.laonRepositorySupport.findAllByUserId("userId", pageable)).willReturn(laons);
+        given(this.laonRepositorySupport.findAllByUserId("userId", pageable)).willReturn(laonPage);
 
         // when
         Pagination<LaonFindResponseDto> laonFindResponseDto = this.laonService.findAllLaon(user, pageable);
@@ -319,7 +322,7 @@ public class LaonServiceTest {
                                                 history.getClimbingCount()
                                         ))
                                         .collect(Collectors.toList())))
-                , pageable, 2)
+                        , pageable, 2)
         );
         given(this.postPort.findLaonPost(user, pageable)).willReturn(postPagination);
 
