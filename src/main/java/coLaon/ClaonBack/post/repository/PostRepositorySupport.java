@@ -156,6 +156,21 @@ public class PostRepositorySupport extends QuerydslRepositorySupport {
         return new PageImpl<>(results, pageable, totalCount);
     }
 
+    public Page<Post> findByCenterAndYearMonth(String userId, String centerId, Integer year, Integer month, Pageable pageable) {
+        JPQLQuery<Post> query = jpaQueryFactory
+                .selectFrom(post)
+                .where(post.writer.id.eq(userId)
+                        .and(post.center.id.eq(centerId))
+                        .and(post.createdAt.year().eq(year))
+                        .and(post.createdAt.month().eq(month))
+                        .and(post.isDeleted.isFalse()));
+
+        long totalCount = query.fetchCount();
+        List<Post> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
+
+        return new PageImpl<>(results, pageable, totalCount);
+    }
+
     public Integer countByCenterExceptBlockUser(String centerId, String userId) {
         return (int) jpaQueryFactory
                 .selectFrom(post)

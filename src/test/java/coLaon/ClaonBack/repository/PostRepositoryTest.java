@@ -30,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -277,6 +278,20 @@ public class PostRepositoryTest {
 
         // when
         Page<Post> results = postRepositorySupport.findByCenterAndHoldExceptBlockUser(centerId, holdInfoId, userId, PageRequest.of(0, 2));
+
+        // then
+        assertThat(results.getContent().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void findByCenterAndMonth() {
+        // given
+        String centerId = center.getId();
+        String userId = user.getId();
+        LocalDateTime now = LocalDateTime.now();
+
+        // when
+        Page<Post> results = postRepositorySupport.findByCenterAndYearMonth(userId, centerId, now.getYear(), now.getMonthValue(), PageRequest.of(0, 2));
 
         // then
         assertThat(results.getContent().size()).isEqualTo(1);

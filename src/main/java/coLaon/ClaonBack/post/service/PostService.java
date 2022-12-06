@@ -59,6 +59,24 @@ public class PostService {
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
+    public Pagination<PostDetailResponseDto> findPostsByCenterAndYearMonth(
+            User user,
+            String centerId,
+            Integer year,
+            Integer month,
+            Pageable pageable
+    ) {
+        return this.paginationFactory.create(
+                postRepositorySupport.findByCenterAndYearMonth(user.getId(), centerId, year, month, pageable).map(
+                        post -> PostDetailResponseDto.from(
+                                post,
+                                post.getWriter().getNickname().equals(user.getNickname()),
+                                postLikeRepository.findByLikerAndPost(user, post).isPresent(),
+                                postLikeRepository.countByPost(post)))
+        );
+    }
+
+    @Transactional(readOnly = true)
     public Pagination<PostDetailResponseDto> findPosts(
             User user,
             Pageable pageable
