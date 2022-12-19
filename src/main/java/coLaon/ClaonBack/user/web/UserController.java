@@ -11,6 +11,7 @@ import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+import coLaon.ClaonBack.user.dto.UserCenterResponseDto;
 import coLaon.ClaonBack.user.service.BlockUserService;
 import coLaon.ClaonBack.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -161,4 +162,15 @@ public class UserController {
     ) {
         return this.userService.findHistoryByCenterIdAndUserId(userDetails.getUser(), centerId);
     }
+
+    @GetMapping(value = "/me/{nickname}/center")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Pagination<UserCenterResponseDto> getCenterHistory(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String nickname,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return this.userService.findCenterHistory(userDetails.getUser(), nickname, pageable);
+    }
 }
+

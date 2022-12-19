@@ -27,6 +27,7 @@ import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+import coLaon.ClaonBack.user.dto.UserCenterResponseDto;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import coLaon.ClaonBack.user.repository.LaonRepository;
 import coLaon.ClaonBack.user.repository.UserRepository;
@@ -84,6 +85,7 @@ public class UserServiceTest {
     private Post post2, post3;
     private ClimbingHistory climbingHistory, climbingHistory2;
     private List<String> postIds;
+    private Post post;
 
     @BeforeEach
     void setUp() {
@@ -139,7 +141,6 @@ public class UserServiceTest {
         );
         ReflectionTestUtils.setField(center, "id", "centerId");
 
-
         HoldInfo holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
         ReflectionTestUtils.setField(holdInfo, "id", "holdId1");
 
@@ -154,10 +155,12 @@ public class UserServiceTest {
                 )),
                 user
         );
+
         ReflectionTestUtils.setField(post, "id", "testPostId");
         ReflectionTestUtils.setField(post, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(post, "updatedAt", LocalDateTime.now());
 
+        this.post = post;
         this.postIds = List.of(post.getId());
 
         this.climbingHistory = ClimbingHistory.of(
@@ -506,5 +509,26 @@ public class UserServiceTest {
                 .isNotNull()
                 .extracting("date", "histories")
                 .contains(historyGroup.get(0).getDate(), historyGroup.get(0).getHistories());
+    }
+
+    @Test
+    @DisplayName("Success case for finding center history by user nickname")
+    void successFindCenterHistory() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<UserCenterResponseDto> postPagination = new PageImpl<>(
+                List.of(UserCenterResponseDto.from(
+                        center.getId(),
+                        center.getThumbnailUrl(),
+                        center.getName()
+                )), pageable, 1);
+
+        given(this.userRepository.findByNickname(this.user.getNickname())).willReturn(Optional.of(this.user));
+        given(this.postPort.selectDistinctCenterByUser(this.user, pageable)).willReturn(postPagination);
+
+        // when
+        Pagination<UserCenterResponseDto> postHistory = this.userService.findCenterHistory(this.user, this.user.getNickname(), pageable);
+        // then
+        assertThat(postHistory.getResults().size()).isEqualTo(1);
     }
 }

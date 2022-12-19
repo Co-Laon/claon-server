@@ -1,8 +1,7 @@
 package coLaon.ClaonBack.post.repository;
 
+import coLaon.ClaonBack.center.domain.Center;
 import coLaon.ClaonBack.post.domain.Post;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -17,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import static coLaon.ClaonBack.center.domain.QCenter.center;
 import static coLaon.ClaonBack.post.domain.QClimbingHistory.climbingHistory;
 import static coLaon.ClaonBack.post.domain.QPost.post;
 import static coLaon.ClaonBack.user.domain.QBlockUser.blockUser;
@@ -192,5 +192,19 @@ public class PostRepositorySupport extends QuerydslRepositorySupport {
                 .orderBy(post.createdAt.desc());
 
         return query.fetch();
+    }
+
+    public Page<Center> findCenterByUser(String userId, Pageable pageable) {
+        JPQLQuery<Center> query = jpaQueryFactory
+                .select(post.center).from(post)
+                .join(post.writer, user)
+                .join(post.center, center)
+                .where(post.isDeleted.isFalse()
+                        .and(post.writer.id.eq(userId)));
+
+        long totalCount = query.fetchCount();
+        List<Center> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
+
+        return new PageImpl<>(results, pageable, totalCount);
     }
 }

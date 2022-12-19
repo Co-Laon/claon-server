@@ -26,6 +26,7 @@ import coLaon.ClaonBack.user.dto.UserModifyRequestDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserResponseDto;
+import coLaon.ClaonBack.user.dto.UserCenterResponseDto;
 import coLaon.ClaonBack.user.infra.InstagramUserInfoProvider;
 import coLaon.ClaonBack.user.infra.ProfileImageManager;
 import coLaon.ClaonBack.user.repository.BlockUserRepository;
@@ -264,4 +265,35 @@ public class UserService {
 
         return this.postPort.findByCenterIdAndUserId(centerId, user.getId());
     }
+
+    @Transactional(readOnly = true)
+    public Pagination<UserCenterResponseDto> findCenterHistory(
+            User user,
+            String nickname,
+            Pageable pageable
+    ) {
+        User targetUser = userRepository.findByNickname(nickname).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        String.format("%s을 찾을 수 없습니다.", nickname)
+                )
+        );
+
+        // individual user page
+        if (!user.getId().equals(targetUser.getId())) {
+            IsPrivateValidator.of(targetUser.getNickname(), targetUser.getIsPrivate()).validate();
+
+            if (!blockUserRepository.findBlock(targetUser.getId(), user.getId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", nickname)
+                );
+            }
+        }
+
+        return paginationFactory.create(
+                this.postPort.selectDistinctCenterByUser(targetUser, pageable)
+        );
+    }
 }
+
