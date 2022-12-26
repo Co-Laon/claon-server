@@ -159,11 +159,26 @@ public class PostRepositorySupport extends QuerydslRepositorySupport {
     public Page<Post> findByCenterAndYearMonth(String userId, String centerId, Integer year, Integer month, Pageable pageable) {
         JPQLQuery<Post> query = jpaQueryFactory
                 .selectFrom(post)
-                .where(post.writer.id.eq(userId)
-                        .and(post.center.id.eq(centerId))
+                .join(post.writer, user)
+                .fetchJoin()
+                .where(post.center.id.eq(centerId)
+                        .and(post.isDeleted.isFalse())
+                        .and(user.isPrivate.isFalse()
+                                .or(post.writer.id.eq(userId)))
+                        .and(post.id.notIn(
+                                JPAExpressions
+                                        .select(post.id)
+                                        .from(post)
+                                        .join(blockUser).on(post.writer.id.eq(blockUser.blockedUser.id))
+                                        .where(blockUser.user.id.eq(userId))))
+                        .and(post.id.notIn(
+                                JPAExpressions
+                                        .select(post.id)
+                                        .from(post)
+                                        .join(blockUser).on(post.writer.id.eq(blockUser.user.id))
+                                        .where(blockUser.blockedUser.id.eq(userId))))
                         .and(post.createdAt.year().eq(year))
-                        .and(post.createdAt.month().eq(month))
-                        .and(post.isDeleted.isFalse()));
+                        .and(post.createdAt.month().eq(month)));
 
         long totalCount = query.fetchCount();
         List<Post> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
