@@ -3,6 +3,7 @@ package coLaon.ClaonBack.common.utils;
 import coLaon.ClaonBack.common.domain.JwtDto;
 import coLaon.ClaonBack.common.domain.RefreshToken;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -101,6 +102,8 @@ public class JwtUtil {
             Jws<Claims> claims = Jwts.parser().setSigningKey(this.SECRET_KEY).parseClaimsJws(jwtToken);
 
             return claims.getBody().getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
         } catch (Exception e) {
             return false;
         }
