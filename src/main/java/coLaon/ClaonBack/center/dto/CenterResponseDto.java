@@ -21,7 +21,7 @@ public class CenterResponseDto {
     private List<OperatingTimeDto> operatingTimeList;
     private String facilities;
     private List<ChargeDto> chargeList;
-    private List<HoldInfoResponseDto> holdInfoList;
+    private List<CenterHoldInfoResponseDto> holdInfoList;
     private String holdInfoImg;
     private List<SectorInfoResponseDto> sectorInfoList;
 
@@ -37,7 +37,7 @@ public class CenterResponseDto {
             List<OperatingTimeDto> operatingTimeList,
             String facilities,
             List<ChargeDto> chargeList,
-            List<HoldInfoResponseDto> holdInfoList,
+            List<CenterHoldInfoResponseDto> holdInfoList,
             String holdInfoImg,
             List<SectorInfoResponseDto> sectorInfoList
     ) {
@@ -70,7 +70,7 @@ public class CenterResponseDto {
                 center.getOperatingTime().stream().map(OperatingTimeDto::from).collect(Collectors.toList()),
                 center.getFacilities(),
                 center.getCharge().stream().map(ChargeDto::from).collect(Collectors.toList()),
-                holdInfoList.stream().map(HoldInfoResponseDto::from).collect(Collectors.toList()),
+                holdInfoList.stream().map(CenterHoldInfoResponseDto::from).collect(Collectors.toList()),
                 center.getHoldInfoImg(),
                 sectorInfoList.stream().map(SectorInfoResponseDto::from).collect(Collectors.toList())
         );

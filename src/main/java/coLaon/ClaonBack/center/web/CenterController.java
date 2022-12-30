@@ -1,20 +1,20 @@
 package coLaon.ClaonBack.center.web;
 
+import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.dto.CenterBookmarkResponseDto;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterHoldInfoResponseDto;
+import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
+import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
 import coLaon.ClaonBack.center.dto.CenterReportCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterReportResponseDto;
 import coLaon.ClaonBack.center.dto.CenterResponseDto;
-import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
-import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
-import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewBundleFindResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewCreateRequestDto;
 import coLaon.ClaonBack.center.dto.ReviewResponseDto;
 import coLaon.ClaonBack.center.dto.ReviewUpdateRequestDto;
-import coLaon.ClaonBack.center.dto.CenterPreviewResponseDto;
-import coLaon.ClaonBack.center.domain.enums.CenterSearchOption;
 import coLaon.ClaonBack.center.service.CenterBookmarkService;
 import coLaon.ClaonBack.center.service.CenterReviewService;
 import coLaon.ClaonBack.center.service.CenterService;
@@ -33,9 +33,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -98,7 +98,7 @@ public class CenterController {
 
     @GetMapping(value = "/{centerId}/hold")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<HoldInfoResponseDto> findHoldInfoByCenter(
+    public List<CenterHoldInfoResponseDto> findHoldInfoByCenter(
             @PathVariable String centerId
     ) {
         return this.centerService.findHoldInfoByCenterId(centerId);

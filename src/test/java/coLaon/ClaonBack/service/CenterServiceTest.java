@@ -12,6 +12,7 @@ import coLaon.ClaonBack.center.domain.SectorInfo;
 import coLaon.ClaonBack.center.domain.enums.CenterReportType;
 import coLaon.ClaonBack.center.dto.CenterCreateRequestDto;
 import coLaon.ClaonBack.center.dto.CenterDetailResponseDto;
+import coLaon.ClaonBack.center.dto.CenterHoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.CenterImgDto;
 import coLaon.ClaonBack.center.dto.CenterNameResponseDto;
 import coLaon.ClaonBack.center.dto.CenterPostThumbnailResponseDto;
@@ -22,7 +23,6 @@ import coLaon.ClaonBack.center.dto.CenterResponseDto;
 import coLaon.ClaonBack.center.dto.ChargeDto;
 import coLaon.ClaonBack.center.dto.ChargeElementDto;
 import coLaon.ClaonBack.center.dto.HoldInfoRequestDto;
-import coLaon.ClaonBack.center.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.center.dto.OperatingTimeDto;
 import coLaon.ClaonBack.center.dto.SectorInfoRequestDto;
 import coLaon.ClaonBack.center.repository.CenterBookmarkRepository;
@@ -98,6 +98,7 @@ public class CenterServiceTest {
     private Center center, center2;
     private Post post, post2;
     private HoldInfo holdInfo, holdInfo2;
+    private ClimbingHistory climbingHistory, climbingHistory2;
     private SectorInfo sectorInfo;
     private CenterBookmark centerBookmark;
 
@@ -157,6 +158,19 @@ public class CenterServiceTest {
         );
         ReflectionTestUtils.setField(this.center2, "id", "center id2");
 
+        this.holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
+        ReflectionTestUtils.setField(this.holdInfo, "id", "holdId1");
+
+        this.holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
+        ReflectionTestUtils.setField(this.holdInfo2, "id", "holdId2");
+
+        this.climbingHistory = ClimbingHistory.of(
+                this.post,
+                holdInfo,
+                2
+        );
+        ReflectionTestUtils.setField(climbingHistory, "id", "climbingId");
+
         this.post = Post.of(
                 center,
                 "testContent1",
@@ -164,18 +178,18 @@ public class CenterServiceTest {
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
-                List.of()
+                List.of(climbingHistory)
         );
         ReflectionTestUtils.setField(this.post, "id", "testPostId");
         ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(this.post, "updatedAt", LocalDateTime.now());
 
-        ClimbingHistory climbingHistory = ClimbingHistory.of(
-                this.post,
-                holdInfo,
+        this.climbingHistory2 = ClimbingHistory.of(
+                this.post2,
+                holdInfo2,
                 1
         );
-        ReflectionTestUtils.setField(climbingHistory, "id", "climbingId");
+        ReflectionTestUtils.setField(climbingHistory2, "id", "climbingId2");
 
         this.post2 = Post.of(
                 center,
@@ -184,16 +198,12 @@ public class CenterServiceTest {
                 List.of(PostContents.of(
                         "test2.com/test.png"
                 )),
-                List.of(climbingHistory)
+                List.of(climbingHistory2)
         );
         ReflectionTestUtils.setField(this.post2, "id", "testPostId2");
         ReflectionTestUtils.setField(this.post2, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(this.post2, "updatedAt", LocalDateTime.now());
 
-        this.holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
-        ReflectionTestUtils.setField(this.holdInfo, "id", "holdId1");
-
-        this.holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
         this.sectorInfo = SectorInfo.of("test sector", LocalDate.of(2022, 1, 1), LocalDate.of(2022, 1, 1), this.center);
 
         this.centerBookmark = CenterBookmark.of(center, user);
@@ -408,12 +418,12 @@ public class CenterServiceTest {
         given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
 
         // when
-        List<HoldInfoResponseDto> holdInfoResponseDto = this.centerService.findHoldInfoByCenterId("center id");
+        List<CenterHoldInfoResponseDto> holdInfoResponseDto = this.centerService.findHoldInfoByCenterId("center id");
 
         // then
         assertThat(holdInfoResponseDto)
                 .isNotNull()
-                .extracting(HoldInfoResponseDto::getName, HoldInfoResponseDto::getImage)
+                .extracting(CenterHoldInfoResponseDto::getName, CenterHoldInfoResponseDto::getImage)
                 .containsExactly(
                         tuple(holdInfo.getName(), holdInfo.getImg()),
                         tuple(holdInfo2.getName(), holdInfo2.getImg()));

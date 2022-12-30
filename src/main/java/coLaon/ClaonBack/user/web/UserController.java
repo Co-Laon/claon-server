@@ -3,6 +3,7 @@ package coLaon.ClaonBack.user.web;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
+import coLaon.ClaonBack.user.dto.HistoryGroupByMonthDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
 import coLaon.ClaonBack.user.dto.UserDetailResponseDto;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -149,5 +151,14 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         this.userService.deleteProfile(userDetails.getUser());
+    }
+
+    @GetMapping(value = "/me/history")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<HistoryGroupByMonthDto> findHistoryByCenter(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam String centerId
+    ) {
+        return this.userService.findHistoryByCenterIdAndUserId(userDetails.getUser(), centerId);
     }
 }

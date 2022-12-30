@@ -4,13 +4,13 @@ import coLaon.ClaonBack.center.domain.HoldInfo;
 import lombok.Data;
 
 @Data
-public class HoldInfoResponseDto {
+public class CenterHoldInfoResponseDto {
     private String id;
     private String name;
     private String image;
     private String crayonImage;
 
-    private HoldInfoResponseDto(
+    private CenterHoldInfoResponseDto(
             String id,
             String name,
             String image,
@@ -22,7 +22,7 @@ public class HoldInfoResponseDto {
         this.crayonImage = crayonImage;
     }
 
-    public static HoldInfoResponseDto from(
+    public static CenterHoldInfoResponseDto from(
             HoldInfo holdInfo
     ) {
         String[] holdInfoImageUrl = holdInfo.getImg().split("hold/");
@@ -31,7 +31,7 @@ public class HoldInfoResponseDto {
         if (holdInfoImageUrl.length == 2)
             crayonImageUrl = holdInfoImageUrl[0] + "crayon/" + holdInfoImageUrl[1];
 
-        return new HoldInfoResponseDto(
+        return new CenterHoldInfoResponseDto(
                 holdInfo.getId(),
                 holdInfo.getName(),
                 holdInfo.getImg(),

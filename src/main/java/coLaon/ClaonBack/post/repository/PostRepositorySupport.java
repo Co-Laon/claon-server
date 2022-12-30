@@ -1,8 +1,11 @@
 package coLaon.ClaonBack.post.repository;
 
 import coLaon.ClaonBack.post.domain.Post;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -178,5 +181,16 @@ public class PostRepositorySupport extends QuerydslRepositorySupport {
                                         .where(blockUser.blockedUser.id.eq(userId)))
                         ))
                 .fetchCount();
+    }
+
+    public List<Post> findByCenterIdAndUserId(String centerId, String userId) {
+        JPAQuery<Post> query = jpaQueryFactory
+                .selectFrom(post)
+                .where(post.center.id.eq(centerId)
+                        .and(post.writer.id.eq(userId))
+                        .and(post.isDeleted.isFalse()))
+                .orderBy(post.createdAt.desc());
+
+        return query.fetch();
     }
 }
