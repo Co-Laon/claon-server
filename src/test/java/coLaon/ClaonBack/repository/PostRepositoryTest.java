@@ -307,4 +307,16 @@ public class PostRepositoryTest {
         // then
         assertThat(results.size()).isEqualTo(1);
     }
+
+    @Test
+    public void successFindCenterByUser() {
+        // given
+        String userId = user.getId();
+
+        // when
+        Page<Center> results = postRepositorySupport.findCenterByUser(userId, PageRequest.of(0, 2));
+
+        // then
+        assertThat(results.getContent().size()).isEqualTo(1);
+    }
 }

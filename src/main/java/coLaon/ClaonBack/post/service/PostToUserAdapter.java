@@ -17,8 +17,11 @@ import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.user.dto.UserCenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostDetailResponseDto;
 import coLaon.ClaonBack.user.dto.UserPostThumbnailResponseDto;
+import coLaon.ClaonBack.user.dto.UserCenterResponseDto;
 import coLaon.ClaonBack.user.service.PostPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -151,5 +154,18 @@ public class PostToUserAdapter implements PostPort {
                 )).sorted(Comparator.comparing(HistoryGroupByMonthDto::getDate).reversed()).collect(Collectors.toList());
 
         return historyGroups;
+    }
+
+    @Override
+    public Page<UserCenterResponseDto> selectDistinctCenterByUser(User user, Pageable pageable) {
+
+        List<UserCenterResponseDto> postList = postRepositorySupport.findCenterByUser(user.getId(), pageable)
+                .map(center -> UserCenterResponseDto.from(
+                    center.getId(),
+                    center.getThumbnailUrl(),
+                    center.getName()
+                )).stream().distinct().collect(Collectors.toList());
+
+        return new PageImpl<>(postList, pageable, postList.size());
     }
 }
