@@ -12,10 +12,14 @@ import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
+import coLaon.ClaonBack.post.repository.ClimbingHistoryRepositorySupport;
+import coLaon.ClaonBack.user.domain.BlockUser;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
+import coLaon.ClaonBack.user.dto.CenterInfoResponseDto;
 import coLaon.ClaonBack.user.dto.HistoryByCenterFindResponseDto;
+import coLaon.ClaonBack.user.dto.HistoryByDateFindResponseDto;
 import coLaon.ClaonBack.user.dto.HistoryGroupByMonthDto;
 import coLaon.ClaonBack.user.dto.UserCenterPreviewResponseDto;
 import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
@@ -71,6 +75,8 @@ public class UserServiceTest {
     @Mock
     BlockUserRepository blockUserRepository;
     @Mock
+    ClimbingHistoryRepositorySupport climbingHistoryRepositorySupport;
+    @Mock
     PostPort postPort;
     @Mock
     CenterPort centerPort;
@@ -80,10 +86,11 @@ public class UserServiceTest {
     @InjectMocks
     UserService userService;
 
-    private User user, privateUser, publicUser;
+    private User user, user2, user3, privateUser, publicUser;
+    private BlockUser blockUser;
     private Center center;
-    private Post post2, post3;
-    private ClimbingHistory climbingHistory, climbingHistory2;
+    private Post post2, post3, post4, post5;
+    private ClimbingHistory climbingHistory, climbingHistory2, climbingHistory3, climbingHistory4;
     private List<String> postIds;
     private Post post;
 
@@ -125,6 +132,36 @@ public class UserServiceTest {
                 "instagramId"
         );
         ReflectionTestUtils.setField(this.user, "id", "userId");
+
+        this.user2 = User.of(
+                "test2@gmail.com",
+                "1234567890",
+                "test2",
+                180.0F,
+                180.0F,
+                "",
+                "",
+                "instagramId2"
+        );
+        ReflectionTestUtils.setField(this.user2, "id", "userId2");
+
+        this.user3 = User.of(
+                "test3@gmail.com",
+                "12341111",
+                "test2",
+                190.0F,
+                190.0F,
+                "",
+                "",
+                "instagramId3"
+        );
+        ReflectionTestUtils.setField(this.user3, "id", "userId3");
+
+        this.blockUser = BlockUser.of(
+                user,
+                user2
+        );
+        ReflectionTestUtils.setField(this.blockUser, "id", "block1");
 
         this.center = Center.of(
                 "test",
@@ -176,10 +213,24 @@ public class UserServiceTest {
         );
         ReflectionTestUtils.setField(climbingHistory2, "id", "climbingId2");
 
+        this.climbingHistory3 = ClimbingHistory.of(
+                post4,
+                holdInfo,
+                2
+        );
+        ReflectionTestUtils.setField(climbingHistory2, "id", "climbingId3");
+
+        this.climbingHistory4 = ClimbingHistory.of(
+                post5,
+                holdInfo2,
+                5
+        );
+        ReflectionTestUtils.setField(climbingHistory2, "id", "climbingId4");
+
         this.post2 = Post.of(
                 center,
                 "testContent1",
-                user,
+                user2,
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
@@ -201,6 +252,32 @@ public class UserServiceTest {
         ReflectionTestUtils.setField(post3, "id", "testPostId3");
         ReflectionTestUtils.setField(post3, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(post3, "updatedAt", LocalDateTime.now());
+
+        this.post4 = Post.of(
+                center,
+                "testContent2",
+                user,
+                List.of(PostContents.of(
+                        "test2.com/test.png"
+                )),
+                List.of(climbingHistory)
+        );
+        ReflectionTestUtils.setField(post4, "id", "testPostId4");
+        ReflectionTestUtils.setField(post4, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(post4, "updatedAt", LocalDateTime.now());
+
+        this.post5 = Post.of(
+                center,
+                "testContent5",
+                user3,
+                List.of(PostContents.of(
+                        "test5.com/test.png"
+                )),
+                List.of(climbingHistory4)
+        );
+        ReflectionTestUtils.setField(post4, "id", "testPostId5");
+        ReflectionTestUtils.setField(post4, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(post4, "updatedAt", LocalDateTime.now());
     }
 
     @Test
@@ -530,5 +607,54 @@ public class UserServiceTest {
         Pagination<UserCenterResponseDto> postHistory = this.userService.findCenterHistory(this.user, this.user.getNickname(), pageable);
         // then
         assertThat(postHistory.getResults().size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Success case for find history using year, month")
+    void successFindHistoryByDate() {
+        // given
+        CenterInfoResponseDto centerInfo = CenterInfoResponseDto.from(
+                center.getId(),
+                center.getName(),
+                center.getThumbnailUrl()
+        );
+
+        List<ClimbingHistoryResponseDto> histories = List.of(
+                ClimbingHistoryResponseDto.from(
+                        HoldInfoResponseDto.of(
+                                climbingHistory.getHoldInfo().getId(),
+                                climbingHistory.getHoldInfo().getName(),
+                                climbingHistory.getHoldInfo().getImg(),
+                                climbingHistory.getHoldInfo().getCrayonImageUrl()
+                        ),
+                        climbingHistory.getClimbingCount() + climbingHistory3.getClimbingCount()
+                ),
+
+                ClimbingHistoryResponseDto.from(
+                        HoldInfoResponseDto.of(
+                                climbingHistory2.getHoldInfo().getId(),
+                                climbingHistory2.getHoldInfo().getName(),
+                                climbingHistory2.getHoldInfo().getImg(),
+                                climbingHistory2.getHoldInfo().getCrayonImageUrl()
+                        ),
+                        climbingHistory2.getClimbingCount() + climbingHistory4.getClimbingCount()
+                )
+        );
+
+        HistoryByDateFindResponseDto historyDto = HistoryByDateFindResponseDto.from(
+                centerInfo, histories
+        );
+
+        given(this.postPort.findHistoryByDate(user.getId(), LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue())).willReturn(List.of(historyDto));
+
+        // when
+        List<HistoryByDateFindResponseDto> results = this.userService.findHistoryByDateAndUserId(user, LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue());
+
+        // then
+        assertThat(results.get(0))
+                .isNotNull()
+                .extracting(HistoryByDateFindResponseDto::getCenterInfo, HistoryByDateFindResponseDto::getHistories)
+                .contains(centerInfo, histories);
+
     }
 }

@@ -14,6 +14,7 @@ import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.domain.enums.OAuth2Provider;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.DuplicatedCheckResponseDto;
+import coLaon.ClaonBack.user.dto.HistoryByDateFindResponseDto;
 import coLaon.ClaonBack.user.dto.HistoryGroupByMonthDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.InstagramResponseDto;
@@ -295,5 +296,8 @@ public class UserService {
                 this.postPort.selectDistinctCenterByUser(targetUser, pageable)
         );
     }
-}
 
+    public List<HistoryByDateFindResponseDto> findHistoryByDateAndUserId(User user, Integer year, Integer month) {
+        return this.postPort.findHistoryByDate(user.getId(), year, month);
+    }
+}

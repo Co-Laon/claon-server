@@ -3,6 +3,7 @@ package coLaon.ClaonBack.user.web;
 import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
+import coLaon.ClaonBack.user.dto.HistoryByDateFindResponseDto;
 import coLaon.ClaonBack.user.dto.HistoryGroupByMonthDto;
 import coLaon.ClaonBack.user.dto.IndividualUserResponseDto;
 import coLaon.ClaonBack.user.dto.PublicScopeResponseDto;
@@ -154,7 +155,7 @@ public class UserController {
         this.userService.deleteProfile(userDetails.getUser());
     }
 
-    @GetMapping(value = "/me/history")
+    @GetMapping(value = "/history")
     @ResponseStatus(value = HttpStatus.OK)
     public List<HistoryGroupByMonthDto> findHistoryByCenter(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -163,7 +164,7 @@ public class UserController {
         return this.userService.findHistoryByCenterIdAndUserId(userDetails.getUser(), centerId);
     }
 
-    @GetMapping(value = "/me/{nickname}/center")
+    @GetMapping(value = "/history/{nickname}/center")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<UserCenterResponseDto> getCenterHistory(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -171,6 +172,16 @@ public class UserController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return this.userService.findCenterHistory(userDetails.getUser(), nickname, pageable);
+    }
+
+    @GetMapping(value = "/history/date")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<HistoryByDateFindResponseDto> findHistoryByDate(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam Integer year,
+            @RequestParam Integer month
+    ) {
+        return this.userService.findHistoryByDateAndUserId(userDetails.getUser(), year, month);
     }
 }
 
