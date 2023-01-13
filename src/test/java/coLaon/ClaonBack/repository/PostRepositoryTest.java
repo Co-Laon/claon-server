@@ -284,17 +284,17 @@ public class PostRepositoryTest {
     }
 
     @Test
-    public void findByCenterAndYearMonth() {
+    public void successFindByNicknameAndCenterAndYearMonth() {
         // given
         String centerId = center.getId();
         String userId = user.getId();
         LocalDateTime now = LocalDateTime.now();
 
         // when
-        Page<Post> results = postRepositorySupport.findByCenterAndYearMonth(userId, centerId, now.getYear(), now.getMonthValue(), PageRequest.of(0, 3));
+        Page<Post> results = postRepositorySupport.findByNicknameAndCenterAndYearMonth(userId, "testNickname", centerId, now.getYear(), now.getMonthValue(), PageRequest.of(0, 3));
 
         // then
-        assertThat(results.getContent().size()).isEqualTo(3);
+        assertThat(results.getContent().size()).isEqualTo(1);
     }
 
     @Test

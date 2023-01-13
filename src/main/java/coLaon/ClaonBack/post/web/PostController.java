@@ -39,6 +39,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 @RestController
 @RequiredArgsConstructor
@@ -199,15 +201,16 @@ public class PostController {
         this.postService.deleteContents(userDetails.getUser(), postId, postContentsUrlDto);
     }
 
-    @GetMapping(value = "/center/{centerId}")
+    @GetMapping(value = "/user/name/{nickname}/center/{centerId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<PostDetailResponseDto> getPostsByMonthAndCenter(
+    public Pagination<PostDetailResponseDto> getUserPostsByCenterAndYearMonth(
             @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String nickname,
             @PathVariable String centerId,
-            @RequestParam Integer year,
-            @RequestParam Integer month,
+            @RequestParam @Min(2000) @Max(9999) Integer year,
+            @RequestParam @Min(1) @Max(12) Integer month,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.ASC) final Pageable pageable
     ) {
-        return this.postService.findPostsByCenterAndYearMonth(userDetails.getUser(), centerId, year, month, pageable);
+        return this.postService.findUserPostsByCenterAndYearMonth(userDetails.getUser(), nickname, centerId, year, month, pageable);
     }
 }

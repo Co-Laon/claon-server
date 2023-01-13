@@ -19,6 +19,7 @@ import static coLaon.ClaonBack.post.domain.QPost.post;
 import static coLaon.ClaonBack.user.domain.QBlockUser.blockUser;
 import static coLaon.ClaonBack.user.domain.QLaon.laon1;
 import static coLaon.ClaonBack.user.domain.QUser.user;
+import static coLaon.ClaonBack.center.domain.QCenter.center;
 
 @Repository
 public class PostRepositorySupport extends QuerydslRepositorySupport {
@@ -156,15 +157,20 @@ public class PostRepositorySupport extends QuerydslRepositorySupport {
         return new PageImpl<>(results, pageable, totalCount);
     }
 
-    public Page<Post> findByCenterAndYearMonth(String userId, String centerId, Integer year, Integer month, Pageable pageable) {
+    public Page<Post> findByNicknameAndCenterAndYearMonth(String userId, String nickname, String centerId, Integer year, Integer month, Pageable pageable) {
+        LocalDateTime from = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime to = from.plusMonths(1);
+
         JPQLQuery<Post> query = jpaQueryFactory
                 .selectFrom(post)
                 .join(post.writer, user)
                 .fetchJoin()
+                .join(post.center, center)
+                .fetchJoin()
                 .where(post.center.id.eq(centerId)
                         .and(post.isDeleted.isFalse())
-                        .and(user.isPrivate.isFalse()
-                                .or(post.writer.id.eq(userId)))
+                        .and(user.nickname.eq(nickname))
+                        .and(user.isPrivate.isFalse())
                         .and(post.id.notIn(
                                 JPAExpressions
                                         .select(post.id)
@@ -177,8 +183,7 @@ public class PostRepositorySupport extends QuerydslRepositorySupport {
                                         .from(post)
                                         .join(blockUser).on(post.writer.id.eq(blockUser.user.id))
                                         .where(blockUser.blockedUser.id.eq(userId))))
-                        .and(post.createdAt.year().eq(year))
-                        .and(post.createdAt.month().eq(month)));
+                        .and(post.createdAt.between(from, to)));
 
         long totalCount = query.fetchCount();
         List<Post> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
