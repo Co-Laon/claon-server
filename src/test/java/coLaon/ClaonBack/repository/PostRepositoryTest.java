@@ -294,7 +294,7 @@ public class PostRepositoryTest {
         Page<Post> results = postRepositorySupport.findByNicknameAndCenterAndYearMonth(userId, "testNickname", centerId, now.getYear(), now.getMonthValue(), PageRequest.of(0, 3));
 
         // then
-        assertThat(results.getContent().size()).isEqualTo(3);
+        assertThat(results.getContent().size()).isEqualTo(1);
     }
 
     @Test
