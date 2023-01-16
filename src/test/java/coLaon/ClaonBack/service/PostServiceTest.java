@@ -242,6 +242,29 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Success case for find user posts by center and year-month")
+    void successFindUserPostsByCenterAndYearMonth() {
+        // given
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<Post> postPage = new PageImpl<>(List.of(post2), pageable, 1);
+        LocalDateTime now = LocalDateTime.now();
+
+        given(this.postRepositorySupport.findByNicknameAndCenterAndYearMonth(user.getId(), "test2", center.getId(), now.getYear(), now.getMonthValue(), pageable))
+                .willReturn(postPage);
+
+        // when
+        Pagination<PostDetailResponseDto> posts = this.postService.findUserPostsByCenterAndYearMonth(user, "test2", center.getId(), now.getYear(), now.getMonthValue(), pageable);
+
+        // then
+        assertThat(posts.getResults())
+                .isNotNull()
+                .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
+                .contains(
+                        tuple("testPostId2", post2.getContent())
+                );
+    }
+
+    @Test
     @DisplayName("Success case for find posts")
     void successFindPosts() {
         // given

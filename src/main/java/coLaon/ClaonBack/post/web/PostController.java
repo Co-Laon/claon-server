@@ -32,12 +32,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 @RestController
 @RequiredArgsConstructor
@@ -196,5 +199,18 @@ public class PostController {
             @RequestBody @Valid PostContentsUrlDto postContentsUrlDto
     ) {
         this.postService.deleteContents(userDetails.getUser(), postId, postContentsUrlDto);
+    }
+
+    @GetMapping(value = "/user/name/{nickname}/center/{centerId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Pagination<PostDetailResponseDto> getUserPostsByCenterAndYearMonth(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String nickname,
+            @PathVariable String centerId,
+            @RequestParam @Min(2000) @Max(9999) Integer year,
+            @RequestParam @Min(1) @Max(12) Integer month,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.ASC) final Pageable pageable
+    ) {
+        return this.postService.findUserPostsByCenterAndYearMonth(userDetails.getUser(), nickname, centerId, year, month, pageable);
     }
 }
