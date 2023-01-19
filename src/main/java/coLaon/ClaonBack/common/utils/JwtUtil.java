@@ -51,9 +51,13 @@ public class JwtUtil {
         this.refreshTokenUtil.delete(refreshToken);
 
         Date now = new Date();
-        return JwtDto.of(
+        JwtDto newToken = JwtDto.of(
                 generateAccessToken(userPk, now),
                 generateRefreshToken(userPk, now));
+
+        this.refreshTokenUtil.save(RefreshToken.of(newToken.getRefreshToken(), userPk));
+
+        return newToken;
     }
 
     private String generateAccessToken(String userPk, Date now) {
