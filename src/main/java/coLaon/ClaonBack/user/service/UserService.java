@@ -255,8 +255,27 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<HistoryGroupByMonthDto> findHistoryByCenterIdAndUserId(
             User user,
+            String nickname,
             String centerId
     ) {
+        User targetUser = userRepository.findByNickname(nickname).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        String.format("%s을 찾을 수 없습니다.", nickname)
+                )
+        );
+
+        if (!user.getId().equals(targetUser.getId())) {
+            IsPrivateValidator.of(targetUser.getNickname(), targetUser.getIsPrivate()).validate();
+
+            if (!blockUserRepository.findBlock(targetUser.getId(), user.getId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", nickname)
+                );
+            }
+        }
+
         if (!this.centerPort.existsByCenterId(centerId)) {
             throw new NotFoundException(
                     ErrorCode.DATA_DOES_NOT_EXIST,
@@ -264,7 +283,7 @@ public class UserService {
             );
         }
 
-        return this.postPort.findByCenterIdAndUserId(centerId, user.getId());
+        return this.postPort.findByCenterIdAndUserId(centerId, targetUser.getId());
     }
 
     @Transactional(readOnly = true)
@@ -297,7 +316,27 @@ public class UserService {
         );
     }
 
-    public List<HistoryByDateFindResponseDto> findHistoryByDateAndUserId(User user, Integer year, Integer month) {
-        return this.postPort.findHistoryByDate(user.getId(), year, month);
+    @Transactional(readOnly = true)
+    public List<HistoryByDateFindResponseDto> findHistoryByDateAndUserId(User user, String nickname, Integer year, Integer month) {
+
+        User targetUser = userRepository.findByNickname(nickname).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        String.format("%s을 찾을 수 없습니다", nickname)
+                )
+        );
+
+        if (!user.getId().equals(targetUser.getId())) {
+            IsPrivateValidator.of(targetUser.getNickname(), targetUser.getIsPrivate()).validate();
+
+            if (!blockUserRepository.findBlock(targetUser.getId(), user.getId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", nickname)
+                );
+            }
+        }
+
+        return this.postPort.findHistoryByDate(targetUser.getId(), year, month);
     }
 }

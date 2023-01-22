@@ -155,16 +155,17 @@ public class UserController {
         this.userService.deleteProfile(userDetails.getUser());
     }
 
-    @GetMapping(value = "/history")
+    @GetMapping(value = "/{nickname}/history/centers/{centerId}")
     @ResponseStatus(value = HttpStatus.OK)
     public List<HistoryGroupByMonthDto> findHistoryByCenter(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam String centerId
+            @PathVariable String nickname,
+            @PathVariable String centerId
     ) {
-        return this.userService.findHistoryByCenterIdAndUserId(userDetails.getUser(), centerId);
+        return this.userService.findHistoryByCenterIdAndUserId(userDetails.getUser(), nickname, centerId);
     }
 
-    @GetMapping(value = "/history/{nickname}/center")
+    @GetMapping(value = "/{nickname}/history/centers")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<UserCenterResponseDto> getCenterHistory(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -174,14 +175,15 @@ public class UserController {
         return this.userService.findCenterHistory(userDetails.getUser(), nickname, pageable);
     }
 
-    @GetMapping(value = "/history/date")
+    @GetMapping(value = "/{nickname}/history")
     @ResponseStatus(value = HttpStatus.OK)
     public List<HistoryByDateFindResponseDto> findHistoryByDate(
             @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String nickname,
             @RequestParam Integer year,
             @RequestParam Integer month
     ) {
-        return this.userService.findHistoryByDateAndUserId(userDetails.getUser(), year, month);
+        return this.userService.findHistoryByDateAndUserId(userDetails.getUser(), nickname, year, month);
     }
 }
 

@@ -89,10 +89,9 @@ public class UserServiceTest {
     private User user, user2, user3, privateUser, publicUser;
     private BlockUser blockUser;
     private Center center;
-    private Post post2, post3, post4, post5;
     private ClimbingHistory climbingHistory, climbingHistory2, climbingHistory3, climbingHistory4;
     private List<String> postIds;
-    private Post post;
+    private Post post, post2, post3, post4, post5;
 
     @BeforeEach
     void setUp() {
@@ -148,7 +147,7 @@ public class UserServiceTest {
         this.user3 = User.of(
                 "test3@gmail.com",
                 "12341111",
-                "test2",
+                "test3",
                 190.0F,
                 190.0F,
                 "",
@@ -192,7 +191,6 @@ public class UserServiceTest {
                 )),
                 user
         );
-
         ReflectionTestUtils.setField(post, "id", "testPostId");
         ReflectionTestUtils.setField(post, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(post, "updatedAt", LocalDateTime.now());
@@ -275,9 +273,9 @@ public class UserServiceTest {
                 )),
                 List.of(climbingHistory4)
         );
-        ReflectionTestUtils.setField(post4, "id", "testPostId5");
-        ReflectionTestUtils.setField(post4, "createdAt", LocalDateTime.now());
-        ReflectionTestUtils.setField(post4, "updatedAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(post5, "id", "testPostId5");
+        ReflectionTestUtils.setField(post5, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(post5, "updatedAt", LocalDateTime.now());
     }
 
     @Test
@@ -541,51 +539,56 @@ public class UserServiceTest {
     @DisplayName("Success case for find history using center and user")
     void successFindByCenterIdAndUserId() {
         // given
-        given(this.centerPort.existsByCenterId("centerId")).willReturn(true);
+        given(this.userRepository.findByNickname(this.user3.getNickname())).willReturn(Optional.of(this.user3));
+        given(this.centerPort.existsByCenterId(this.center.getId())).willReturn(true);
 
-        ClimbingHistoryResponseDto climbingHistoryResponseDto1 = ClimbingHistoryResponseDto.from(
+        ClimbingHistoryResponseDto climbingHistoryResponseDto3 = ClimbingHistoryResponseDto.from(
                 HoldInfoResponseDto.of(
-                        climbingHistory.getHoldInfo().getId(),
-                        climbingHistory.getHoldInfo().getName(),
-                        climbingHistory.getHoldInfo().getImg(),
-                        climbingHistory.getHoldInfo().getCrayonImageUrl()
+                        climbingHistory4.getHoldInfo().getId(),
+                        climbingHistory4.getHoldInfo().getName(),
+                        climbingHistory4.getHoldInfo().getImg(),
+                        climbingHistory4.getHoldInfo().getCrayonImageUrl()
                 ),
-                climbingHistory.getClimbingCount()
-        );
-
-        ClimbingHistoryResponseDto climbingHistoryResponseDto2 = ClimbingHistoryResponseDto.from(
-                HoldInfoResponseDto.of(
-                        climbingHistory2.getHoldInfo().getId(),
-                        climbingHistory2.getHoldInfo().getName(),
-                        climbingHistory2.getHoldInfo().getImg(),
-                        climbingHistory2.getHoldInfo().getCrayonImageUrl()
-                ),
-                climbingHistory2.getClimbingCount()
+                climbingHistory4.getClimbingCount()
         );
 
         List<HistoryByCenterFindResponseDto> histories = List.of(
                 HistoryByCenterFindResponseDto.from(
-                        post2.getId(),
-                        post2.getCreatedAt(),
-                        List.of(climbingHistoryResponseDto1)),
-                HistoryByCenterFindResponseDto.from(
-                        post3.getId(),
-                        post3.getCreatedAt(),
-                        List.of(climbingHistoryResponseDto2))
+                        post5.getId(),
+                        post5.getCreatedAt(),
+                        List.of(climbingHistoryResponseDto3))
         );
 
-        List<HistoryGroupByMonthDto> historyGroup = List.of(HistoryGroupByMonthDto.from(post2.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM")), histories));
+        List<HistoryGroupByMonthDto> historyGroup = List.of(HistoryGroupByMonthDto.from(post3.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM")), histories));
 
-        given(this.postPort.findByCenterIdAndUserId("centerId", "userId")).willReturn(historyGroup);
+        given(this.postPort.findByCenterIdAndUserId(center.getId(), user3.getId())).willReturn(historyGroup);
 
         // when
-        List<HistoryGroupByMonthDto> results = this.userService.findHistoryByCenterIdAndUserId(user, center.getId());
+        List<HistoryGroupByMonthDto> results = this.userService.findHistoryByCenterIdAndUserId(user, user3.getNickname(), center.getId());
 
         // then
         assertThat(results.get(0))
                 .isNotNull()
                 .extracting("date", "histories")
                 .contains(historyGroup.get(0).getDate(), historyGroup.get(0).getHistories());
+    }
+
+    @Test
+    @DisplayName("failure case for find history using center and user because of block relation")
+    void failureFindByCenterIdAndUserId_forPrivateUser() {
+        // given
+        given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
+
+        // when
+        final UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
+                () -> this.userService.findHistoryByCenterIdAndUserId(user, this.privateUser.getNickname(), this.center.getId())
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s은 비공개 상태입니다.", privateUser.getNickname()));
     }
 
     @Test
@@ -622,22 +625,12 @@ public class UserServiceTest {
         List<ClimbingHistoryResponseDto> histories = List.of(
                 ClimbingHistoryResponseDto.from(
                         HoldInfoResponseDto.of(
-                                climbingHistory.getHoldInfo().getId(),
-                                climbingHistory.getHoldInfo().getName(),
-                                climbingHistory.getHoldInfo().getImg(),
-                                climbingHistory.getHoldInfo().getCrayonImageUrl()
+                                climbingHistory4.getHoldInfo().getId(),
+                                climbingHistory4.getHoldInfo().getName(),
+                                climbingHistory4.getHoldInfo().getImg(),
+                                climbingHistory4.getHoldInfo().getCrayonImageUrl()
                         ),
-                        climbingHistory.getClimbingCount() + climbingHistory3.getClimbingCount()
-                ),
-
-                ClimbingHistoryResponseDto.from(
-                        HoldInfoResponseDto.of(
-                                climbingHistory2.getHoldInfo().getId(),
-                                climbingHistory2.getHoldInfo().getName(),
-                                climbingHistory2.getHoldInfo().getImg(),
-                                climbingHistory2.getHoldInfo().getCrayonImageUrl()
-                        ),
-                        climbingHistory2.getClimbingCount() + climbingHistory4.getClimbingCount()
+                        climbingHistory4.getClimbingCount()
                 )
         );
 
@@ -645,16 +638,35 @@ public class UserServiceTest {
                 centerInfo, histories
         );
 
-        given(this.postPort.findHistoryByDate(user.getId(), LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue())).willReturn(List.of(historyDto));
+        given(this.userRepository.findByNickname(this.user3.getNickname())).willReturn(Optional.of(this.user3));
+        given(this.postPort.findHistoryByDate(user3.getId(), LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue())).willReturn(List.of(historyDto));
 
         // when
-        List<HistoryByDateFindResponseDto> results = this.userService.findHistoryByDateAndUserId(user, LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue());
+        List<HistoryByDateFindResponseDto> results = this.userService.findHistoryByDateAndUserId(user, user3.getNickname(), LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue());
 
         // then
         assertThat(results.get(0))
                 .isNotNull()
                 .extracting(HistoryByDateFindResponseDto::getCenterInfo, HistoryByDateFindResponseDto::getHistories)
                 .contains(centerInfo, histories);
+    }
 
+    @Test
+    @DisplayName("failure case for find history using center and user because of block relation")
+    void failureFindHistoryByDate_forBlockUser() {
+        // given
+        given(this.userRepository.findByNickname(this.user2.getNickname())).willReturn(Optional.of(this.user2));
+        given(this.blockUserRepository.findBlock(this.user2.getId(), this.user.getId())).willReturn(List.of(this.blockUser));
+
+        // when
+        final UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
+                () -> this.userService.findHistoryByCenterIdAndUserId(user, this.user2.getNickname(), this.center.getId())
+        );
+
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s을 찾을 수 없습니다.", user2.getNickname()));
     }
 }

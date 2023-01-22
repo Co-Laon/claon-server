@@ -149,7 +149,8 @@ public class PostToUserAdapter implements PostPort {
                                         ),
                                         climbingHistory.getClimbingCount()
                                 )).collect(Collectors.toList())
-                )).collect(Collectors.groupingBy(history -> history.getCreatedAt().substring(0, history.getCreatedAt().lastIndexOf('.'))));
+                )).sorted(Comparator.comparing(HistoryByCenterFindResponseDto::getCreatedAt))
+                .collect(Collectors.groupingBy(history -> history.getCreatedAt().substring(0, history.getCreatedAt().lastIndexOf('.'))));
 
         List<HistoryGroupByMonthDto> historyGroups = historyMap.entrySet().stream()
                 .map(history -> HistoryGroupByMonthDto.from(

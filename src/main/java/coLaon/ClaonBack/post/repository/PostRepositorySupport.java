@@ -22,7 +22,6 @@ import static coLaon.ClaonBack.post.domain.QPost.post;
 import static coLaon.ClaonBack.user.domain.QBlockUser.blockUser;
 import static coLaon.ClaonBack.user.domain.QLaon.laon1;
 import static coLaon.ClaonBack.user.domain.QUser.user;
-import static coLaon.ClaonBack.center.domain.QCenter.center;
 
 @Repository
 public class PostRepositorySupport extends QuerydslRepositorySupport {

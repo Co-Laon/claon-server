@@ -11,8 +11,6 @@ import java.util.List;
 
 import static coLaon.ClaonBack.post.domain.QClimbingHistory.climbingHistory;
 import static coLaon.ClaonBack.post.domain.QPost.post;
-import static coLaon.ClaonBack.user.domain.QUser.user;
-import static coLaon.ClaonBack.user.domain.QBlockUser.blockUser;
 
 @Repository
 public class ClimbingHistoryRepositorySupport extends QuerydslRepositorySupport {
@@ -30,24 +28,11 @@ public class ClimbingHistoryRepositorySupport extends QuerydslRepositorySupport 
                         JPAExpressions
                                 .select(post.id)
                                 .from(post)
-                                .join(user).on(post.writer.id.eq(user.id))
-                                .where(user.isPrivate.isFalse()
+                                .where(post.writer.id.eq(userId)
                                         .and(post.isDeleted.isFalse())
                                         .and(post.createdAt.year().eq(year))
                                         .and(post.createdAt.month().eq(month)))
-                ).and(climbingHistory.post.id.notIn(
-                        JPAExpressions
-                                .select(post.id)
-                                .from(post)
-                                .join(blockUser).on(post.writer.id.eq(blockUser.blockedUser.id))
-                                .where(blockUser.user.id.eq(userId))
-                )).and(climbingHistory.post.id.notIn(
-                        JPAExpressions
-                                .select(post.id)
-                                .from(post)
-                                .join(blockUser).on(post.writer.id.eq(blockUser.user.id))
-                                .where(blockUser.blockedUser.id.eq(userId))
-                )));
+                ));
 
         return query.fetch();
     }
