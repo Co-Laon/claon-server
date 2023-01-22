@@ -22,7 +22,6 @@ import static coLaon.ClaonBack.post.domain.QPost.post;
 import static coLaon.ClaonBack.user.domain.QBlockUser.blockUser;
 import static coLaon.ClaonBack.user.domain.QLaon.laon1;
 import static coLaon.ClaonBack.user.domain.QUser.user;
-import static coLaon.ClaonBack.center.domain.QCenter.center;
 
 @Repository
 public class PostRepositorySupport extends QuerydslRepositorySupport {
@@ -173,7 +172,8 @@ public class PostRepositorySupport extends QuerydslRepositorySupport {
                 .where(post.center.id.eq(centerId)
                         .and(post.isDeleted.isFalse())
                         .and(user.nickname.eq(nickname))
-                        .and(user.isPrivate.isFalse())
+                        .and(user.isPrivate.isFalse()
+                                .or(post.writer.id.eq(userId)))
                         .and(post.id.notIn(
                                 JPAExpressions
                                         .select(post.id)
