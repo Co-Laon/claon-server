@@ -202,7 +202,7 @@ public class PostController {
         this.postService.deleteContents(userDetails.getUser(), postId, postContentsUrlDto);
     }
 
-    @GetMapping
+    @GetMapping("/history")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<PostDetailResponseDto> getUserPostsByCenterAndYearMonth(
             @AuthenticationPrincipal UserDetails userDetails,
