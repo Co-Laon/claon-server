@@ -5,13 +5,16 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.post.domain.ClimbingHistory;
 import coLaon.ClaonBack.post.domain.PostContents;
 import coLaon.ClaonBack.post.repository.ClimbingHistoryRepository;
+import coLaon.ClaonBack.post.repository.ClimbingHistoryRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.post.repository.PostRepositorySupport;
 import coLaon.ClaonBack.user.domain.User;
 import coLaon.ClaonBack.user.dto.CenterClimbingHistoryResponseDto;
+import coLaon.ClaonBack.user.dto.CenterInfoResponseDto;
 import coLaon.ClaonBack.user.dto.ClimbingHistoryResponseDto;
 import coLaon.ClaonBack.user.dto.HistoryByCenterFindResponseDto;
+import coLaon.ClaonBack.user.dto.HistoryByDateFindResponseDto;
 import coLaon.ClaonBack.user.dto.HistoryGroupByMonthDto;
 import coLaon.ClaonBack.user.dto.HoldInfoResponseDto;
 import coLaon.ClaonBack.user.dto.UserCenterPreviewResponseDto;
@@ -35,6 +38,7 @@ import java.util.stream.Collectors;
 public class PostToUserAdapter implements PostPort {
     private final PostRepository postRepository;
     private final ClimbingHistoryRepository climbingHistoryRepository;
+    private final ClimbingHistoryRepositorySupport climbingHistoryRepositorySupport;
     private final PaginationFactory paginationFactory;
     private final PostRepositorySupport postRepositorySupport;
     private final PostLikeRepository postLikeRepository;
@@ -145,7 +149,8 @@ public class PostToUserAdapter implements PostPort {
                                         ),
                                         climbingHistory.getClimbingCount()
                                 )).collect(Collectors.toList())
-                )).collect(Collectors.groupingBy(history -> history.getCreatedAt().substring(0, history.getCreatedAt().lastIndexOf('.'))));
+                )).sorted(Comparator.comparing(HistoryByCenterFindResponseDto::getCreatedAt))
+                .collect(Collectors.groupingBy(history -> history.getCreatedAt().substring(0, history.getCreatedAt().lastIndexOf('.'))));
 
         List<HistoryGroupByMonthDto> historyGroups = historyMap.entrySet().stream()
                 .map(history -> HistoryGroupByMonthDto.from(
@@ -167,5 +172,34 @@ public class PostToUserAdapter implements PostPort {
                 )).stream().distinct().collect(Collectors.toList());
 
         return new PageImpl<>(postList, pageable, postList.size());
+    }
+
+    public List<HistoryByDateFindResponseDto> findHistoryByDate(String userId, Integer year, Integer month) {
+        Map<CenterInfoResponseDto, Map<HoldInfoResponseDto, Integer>> historyMap = this.climbingHistoryRepositorySupport.findHistoryByDate(userId, year, month)
+                .stream().collect(Collectors.groupingBy(
+                        history -> CenterInfoResponseDto.from(
+                                history.getPost().getCenter().getId(),
+                                history.getPost().getCenter().getName(),
+                                history.getPost().getCenter().getThumbnailUrl()
+                        ),
+                        Collectors.toMap(
+                                history -> HoldInfoResponseDto.of(
+                                        history.getHoldInfo().getId(),
+                                        history.getHoldInfo().getName(),
+                                        history.getHoldInfo().getImg(),
+                                        history.getHoldInfo().getCrayonImageUrl()
+                                ),
+                                ClimbingHistory::getClimbingCount,
+                                Integer::sum
+                        )
+                ));
+
+        return historyMap.entrySet().stream()
+                .map(history -> HistoryByDateFindResponseDto.from(
+                        history.getKey(),
+                        history.getValue().entrySet().stream()
+                                .map(hold -> ClimbingHistoryResponseDto.from(hold.getKey(), hold.getValue()))
+                                .collect(Collectors.toList())))
+                .collect(Collectors.toList());
     }
 }
