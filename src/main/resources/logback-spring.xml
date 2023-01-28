@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 이 곳에 추가할 기능을 넣는다. -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread][%X{traceId}] %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+    </appender>
+    <appender name="SERVER_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./logs/info.log</file> <!-- 파일 경로 -->
+        <encoder>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread][%X{traceId}] %-5level %logger{35} - %msg%n
+            </pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 해당 패턴 네이밍으로 이전 파일이 기록됨 -->
+            <fileNamePattern>./was-logs/info.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize> <!-- 한 파일의 최대 용량 -->
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>31</maxHistory> <!-- 한 파일의 최대 저장 기한 180일 -->
+        </rollingPolicy>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="SERVER_LOG"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

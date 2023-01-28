@@ -34,5 +34,6 @@ hs_err_pid*
 !**/resources/
 **/resources/*
 !**/resources/application-*.yml
+!**/resources/logback-spring.xml
 
 start.sh
