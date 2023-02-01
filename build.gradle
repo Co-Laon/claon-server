@@ -5,6 +5,9 @@ plugins {
 
 	// querydsl
 	id 'com.ewerk.gradle.plugins.querydsl' version '1.0.10'
+
+	// spring rest docs
+	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
 group = 'co-Raon'
@@ -12,6 +15,7 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
 configurations {
+	asciidoctorExtension
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
@@ -65,6 +69,10 @@ dependencies {
 	implementation 'com.github.downgoon:MarvinPlugins:1.5.5'
 	implementation 'org.springframework:spring-test'
 
+	// rest docs
+	asciidoctorExtension 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+
 	// test
 	implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 	implementation 'org.mockito:mockito-junit-jupiter:4.6.1'
@@ -96,6 +104,35 @@ compileQuerydsl{
 	options.annotationProcessorPath = configurations.querydsl
 }
 
+// rest docs
+ext {
+	snippetsDir = file('build/generated-snippets')
+	buildDocsDir = file('build/docs/asciidoc')
+	restDocsDir = file('src/main/resources/static/docs')
+}
+
+asciidoctor {
+	inputs.dir snippetsDir
+	configurations 'asciidoctorExt'
+	dependsOn test
+}
+
+asciidoctor.doFirst {
+	delete restDocsDir
+}
+
+task copyRestDocs(type: Copy) {
+	dependsOn asciidoctor
+	from buildDocsDir
+	into restDocsDir
+}
+
+build {
+	dependsOn copyRestDocs
+}
+
+// test
 test {
 	useJUnitPlatform()
+	outputs.dir snippetsDir
 }
