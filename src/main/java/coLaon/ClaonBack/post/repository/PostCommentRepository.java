@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface PostCommentRepository extends JpaRepository<PostComment, String> {
-    @Query(value = "SELECT pc FROM PostComment AS pc JOIN FETCH pc.writer WHERE pc.id = :id AND pc.isDeleted = false")
+    @Query(value = "SELECT pc FROM PostComment AS pc JOIN FETCH pc.writer JOIN FETCH pc.post WHERE pc.id = :id AND pc.isDeleted = false")
     Optional<PostComment> findByIdAndIsDeletedFalse(@Param("id") String id);
 }

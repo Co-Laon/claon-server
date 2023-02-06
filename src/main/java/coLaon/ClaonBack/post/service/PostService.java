@@ -104,15 +104,15 @@ public class PostService {
                 )
         );
 
-        if (!blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).isEmpty()) {
-            throw new UnauthorizedException(
-                    ErrorCode.NOT_ACCESSIBLE,
-                    String.format("%s을 찾을 수 없습니다.", post.getWriter().getNickname())
-            );
-        }
-
         if (!post.getWriter().getNickname().equals(user.getNickname())) {
             IsPrivateValidator.of(post.getWriter().getNickname(), post.getWriter().getIsPrivate()).validate();
+
+            if (!blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", post.getWriter().getNickname())
+                );
+            }
         }
 
         return PostDetailResponseDto.from(

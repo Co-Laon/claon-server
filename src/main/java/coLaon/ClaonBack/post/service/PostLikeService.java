@@ -5,6 +5,8 @@ import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.BadRequestException;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
+import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostLike;
 import coLaon.ClaonBack.post.dto.LikeFindResponseDto;
@@ -13,6 +15,7 @@ import coLaon.ClaonBack.post.repository.PostLikeRepository;
 import coLaon.ClaonBack.post.repository.PostLikeRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class PostLikeService {
     private final PostLikeRepository postLikeRepository;
     private final PostLikeRepositorySupport postLikeRepositorySupport;
     private final PaginationFactory paginationFactory;
+    private final BlockUserRepository blockUserRepository;
 
     @Transactional
     public LikeResponseDto createLike(User user, String postId) {
@@ -86,6 +90,17 @@ public class PostLikeService {
                         "게시글을 찾을 수 없습니다."
                 )
         );
+
+        if (!post.getWriter().getNickname().equals(user.getNickname())) {
+            IsPrivateValidator.of(post.getWriter().getNickname(), post.getWriter().getIsPrivate()).validate();
+
+            if (!blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", post.getWriter().getNickname())
+                );
+            }
+        }
 
         return this.paginationFactory.create(
                 postLikeRepositorySupport.findAllByPost(post.getId(), user.getId(), pageable)

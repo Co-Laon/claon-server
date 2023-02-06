@@ -84,7 +84,7 @@ public class PostServiceTest {
     @InjectMocks
     PostService postService;
 
-    private User user, user2, blockedUser;
+    private User user, user2, blockedUser, privateUser;
     private Post post, post2, blockedPost, privatePost;
     private HoldInfo holdInfo1;
     private Center center;
@@ -135,7 +135,7 @@ public class PostServiceTest {
                 blockedUser
         );
 
-        User privateUser = User.of(
+        privateUser = User.of(
                 "test123@gmail.com",
                 "test2345!!",
                 "privateUser",
@@ -297,7 +297,7 @@ public class PostServiceTest {
         given(this.postLikeRepository.countByPost(post2)).willReturn(2);
 
         // when
-        PostDetailResponseDto postResponseDto = this.postService.findPost(user, "testPostId2");
+        PostDetailResponseDto postResponseDto = this.postService.findPost(user2, "testPostId2");
 
         // then
         assertThat(postResponseDto)
@@ -306,6 +306,25 @@ public class PostServiceTest {
                         post -> post.getContentsList().get(0),
                         PostDetailResponseDto::getCenterName)
                 .contains(post2.getContentList().get(0).getUrl(), center.getName());
+    }
+
+    @Test
+    @DisplayName("Success case for find own post")
+    void successFindOwnPost() {
+        // given
+        given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
+        given(this.postLikeRepository.countByPost(privatePost)).willReturn(2);
+
+        // when
+        PostDetailResponseDto postResponseDto = this.postService.findPost(privateUser, "privatePostId");
+
+        // then
+        assertThat(postResponseDto)
+                .isNotNull()
+                .extracting(
+                        PostDetailResponseDto::getPostId,
+                        PostDetailResponseDto::getCenterName)
+                .contains("privatePostId", center.getName());
     }
 
     @Test
