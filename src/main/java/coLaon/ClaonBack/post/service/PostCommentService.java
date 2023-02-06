@@ -4,7 +4,9 @@ import coLaon.ClaonBack.common.domain.Pagination;
 import coLaon.ClaonBack.common.domain.PaginationFactory;
 import coLaon.ClaonBack.common.exception.ErrorCode;
 import coLaon.ClaonBack.common.exception.NotFoundException;
+import coLaon.ClaonBack.common.exception.UnauthorizedException;
 import coLaon.ClaonBack.common.validator.IdEqualValidator;
+import coLaon.ClaonBack.common.validator.IsPrivateValidator;
 import coLaon.ClaonBack.post.domain.Post;
 import coLaon.ClaonBack.post.domain.PostComment;
 import coLaon.ClaonBack.post.dto.CommentCreateRequestDto;
@@ -16,6 +18,7 @@ import coLaon.ClaonBack.post.repository.PostCommentRepository;
 import coLaon.ClaonBack.post.repository.PostCommentRepositorySupport;
 import coLaon.ClaonBack.post.repository.PostRepository;
 import coLaon.ClaonBack.user.domain.User;
+import coLaon.ClaonBack.user.repository.BlockUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ public class PostCommentService {
     private final PostCommentRepositorySupport postCommentRepositorySupport;
     private final PostRepository postRepository;
     private final PaginationFactory paginationFactory;
+    private final BlockUserRepository blockUserRepository;
 
     @Transactional
     public CommentResponseDto createComment(
@@ -43,6 +47,17 @@ public class PostCommentService {
                         "게시글을 찾을 수 없습니다."
                 )
         );
+
+        if (!post.getWriter().getNickname().equals(user.getNickname())) {
+            IsPrivateValidator.of(post.getWriter().getNickname(), post.getWriter().getIsPrivate()).validate();
+
+            if (!blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", post.getWriter().getNickname())
+                );
+            }
+        }
 
         return CommentResponseDto.from(
                 postCommentRepository.save(
@@ -76,6 +91,17 @@ public class PostCommentService {
                 )
         );
 
+        if (!post.getWriter().getNickname().equals(user.getNickname())) {
+            IsPrivateValidator.of(post.getWriter().getNickname(), post.getWriter().getIsPrivate()).validate();
+
+            if (!blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", post.getWriter().getNickname())
+                );
+            }
+        }
+
         return this.paginationFactory.create(
                 postCommentRepositorySupport.findParentCommentByPost(post.getId(), user.getId(), user.getNickname(), pageable)
         );
@@ -93,6 +119,17 @@ public class PostCommentService {
                         "댓글을 찾을 수 없습니다."
                 )
         );
+
+        if (!postComment.getPost().getWriter().getNickname().equals(user.getNickname())) {
+            IsPrivateValidator.of(postComment.getPost().getWriter().getNickname(), postComment.getPost().getWriter().getIsPrivate()).validate();
+
+            if (!blockUserRepository.findBlock(user.getId(), postComment.getPost().getWriter().getId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", postComment.getPost().getWriter().getNickname())
+                );
+            }
+        }
 
         return this.paginationFactory.create(
                 postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), user.getId(), pageable)
