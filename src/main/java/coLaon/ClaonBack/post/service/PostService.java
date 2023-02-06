@@ -111,7 +111,9 @@ public class PostService {
             );
         }
 
-        IsPrivateValidator.of(post.getWriter().getNickname(), post.getWriter().getIsPrivate()).validate();
+        if (!post.getWriter().getNickname().equals(user.getNickname())) {
+            IsPrivateValidator.of(post.getWriter().getNickname(), post.getWriter().getIsPrivate()).validate();
+        }
 
         return PostDetailResponseDto.from(
                 post,
