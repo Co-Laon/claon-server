@@ -44,3 +44,15 @@ jobs:
 
       - name: Gradle build
         run: ./gradlew build --exclude-task test
+
+      - name: Test with Coverage
+        run: ./gradlew build jacocoTestReport
+
+      - name: Test with Coverage Verification
+        run: ./gradlew build jacocoTestCoverageVerification
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./build/reports/jacoco/test/jacocoTestReport.xml
