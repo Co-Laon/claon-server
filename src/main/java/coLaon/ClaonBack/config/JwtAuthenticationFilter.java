@@ -36,6 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain chain
     ) throws IOException, ServletException {
+        System.out.println("DO FILTER @@@@@@@@@@@@@@@@@@@@@@@@@@@");
         JwtDto jwtDto = this.headerUtil.resolveToken(request);
 
         if (jwtDto.getAccessToken() == null || jwtDto.getRefreshToken() == null) {
@@ -85,6 +86,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private Optional<UsernamePasswordAuthenticationToken> getAuthentication(String userPk) {
+        System.out.print(userPk);
+
         return this.userRepository.findById(userPk)
                 .map(user -> new UsernamePasswordAuthenticationToken(new UserDetails(user), null, new ArrayList<>()));
     }
