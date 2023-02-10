@@ -21,12 +21,4 @@ public class SignUpRequestDto {
     private String imagePath;
     private String instagramOAuthId;
     private String instagramUserName;
-
-    public Optional<Float> getHeight() {
-        return Optional.ofNullable(this.height);
-    }
-
-    public Optional<Float> getArmReach() {
-        return Optional.ofNullable(this.armReach);
-    }
 }
