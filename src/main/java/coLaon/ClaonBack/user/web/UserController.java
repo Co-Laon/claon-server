@@ -1,6 +1,7 @@
 package coLaon.ClaonBack.user.web;
 
 import coLaon.ClaonBack.common.domain.Pagination;
+import coLaon.ClaonBack.common.utils.HeaderUtil;
 import coLaon.ClaonBack.user.domain.UserDetails;
 import coLaon.ClaonBack.user.dto.BlockUserFindResponseDto;
 import coLaon.ClaonBack.user.dto.HistoryByDateFindResponseDto;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -43,6 +45,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final BlockUserService blockUserService;
+    private final HeaderUtil headerUtil;
 
     @PutMapping("/me/scope")
     @ResponseStatus(value = HttpStatus.OK)
@@ -126,8 +129,10 @@ public class UserController {
     @DeleteMapping("/me")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteUser(
+            HttpServletRequest request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
+        this.userService.signOut(this.headerUtil.resolveToken(request));
         this.userService.delete(userDetails.getUser());
     }
 

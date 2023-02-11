@@ -35,7 +35,7 @@ public class RefreshTokenUtil {
 
     public void delete(String token) {
         this.findByToken(token).ifPresent(
-                t -> this.redisTemplate.opsForHash().delete(token)
+                t -> this.redisTemplate.delete(t.getToken())
         );
     }
 }
