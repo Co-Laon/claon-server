@@ -29,6 +29,7 @@ public class UserRepositorySupport extends QuerydslRepositorySupport {
         JPQLQuery<User> query = jpaQueryFactory
                 .selectFrom(user)
                 .where(user.nickname.containsIgnoreCase(nickname)
+                        .and(user.imagePath.isNotNull())
                         .and(user.id.ne(userId))
                         .and(user.id.notIn(
                                 JPAExpressions
