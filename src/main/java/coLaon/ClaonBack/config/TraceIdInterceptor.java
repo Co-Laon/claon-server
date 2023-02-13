@@ -2,6 +2,7 @@ package coLaon.ClaonBack.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -29,6 +30,7 @@ public class TraceIdInterceptor implements HandlerInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        log.info("response status: {}", response.getStatus());
         MDC.clear();
         HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
     }

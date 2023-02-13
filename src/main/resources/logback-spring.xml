@@ -30,6 +30,7 @@
         </appender>
         <logger name="org.springframework" level="INFO"/>
         <logger name="coLaon.ClaonBack" level="INFO"/>
+        <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="DEBUG"/>
         <root level="INFO">
             <appender-ref ref="SERVER_LOG"/>
         </root>

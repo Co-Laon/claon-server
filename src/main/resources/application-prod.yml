@@ -5,7 +5,12 @@ spring:
   config:
     import: classpath:auth-config.yml, classpath:prod-database-config.yml, classpath:aws-config.yml, classpath:prod-redis-config.yml, classpath:prod-apache-config.yml
 
+
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: true
+
+logging:
+  level:
+    org.spring.framework.web.filter.CommonsRequestLoggingFilter: DEBUG
