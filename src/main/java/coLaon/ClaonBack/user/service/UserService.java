@@ -107,8 +107,8 @@ public class UserService {
 
         user.signUp(
                 signUpRequestDto.getNickname(),
-                signUpRequestDto.getHeight().orElse(0.0f),
-                signUpRequestDto.getArmReach().orElse(0.0f),
+                signUpRequestDto.getHeight() == null ? 0 : signUpRequestDto.getHeight(),
+                signUpRequestDto.getArmReach() == null ? 0 : signUpRequestDto.getArmReach(),
                 signUpRequestDto.getImagePath(),
                 signUpRequestDto.getInstagramOAuthId(),
                 signUpRequestDto.getInstagramUserName()

@@ -1,0 +1,208 @@
+= Claon API Documentation
+claon-back api 1.0
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+[[center-api]]
+== Center API
+
+[[get-center-posts]]
+=== Get Center Posts
+
+[[create-center]]
+=== Create Center
+
+[[find-center]]
+=== Find Center
+
+[[get-center-list]]
+=== Get Center List
+
+[[search-center-name]]
+=== Search Center List
+
+[[find-hold-info-by-center]]
+=== Find Hold Info by Center
+
+[[create-review]]
+=== Create Review
+
+[[update-review]]
+=== Update Review
+
+[[delete-review]]
+=== Delete Review
+
+[[find-review-by-center]]
+=== Find Review by Center
+
+[[create-center-bookmark]]
+=== Create Center Bookmark
+
+[[delete-center-bookmark]]
+=== Delete Center Bookmark
+
+[[create-center-report]]
+=== Create Center Report
+
+[[search-center]]
+=== Search Center
+
+
+[[notice-api]]
+== Notice API
+
+[[get-notice-list]]
+=== Get Notice List
+
+[[create-notice]]
+=== Create Notice
+
+
+[[post-api]]
+== Post API
+
+[[create-post]]
+=== Create Post
+
+[[update-post]]
+=== Update Post
+
+[[get-post]]
+=== Get Post
+
+[[delete-post]]
+=== Delete Post
+
+[[create-post-report]]
+=== Create Post Report
+
+[[create-like]]
+=== Create Like
+
+[[delete-like]]
+=== Delete Like
+
+[[find-all-like]]
+=== Find All Like
+
+[[create-comment]]
+=== Create Comment
+
+[[find-all-parent-comment]]
+=== Find All Parent Comment
+
+[[find-all-children-comment]]
+=== Find All Children Comment
+
+[[update-comment]]
+=== Update Comment
+
+[[delete-comment]]
+=== Delete Comment
+
+[[get-posts]]
+=== Get Posts
+
+[[upload-contents]]
+=== Upload Contents
+
+[[delete-contents]]
+=== Delete Contents
+
+[[get-posts-by-center-and-yearmonth]]
+=== Get User Posts by Center and Year-month
+
+
+[[auth-api]]
+== Auth API
+
+[[nickname-duplicate]]
+=== Nickname Duplicate Check
+닉네임의 중복 여부를 판별합니다.
+
+operation::nickname-duplicate[snippets='http-request,http-response,request-body,response-body,path-parameters,response-fields']
+
+[[get-instagram-account]]
+=== Get Instagram Account
+
+[[sign-in]]
+=== Sign In
+
+[[sign-up]]
+=== Sign Up
+
+[[sign-out]]
+=== Sign Out
+
+
+[[laon-api]]
+== Laon API
+
+[[create-laon]]
+=== Create Laon
+
+[[delete-laon]]
+=== Delete Laon
+
+[[find-all-laon]]
+=== Find All Laon
+
+[[get-laon-post]]
+=== Get Laon Posts
+
+
+[[user-api]]
+== User API
+
+[[change-public-scope]]
+=== Change Public Scope
+
+[[retrieve-me]]
+=== Retrieve Me
+
+[[search-user]]
+=== Search User
+
+[[modify-user]]
+=== Modify User
+
+[[get-public-user]]
+=== Get Public User Information
+
+[[find-posts-by-user]]
+=== Find Posts by User
+
+[[create-block]]
+=== Block User
+
+[[delete-block]]
+=== Unblock User
+
+[[find-block-user]]
+=== Find Block User
+
+[[delete-user]]
+=== Delete User
+
+[[retrieve-my-account]]
+=== Retrieve My Account
+
+[[upload-profile]]
+=== Upload Profile
+
+[[delete-profile]]
+=== Delete Profile
+
+[[find-history-by-center]]
+=== Find History by User and Center
+
+[[get-center-history]]
+=== Find Center History by User
+
+[[find-history-by-date]]
+=== Find History by User and Date

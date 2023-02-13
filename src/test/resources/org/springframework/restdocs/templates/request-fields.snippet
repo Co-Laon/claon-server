@@ -1,0 +1,12 @@
+|===
+    |필드명|자료형|필수여부|설명|제약사항
+
+{{#fields}}
+|{{#tableCellContent}}`+{{path}}+`{{/tableCellContent}}
+|{{#tableCellContent}}`+{{type}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{#required}}{{.}}{{/required}}{{/tableCellContent}}
+|{{#tableCellContent}}{{description}}{{/tableCellContent}}
+|{{#tableCellContent}}{{#constraint}}{{.}} +
+{{/constraint}}{{/tableCellContent}}
+{{/fields}}
+|===
