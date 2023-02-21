@@ -2,7 +2,6 @@ package coLaon.ClaonBack.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -25,12 +24,6 @@ public class TraceIdInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String traceId = UUID.randomUUID().toString();
         MDC.put("traceId", traceId);
-        log.info("request : {} {}", request.getMethod(), request.getRequestURI());
-        if (request.getMethod().equals("POST") || request.getMethod().equals("PUT")) {
-            if (!request.getHeader("Content-Type").contains("multipart/form-data")) {
-                log.info("request body : {}", IOUtils.toString(request.getInputStream()));
-            }
-        }
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
 
