@@ -12,16 +12,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j
 @Component
 public class CustomServletWrappingFilter extends OncePerRequestFilter {
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
-
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain chain
+    ) throws ServletException, IOException {
         ContentCachingRequestWrapper wrappingRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappingResponse = new ContentCachingResponseWrapper(response);
 
@@ -29,7 +31,9 @@ public class CustomServletWrappingFilter extends OncePerRequestFilter {
 
         log.info("request : {} {}", request.getMethod(), request.getRequestURI());
         if (request.getMethod().equals("POST") || request.getMethod().equals("PUT")) {
-            if (!request.getHeader("Content-Type").contains("multipart/form-data")) {
+            if (!Optional.ofNullable(request.getHeader("Content-Type"))
+                    .map(header -> header.contains("multipart/form-data"))
+                    .orElse(false)) {
                 ObjectMapper om = new ObjectMapper();
                 log.info("request body : {}", om.readTree(wrappingRequest.getContentAsByteArray()));
             }
