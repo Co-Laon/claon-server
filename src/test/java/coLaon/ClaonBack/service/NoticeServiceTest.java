@@ -11,6 +11,7 @@ import coLaon.ClaonBack.notice.repository.NoticeRepository;
 import coLaon.ClaonBack.notice.service.NoticeService;
 
 import coLaon.ClaonBack.user.domain.User;
+import org.apache.el.util.ReflectionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,6 +80,7 @@ public class NoticeServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 2);
         Notice sampleNotice = Notice.of("asdf", "asdfaf", this.adminUser);
+        ReflectionTestUtils.setField(sampleNotice, "createdAt", LocalDateTime.now());
         given(this.noticeRepository.findAllWithPagination(pageable)).willReturn(new PageImpl<>(List.of(sampleNotice), pageable, 1));
 
         // when
@@ -96,6 +99,7 @@ public class NoticeServiceTest {
                 dto.getContent(),
                 this.adminUser
         );
+        ReflectionTestUtils.setField(notice, "createdAt", LocalDateTime.now());
 
         try (MockedStatic<Notice> mockedNotice = mockStatic(Notice.class)) {
             // given
