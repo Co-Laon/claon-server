@@ -32,6 +32,7 @@ public class PostComment extends BaseEntity {
     private User writer;
     @ManyToOne(targetEntity = PostComment.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private PostComment parentComment;
 
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
