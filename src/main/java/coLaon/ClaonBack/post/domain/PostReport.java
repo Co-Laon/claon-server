@@ -29,7 +29,7 @@ public class PostReport extends BaseEntity {
     private String content;
 
     @ManyToOne(targetEntity = User.class)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User reporter;
     @ManyToOne(targetEntity = Post.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id", nullable = false)

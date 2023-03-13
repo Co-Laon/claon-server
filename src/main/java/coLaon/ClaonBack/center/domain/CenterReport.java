@@ -29,7 +29,7 @@ public class CenterReport extends BaseEntity {
     private CenterReportType reportType;
 
     @ManyToOne(targetEntity = User.class)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User reporter;
 
     @ManyToOne(targetEntity = Center.class)
