@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+    import:
+      - optional:classpath:aws-config.yml
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/claon_db
+    username: colaon_user
+    password: colaon_password
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
