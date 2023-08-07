@@ -33,6 +33,7 @@ hs_err_pid*
 # CLAON secret property files
 !**/resources/
 **/resources/*
+!**/resources/application.yml
 !**/resources/application-*.yml
 !**/resources/logback-spring.xml
 
