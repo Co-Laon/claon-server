@@ -11,13 +11,17 @@ import java.util.Optional;
 
 @Repository
 public interface LaonRepository extends JpaRepository<Laon, String> {
-    @Query(value = "SELECT * " +
-            "FROM TB_LAON AS l " +
-            "WHERE l.laon_id = :laonId AND l.user_id = :userId", nativeQuery = true)
+    @Query(value = """
+            SELECT * 
+            FROM TB_LAON AS l 
+            WHERE l.laon_id = :laonId AND l.user_id = :userId
+            """, nativeQuery = true)
     Optional<Laon> findByLaonIdAndUserId(@Param("laonId") String laonId, @Param("userId") String userId);
 
-    @Query(value = "SELECT l.user_id " +
-            "FROM TB_LAON AS l " +
-            "WHERE l.laon_id = :userId", nativeQuery = true)
+    @Query(value = """
+            SELECT l.user_id 
+            FROM TB_LAON AS l 
+            WHERE l.laon_id = :userId
+            """, nativeQuery = true)
     List<String> getUserIdsByLaonId(@Param("userId") String userId);
 }

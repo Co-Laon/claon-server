@@ -5,8 +5,8 @@ import com.claon.common.exception.InternalServerErrorException;
 import com.claon.center.domain.CenterImg;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.AttributeConverter;
 
-import javax.persistence.AttributeConverter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,7 +15,7 @@ public class CenterImgListConverter implements AttributeConverter<List<CenterImg
 
     @Override
     public String convertToDatabaseColumn(List<CenterImg> attribute) {
-        if (attribute.size() == 0) {
+        if (attribute.isEmpty()) {
             return "";
         }
 
@@ -37,7 +37,7 @@ public class CenterImgListConverter implements AttributeConverter<List<CenterImg
 
         return jsonList.stream().map(json -> {
             try {
-                if (json.length() == 0) return null;
+                if (json.isEmpty()) return null;
 
                 return objectMapper.readValue(json, CenterImg.class);
             } catch (JsonProcessingException e) {

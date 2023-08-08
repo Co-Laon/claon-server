@@ -1,5 +1,8 @@
 package com.claon.common.exception;
 
+import lombok.Getter;
+
+@Getter
 public enum ErrorCode {
     /**
      * 400 Bad Request
@@ -41,9 +44,5 @@ public enum ErrorCode {
 
     ErrorCode(int code) {
         this.code = code;
-    }
-
-    public int getCode() {
-        return this.code;
     }
 }

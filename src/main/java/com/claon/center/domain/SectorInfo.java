@@ -1,16 +1,16 @@
 package com.claon.center.domain;
 
 import com.claon.common.domain.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -21,8 +21,10 @@ import java.time.format.DateTimeFormatter;
 public class SectorInfo extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
+
     @Column(name = "start_time")
     private LocalDate start;
+
     @Column(name = "end_time")
     private LocalDate end;
 
@@ -65,11 +67,11 @@ public class SectorInfo extends BaseEntity {
     ) {
         LocalDate startDate = null;
         LocalDate endDate = null;
-        if (!start.equals("")) {
+        if (!start.isEmpty()) {
             startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern("yyyy/M/d"));
         }
 
-        if (!end.equals("")) {
+        if (!end.isEmpty()) {
             endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern("yyyy/M/d"));
         }
 

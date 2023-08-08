@@ -2,19 +2,19 @@ package com.claon.post.domain;
 
 import com.claon.common.domain.BaseEntity;
 import com.claon.user.domain.User;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import java.util.List;
 
 @Entity
@@ -24,12 +24,15 @@ import java.util.List;
 public class PostComment extends BaseEntity {
     @Column(name = "content")
     private String content;
+
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
+
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User writer;
+
     @ManyToOne(targetEntity = PostComment.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     @OnDelete(action = OnDeleteAction.CASCADE)

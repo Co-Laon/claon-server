@@ -13,9 +13,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Objects;
 
-import static claon.post.domain.QPostLike.postLike;
-import static claon.user.domain.QBlockUser.blockUser;
-import static claon.user.domain.QUser.user;
+import static com.claon.post.domain.QPostLike.postLike;
+import static com.claon.user.domain.QBlockUser.blockUser;
+import static com.claon.user.domain.QUser.user;
 
 @Repository
 public class PostLikeRepositorySupport extends QuerydslRepositorySupport {

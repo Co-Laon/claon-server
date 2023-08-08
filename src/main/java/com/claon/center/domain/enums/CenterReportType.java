@@ -16,7 +16,7 @@ public enum CenterReportType {
     HOLD("홀드정보"),
     SETTING_INFO("세팅일정");
 
-    private String value;
+    private final String value;
 
     CenterReportType(String value) {
         this.value = value;

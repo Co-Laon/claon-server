@@ -10,7 +10,9 @@ import java.util.List;
 
 @Repository
 public interface CenterRepository extends JpaRepository<Center, String> {
-    @Query(value = "SELECT * FROM TB_CENTER " +
-            "WHERE name like %:keyword% order by name limit 3", nativeQuery = true)
+    @Query(value = """
+            SELECT * FROM TB_CENTER 
+            WHERE name like %:keyword% order by name limit 3
+            """, nativeQuery = true)
     List<Center> searchCenter(@Param("keyword") String keyword);
 }

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static claon.post.domain.QClimbingHistory.climbingHistory;
-import static claon.post.domain.QPost.post;
+import static com.claon.post.domain.QClimbingHistory.climbingHistory;
+import static com.claon.post.domain.QPost.post;
 
 @Repository
 public class ClimbingHistoryRepositorySupport extends QuerydslRepositorySupport {
