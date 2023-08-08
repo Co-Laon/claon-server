@@ -1,8 +1,7 @@
 plugins {
-	id 'org.springframework.boot' version '2.5.12'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'org.springframework.boot' version '3.1.2'
+	id 'io.spring.dependency-management' version '1.1.2'
 	id 'java'
-	id 'jacoco'
 
 	// querydsl
 	id 'com.ewerk.gradle.plugins.querydsl' version '1.0.10'
@@ -13,7 +12,10 @@ plugins {
 
 group = 'claon'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+
+java {
+	sourceCompatibility = '17'
+}
 
 configurations {
 	asciidoctorExt
@@ -26,11 +28,11 @@ repositories {
 	mavenCentral()
 }
 
-jacoco {
-	toolVersion = '0.8.8'
-}
-
 dependencies {
+	implementation project(':center')
+	implementation project(':post')
+	implementation project(':user')
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
@@ -141,80 +143,4 @@ build {
 test {
 	useJUnitPlatform()
 	outputs.dir snippetsDir
-	finalizedBy jacocoTestReport
 }
-
-def jacocoExclude = [
-		// center
-		"**/center/domain/**",
-		"**/center/dto/**",
-		"**/center/web/**",
-		"**/center/service/*Adapter.*",
-		// common
-		"**/common/domain/**",
-		"**/common/exception/**",
-		"**/common/utgils/**",
-		"**/common/validator/**",
-		"**/common/**", // check
-		// config
-		"**/config/**", // check
-		// notice
-		"**/notice/domain/**",
-		"**/notice/dto/**",
-		"**/notice/web/**",
-		// post
-		"**/post/domain/**",
-		"**/post/dto/**",
-		"**/post/infra/**",
-		"**/post/web/**",
-		"**/post/service/*Adapter.*",
-
-		// user
-		"**/user/domain/**",
-		"**/user/dto/**",
-		"**/user/infra/**",
-		"**/user/web/**",
-		// version
-		"**/version/domain/**",
-		"**/version/dto/**",
-		"**/version/web/**",
-
-		// main
-		"**/ClaonBackApplication.java"
-]
-
-jacocoTestReport {
-	dependsOn test
-
-	reports {
-		html.enabled true
-		xml.enabled true
-		csv.enabled false
-		html.destination file("$buildDir/reports/jacoco")
-	}
-
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: jacocoExclude)
-		}))
-	}
-}
-
-jacocoTestCoverageVerification {
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it,
-					exclude: jacocoExclude
-			)
-		}))
-	}
-	violationRules {
-		rule {
-			excludes = jacocoExclude
-			limit {
-				minimum = 0.50
-			}
-		}
-	}
-}
-
