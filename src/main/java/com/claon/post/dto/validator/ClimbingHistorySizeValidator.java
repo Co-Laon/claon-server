@@ -1,9 +1,9 @@
 package com.claon.post.dto.validator;
 
 import com.claon.post.dto.ClimbingHistoryRequestDto;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import java.util.List;
 
 public class ClimbingHistorySizeValidator implements ConstraintValidator<ClimbingHistorySize, List<ClimbingHistoryRequestDto>> {

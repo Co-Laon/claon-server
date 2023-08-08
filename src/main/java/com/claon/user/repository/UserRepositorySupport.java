@@ -13,8 +13,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Objects;
 
-import static claon.user.domain.QBlockUser.blockUser;
-import static claon.user.domain.QUser.user;
+import static com.claon.user.domain.QBlockUser.blockUser;
+import static com.claon.user.domain.QUser.user;
 
 @Repository
 public class UserRepositorySupport extends QuerydslRepositorySupport {

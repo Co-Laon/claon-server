@@ -20,6 +20,7 @@ import com.claon.center.dto.ReviewResponseDto;
 import com.claon.center.dto.ReviewUpdateRequestDto;
 import com.claon.center.service.CenterService;
 import com.claon.user.domain.UserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -37,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 

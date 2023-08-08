@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -78,7 +77,7 @@ public class InstagramUserInfoProvider implements OAuth2UserInfoProvider {
     }
 
     private ObjectNode parseResponse(ResponseEntity<String> response) {
-        HttpStatus statusCode = response.getStatusCode();
+        var statusCode = response.getStatusCode();
         if (statusCode.isError()) {
             throw new InternalServerErrorException(ErrorCode.INTERNAL_SERVER_ERROR, "인스타그램 로그인에 실패했습니다.");
         }

@@ -20,7 +20,7 @@ public class KakaoUserInfoProvider implements OAuth2UserInfoProvider {
     public OAuth2UserInfoDto getUserInfo(String accessToken) {
         ResponseEntity<String> response = getKakaoMeResponse(accessToken);
 
-        HttpStatus statusCode = response.getStatusCode();
+        var statusCode = response.getStatusCode();
         if (statusCode.isError()) {
             throw new InternalServerErrorException(ErrorCode.INTERNAL_SERVER_ERROR, "카카오 로그인에 실패했습니다.");
         }

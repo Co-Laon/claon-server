@@ -152,13 +152,11 @@ public class PostToUserAdapter implements PostPort {
                 )).sorted(Comparator.comparing(HistoryByCenterFindResponseDto::getCreatedAt))
                 .collect(Collectors.groupingBy(history -> history.getCreatedAt().substring(0, history.getCreatedAt().lastIndexOf('.'))));
 
-        List<HistoryGroupByMonthDto> historyGroups = historyMap.entrySet().stream()
+        return historyMap.entrySet().stream()
                 .map(history -> HistoryGroupByMonthDto.from(
                         history.getKey(),
                         history.getValue()
                 )).sorted(Comparator.comparing(HistoryGroupByMonthDto::getDate).reversed()).collect(Collectors.toList());
-
-        return historyGroups;
     }
 
     @Override

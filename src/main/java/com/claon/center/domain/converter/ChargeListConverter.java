@@ -7,8 +7,8 @@ import com.claon.center.domain.ChargeElement;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.AttributeConverter;
 
-import javax.persistence.AttributeConverter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +21,7 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
 
     @Override
     public String convertToDatabaseColumn(List<Charge> attribute) {
-        if (attribute.size() == 0) {
+        if (attribute.isEmpty()) {
             return "";
         }
 
@@ -60,14 +60,14 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
 
         return jsonList.stream().map(json -> {
             try {
-                if (json.length() == 0) return null;
+                if (json.isEmpty()) return null;
 
                 Map<String, String> charge = objectMapper.readValue(json, new TypeReference<>() {
                 });
 
                 return Charge.of(
                         Stream.of(charge.get("chargeList").split("&&&"))
-                                .filter(c -> !c.equals(""))
+                                .filter(c -> !c.isEmpty())
                                 .map(c -> {
                                     try {
                                         return objectMapper.readValue(c, ChargeElement.class);
