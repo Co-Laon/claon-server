@@ -16,12 +16,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import static claon.center.domain.QCenter.center;
-import static claon.post.domain.QClimbingHistory.climbingHistory;
-import static claon.post.domain.QPost.post;
-import static claon.user.domain.QBlockUser.blockUser;
-import static claon.user.domain.QLaon.laon1;
-import static claon.user.domain.QUser.user;
+import static com.claon.center.domain.QCenter.center;
+import static com.claon.post.domain.QClimbingHistory.climbingHistory;
+import static com.claon.post.domain.QPost.post;
+import static com.claon.user.domain.QBlockUser.blockUser;
+import static com.claon.user.domain.QLaon.laon1;
+import static com.claon.user.domain.QUser.user;
 
 @Repository
 public class PostRepositorySupport extends QuerydslRepositorySupport {

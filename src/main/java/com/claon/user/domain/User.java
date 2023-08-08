@@ -1,12 +1,12 @@
 package com.claon.user.domain;
 
 import com.claon.common.domain.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Column;
 import java.util.UUID;
 
 @Entity
@@ -16,20 +16,28 @@ import java.util.UUID;
 public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
+
     @Column(name = "oauth_id", nullable = false)
     private String oAuthId;
+
     @Column(name = "nickname", unique = true)
     private String nickname;
+
     @Column(name = "height")
     private Float height;
+
     @Column(name = "arm_reach")
     private Float armReach;
+
     @Column(name = "image_path")
     private String imagePath;
+
     @Column(name = "instagram_oauth_id")
     private String instagramOAuthId;
+
     @Column(name = "instagram_user_name")
     private String instagramUserName;
+
     @Column(name = "is_private")
     private Boolean isPrivate;
 

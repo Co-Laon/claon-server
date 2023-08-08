@@ -4,13 +4,12 @@ import com.claon.center.domain.converter.CenterImgListConverter;
 import com.claon.center.domain.converter.ChargeListConverter;
 import com.claon.center.domain.converter.OperatingTimeListConverter;
 import com.claon.common.domain.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 import java.util.List;
 
@@ -21,27 +20,37 @@ import java.util.List;
 public class Center extends BaseEntity {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
+
     @Column(name = "address", nullable = false)
     private String address;
+
     @Column(name = "tel")
     private String tel;
+
     @Column(name = "web_url", length = 500)
     private String webUrl;
+
     @Column(name = "instagram_url", length = 500)
     private String instagramUrl;
+
     @Column(name = "youtube_url", length = 500)
     private String youtubeUrl;
+
     @Convert(converter = CenterImgListConverter.class)
     @Column(name = "img_list", length = 2000)
     private List<CenterImg> imgList;
+
     @Convert(converter = OperatingTimeListConverter.class)
     @Column(name = "operating_time", length = 1000)
     private List<OperatingTime> operatingTime;
+
     @Column(name = "facilities")
     private String facilities;
+
     @Convert(converter = ChargeListConverter.class)
     @Column(name = "charge", length = 3000)
     private List<Charge> charge;
+
     @Column(name = "hold_info_img", length = 500)
     private String holdInfoImg;
 
@@ -100,7 +109,7 @@ public class Center extends BaseEntity {
     }
 
     public String getThumbnailUrl() {
-        if (this.getImgList().size() == 0) {
+        if (this.getImgList().isEmpty()) {
             return null;
         }
         return this.getImgList().get(0).getUrl();

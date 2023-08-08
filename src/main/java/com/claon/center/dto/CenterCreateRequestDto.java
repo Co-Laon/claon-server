@@ -1,10 +1,10 @@
 package com.claon.center.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;

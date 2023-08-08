@@ -5,8 +5,8 @@ import com.claon.common.exception.InternalServerErrorException;
 import com.claon.center.domain.OperatingTime;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.AttributeConverter;
 
-import javax.persistence.AttributeConverter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,7 +15,7 @@ public class OperatingTimeListConverter implements AttributeConverter<List<Opera
 
     @Override
     public String convertToDatabaseColumn(List<OperatingTime> attribute) {
-        if (attribute.size() == 0) {
+        if (attribute.isEmpty()) {
             return "";
         }
 
@@ -37,7 +37,7 @@ public class OperatingTimeListConverter implements AttributeConverter<List<Opera
 
         return jsonList.stream().map(json -> {
             try {
-                if (json.length() == 0) return null;
+                if (json.isEmpty()) return null;
 
                 return objectMapper.readValue(json, OperatingTime.class);
             } catch (JsonProcessingException e) {

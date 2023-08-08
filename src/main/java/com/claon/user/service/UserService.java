@@ -146,12 +146,11 @@ public class UserService {
             User user,
             String userNickname
     ) {
-        User targetUser = this.userRepository.findByNickname(userNickname).orElseThrow(() -> {
-            throw new NotFoundException(
-                    ErrorCode.DATA_DOES_NOT_EXIST,
-                    String.format("%s을 찾을 수 없습니다.", userNickname)
-            );
-        });
+        User targetUser = this.userRepository.findByNickname(userNickname)
+                .orElseThrow(() -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        String.format("%s을 찾을 수 없습니다.", userNickname)
+                ));
 
         List<String> postIds = this.postPort.selectPostIdsByUserId(targetUser.getId());
         Long postCount = (long) postIds.size();
@@ -242,7 +241,7 @@ public class UserService {
     }
 
     public void deleteProfile(User user) {
-        if (user.getImagePath().equals("")) {
+        if (user.getImagePath().isEmpty()) {
             throw new NotFoundException(
                     ErrorCode.DATA_DOES_NOT_EXIST,
                     "프로필 이미지를 찾을 수 없습니다."

@@ -1,8 +1,7 @@
 package com.claon.common.domain;
 
+import jakarta.persistence.Id;
 import lombok.Getter;
-
-import javax.persistence.Id;
 
 @Getter
 public class RefreshToken {

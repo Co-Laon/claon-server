@@ -2,7 +2,6 @@ package com.claon.post.repository;
 
 import com.claon.post.domain.PostComment;
 import com.claon.post.dto.CommentFindResponseDto;
-import claon.post.dto.QCommentFindResponseDto;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -16,9 +15,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Objects;
 
-import static claon.post.domain.QPostComment.postComment;
-import static claon.user.domain.QBlockUser.blockUser;
-import static claon.user.domain.QUser.user;
+import com.claon.post.dto.QCommentFindResponseDto;
+import static com.claon.post.domain.QPostComment.postComment;
+import static com.claon.user.domain.QBlockUser.blockUser;
+import static com.claon.user.domain.QUser.user;
 
 @Repository
 public class PostCommentRepositorySupport extends QuerydslRepositorySupport {

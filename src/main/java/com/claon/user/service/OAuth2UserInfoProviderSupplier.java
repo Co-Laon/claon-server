@@ -4,9 +4,9 @@ import com.claon.user.infra.GoogleUserInfoProvider;
 import com.claon.user.infra.KakaoUserInfoProvider;
 import com.claon.user.infra.OAuth2UserInfoProvider;
 import com.claon.user.domain.enums.OAuth2Provider;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 

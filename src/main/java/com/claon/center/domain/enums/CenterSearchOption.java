@@ -7,7 +7,7 @@ public enum CenterSearchOption {
     BOOKMARK("bookmark"),
     NEWLY_REGISTERED("newly_registered");
 
-    private String value;
+    private final String value;
     
     CenterSearchOption(String value) {
         this.value = value;

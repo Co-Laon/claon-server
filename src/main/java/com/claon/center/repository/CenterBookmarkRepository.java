@@ -10,8 +10,10 @@ import java.util.Optional;
 
 @Repository
 public interface CenterBookmarkRepository extends JpaRepository<CenterBookmark, String> {
-    @Query(value = "SELECT * " +
-            "FROM tb_center_bookmark AS b " +
-            "WHERE b.user_id = :userId AND b.center_id = :centerId", nativeQuery = true)
+    @Query(value = """
+            SELECT * 
+            FROM tb_center_bookmark AS b 
+            WHERE b.user_id = :userId AND b.center_id = :centerId
+            """, nativeQuery = true)
     Optional<CenterBookmark> findByUserIdAndCenterId(@Param("userId") String userId, @Param("centerId") String centerId);
 }

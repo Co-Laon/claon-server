@@ -5,6 +5,7 @@ import com.claon.notice.dto.NoticeResponseDto;
 import com.claon.notice.service.NoticeService;
 import com.claon.user.domain.UserDetails;
 import com.claon.notice.dto.NoticeCreateRequestDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor

@@ -3,7 +3,6 @@ package com.claon.center.repository;
 import com.claon.center.domain.Center;
 import com.claon.center.domain.enums.CenterSearchOption;
 import com.claon.center.dto.CenterPreviewResponseDto;
-import claon.center.dto.QCenterPreviewResponseDto;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Page;
@@ -17,10 +16,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import static claon.center.domain.QCenter.center;
-import static claon.center.domain.QCenterBookmark.centerBookmark;
-import static claon.center.domain.QCenterReview.centerReview;
-import static claon.center.domain.QSectorInfo.sectorInfo;
+import com.claon.center.dto.QCenterPreviewResponseDto;
+import static com.claon.center.domain.QCenter.center;
+import static com.claon.center.domain.QCenterBookmark.centerBookmark;
+import static com.claon.center.domain.QCenterReview.centerReview;
+import static com.claon.center.domain.QSectorInfo.sectorInfo;
 
 @Repository
 public class CenterRepositorySupport extends QuerydslRepositorySupport {
@@ -52,17 +52,11 @@ public class CenterRepositorySupport extends QuerydslRepositorySupport {
                 .rightJoin(centerReview.center, center)
                 .groupBy(center.id);
 
-        switch (option) {
-            case BOOKMARK:
-                query = findBookMarkedCenters(query, userId);
-                break;
-            case NEW_SETTING:
-                query = findNewSettingCenters(query);
-                break;
-            case NEWLY_REGISTERED:
-                query = findNewlyRegisteredCenters(query);
-                break;
-        }
+        query = switch (option) {
+            case BOOKMARK -> findBookMarkedCenters(query, userId);
+            case NEW_SETTING -> findNewSettingCenters(query);
+            case NEWLY_REGISTERED -> findNewlyRegisteredCenters(query);
+        };
 
         long totalCount = query.fetchCount();
         List<CenterPreviewResponseDto> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();

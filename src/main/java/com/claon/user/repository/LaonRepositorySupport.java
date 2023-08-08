@@ -2,7 +2,6 @@ package com.claon.user.repository;
 
 import com.claon.user.domain.Laon;
 import com.claon.user.dto.LaonFindResponseDto;
-import claon.user.dto.QLaonFindResponseDto;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -15,8 +14,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Objects;
 
-import static claon.user.domain.QBlockUser.blockUser;
-import static claon.user.domain.QLaon.laon1;
+import com.claon.user.dto.QLaonFindResponseDto;
+import static com.claon.user.domain.QBlockUser.blockUser;
+import static com.claon.user.domain.QLaon.laon1;
 
 @Repository
 public class LaonRepositorySupport extends QuerydslRepositorySupport {

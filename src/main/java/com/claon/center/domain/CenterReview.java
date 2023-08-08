@@ -2,17 +2,16 @@ package com.claon.center.domain;
 
 import com.claon.common.domain.BaseEntity;
 import com.claon.user.domain.User;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 
 @Entity
 @Getter
@@ -21,12 +20,15 @@ import javax.persistence.Table;
 public class CenterReview extends BaseEntity {
     @Column(name = "rank", nullable = false)
     private Integer rank;
+
     @Column(name = "content", length = 500)
     private String content;
+
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User writer;
+
     @ManyToOne(targetEntity = Center.class)
     @JoinColumn(name = "center_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)

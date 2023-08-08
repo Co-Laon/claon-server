@@ -4,21 +4,21 @@ import com.claon.common.domain.BaseEntity;
 import com.claon.user.domain.User;
 import com.claon.center.domain.Center;
 import com.claon.post.domain.converter.PostContentsConverter;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import java.util.List;
 
 @Entity
@@ -29,6 +29,7 @@ public class Post extends BaseEntity {
     @ManyToOne(targetEntity = Center.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "center_id", nullable = false)
     private Center center;
+
     @Column(name = "content", length = 500)
     private String content;
 
@@ -38,6 +39,7 @@ public class Post extends BaseEntity {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
+
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -48,7 +50,7 @@ public class Post extends BaseEntity {
     private List<ClimbingHistory> climbingHistoryList;
 
     public String getThumbnailUrl() {
-        if (this.getContentList().size() == 0) {
+        if (this.getContentList().isEmpty()) {
             return null;
         }
         return this.getContentList().get(0).getUrl();
