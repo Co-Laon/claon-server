@@ -2,134 +2,125 @@ plugins {
 	id 'org.springframework.boot' version '3.1.2'
 	id 'io.spring.dependency-management' version '1.1.2'
 	id 'java'
-
-	// spring rest docs
-	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
-group = 'claon'
+group = 'com.claon'
 version = '0.0.1-SNAPSHOT'
 
 java {
 	sourceCompatibility = '17'
 }
 
-configurations {
-	asciidoctorExt
-	compileOnly {
-		extendsFrom annotationProcessor
+allprojects {
+	repositories {
+		mavenCentral()
 	}
 }
 
-repositories {
-	mavenCentral()
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'org.springframework.boot'
+	apply plugin: 'io.spring.dependency-management'
+
+	group = 'com.claon'
+
+	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-configuration-processor'
+		implementation 'org.jetbrains:annotations:24.0.0'
+		runtimeOnly 'com.h2database:h2'
+		runtimeOnly 'org.postgresql:postgresql'
+
+		compileOnly 'org.projectlombok:lombok'
+		annotationProcessor 'org.projectlombok:lombok'
+
+		// swagger
+		implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+		// security
+		implementation 'org.springframework.boot:spring-boot-starter-validation'
+		implementation 'org.springframework.boot:spring-boot-starter-security'
+		implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+		implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+		// redis
+		implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+		// querydsl
+		implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+		annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+		annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+		annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+		// aws
+		implementation 'com.google.api-client:google-api-client:2.0.0'
+		implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.239')
+		implementation 'com.amazonaws:aws-java-sdk-s3'
+		compileOnly 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+		compileOnly 'org.apache.tika:tika-parsers:2.3.0'
+
+		// multipart resolver
+		implementation 'commons-io:commons-io:2.11.0'
+		implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
+
+		// image resize
+		implementation 'com.github.downgoon:marvin:1.5.5'
+		implementation 'com.github.downgoon:MarvinPlugins:1.5.5'
+		implementation 'org.springframework:spring-test'
+
+		// test
+		implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+		implementation 'org.mockito:mockito-junit-jupiter:4.6.1'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testImplementation 'org.mockito:mockito-inline:4.6.1'
+		testImplementation 'org.springframework.security:spring-security-test'
+	}
+
+	test {
+		useJUnitPlatform()
+	}
 }
 
-dependencies {
-	implementation project(':center')
-	implementation project(':post')
-	implementation project(':user')
+project(':center') {
+	ext {
+		querydslDir = file('build/generated/querydsl')
+	}
 
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-configuration-processor'
-	implementation 'org.jetbrains:annotations:24.0.0'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'org.postgresql:postgresql'
-
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-
-	// swagger
-	implementation 'io.springfox:springfox-boot-starter:3.0.0'
-
-	// security
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	implementation 'io.jsonwebtoken:jjwt:0.9.1'
-
-	// redis
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
-	// querydsl
-	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
-	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-
-	// aws
-	implementation 'com.google.api-client:google-api-client:2.0.0'
-	implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.239')
-	implementation 'com.amazonaws:aws-java-sdk-s3'
-	compileOnly 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
-	compileOnly 'org.apache.tika:tika-parsers:2.3.0'
-
-	// multipart resolver
-	implementation 'commons-io:commons-io:2.11.0'
-	implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
-
-	// image resize
-	implementation 'com.github.downgoon:marvin:1.5.5'
-	implementation 'com.github.downgoon:MarvinPlugins:1.5.5'
-	implementation 'org.springframework:spring-test'
-
-	// rest docs
-	asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
-	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-
-	// test
-	implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
-	implementation 'org.mockito:mockito-junit-jupiter:4.6.1'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.mockito:mockito-inline:4.6.1'
-	testImplementation 'org.springframework.security:spring-security-test'
-}
-
-// querydsl
-def querydslDir = "$buildDir/generated/querydsl"
-
-sourceSets {
-	main {
-		java {
-			srcDirs = ['src/main/java', querydslDir]
+	configurations {
+		compileOnly {
+			extendsFrom annotationProcessor
 		}
+		querydsl.extendsFrom compileClasspath
+	}
+
+	sourceSets {
+		main.java.srcDir querydslDir
 	}
 }
 
-configurations {
-	querydsl.extendsFrom compileClasspath
+project(':post') {
+	ext {
+		querydslDir = file('build/generated/querydsl')
+	}
+
+	configurations {
+		compileOnly {
+			extendsFrom annotationProcessor
+		}
+		querydsl.extendsFrom compileClasspath
+	}
 }
 
-// rest docs
-ext {
-	snippetsDir = file('build/generated-snippets')
-	buildDocsDir = file('build/docs/asciidoc')
-	restDocsDir = file('src/main/resources/static/docs')
-}
+project(':user') {
+	ext {
+		querydslDir = file('build/generated/querydsl')
+	}
 
-asciidoctor {
-	inputs.dir snippetsDir
-	configurations 'asciidoctorExt'
-	dependsOn test
-}
-
-asciidoctor.doFirst {
-	delete restDocsDir
-}
-
-task copyRestDocs(type: Copy) {
-	dependsOn asciidoctor
-	from buildDocsDir
-	into restDocsDir
-}
-
-build {
-	dependsOn copyRestDocs
-}
-
-// test
-test {
-	useJUnitPlatform()
-	outputs.dir snippetsDir
+	configurations {
+		compileOnly {
+			extendsFrom annotationProcessor
+		}
+		querydsl.extendsFrom compileClasspath
+	}
 }
