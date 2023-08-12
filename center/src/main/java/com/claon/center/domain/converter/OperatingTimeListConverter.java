@@ -25,7 +25,7 @@ public class OperatingTimeListConverter implements AttributeConverter<List<Opera
             } catch (JsonProcessingException e) {
                 throw new InternalServerErrorException(
                         ErrorCode.INTERNAL_SERVER_ERROR,
-                        ""
+                        e.getMessage()
                 );
             }
         }).collect(Collectors.joining("&&&"));
