@@ -34,7 +34,7 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
                         } catch (JsonProcessingException e) {
                             throw new InternalServerErrorException(
                                     ErrorCode.INTERNAL_SERVER_ERROR,
-                                    ""
+                                    e.getMessage()
                             );
                         }
                     }).collect(Collectors.joining("&&&"));
@@ -48,7 +48,7 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
                     } catch (JsonProcessingException e) {
                         throw new InternalServerErrorException(
                                 ErrorCode.INTERNAL_SERVER_ERROR,
-                                ""
+                                e.getMessage()
                         );
                     }
                 }).collect(Collectors.joining("&&&&"));
@@ -62,8 +62,7 @@ public class ChargeListConverter implements AttributeConverter<List<Charge>, Str
             try {
                 if (json.isEmpty()) return null;
 
-                Map<String, String> charge = objectMapper.readValue(json, new TypeReference<>() {
-                });
+                Map<String, String> charge = objectMapper.readValue(json, new TypeReference<>() {});
 
                 return Charge.of(
                         Stream.of(charge.get("chargeList").split("&&&"))

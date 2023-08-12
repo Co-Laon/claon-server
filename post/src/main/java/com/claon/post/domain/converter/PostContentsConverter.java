@@ -1,8 +1,8 @@
-package com.claon.center.domain.converter;
+package com.claon.post.domain.converter;
 
-import com.claon.center.common.exception.ErrorCode;
-import com.claon.center.common.exception.InternalServerErrorException;
-import com.claon.center.domain.CenterImg;
+import com.claon.post.common.exception.ErrorCode;
+import com.claon.post.common.exception.InternalServerErrorException;
+import com.claon.post.domain.PostContents;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
@@ -10,11 +10,11 @@ import jakarta.persistence.AttributeConverter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CenterImgListConverter implements AttributeConverter<List<CenterImg>, String> {
+public class PostContentsConverter implements AttributeConverter<List<PostContents>, String> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public String convertToDatabaseColumn(List<CenterImg> attribute) {
+    public String convertToDatabaseColumn(List<PostContents> attribute) {
         if (attribute.isEmpty()) {
             return "";
         }
@@ -32,14 +32,14 @@ public class CenterImgListConverter implements AttributeConverter<List<CenterImg
     }
 
     @Override
-    public List<CenterImg> convertToEntityAttribute(String dbData) {
+    public List<PostContents> convertToEntityAttribute(String dbData) {
         List<String> jsonList = List.of(dbData.split("&&&"));
 
         return jsonList.stream().map(json -> {
             try {
                 if (json.isEmpty()) return null;
 
-                return objectMapper.readValue(json, CenterImg.class);
+                return objectMapper.readValue(json, PostContents.class);
             } catch (JsonProcessingException e) {
                 throw new InternalServerErrorException(
                         ErrorCode.INTERNAL_SERVER_ERROR,
