@@ -56,7 +56,6 @@ subprojects {
 		// aws
 		implementation 'com.google.api-client:google-api-client:2.0.0'
 		implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.239')
-		implementation 'com.amazonaws:aws-java-sdk-s3'
 		compileOnly 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 		compileOnly 'org.apache.tika:tika-parsers:2.3.0'
 
@@ -123,4 +122,8 @@ project(':user') {
 		}
 		querydsl.extendsFrom compileClasspath
 	}
+}
+
+project(':gateway') {
+
 }
