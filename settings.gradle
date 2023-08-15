@@ -1,6 +1,5 @@
 rootProject.name = 'claon'
 
-include 'auth'
 include 'center'
 include 'post'
 include 'user'
