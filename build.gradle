@@ -109,6 +109,10 @@ project(':post') {
 		}
 		querydsl.extendsFrom compileClasspath
 	}
+
+	sourceSets {
+		main.java.srcDir querydslDir
+	}
 }
 
 project(':user') {
@@ -122,8 +126,16 @@ project(':user') {
 		}
 		querydsl.extendsFrom compileClasspath
 	}
+
+	sourceSets {
+		main.java.srcDir querydslDir
+	}
 }
 
 project(':gateway') {
-
+	configurations {
+		compileOnly {
+			extendsFrom annotationProcessor
+		}
+	}
 }
