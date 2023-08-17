@@ -208,10 +208,10 @@ public class CenterService {
             );
 
 //            return this.postPort.findByCenterAndHoldExceptBlockUser(center.getId(), holdId.get(), userId, pageable);
-            return paginationFactory.create(new PageImpl<>(List.of()));
+            return paginationFactory.create(new PageImpl<>(List.of(), pageable, 0));
         }
 
 //        return this.postPort.findByCenterExceptBlockUser(center.getId(), userId, pageable);
-        return paginationFactory.create(new PageImpl<>(List.of()));
+        return paginationFactory.create(new PageImpl<>(List.of(), pageable, 0));
     }
 }
