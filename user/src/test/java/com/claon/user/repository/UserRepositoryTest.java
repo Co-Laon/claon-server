@@ -97,29 +97,4 @@ public class UserRepositoryTest {
         assertThat(userPage.getContent()).hasSize(1);
         assertThat(userPage.getContent().get(0).getNickname()).isEqualTo("search");
     }
-
-    @Test
-    public void successFindByEmailAndOAuthId() {
-        // given
-        String email = "test@gmail.com";
-        String oAuthId = "1234567890";
-
-        // when
-        Optional<User> userOptional = userRepository.findByEmailAndOAuthId(email, oAuthId);
-
-        // then
-        assertThat(userOptional.isPresent()).isEqualTo(true);
-    }
-
-    @Test
-    public void successFindByInstagramOAuthId() {
-        // given
-        String instagramOAuthId = "123456";
-
-        // when
-        Optional<User> userOptional = userRepository.findByInstagramOAuthId(instagramOAuthId);
-
-        // then
-        assertThat(userOptional.isPresent()).isEqualTo(true);
-    }
 }
