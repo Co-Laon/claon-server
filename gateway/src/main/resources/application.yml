@@ -1,16 +1,13 @@
 server:
   port: 8080
 
-spring:
-  config:
-    import:
-      - classpath:auth-config.yml
-
 ---
 spring:
   config:
     activate:
       on-profile: local
+    import:
+      - classpath:auth-config.yml
 
   datasource:
     driver-class-name: org.postgresql.Driver
