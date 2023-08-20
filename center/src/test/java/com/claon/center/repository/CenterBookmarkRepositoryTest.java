@@ -26,7 +26,7 @@ public class CenterBookmarkRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        this.center = centerRepository.save(Center.of(
+        center = centerRepository.save(Center.of(
                 "test",
                 "test",
                 "010-1234-1234",
@@ -40,13 +40,13 @@ public class CenterBookmarkRepositoryTest {
                 "hold info img test"
         ));
 
-        this.centerBookmarkRepository.save(CenterBookmark.of(this.center, USER_ID));
+        centerBookmarkRepository.save(CenterBookmark.of(center, USER_ID));
     }
 
     @Test
     public void successFindByUserIdAndCenterId() {
         // given
-        String centerId = this.center.getId();
+        String centerId = center.getId();
 
         // when
         Optional<CenterBookmark> centerBookmark = centerBookmarkRepository.findByUserIdAndCenterId(USER_ID, centerId);

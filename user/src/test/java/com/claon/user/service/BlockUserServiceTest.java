@@ -1,6 +1,5 @@
 package com.claon.user.service;
 
-import com.claon.user.common.domain.Pagination;
 import com.claon.user.common.domain.PaginationFactory;
 import com.claon.user.common.exception.ErrorCode;
 import com.claon.user.common.exception.UnauthorizedException;
@@ -56,7 +55,7 @@ public class BlockUserServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.publicUser = User.of(
+        publicUser = User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -66,9 +65,9 @@ public class BlockUserServiceTest {
                 "",
                 "instagramId"
         );
-        ReflectionTestUtils.setField(this.publicUser, "id", "publicUserId");
+        ReflectionTestUtils.setField(publicUser, "id", "publicUserId");
 
-        this.blockUser = User.of(
+        blockUser = User.of(
                 "block@gmail.com",
                 "1264567890",
                 "testBlockNickname",
@@ -78,16 +77,16 @@ public class BlockUserServiceTest {
                 "",
                 "instagramId2"
         );
-        ReflectionTestUtils.setField(this.blockUser, "id", "blockUserId");
+        ReflectionTestUtils.setField(blockUser, "id", "blockUserId");
 
-        this.blockUserRelation = BlockUser.of(
-                this.publicUser,
-                this.blockUser
+        blockUserRelation = BlockUser.of(
+                publicUser,
+                blockUser
         );
 
-        this.laonRelation = Laon.of(
-                this.publicUser,
-                this.blockUser
+        laonRelation = Laon.of(
+                publicUser,
+                blockUser
         );
     }
 
@@ -96,20 +95,20 @@ public class BlockUserServiceTest {
     void successBlockUser() {
         try (MockedStatic<BlockUser> mockedBlock = mockStatic(BlockUser.class)) {
             // given
-            given(this.userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
-            given(this.userRepository.findByNickname("testBlockNickname")).willReturn(Optional.of(blockUser));
-            given(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).willReturn(Optional.empty());
-            given(this.laonRepository.findByLaonIdAndUserId(blockUser.getId(), publicUser.getId())).willReturn(Optional.of(this.laonRelation));
+            given(userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
+            given(userRepository.findByNickname(blockUser.getNickname())).willReturn(Optional.of(blockUser));
+            given(blockUserRepository.findByUserIdAndBlockId(publicUser.getId(), blockUser.getId())).willReturn(Optional.empty());
+            given(laonRepository.findByLaonIdAndUserId(blockUser.getId(), publicUser.getId())).willReturn(Optional.of(laonRelation));
 
-            mockedBlock.when(() -> BlockUser.of(this.publicUser, this.blockUser)).thenReturn(this.blockUserRelation);
+            mockedBlock.when(() -> BlockUser.of(publicUser, blockUser)).thenReturn(blockUserRelation);
 
-            given(this.blockUserRepository.save(this.blockUserRelation)).willReturn(this.blockUserRelation);
+            given(blockUserRepository.save(blockUserRelation)).willReturn(blockUserRelation);
 
             // when
-            this.blockUserService.createBlock(publicUser.getId(), "testBlockNickname");
+            blockUserService.createBlock(publicUser.getId(), blockUser.getNickname());
 
             // then
-            assertThat(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).isNotNull();
+            assertThat(blockUserRepository.findByUserIdAndBlockId(publicUser.getId(), blockUser.getId())).isNotNull();
         }
     }
 
@@ -117,13 +116,13 @@ public class BlockUserServiceTest {
     @DisplayName("Failure case for create block when block myself")
     void failCreateBlockMyself() {
         //given
-        given(this.userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
-        given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(publicUser));
+        given(userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
+        given(userRepository.findByNickname(publicUser.getNickname())).willReturn(Optional.of(publicUser));
 
         //when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.blockUserService.createBlock(publicUser.getId(), "userNickname")
+                () -> blockUserService.createBlock(publicUser.getId(), publicUser.getNickname())
         );
 
         //then
@@ -136,15 +135,15 @@ public class BlockUserServiceTest {
     @DisplayName("Success case for unblock user")
     void successUnblockUser() {
         // given
-        given(this.userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
-        given(this.userRepository.findByNickname("testBlockNickname")).willReturn(Optional.of(blockUser));
-        given(this.blockUserRepository.findByUserIdAndBlockId(this.publicUser.getId(), this.blockUser.getId())).willReturn(Optional.of(blockUserRelation));
+        given(userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
+        given(userRepository.findByNickname(blockUser.getNickname())).willReturn(Optional.of(blockUser));
+        given(blockUserRepository.findByUserIdAndBlockId(publicUser.getId(), blockUser.getId())).willReturn(Optional.of(blockUserRelation));
 
         // when
-        this.blockUserService.deleteBlock(publicUser.getId(), "testBlockNickname");
+        blockUserService.deleteBlock(publicUser.getId(), blockUser.getNickname());
 
         // then
-        assertThat(this.blockUserRepository.findAll()).isEmpty();
+        assertThat(blockUserRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -154,20 +153,20 @@ public class BlockUserServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         Page<BlockUser> blockUsers = new PageImpl<>(List.of(blockUserRelation), pageable, 2);
 
-        given(this.userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
-        given(this.blockUserRepository.findByUser(publicUser, pageable)).willReturn(blockUsers);
+        given(userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
+        given(blockUserRepository.findByUser(publicUser, pageable)).willReturn(blockUsers);
 
         // when
-        Pagination<BlockUserFindResponseDto> blockUserFindResponseDto = this.blockUserService.findBlockUser(publicUser.getId(), pageable);
+        var blockUserFindResponseDto = blockUserService.findBlockUser(publicUser.getId(), pageable);
 
         // then
         assertThat(blockUserFindResponseDto.getResults())
                 .isNotNull()
                 .extracting(
-                        BlockUserFindResponseDto::getBlockUserNickName,
-                        BlockUserFindResponseDto::getBlockUserProfileImage)
+                        BlockUserFindResponseDto::getBlockUserNickName, BlockUserFindResponseDto::getBlockUserProfileImage
+                )
                 .containsExactly(
-                        tuple("testBlockNickname", "")
+                        tuple(blockUser.getNickname(), "")
                 );
     }
 }

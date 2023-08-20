@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +32,7 @@ public class ReviewRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        this.center = centerRepository.save(Center.of(
+        center = centerRepository.save(Center.of(
                 "test",
                 "test",
                 "010-1234-1234",
@@ -51,17 +50,17 @@ public class ReviewRepositoryTest {
                 2,
                 "test",
                 USER_ID,
-                this.center
+                center
         ));
     }
 
     @Test
     public void successFindByUserIdAndCenterId() {
         // given
-        String centerId = this.center.getId();
+        String centerId = center.getId();
 
         // when
-        Optional<CenterReview> centerReviewOptional = reviewRepository.findByUserIdAndCenterId(USER_ID, centerId);
+        var centerReviewOptional = reviewRepository.findByUserIdAndCenterId(USER_ID, centerId);
 
         // then
         assertThat(centerReviewOptional).isPresent();
@@ -73,8 +72,8 @@ public class ReviewRepositoryTest {
 //        reviewRepository.save(CenterReview.of(
 //                2,
 //                "test",
-//                this.blockUser,
-//                this.center
+//                blockUser,
+//                center
 //        ));
 //        String centerId = center.getId();
 //        String userId = user.getId();
@@ -92,8 +91,8 @@ public class ReviewRepositoryTest {
 //        reviewRepository.save(CenterReview.of(
 //                2,
 //                "test",
-//                this.blockUser,
-//                this.center
+//                blockUser,
+//                center
 //        ));
 //        String centerId = center.getId();
 //        String userId = user.getId();
@@ -111,8 +110,8 @@ public class ReviewRepositoryTest {
 //        reviewRepository.save(CenterReview.of(
 //                2,
 //                "test",
-//                this.blockUser,
-//                this.center
+//                blockUser,
+//                center
 //        ));
 //        String centerId = center.getId();
 //        String userId = user.getId();

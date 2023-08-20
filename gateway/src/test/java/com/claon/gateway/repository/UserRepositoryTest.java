@@ -20,7 +20,7 @@ public class UserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        User user = userRepository.save(User.of(
+        userRepository.save(User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",

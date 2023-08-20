@@ -11,7 +11,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,13 +23,12 @@ public class PostReportRepositoryTest {
     private PostReportRepository postReportRepository;
 
     private final String USER_ID = "USER_ID";
-    private final String CENTER_ID = "CENTER_ID";
     private Post post;
 
     @BeforeEach
     void setUp() {
         this.post = postRepository.save(Post.of(
-                CENTER_ID,
+                "CENTER_ID",
                 "testContent1",
                 USER_ID,
                 List.of(),
@@ -45,7 +43,7 @@ public class PostReportRepositoryTest {
     @Test
     public void successFindByReporterAndPost() {
         // when
-        Optional<PostReport> postReport = postReportRepository.findByReporterIdAndPost(USER_ID, this.post);
+        var postReport = postReportRepository.findByReporterIdAndPost(USER_ID, this.post);
 
         // then
         assertThat(postReport).isPresent();

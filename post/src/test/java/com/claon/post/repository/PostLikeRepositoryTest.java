@@ -9,12 +9,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,13 +28,12 @@ public class PostLikeRepositoryTest {
     private PostLikeRepositorySupport postLikeRepositorySupport;
 
     private final String USER_ID = "USER_ID";
-    private final String CENTER_ID = "CENTER_ID";
     private Post post;
 
     @BeforeEach
     void setUp() {
         this.post = postRepository.save(Post.of(
-                CENTER_ID,
+                "CENTER_ID",
                 "testContent1",
                 USER_ID,
                 List.of(),
@@ -51,7 +48,7 @@ public class PostLikeRepositoryTest {
     @Test
     public void successFindByLikerAndPost() {
         // when
-        Optional<PostLike> postLike = postLikeRepository.findByLikerIdAndPost(USER_ID, this.post);
+        var postLike = postLikeRepository.findByLikerIdAndPost(USER_ID, this.post);
 
         // then
         assertThat(postLike).isPresent();
@@ -60,7 +57,7 @@ public class PostLikeRepositoryTest {
     @Test
     public void successCountByPost() {
         // when
-        Integer countPost = postLikeRepository.countByPost(this.post);
+        var countPost = postLikeRepository.countByPost(this.post);
 
         // then
         assertThat(countPost).isEqualTo(1);
@@ -72,7 +69,7 @@ public class PostLikeRepositoryTest {
         List<String> postIds = List.of(post.getId());
 
         // when
-        Long count = postLikeRepository.countByPostIdIn(postIds);
+        var count = postLikeRepository.countByPostIdIn(postIds);
 
         // then
         assertThat(count).isEqualTo(1);
@@ -88,7 +85,7 @@ public class PostLikeRepositoryTest {
 //        ));
 
         // when
-        Page<PostLike> likerList = postLikeRepositorySupport.findAllByPost(postId, USER_ID, PageRequest.of(0, 2));
+        var likerList = postLikeRepositorySupport.findAllByPost(postId, USER_ID, PageRequest.of(0, 2));
 
         // then
         assertThat(likerList.getContent().size()).isEqualTo(1);

@@ -50,13 +50,13 @@ public class CenterReviewServiceTest {
     CenterReviewService centerReviewService;
 
     private final String USER_ID = "USER_ID";
-    private final String USER2_ID = "USER2_ID";
+    private final String WRONG_USER_ID = "WRONG_USER_ID";
     private Center center;
-    private CenterReview review1, review2;
+    private CenterReview review;
 
     @BeforeEach
     void setUp() {
-        this.center = Center.of(
+        center = Center.of(
                 "test",
                 "test",
                 "010-1234-1234",
@@ -69,16 +69,12 @@ public class CenterReviewServiceTest {
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test"
         );
-        ReflectionTestUtils.setField(this.center, "id", "center id");
+        ReflectionTestUtils.setField(center, "id", "center id");
 
-        this.review1 = CenterReview.of(5, "testContent1", USER_ID, this.center);
-        ReflectionTestUtils.setField(this.review1, "id", "review1Id");
-        ReflectionTestUtils.setField(this.review1, "createdAt", LocalDateTime.now());
-        ReflectionTestUtils.setField(this.review1, "updatedAt", LocalDateTime.now());
-        this.review2 = CenterReview.of(4, "testContent2", USER_ID, this.center);
-        ReflectionTestUtils.setField(this.review2, "id", "review2Id");
-        ReflectionTestUtils.setField(this.review2, "createdAt", LocalDateTime.now());
-        ReflectionTestUtils.setField(this.review2, "updatedAt", LocalDateTime.now());
+        review = CenterReview.of(5, "testContent", USER_ID, center);
+        ReflectionTestUtils.setField(review, "id", "reviewId");
+        ReflectionTestUtils.setField(review, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(review, "updatedAt", LocalDateTime.now());
     }
 
     @Test
@@ -88,20 +84,20 @@ public class CenterReviewServiceTest {
             // given
             ReviewCreateRequestDto reviewCreateRequestDto = new ReviewCreateRequestDto(5, "testContent");
 
-            given(this.centerRepository.findById("testCenterId")).willReturn(Optional.of(center));
+            given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
 
-            reviewMockedStatic.when(() -> CenterReview.of(5, "testContent", USER_ID, this.center)).thenReturn(this.review1);
+            reviewMockedStatic.when(() -> CenterReview.of(5, "testContent", USER_ID, center)).thenReturn(review);
 
-            given(this.reviewRepository.save(this.review1)).willReturn(this.review1);
+            given(reviewRepository.save(review)).willReturn(review);
 
             // when
-            ReviewResponseDto reviewResponseDto = this.centerReviewService.createReview(USER_ID, "testCenterId", reviewCreateRequestDto);
+            var reviewResponseDto = centerReviewService.createReview(USER_ID, center.getId(), reviewCreateRequestDto);
 
             // then
             assertThat(reviewResponseDto)
                     .isNotNull()
                     .extracting("reviewId", "content")
-                    .contains(this.review1.getId(), this.review1.getContent());
+                    .contains(review.getId(), review.getContent());
         }
     }
 
@@ -110,13 +106,13 @@ public class CenterReviewServiceTest {
     void failureCreateReview_alreadyExist() {
         ReviewCreateRequestDto reviewCreateRequestDto = new ReviewCreateRequestDto(5, "testContent");
 
-        given(this.centerRepository.findById("center id")).willReturn(Optional.of(center));
-        given(this.reviewRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.of(review1));
+        given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
+        given(reviewRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.of(review));
 
         // when
         final BadRequestException ex = Assertions.assertThrows(
                 BadRequestException.class,
-                () -> this.centerReviewService.createReview(USER_ID, "center id", reviewCreateRequestDto)
+                () -> centerReviewService.createReview(USER_ID, center.getId(), reviewCreateRequestDto)
         );
 
         // then
@@ -131,17 +127,17 @@ public class CenterReviewServiceTest {
         // given
         ReviewUpdateRequestDto reviewUpdateRequestDto = new ReviewUpdateRequestDto(1, "updateContent");
 
-        given(this.reviewRepository.findById("review1Id")).willReturn(Optional.of(review1));
-        given(this.reviewRepository.save(this.review1)).willReturn(this.review1);
+        given(reviewRepository.findById(review.getId())).willReturn(Optional.of(review));
+        given(reviewRepository.save(review)).willReturn(review);
 
         // when
-        ReviewResponseDto reviewResponseDto = this.centerReviewService.updateReview(USER_ID, "review1Id", reviewUpdateRequestDto);
+        var reviewResponseDto = centerReviewService.updateReview(USER_ID, review.getId(), reviewUpdateRequestDto);
 
         // then
         assertThat(reviewResponseDto)
                 .isNotNull()
                 .extracting("content", "reviewId")
-                .contains("updateContent", "review1Id");
+                .contains(reviewUpdateRequestDto.getContent(), review.getId());
     }
 
     @Test
@@ -150,12 +146,12 @@ public class CenterReviewServiceTest {
         // given
         ReviewUpdateRequestDto reviewUpdateRequestDto = new ReviewUpdateRequestDto(1, "updateContent");
 
-        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review1));
+        given(reviewRepository.findById(review.getId())).willReturn(Optional.of(review));
 
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.centerReviewService.updateReview(USER2_ID, "reviewId", reviewUpdateRequestDto)
+                () -> centerReviewService.updateReview(WRONG_USER_ID, review.getId(), reviewUpdateRequestDto)
         );
 
         // then
@@ -168,25 +164,25 @@ public class CenterReviewServiceTest {
     @DisplayName("Success case for delete review")
     void successDeleteReview() {
         // given
-        given(this.reviewRepository.findById("review1Id")).willReturn(Optional.of(review1));
+        given(reviewRepository.findById(review.getId())).willReturn(Optional.of(review));
 
         // when
-        this.centerReviewService.deleteReview(USER_ID, "review1Id");
+        centerReviewService.deleteReview(USER_ID, review.getId());
 
         // then
-        org.assertj.core.api.Assertions.assertThat(this.reviewRepository.findAll()).isEmpty();
+        assertThat(reviewRepository.findAll()).isEmpty();
     }
 
     @Test
     @DisplayName("Failure case for delete review because update by other user")
     void failDeleteReview_Unauthorized() {
         // given
-        given(this.reviewRepository.findById("reviewId")).willReturn(Optional.of(review1));
+        given(reviewRepository.findById(review.getId())).willReturn(Optional.of(review));
 
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.centerReviewService.deleteReview(USER2_ID, "reviewId")
+                () -> centerReviewService.deleteReview(WRONG_USER_ID, review.getId())
         );
 
         // then
@@ -200,22 +196,21 @@ public class CenterReviewServiceTest {
     void successFindReview() {
         //given
         Pageable pageable = PageRequest.of(0, 2);
-        Page<CenterReview> centerReviewPage = new PageImpl<>(List.of(review1, review2), pageable, 2);
+        Page<CenterReview> centerReviewPage = new PageImpl<>(List.of(review), pageable, 2);
 
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.reviewRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.of(review1));
-        given(this.reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(center.getId(), USER_ID, pageable)).willReturn(centerReviewPage);
+        given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
+        given(reviewRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.of(review));
+        given(reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(center.getId(), USER_ID, pageable)).willReturn(centerReviewPage);
 
         //when
-        ReviewBundleFindResponseDto reviewBundleFindResponseDto = this.centerReviewService.findReview(USER_ID, "centerId", pageable);
+        var reviewBundleFindResponseDto = centerReviewService.findReview(USER_ID, center.getId(), pageable);
 
         // then
-        org.assertj.core.api.Assertions.assertThat(reviewBundleFindResponseDto.getOtherReviewsPagination().getResults())
+        assertThat(reviewBundleFindResponseDto.getOtherReviewsPagination().getResults())
                 .isNotNull()
                 .extracting(ReviewFindResponseDto::getReviewId, ReviewFindResponseDto::getRank)
                 .contains(
-                        tuple(review1.getId(), review1.getRank()),
-                        tuple(review2.getId(), review2.getRank())
+                        tuple(review.getId(), review.getRank())
                 );
     }
 }
