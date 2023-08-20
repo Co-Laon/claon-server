@@ -44,7 +44,7 @@ public class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.user = User.of(
+        user = User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -54,7 +54,7 @@ public class AuthServiceTest {
                 "123456",
                 "test"
         );
-        ReflectionTestUtils.setField(this.user, "id", "test");
+        ReflectionTestUtils.setField(user, "id", "test");
     }
 
     @Test
@@ -76,20 +76,20 @@ public class AuthServiceTest {
                 true
         );
 
-        given(this.oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(this.oAuth2UserInfoProvider);
-        given(this.oAuth2UserInfoProvider.getUserInfo(signInRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
+        given(oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(oAuth2UserInfoProvider);
+        given(oAuth2UserInfoProvider.getUserInfo(signInRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
 
-        given(this.userRepository.findByEmailAndOAuthId(oAuth2UserInfoDto.getEmail(), oAuth2UserInfoDto.getOAuthId())).willReturn(Optional.of(this.user));
-        given(this.jwtUtil.createToken(this.user.getId(), true)).willReturn(jwtDto);
+        given(userRepository.findByEmailAndOAuthId(oAuth2UserInfoDto.getEmail(), oAuth2UserInfoDto.getOAuthId())).willReturn(Optional.of(user));
+        given(jwtUtil.createToken(user.getId(), true)).willReturn(jwtDto);
 
         // when
-        JwtDto result = this.userService.signIn(OAuth2Provider.GOOGLE, signInRequestDto);
+        var result = userService.signIn(OAuth2Provider.GOOGLE, signInRequestDto);
 
         // then
         assertThat(result)
                 .isNotNull()
                 .extracting("accessToken", "refreshToken")
-                .contains("access-token", "refresh-token");
+                .contains(result.getAccessToken(), result.getRefreshToken());
     }
 
     @Test
@@ -124,24 +124,24 @@ public class AuthServiceTest {
                     false
             );
 
-            given(this.oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(this.oAuth2UserInfoProvider);
-            given(this.oAuth2UserInfoProvider.getUserInfo(signInRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
+            given(oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(oAuth2UserInfoProvider);
+            given(oAuth2UserInfoProvider.getUserInfo(signInRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
 
-            given(this.userRepository.findByEmailAndOAuthId(oAuth2UserInfoDto.getEmail(), oAuth2UserInfoDto.getOAuthId())).willReturn(Optional.empty());
+            given(userRepository.findByEmailAndOAuthId(oAuth2UserInfoDto.getEmail(), oAuth2UserInfoDto.getOAuthId())).willReturn(Optional.empty());
 
             mockedUser.when(() -> User.createNewUser("test@gmail.com", "1234567890")).thenReturn(firstAccessUser);
-            given(this.userRepository.save(firstAccessUser)).willReturn(firstAccessUser);
+            given(userRepository.save(firstAccessUser)).willReturn(firstAccessUser);
 
-            given(this.jwtUtil.createToken(this.user.getId(), true)).willReturn(jwtDto);
+            given(jwtUtil.createToken(user.getId(), true)).willReturn(jwtDto);
 
             // when
-            JwtDto result = this.userService.signIn(OAuth2Provider.GOOGLE, signInRequestDto);
+            var result = userService.signIn(OAuth2Provider.GOOGLE, signInRequestDto);
 
             // then
             assertThat(result)
                     .isNotNull()
                     .extracting("accessToken", "refreshToken")
-                    .contains("access-token", "refresh-token");
+                    .contains(result.getAccessToken(), result.getRefreshToken());
         }
     }
 
@@ -158,10 +158,10 @@ public class AuthServiceTest {
                 "test"
         );
 
-        given(this.userRepository.save(this.user)).willReturn(this.user);
+        given(userRepository.save(user)).willReturn(user);
 
         // when
-        UserResponseDto userResponseDto = this.userService.signUp(this.user, signUpRequestDto);
+        var userResponseDto = userService.signUp(user, signUpRequestDto);
 
         // then
         assertThat(userResponseDto)

@@ -51,74 +51,73 @@ public class PostCommentServiceTest {
     PostCommentService postCommentService;
 
     private final String USER_ID = "USER_ID";
-    private final String CENTER_ID = "CENTER_ID";
     private Post post, blockedPost, privatePost;
     private PostComment postComment, privateComment;
     private PostComment childPostComment;
 
     @BeforeEach
     void setUp() {
-        this.post = Post.of(
-                CENTER_ID,
+        post = Post.of(
+                "CENTER_ID",
                 "testContent",
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
                 USER_ID
         );
-        ReflectionTestUtils.setField(this.post, "id", "testPostId");
+        ReflectionTestUtils.setField(post, "id", "testPostId");
 
-        this.postComment = PostComment.of(
+        postComment = PostComment.of(
                 "testContent",
                 USER_ID,
                 post,
                 null
         );
-        ReflectionTestUtils.setField(this.postComment, "id", "testCommentId");
-        ReflectionTestUtils.setField(this.postComment, "createdAt", LocalDateTime.now());
-        ReflectionTestUtils.setField(this.postComment, "updatedAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(postComment, "id", "testCommentId");
+        ReflectionTestUtils.setField(postComment, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(postComment, "updatedAt", LocalDateTime.now());
 
-        this.childPostComment = PostComment.of(
+        childPostComment = PostComment.of(
                 "testChildContent",
                 USER_ID,
                 post,
                 postComment
         );
-        ReflectionTestUtils.setField(this.childPostComment, "id", "testChildId");
-        ReflectionTestUtils.setField(this.childPostComment, "createdAt", LocalDateTime.now());
-        ReflectionTestUtils.setField(this.childPostComment, "updatedAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(childPostComment, "id", "testChildId");
+        ReflectionTestUtils.setField(childPostComment, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(childPostComment, "updatedAt", LocalDateTime.now());
 
-//        this.blockedPost = Post.of(
+//        blockedPost = Post.of(
 //                center,
 //                "testContent3",
 //                blockedUser,
 //                List.of(),
 //                List.of()
 //        );
-//        ReflectionTestUtils.setField(this.blockedPost, "id", "blockedPostId");
-//        ReflectionTestUtils.setField(this.blockedPost, "createdAt", LocalDateTime.now());
-//        ReflectionTestUtils.setField(this.blockedPost, "updatedAt", LocalDateTime.now());
+//        ReflectionTestUtils.setField(blockedPost, "id", "blockedPostId");
+//        ReflectionTestUtils.setField(blockedPost, "createdAt", LocalDateTime.now());
+//        ReflectionTestUtils.setField(blockedPost, "updatedAt", LocalDateTime.now());
 //
-//        this.privatePost = Post.of(
+//        privatePost = Post.of(
 //                center,
 //                "testContent4",
 //                privateUser,
 //                List.of(),
 //                List.of()
 //        );
-//        ReflectionTestUtils.setField(this.privatePost, "id", "privatePostId");
-//        ReflectionTestUtils.setField(this.privatePost, "createdAt", LocalDateTime.now());
-//        ReflectionTestUtils.setField(this.privatePost, "updatedAt", LocalDateTime.now());
+//        ReflectionTestUtils.setField(privatePost, "id", "privatePostId");
+//        ReflectionTestUtils.setField(privatePost, "createdAt", LocalDateTime.now());
+//        ReflectionTestUtils.setField(privatePost, "updatedAt", LocalDateTime.now());
 //
-//        this.privateComment = PostComment.of(
+//        privateComment = PostComment.of(
 //                "testContent1",
 //                writer,
 //                privatePost,
 //                null
 //        );
-//        ReflectionTestUtils.setField(this.privateComment, "id", "privateCommentId");
-//        ReflectionTestUtils.setField(this.privateComment, "createdAt", LocalDateTime.now());
-//        ReflectionTestUtils.setField(this.privateComment, "updatedAt", LocalDateTime.now());
+//        ReflectionTestUtils.setField(privateComment, "id", "privateCommentId");
+//        ReflectionTestUtils.setField(privateComment, "createdAt", LocalDateTime.now());
+//        ReflectionTestUtils.setField(privateComment, "updatedAt", LocalDateTime.now());
     }
 
     @Test
@@ -131,25 +130,25 @@ public class PostCommentServiceTest {
                     null
             );
 
-            given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
+            given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
 
             mockedPostComment.when(() -> PostComment.of(
                     "testContent",
                     USER_ID,
-                    this.post,
+                    post,
                     null
-            )).thenReturn(this.postComment);
+            )).thenReturn(postComment);
 
-            given(this.postCommentRepository.save(this.postComment)).willReturn(this.postComment);
+            given(postCommentRepository.save(postComment)).willReturn(postComment);
 
             // when
-            CommentResponseDto commentResponseDto = this.postCommentService.createComment(USER_ID, "testPostId", commentRequestDto);
+            var commentResponseDto = postCommentService.createComment(USER_ID, post.getId(), commentRequestDto);
 
             // then
             assertThat(commentResponseDto)
                     .isNotNull()
                     .extracting("isDeleted", "content")
-                    .contains(false, "testContent");
+                    .contains(postComment.getIsDeleted(), postComment.getContent());
         }
     }
 
@@ -163,19 +162,19 @@ public class PostCommentServiceTest {
 //                    null
 //            );
 //
-//            given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
+//            given(postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
 //
 //            mockedPostComment.when(() -> PostComment.of(
 //                    "testContent1",
-//                    this.privateUser,
-//                    this.privatePost,
+//                    privateUser,
+//                    privatePost,
 //                    null
-//            )).thenReturn(this.postComment);
+//            )).thenReturn(postComment);
 //
-//            given(this.postCommentRepository.save(this.postComment)).willReturn(this.postComment);
+//            given(postCommentRepository.save(postComment)).willReturn(postComment);
 //
 //            // when
-//            CommentResponseDto commentResponseDto = this.postCommentService.createComment(privateUser, "privatePostId", commentRequestDto);
+//            CommentResponseDto commentResponseDto = postCommentService.createComment(privateUser, "privatePostId", commentRequestDto);
 //
 //            // then
 //            assertThat(commentResponseDto)
@@ -192,26 +191,26 @@ public class PostCommentServiceTest {
             // given
             CommentCreateRequestDto commentRequestDto = new CommentCreateRequestDto("testChildContent", postComment.getId());
 
-            given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
-            given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
+            given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
+            given(postCommentRepository.findById(postComment.getId())).willReturn(Optional.of(postComment));
 
             mockedPostComment.when(() -> PostComment.of(
                     "testChildContent",
                     USER_ID,
-                    this.post,
+                    post,
                     postComment
-            )).thenReturn(this.childPostComment);
+            )).thenReturn(childPostComment);
 
-            given(this.postCommentRepository.save(this.childPostComment)).willReturn(this.childPostComment);
+            given(postCommentRepository.save(childPostComment)).willReturn(childPostComment);
 
             // when
-            CommentResponseDto commentResponseDto = this.postCommentService.createComment(USER_ID, "testPostId", commentRequestDto);
+            var commentResponseDto = postCommentService.createComment(USER_ID, post.getId(), commentRequestDto);
 
             // then
             assertThat(commentResponseDto)
                     .isNotNull()
                     .extracting("isDeleted", "content", "parentCommentId")
-                    .contains(false, "testChildContent", "testCommentId");
+                    .contains(childPostComment.getIsDeleted(), childPostComment.getContent(), childPostComment.getParentComment().getId());
         }
     }
 
@@ -224,12 +223,12 @@ public class PostCommentServiceTest {
 //                null
 //        );
 //
-//        given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
+//        given(postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
 //
 //        // when
 //        final UnauthorizedException ex = assertThrows(
 //                UnauthorizedException.class,
-//                () -> this.postCommentService.createComment(writer, "privatePostId", commentRequestDto)
+//                () -> postCommentService.createComment(writer, "privatePostId", commentRequestDto)
 //        );
 //
 //        // then
@@ -247,13 +246,13 @@ public class PostCommentServiceTest {
 //                null
 //        );
 //
-//        given(this.postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
-//        given(this.blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(List.of(blockUser));
+//        given(postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
+//        given(blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(List.of(blockUser));
 //
 //        // when
 //        final UnauthorizedException ex = assertThrows(
 //                UnauthorizedException.class,
-//                () -> this.postCommentService.createComment(writer, "blockedPostId", commentRequestDto)
+//                () -> postCommentService.createComment(writer, "blockedPostId", commentRequestDto)
 //        );
 //
 //        // then
@@ -267,7 +266,7 @@ public class PostCommentServiceTest {
     void successFindParentComments() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
+        given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
 
         Page<CommentFindResponseDto> parents = new PageImpl<>(
                 List.of(new CommentFindResponseDto(postComment, 0, USER_ID)),
@@ -275,17 +274,17 @@ public class PostCommentServiceTest {
                 2
         );
 
-        given(this.postCommentRepositorySupport.findParentCommentByPost(post.getId(), USER_ID, pageable)).willReturn(parents);
+        given(postCommentRepositorySupport.findParentCommentByPost(post.getId(), USER_ID, pageable)).willReturn(parents);
 
         // when
-        Pagination<CommentFindResponseDto> commentFindResponseDto = this.postCommentService.findCommentsByPost(USER_ID, "testPostId", pageable);
+        Pagination<CommentFindResponseDto> commentFindResponseDto = postCommentService.findCommentsByPost(USER_ID, post.getId(), pageable);
 
         // then
         assertThat(commentFindResponseDto.getResults())
                 .isNotNull()
                 .extracting(CommentFindResponseDto::getContent, CommentFindResponseDto::getCommentId)
                 .containsExactly(
-                        tuple("testContent", "testCommentId")
+                        tuple(postComment.getContent(), postComment.getId())
                 );
     }
 
@@ -294,7 +293,7 @@ public class PostCommentServiceTest {
 //    void successFindParentCommentsForOwnPost() {
 //        // given
 //        Pageable pageable = PageRequest.of(0, 2);
-//        given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
+//        given(postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
 //
 //        Page<CommentFindResponseDto> parents = new PageImpl<>(
 //                List.of(
@@ -305,10 +304,10 @@ public class PostCommentServiceTest {
 //                2
 //        );
 //
-//        given(this.postCommentRepositorySupport.findParentCommentByPost(privatePost.getId(), privateUser.getId(), privateUser.getNickname(), pageable)).willReturn(parents);
+//        given(postCommentRepositorySupport.findParentCommentByPost(privatePost.getId(), privateUser.getId(), privateUser.getNickname(), pageable)).willReturn(parents);
 //
 //        // when
-//        Pagination<CommentFindResponseDto> commentFindResponseDto = this.postCommentService.findCommentsByPost(privateUser, "privatePostId", pageable);
+//        Pagination<CommentFindResponseDto> commentFindResponseDto = postCommentService.findCommentsByPost(privateUser, "privatePostId", pageable);
 //
 //        // then
 //        assertThat(commentFindResponseDto.getResults())
@@ -325,12 +324,12 @@ public class PostCommentServiceTest {
 //    void failureFindParentCommentForPrivateUser() {
 //        // given
 //        Pageable pageable = PageRequest.of(0, 2);
-//        given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
+//        given(postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
 //
 //        // when
 //        final UnauthorizedException ex = assertThrows(
 //                UnauthorizedException.class,
-//                () -> this.postCommentService.findCommentsByPost(writer, "privatePostId", pageable)
+//                () -> postCommentService.findCommentsByPost(writer, "privatePostId", pageable)
 //        );
 //
 //        // then
@@ -344,13 +343,13 @@ public class PostCommentServiceTest {
 //    void failureFindParentCommentForBlockedUser() {
 //        // given
 //        Pageable pageable = PageRequest.of(0, 2);
-//        given(this.postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
-//        given(this.blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(List.of(blockUser));
+//        given(postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
+//        given(blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(List.of(blockUser));
 //
 //        // when
 //        final UnauthorizedException ex = assertThrows(
 //                UnauthorizedException.class,
-//                () -> this.postCommentService.findCommentsByPost(writer, "blockedPostId", pageable)
+//                () -> postCommentService.findCommentsByPost(writer, "blockedPostId", pageable)
 //        );
 //
 //        // then
@@ -366,18 +365,18 @@ public class PostCommentServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         Page<PostComment> children = new PageImpl<>(List.of(childPostComment), pageable, 2);
 
-        given(this.postCommentRepository.findByIdAndIsDeletedFalse("testCommentId")).willReturn(Optional.of(postComment));
-        given(this.postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), USER_ID, pageable)).willReturn(children);
+        given(postCommentRepository.findByIdAndIsDeletedFalse(postComment.getId())).willReturn(Optional.of(postComment));
+        given(postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), USER_ID, pageable)).willReturn(children);
 
         // when
-        Pagination<ChildCommentResponseDto> commentFindResponseDto = this.postCommentService.findAllChildCommentsByParent(USER_ID, "testCommentId", pageable);
+        var commentFindResponseDto = postCommentService.findAllChildCommentsByParent(USER_ID, postComment.getId(), pageable);
 
         // then
         assertThat(commentFindResponseDto.getResults())
                 .isNotNull()
                 .extracting(ChildCommentResponseDto::getContent, ChildCommentResponseDto::getIsDeleted)
                 .containsExactly(
-                        tuple("testChildContent", false)
+                        tuple(childPostComment.getContent(), childPostComment.getIsDeleted())
                 );
     }
 
@@ -388,11 +387,11 @@ public class PostCommentServiceTest {
 //        Pageable pageable = PageRequest.of(0, 2);
 //        Page<PostComment> children = new PageImpl<>(List.of(childPostComment), pageable, 2);
 //
-//        given(this.postCommentRepository.findByIdAndIsDeletedFalse("privateCommentId")).willReturn(Optional.of(privateComment));
-//        given(this.postCommentRepositorySupport.findChildCommentByParentComment(privateComment.getId(), privateUser.getId(), pageable)).willReturn(children);
+//        given(postCommentRepository.findByIdAndIsDeletedFalse("privateCommentId")).willReturn(Optional.of(privateComment));
+//        given(postCommentRepositorySupport.findChildCommentByParentComment(privateComment.getId(), privateUser.getId(), pageable)).willReturn(children);
 //
 //        // when
-//        Pagination<ChildCommentResponseDto> commentFindResponseDto = this.postCommentService.findAllChildCommentsByParent(privateUser, "privateCommentId", pageable);
+//        Pagination<ChildCommentResponseDto> commentFindResponseDto = postCommentService.findAllChildCommentsByParent(privateUser, "privateCommentId", pageable);
 //
 //        // then
 //        assertThat(commentFindResponseDto.getResults())
@@ -408,30 +407,30 @@ public class PostCommentServiceTest {
     @DisplayName("Success case for delete comment")
     void successDeleteComment() {
         // given
-        given(this.postCommentRepository.findById("testChildId")).willReturn(Optional.of(childPostComment));
+        given(postCommentRepository.findById(childPostComment.getId())).willReturn(Optional.of(childPostComment));
 
-        given(this.postCommentRepository.save(childPostComment)).willReturn(childPostComment);
+        given(postCommentRepository.save(childPostComment)).willReturn(childPostComment);
 
         // when
-        CommentResponseDto commentResponseDto = this.postCommentService.deleteComment(USER_ID, "testChildId");
+        var commentResponseDto = postCommentService.deleteComment(USER_ID, childPostComment.getId());
 
         // then
         assertThat(commentResponseDto)
                 .isNotNull()
                 .extracting("commentId", "isDeleted")
-                .contains("testChildId", true);
+                .contains(childPostComment.getId(), childPostComment.getIsDeleted());
     }
 
     @Test
     @DisplayName("Failure case for delete comment because delete by other user")
     void failDeleteComment_Unauthorized() {
         // given
-        given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
+        given(postCommentRepository.findById(postComment.getId())).willReturn(Optional.of(postComment));
 
         // when
         final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> this.postCommentService.deleteComment("wrongId", "testCommentId")
+                () -> postCommentService.deleteComment("wrongId", postComment.getId())
         );
 
         // then
@@ -446,18 +445,18 @@ public class PostCommentServiceTest {
         // given
         CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent");
 
-        given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
+        given(postCommentRepository.findById(postComment.getId())).willReturn(Optional.of(postComment));
 
-        given(this.postCommentRepository.save(postComment)).willReturn(postComment);
+        given(postCommentRepository.save(postComment)).willReturn(postComment);
 
         // when
-        CommentResponseDto commentResponseDto = this.postCommentService.updateComment(USER_ID, "testCommentId", commentUpdateRequestDto);
+        var commentResponseDto = postCommentService.updateComment(USER_ID, postComment.getId(), commentUpdateRequestDto);
 
         // then
         assertThat(commentResponseDto)
                 .isNotNull()
                 .extracting("commentId", "content")
-                .contains("testCommentId", "updateContent");
+                .contains(postComment.getId(), commentUpdateRequestDto.getContent());
     }
 
     @Test
@@ -466,12 +465,12 @@ public class PostCommentServiceTest {
         // given
         CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent");
 
-        given(this.postCommentRepository.findById("testCommentId")).willReturn(Optional.of(postComment));
+        given(postCommentRepository.findById(postComment.getId())).willReturn(Optional.of(postComment));
 
         // when
         final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> this.postCommentService.updateComment("wrongId", "testCommentId", commentUpdateRequestDto)
+                () -> postCommentService.updateComment("wrongId", postComment.getId(), commentUpdateRequestDto)
         );
 
         // then

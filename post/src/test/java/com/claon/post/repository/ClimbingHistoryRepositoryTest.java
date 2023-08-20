@@ -30,15 +30,13 @@ public class ClimbingHistoryRepositoryTest {
     private ClimbingHistoryRepositorySupport climbingHistoryRepositorySupport;
 
     private final String USER_ID = "USER_ID";
-    private final String HOLD_ID = "HOLD_ID";
-    private final String CENTER_ID = "CENTER_ID";
     private Post post;
     private ClimbingHistory climbingHistory;
 
     @BeforeEach
     void setUp() {
-        this.post = postRepository.save(Post.of(
-                CENTER_ID,
+        post = postRepository.save(Post.of(
+                "CENTER_ID",
                 "testContent1",
                 List.of(PostContents.of(
                         "test.com/test.png"
@@ -46,16 +44,16 @@ public class ClimbingHistoryRepositoryTest {
                 USER_ID
         ));
 
-        this.climbingHistory = climbingHistoryRepository.save(ClimbingHistory.of(this.post, HOLD_ID, 1));
+        climbingHistory = climbingHistoryRepository.save(ClimbingHistory.of(post, "HOLD_ID", 1));
     }
 
     @Test
     public void successFindByPostIds() {
         // given
-        List<String> postIdList = List.of(this.post.getId());
+        List<String> postIdList = List.of(post.getId());
 
         // when
-        List<ClimbingHistory> histories = climbingHistoryRepository.findByPostIds(postIdList);
+        var histories = climbingHistoryRepository.findByPostIds(postIdList);
 
         // then
         assertThat(histories.size()).isEqualTo(1);
@@ -64,7 +62,7 @@ public class ClimbingHistoryRepositoryTest {
     @Test
     public void successDeleteAllByPost() {
         // given
-        String postId = this.post.getId();
+        String postId = post.getId();
 
         // when
         climbingHistoryRepository.deleteAllByPost(postId);
@@ -79,7 +77,7 @@ public class ClimbingHistoryRepositoryTest {
         LocalDateTime now = LocalDateTime.now();
 
         // when
-        List<ClimbingHistory> histories = climbingHistoryRepositorySupport.findHistoryByDate(USER_ID, now.getYear(), now.getMonthValue());
+        var histories = climbingHistoryRepositorySupport.findHistoryByDate(USER_ID, now.getYear(), now.getMonthValue());
 
         // then
         assertThat(histories.size()).isEqualTo(1);

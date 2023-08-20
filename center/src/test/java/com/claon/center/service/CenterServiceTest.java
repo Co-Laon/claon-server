@@ -61,14 +61,14 @@ public class CenterServiceTest {
 
     private final String ADMIN_ID = "ADMIN_ID";
     private final String USER_ID = "USER_ID";
-    private Center center, center2;
-    private HoldInfo holdInfo, holdInfo2;
+    private Center center;
+    private HoldInfo holdInfo;
     private SectorInfo sectorInfo;
     private CenterBookmark centerBookmark;
 
     @BeforeEach
     void setUp() {
-        this.center = Center.of(
+        center = Center.of(
                 "test",
                 "test",
                 "010-1234-1234",
@@ -81,33 +81,15 @@ public class CenterServiceTest {
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test"
         );
-        ReflectionTestUtils.setField(this.center, "id", "center id");
+        ReflectionTestUtils.setField(center, "id", "center id");
 
-        this.center2 = Center.of(
-                "test2",
-                "test2",
-                "010-2345-1234",
-                "https://test2.com",
-                "https://instagram2.com/test",
-                "https://youtube2.com/channel/test",
-                List.of(new CenterImg("img test")),
-                List.of(new OperatingTime("매일", "10:00", "23:00")),
-                "facilities test",
-                List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
-                "hold info img test"
-        );
-        ReflectionTestUtils.setField(this.center2, "id", "center id2");
+        holdInfo = HoldInfo.of("test hold", "hold img test", center);
+        ReflectionTestUtils.setField(holdInfo, "id", "holdId");
 
-        this.holdInfo = HoldInfo.of("test hold", "hold img test", this.center);
-        ReflectionTestUtils.setField(this.holdInfo, "id", "holdId1");
+        sectorInfo = SectorInfo.of("test sector", LocalDate.of(2022, 1, 1), LocalDate.of(2022, 1, 1), center);
 
-        this.holdInfo2 = HoldInfo.of("test hold2", "hold img test2", this.center);
-        ReflectionTestUtils.setField(this.holdInfo2, "id", "holdId2");
-
-        this.sectorInfo = SectorInfo.of("test sector", LocalDate.of(2022, 1, 1), LocalDate.of(2022, 1, 1), this.center);
-
-        this.centerBookmark = CenterBookmark.of(center, USER_ID);
-        ReflectionTestUtils.setField(this.centerBookmark, "id", "bookMarkId");
+        centerBookmark = CenterBookmark.of(center, USER_ID);
+        ReflectionTestUtils.setField(centerBookmark, "id", "bookMarkId");
     }
 
     @Test
@@ -117,7 +99,7 @@ public class CenterServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
 //        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
 
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
 
 //        Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
 //                new PageImpl<>(
@@ -126,11 +108,11 @@ public class CenterServiceTest {
 //                                CenterPostThumbnailResponseDto.from(post2.getId(), post2.getThumbnailUrl())
 //                        ), pageable, 2)
 //        );
-//        given(this.postPort.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)).willReturn(postPagination);
+//        given(postPort.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)).willReturn(postPagination);
 
         // when
         var postThumbnailResponseDtoPagination =
-                this.centerService.getCenterPosts(USER_ID, "centerId", Optional.empty(), pageable);
+                centerService.getCenterPosts(USER_ID, center.getId(), Optional.empty(), pageable);
 
         //then
         assertThat(postThumbnailResponseDtoPagination.getResults())
@@ -149,8 +131,8 @@ public class CenterServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
 //        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
 
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
-        given(this.holdInfoRepository.findByIdAndCenter("holdId1", center)).willReturn(Optional.of(holdInfo));
+        given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
+        given(holdInfoRepository.findByIdAndCenter(holdInfo.getId(), center)).willReturn(Optional.of(holdInfo));
 
 //        Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
 //                new PageImpl<>(
@@ -159,11 +141,11 @@ public class CenterServiceTest {
 //                                CenterPostThumbnailResponseDto.from(post2.getId(), post2.getThumbnailUrl())
 //                        ), pageable, 2)
 //        );
-//        given(this.postPort.findByCenterAndHoldExceptBlockUser(center.getId(), "holdId1", user.getId(), pageable)).willReturn(postPagination);
+//        given(postPort.findByCenterAndHoldExceptBlockUser(center.getId(), "holdId1", user.getId(), pageable)).willReturn(postPagination);
 
         // when
-        Pagination<CenterPostThumbnailResponseDto> postThumbnailResponseDtoPagination =
-                this.centerService.getCenterPosts(USER_ID, "centerId", Optional.of("holdId1"), pageable);
+        var postThumbnailResponseDtoPagination =
+                centerService.getCenterPosts(USER_ID, center.getId(), Optional.of(holdInfo.getId()), pageable);
 
         //then
         assertThat(postThumbnailResponseDtoPagination.getResults())
@@ -180,12 +162,12 @@ public class CenterServiceTest {
         //given
         Pageable pageable = PageRequest.of(0, 2);
 
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(center));
+        given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
 
         // when
         final NotFoundException ex = assertThrows(
                 NotFoundException.class,
-                () -> this.centerService.getCenterPosts(USER_ID, "centerId", Optional.of("invalidHoldId"), pageable)
+                () -> centerService.getCenterPosts(USER_ID, center.getId(), Optional.of("wrongId"), pageable)
         );
 
         // then
@@ -245,29 +227,29 @@ public class CenterServiceTest {
                     "facilities test",
                     List.of(charge),
                     "hold info img test"
-            )).thenReturn(this.center);
+            )).thenReturn(center);
 
             mockedHoldInfo.when(() -> HoldInfo.of(
-                    "test hold", "hold img test", this.center
-            )).thenReturn(this.holdInfo);
+                    "test hold", "hold img test", center
+            )).thenReturn(holdInfo);
 
             mockedSectorInfo.when(() -> SectorInfo.of(
-                    "test sector", "2022/1/1", "2022/1/2", this.center
-            )).thenReturn(this.sectorInfo);
+                    "test sector", "2022/1/1", "2022/1/2", center
+            )).thenReturn(sectorInfo);
 
-            given(this.centerRepository.save(this.center)).willReturn(this.center);
+            given(centerRepository.save(center)).willReturn(center);
 
-            given(this.holdInfoRepository.save(this.holdInfo)).willReturn(this.holdInfo);
-            given(this.sectorInfoRepository.save(this.sectorInfo)).willReturn(this.sectorInfo);
+            given(holdInfoRepository.save(holdInfo)).willReturn(holdInfo);
+            given(sectorInfoRepository.save(sectorInfo)).willReturn(sectorInfo);
 
             // when
-            CenterResponseDto responseDto = this.centerService.create(ADMIN_ID, requestDto);
+            var responseDto = centerService.create(ADMIN_ID, requestDto);
 
             // then
             assertThat(responseDto)
                     .isNotNull()
                     .extracting("id", "name")
-                    .contains("center id", "test");
+                    .contains(center.getId(), center.getName());
         }
     }
 
@@ -280,7 +262,7 @@ public class CenterServiceTest {
 //        // when
 //        final UnauthorizedException ex = Assertions.assertThrows(
 //                UnauthorizedException.class,
-//                () -> this.centerService.create(USER_ID, requestDto)
+//                () -> centerService.create(USER_ID, requestDto)
 //        );
 //
 //        // then
@@ -293,15 +275,15 @@ public class CenterServiceTest {
     @DisplayName("Success case for find center")
     void successFindCenter() {
         // given
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
-        given(this.centerBookmarkRepository.findByUserIdAndCenterId(USER_ID, "centerId")).willReturn(Optional.of(centerBookmark));
-//        given(this.postPort.countByCenterExceptBlockUser("centerId", USER_ID)).willReturn(0);
-        given(this.reviewRepositorySupport.countByCenterExceptBlockUser("centerId", USER_ID)).willReturn(2);
-        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
-        given(this.sectorInfoRepository.findAllByCenter(center)).willReturn(List.of(sectorInfo));
+        given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
+        given(centerBookmarkRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.of(centerBookmark));
+//        given(postPort.countByCenterExceptBlockUser("centerId", USER_ID)).willReturn(0);
+        given(reviewRepositorySupport.countByCenterExceptBlockUser(center.getId(), USER_ID)).willReturn(2);
+        given(holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo));
+        given(sectorInfoRepository.findAllByCenter(center)).willReturn(List.of(sectorInfo));
 
         //when
-        CenterDetailResponseDto centerResponseDto = centerService.findCenter(USER_ID, "centerId");
+        var centerResponseDto = centerService.findCenter(USER_ID, center.getId());
 
         //then
         assertThat(centerResponseDto)
@@ -314,35 +296,36 @@ public class CenterServiceTest {
     @DisplayName("Success case for find HoldInfo by center")
     void successFindHoldInfoByCenter() {
         // given
-        given(this.centerRepository.findById("center id")).willReturn(Optional.of(this.center));
-        given(this.holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo, holdInfo2));
+        given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
+        given(holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo));
 
         // when
-        List<CenterHoldInfoResponseDto> holdInfoResponseDto = this.centerService.findHoldInfoByCenterId("center id");
+        var holdInfoResponseDto = centerService.findHoldInfoByCenterId(center.getId());
 
         // then
         assertThat(holdInfoResponseDto)
                 .isNotNull()
                 .extracting(CenterHoldInfoResponseDto::getName, CenterHoldInfoResponseDto::getImage)
                 .containsExactly(
-                        tuple(holdInfo.getName(), holdInfo.getImg()),
-                        tuple(holdInfo2.getName(), holdInfo2.getImg()));
+                        tuple(holdInfo.getName(), holdInfo.getImg())
+                );
     }
 
     @Test
     @DisplayName("Success case for search Center name by keyword")
     void successSearchCenterNameByKeyword() {
         // given
-        given(this.centerRepository.searchCenter("te")).willReturn(List.of(this.center, this.center2));
+        String keyword = "te";
+        given(centerRepository.searchCenter(keyword)).willReturn(List.of(center));
 
         // when
-        List<CenterNameResponseDto> centerNameResponseDto = this.centerService.searchCenterName("te");
+        var centerNameResponseDto = centerService.searchCenterName(keyword);
 
         // then
         assertThat(centerNameResponseDto)
                 .isNotNull()
                 .extracting(CenterNameResponseDto::getName)
-                .contains(this.center.getName(), this.center2.getName());
+                .contains(center.getName());
     }
 
     @Test
@@ -350,12 +333,16 @@ public class CenterServiceTest {
     void successSearchCenter() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        Page<CenterPreviewResponseDto> centerPage = new PageImpl<>(List.of(new CenterPreviewResponseDto(center.getId(), center.getName(), center.getImgList(), 5.0)), pageable, 2);
+        Page<CenterPreviewResponseDto> centerPage = new PageImpl<>(
+                List.of(new CenterPreviewResponseDto(center.getId(), center.getName(), center.getImgList(), 5.0)),
+                pageable,
+                2
+        );
 
-        given(this.centerRepositorySupport.searchCenter(this.center.getName(), pageable)).willReturn(centerPage);
+        given(centerRepositorySupport.searchCenter(center.getName(), pageable)).willReturn(centerPage);
 
         // when
-        Pagination<CenterPreviewResponseDto> centerPreviewResponseDtoPagination = this.centerService.searchCenter(this.center.getName(), pageable);
+        var centerPreviewResponseDtoPagination = centerService.searchCenter(center.getName(), pageable);
 
         // then
         assertThat(centerPreviewResponseDtoPagination.getResults())
@@ -373,7 +360,7 @@ public class CenterServiceTest {
                 "test",
                 CenterReportType.TELEPHONE,
                 USER_ID,
-                this.center
+                center
         );
         ReflectionTestUtils.setField(centerReport, "id", "reportId");
 
@@ -384,18 +371,18 @@ public class CenterServiceTest {
                     CenterReportType.TELEPHONE
             );
 
-            given(this.centerRepository.findById("center id")).willReturn(Optional.of(this.center));
+            given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
 
             mockedCenterReport.when(() -> CenterReport.of(
                     "test",
                     CenterReportType.TELEPHONE,
                     USER_ID,
-                    this.center
+                    center
             )).thenReturn(centerReport);
-            given(this.centerReportRepository.save(centerReport)).willReturn(centerReport);
+            given(centerReportRepository.save(centerReport)).willReturn(centerReport);
 
             // when
-            CenterReportResponseDto centerReportResponseDto = this.centerService.createReport(USER_ID, "center id", centerReportCreateRequestDto);
+            var centerReportResponseDto = centerService.createReport(USER_ID, center.getId(), centerReportCreateRequestDto);
 
             // then
             assertThat(centerReportResponseDto)

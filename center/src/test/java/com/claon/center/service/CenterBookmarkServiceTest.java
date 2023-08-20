@@ -1,7 +1,6 @@
 package com.claon.center.service;
 
 import com.claon.center.domain.*;
-import com.claon.center.dto.CenterBookmarkResponseDto;
 import com.claon.center.repository.CenterBookmarkRepository;
 import com.claon.center.repository.CenterRepository;
 import com.claon.center.common.exception.BadRequestException;
@@ -41,7 +40,7 @@ class CenterBookmarkServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.center = Center.of(
+        center = Center.of(
                 "test",
                 "test",
                 "010-1234-1234",
@@ -54,13 +53,13 @@ class CenterBookmarkServiceTest {
                 List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                 "hold info img test"
         );
-        ReflectionTestUtils.setField(this.center, "id", "centerId");
+        ReflectionTestUtils.setField(center, "id", "centerId");
 
-        this.centerBookmark = CenterBookmark.of(
-                this.center,
+        centerBookmark = CenterBookmark.of(
+                center,
                 USER_ID
         );
-        ReflectionTestUtils.setField(this.centerBookmark, "id", "bookmarkCenterId");
+        ReflectionTestUtils.setField(centerBookmark, "id", "bookmarkCenterId");
     }
 
     @Test
@@ -68,21 +67,21 @@ class CenterBookmarkServiceTest {
     void successCreateBookmarkCenter() {
         try (MockedStatic<CenterBookmark> mockedBookmarkCenter = mockStatic(CenterBookmark.class)) {
             // given
-            given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
-            given(this.centerBookmarkRepository.findByUserIdAndCenterId(USER_ID, this.center.getId())).willReturn(Optional.empty());
+            given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
+            given(centerBookmarkRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.empty());
 
-            mockedBookmarkCenter.when(() -> CenterBookmark.of(this.center, USER_ID)).thenReturn(this.centerBookmark);
+            mockedBookmarkCenter.when(() -> CenterBookmark.of(center, USER_ID)).thenReturn(centerBookmark);
 
-            given(this.centerBookmarkRepository.save(this.centerBookmark)).willReturn(this.centerBookmark);
+            given(centerBookmarkRepository.save(centerBookmark)).willReturn(centerBookmark);
 
             // when
-            CenterBookmarkResponseDto responseDto = this.centerBookmarkService.create(USER_ID, this.center.getId());
+            var responseDto = centerBookmarkService.create(USER_ID, center.getId());
 
             // then
             assertThat(responseDto)
                     .isNotNull()
                     .extracting("centerId", "isBookmarked")
-                    .contains("centerId", true);
+                    .contains(center.getId(), true);
         }
     }
 
@@ -90,13 +89,13 @@ class CenterBookmarkServiceTest {
     @DisplayName("Failure case for create bookmarkCenter")
     void failureCreateBookmarkCenter_already_exist() {
         // given
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
-        given(this.centerBookmarkRepository.findByUserIdAndCenterId(USER_ID, this.center.getId())).willReturn(Optional.of(centerBookmark));
+        given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
+        given(centerBookmarkRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.of(centerBookmark));
 
         // when
         final BadRequestException ex = Assertions.assertThrows(
                 BadRequestException.class,
-                () -> this.centerBookmarkService.create(USER_ID, this.center.getId())
+                () -> centerBookmarkService.create(USER_ID, center.getId())
         );
 
         // then
@@ -109,29 +108,29 @@ class CenterBookmarkServiceTest {
     @DisplayName("Success case for delete bookmarkCenter")
     void successDeleteBookmarkCenter() {
         // given
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
-        given(this.centerBookmarkRepository.findByUserIdAndCenterId(USER_ID, this.center.getId())).willReturn(Optional.of(this.centerBookmark));
+        given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
+        given(centerBookmarkRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.of(centerBookmark));
 
         // when
-        CenterBookmarkResponseDto responseDto = this.centerBookmarkService.delete(USER_ID, this.center.getId());
+        var responseDto = centerBookmarkService.delete(USER_ID, center.getId());
 
         // then
-        org.assertj.core.api.Assertions.assertThat(this.centerBookmarkRepository.findAll()).isEmpty();
+        assertThat(centerBookmarkRepository.findAll()).isEmpty();
         assertThat(responseDto)
                 .extracting("centerId", "isBookmarked")
-                .contains("centerId", false);
+                .contains(center.getId(), false);
     }
 
     @Test
     @DisplayName("Failure case for delete bookmarkCenter")
     void failureDeleteBookmarkCenter_row_does_not_exist() {
         // given
-        given(this.centerRepository.findById("centerId")).willReturn(Optional.of(this.center));
+        given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
 
         // when
         final BadRequestException ex = Assertions.assertThrows(
                 BadRequestException.class,
-                () -> this.centerBookmarkService.delete(USER2_ID, this.center.getId())
+                () -> centerBookmarkService.delete(USER2_ID, center.getId())
         );
 
         // then

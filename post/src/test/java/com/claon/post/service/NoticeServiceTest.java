@@ -1,14 +1,9 @@
 package com.claon.post.service;
 
-import com.claon.post.common.domain.Pagination;
 import com.claon.post.common.domain.PaginationFactory;
-import com.claon.post.common.exception.ErrorCode;
-import com.claon.post.common.exception.UnauthorizedException;
 import com.claon.post.domain.Notice;
 import com.claon.post.dto.NoticeCreateRequestDto;
-import com.claon.post.dto.NoticeResponseDto;
 import com.claon.post.repository.NoticeRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,7 +37,6 @@ public class NoticeServiceTest {
     NoticeService noticeService;
 
     private final String ADMIN_ID = "ADMIN_ID";
-    private final String USER_ID = "USER_ID";
     private Notice notice;
 
     @BeforeEach
@@ -56,10 +50,10 @@ public class NoticeServiceTest {
     void successGetNoticeList() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        given(this.noticeRepository.findAllWithPagination(pageable)).willReturn(new PageImpl<>(List.of(notice), pageable, 1));
+        given(noticeRepository.findAllWithPagination(pageable)).willReturn(new PageImpl<>(List.of(notice), pageable, 1));
 
         // when
-        Pagination<NoticeResponseDto> pagination = this.noticeService.getNoticeList(pageable);
+        var pagination = noticeService.getNoticeList(pageable);
 
         // then
         assertThat(pagination.getResults().size()).isEqualTo(1);
@@ -78,15 +72,15 @@ public class NoticeServiceTest {
                     ADMIN_ID
             )).thenReturn(notice);
 
-            given(this.noticeRepository.save(notice)).willReturn(notice);
+            given(noticeRepository.save(notice)).willReturn(notice);
 
             // when
-            NoticeResponseDto result = this.noticeService.createNotice(ADMIN_ID, dto);
+            var result = noticeService.createNotice(ADMIN_ID, dto);
 
             // then
             assertThat(result)
                     .extracting("title", "content")
-                    .contains("title", "content");
+                    .contains(notice.getTitle(), notice.getContent());
         }
     }
 
@@ -99,7 +93,7 @@ public class NoticeServiceTest {
 //        // when
 //        final UnauthorizedException ex = Assertions.assertThrows(
 //                UnauthorizedException.class,
-//                () -> this.noticeService.createNotice(USER_ID, dto)
+//                () -> noticeService.createNotice(USER_ID, dto)
 //        );
 //
 //        // then
