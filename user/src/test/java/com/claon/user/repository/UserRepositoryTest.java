@@ -10,11 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,7 +28,7 @@ public class UserRepositoryTest {
     @Autowired
     private BlockUserRepository blockUserRepository;
 
-    private User user;
+    private User user, searchUser;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +43,7 @@ public class UserRepositoryTest {
                 "instagramId"
         ));
 
-        User searchUser = userRepository.save(User.of(
+        searchUser = userRepository.save(User.of(
                 "search@gmail.com",
                 "1234567777",
                 "search",
@@ -79,10 +76,10 @@ public class UserRepositoryTest {
         String nickname = "test";
 
         // when
-        Optional<User> userOptional = userRepository.findByNickname(nickname);
+        var result = userRepository.findByNickname(nickname);
 
         // then
-        assertThat(userOptional.isPresent()).isEqualTo(true);
+        assertThat(result.isPresent()).isEqualTo(true);
     }
 
     @Test
@@ -91,10 +88,10 @@ public class UserRepositoryTest {
         String nickname = "se";
 
         // when
-        Page<User> userPage = userRepositorySupport.searchUser(user.getId(), nickname, PageRequest.of(0, 2));
+        var result = userRepositorySupport.searchUser(user.getId(), nickname, PageRequest.of(0, 2));
 
         // then
-        assertThat(userPage.getContent()).hasSize(1);
-        assertThat(userPage.getContent().get(0).getNickname()).isEqualTo("search");
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getNickname()).isEqualTo(searchUser.getNickname());
     }
 }

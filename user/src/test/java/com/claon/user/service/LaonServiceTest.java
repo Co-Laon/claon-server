@@ -1,15 +1,11 @@
 package com.claon.user.service;
 
-import com.claon.user.common.domain.Pagination;
 import com.claon.user.common.domain.PaginationFactory;
 import com.claon.user.common.exception.ErrorCode;
 import com.claon.user.common.exception.UnauthorizedException;
 import com.claon.user.domain.Laon;
 import com.claon.user.domain.User;
-import com.claon.user.dto.ClimbingHistoryResponseDto;
-import com.claon.user.dto.HoldInfoResponseDto;
 import com.claon.user.dto.LaonFindResponseDto;
-import com.claon.user.dto.UserPostDetailResponseDto;
 import com.claon.user.repository.BlockUserRepository;
 import com.claon.user.repository.LaonRepository;
 import com.claon.user.repository.LaonRepositorySupport;
@@ -32,7 +28,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -62,7 +57,7 @@ public class LaonServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.laon = User.of(
+        laon = User.of(
                 "test@gmail.com",
                 "1234567890",
                 "laonNickname",
@@ -72,9 +67,9 @@ public class LaonServiceTest {
                 "",
                 "instagramId"
         );
-        ReflectionTestUtils.setField(this.laon, "id", "laonId");
+        ReflectionTestUtils.setField(laon, "id", "laonId");
 
-        this.user = User.of(
+        user = User.of(
                 "test@gmail.com",
                 "1234567222",
                 "userNickname",
@@ -84,11 +79,11 @@ public class LaonServiceTest {
                 "",
                 "instagramId2"
         );
-        ReflectionTestUtils.setField(this.user, "id", "userId");
+        ReflectionTestUtils.setField(user, "id", "userId");
 
-        this.laonRelation = Laon.of(
-                this.user,
-                this.laon
+        laonRelation = Laon.of(
+                user,
+                laon
         );
     }
 
@@ -97,20 +92,20 @@ public class LaonServiceTest {
     void successCreateLaon() {
         try (MockedStatic<Laon> mockedLaon = mockStatic(Laon.class)) {
             // given
-            given(this.userRepository.findById(user.getId())).willReturn(Optional.of(user));
-            given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(laon));
-            given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.empty());
-            given(this.blockUserRepository.findBlock(this.user.getId(), this.laon.getId())).willReturn(List.of());
+            given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+            given(userRepository.findByNickname(laon.getNickname())).willReturn(Optional.of(laon));
+            given(laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId())).willReturn(Optional.empty());
+            given(blockUserRepository.findBlock(user.getId(), laon.getId())).willReturn(List.of());
 
-            mockedLaon.when(() -> Laon.of(this.user, this.laon)).thenReturn(this.laonRelation);
+            mockedLaon.when(() -> Laon.of(user, laon)).thenReturn(laonRelation);
 
-            given(this.laonRepository.save(this.laonRelation)).willReturn(this.laonRelation);
+            given(laonRepository.save(laonRelation)).willReturn(laonRelation);
 
             // when
-            this.laonService.createLaon(user.getId(), "userNickname");
+            laonService.createLaon(user.getId(), laon.getNickname());
 
             // then
-            assertThat(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).isNotNull();
+            assertThat(laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId())).isNotNull();
         }
     }
 
@@ -118,13 +113,13 @@ public class LaonServiceTest {
     @DisplayName("Failure case for create laon when laon myself")
     void failCreateLaonMyself() {
         //given
-        given(this.userRepository.findById(user.getId())).willReturn(Optional.of(user));
-        given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(user));
+        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(userRepository.findByNickname(user.getNickname())).willReturn(Optional.of(user));
 
         //when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> this.laonService.createLaon(user.getId(), "userNickname")
+                () -> laonService.createLaon(user.getId(), user.getNickname())
         );
 
         //then
@@ -137,15 +132,15 @@ public class LaonServiceTest {
     @DisplayName("Success case for delete laon")
     void successDeleteLaon() {
         // given
-        given(this.userRepository.findById(user.getId())).willReturn(Optional.of(user));
-        given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(laon));
-        given(this.laonRepository.findByLaonIdAndUserId(this.laon.getId(), this.user.getId())).willReturn(Optional.of(this.laonRelation));
+        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(userRepository.findByNickname(laon.getNickname())).willReturn(Optional.of(laon));
+        given(laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId())).willReturn(Optional.of(laonRelation));
 
         // when
-        this.laonService.deleteLaon(user.getId(), "userNickname");
+        laonService.deleteLaon(user.getId(), laon.getNickname());
 
         // then
-        assertThat(this.laonRepository.findAll()).isEmpty();
+        assertThat(laonRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -157,17 +152,17 @@ public class LaonServiceTest {
                 new LaonFindResponseDto(laonRelation.getLaon().getNickname(), laonRelation.getLaon().getImagePath())
         ), pageable, 2);
 
-        given(this.laonRepositorySupport.findAllByUserId("userId", pageable)).willReturn(laonPage);
+        given(laonRepositorySupport.findAllByUserId(user.getId(), pageable)).willReturn(laonPage);
 
         // when
-        Pagination<LaonFindResponseDto> laonFindResponseDto = this.laonService.findAllLaon(user.getId(), pageable);
+        var laonFindResponseDto = laonService.findAllLaon(user.getId(), pageable);
 
         // then
         assertThat(laonFindResponseDto.getResults())
                 .isNotNull()
                 .extracting(LaonFindResponseDto::getLaonNickname, LaonFindResponseDto::getLaonProfileImage)
                 .containsExactly(
-                        tuple(this.laon.getNickname(), this.laon.getImagePath())
+                        tuple(laon.getNickname(), laon.getImagePath())
                 );
     }
 
@@ -225,10 +220,10 @@ public class LaonServiceTest {
 //                                        .collect(Collectors.toList())))
 //                        , pageable, 2)
 //        );
-//        given(this.postPort.findLaonPost(user, pageable)).willReturn(postPagination);
+//        given(postPort.findLaonPost(user, pageable)).willReturn(postPagination);
 //
 //        // when
-//        Pagination<UserPostDetailResponseDto> post = this.laonService.findLaonPost(user.getId(), pageable);
+//        Pagination<UserPostDetailResponseDto> post = laonService.findLaonPost(user.getId(), pageable);
 //
 //        //then
 //        assertThat(post.getResults())

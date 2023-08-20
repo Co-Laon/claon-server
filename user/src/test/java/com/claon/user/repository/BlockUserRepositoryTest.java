@@ -7,12 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +24,7 @@ public class BlockUserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        this.user = userRepository.save(User.of(
+        user = userRepository.save(User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -39,7 +35,7 @@ public class BlockUserRepositoryTest {
                 "instagramId"
         ));
 
-        this.blockUser = userRepository.save(User.of(
+        blockUser = userRepository.save(User.of(
                 "block@gmail.com",
                 "1264567890",
                 "testBlockNickname",
@@ -51,12 +47,12 @@ public class BlockUserRepositoryTest {
         ));
 
         blockUserRepository.save(BlockUser.of(
-                this.user,
-                this.blockUser
+                user,
+                blockUser
         ));
         blockUserRepository.save(BlockUser.of(
-                this.blockUser,
-                this.user
+                blockUser,
+                user
         ));
     }
 
@@ -67,7 +63,7 @@ public class BlockUserRepositoryTest {
         String blockUserId = blockUser.getId();
 
         // when
-        Optional<BlockUser> blockUserOptional = blockUserRepository.findByUserIdAndBlockId(userId, blockUserId);
+        var blockUserOptional = blockUserRepository.findByUserIdAndBlockId(userId, blockUserId);
 
         // then
         assertThat(blockUserOptional).isPresent();
@@ -75,10 +71,8 @@ public class BlockUserRepositoryTest {
 
     @Test
     public void successFindByUserId() {
-        // given
-
         // when
-        Page<BlockUser> blockUserList = blockUserRepository.findByUser(user, PageRequest.of(0, 2));
+        var blockUserList = blockUserRepository.findByUser(user, PageRequest.of(0, 2));
 
         // then
         assertThat(blockUserList.getContent().size()).isEqualTo(1);
@@ -91,7 +85,7 @@ public class BlockUserRepositoryTest {
         String blockUserId = blockUser.getId();
 
         // when
-        List<BlockUser> blockUserList = blockUserRepository.findBlock(userId, blockUserId);
+        var blockUserList = blockUserRepository.findBlock(userId, blockUserId);
 
         // then
         assertThat(blockUserList.size()).isEqualTo(2);

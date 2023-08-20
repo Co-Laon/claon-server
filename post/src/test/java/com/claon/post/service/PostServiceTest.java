@@ -1,6 +1,5 @@
 package com.claon.post.service;
 
-import com.claon.post.common.domain.Pagination;
 import com.claon.post.common.domain.PaginationFactory;
 import com.claon.post.common.exception.ErrorCode;
 import com.claon.post.common.exception.UnauthorizedException;
@@ -63,7 +62,7 @@ public class PostServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.post = Post.of(
+        post = Post.of(
                 CENTER_ID,
                 "testContent1",
                 USER_ID,
@@ -72,46 +71,46 @@ public class PostServiceTest {
                 )),
                 List.of()
         );
-        ReflectionTestUtils.setField(this.post, "id", "testPostId");
-        ReflectionTestUtils.setField(this.post, "createdAt", LocalDateTime.now());
-        ReflectionTestUtils.setField(this.post, "updatedAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(post, "id", "testPostId");
+        ReflectionTestUtils.setField(post, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(post, "updatedAt", LocalDateTime.now());
 
-        this.climbingHistory = ClimbingHistory.of(
-                this.post,
+        climbingHistory = ClimbingHistory.of(
+                post,
                 HOLD_ID,
                 0
         );
-        ReflectionTestUtils.setField(this.climbingHistory, "id", "climbingId");
+        ReflectionTestUtils.setField(climbingHistory, "id", "climbingId");
 
-//        this.blockedPost = Post.of(
+//        blockedPost = Post.of(
 //                center,
 //                "testContent3",
 //                blockedUser,
 //                List.of(),
 //                List.of()
 //        );
-//        ReflectionTestUtils.setField(this.blockedPost, "id", "blockedPostId");
-//        ReflectionTestUtils.setField(this.blockedPost, "createdAt", LocalDateTime.now());
-//        ReflectionTestUtils.setField(this.blockedPost, "updatedAt", LocalDateTime.now());
+//        ReflectionTestUtils.setField(blockedPost, "id", "blockedPostId");
+//        ReflectionTestUtils.setField(blockedPost, "createdAt", LocalDateTime.now());
+//        ReflectionTestUtils.setField(blockedPost, "updatedAt", LocalDateTime.now());
 //
-//        this.privatePost = Post.of(
+//        privatePost = Post.of(
 //                center,
 //                "testContent4",
 //                privateUser,
 //                List.of(),
 //                List.of()
 //        );
-//        ReflectionTestUtils.setField(this.privatePost, "id", "privatePostId");
-//        ReflectionTestUtils.setField(this.privatePost, "createdAt", LocalDateTime.now());
-//        ReflectionTestUtils.setField(this.privatePost, "updatedAt", LocalDateTime.now());
+//        ReflectionTestUtils.setField(privatePost, "id", "privatePostId");
+//        ReflectionTestUtils.setField(privatePost, "createdAt", LocalDateTime.now());
+//        ReflectionTestUtils.setField(privatePost, "updatedAt", LocalDateTime.now());
 
-        this.postReport = PostReport.of(
+        postReport = PostReport.of(
                 USER_ID,
                 post,
                 PostReportType.INAPPROPRIATE_POST,
                 "testContent"
         );
-        ReflectionTestUtils.setField(this.postReport, "id", "postReportId");
+        ReflectionTestUtils.setField(postReport, "id", "postReportId");
     }
 
     @Test
@@ -122,18 +121,18 @@ public class PostServiceTest {
         Page<Post> postPage = new PageImpl<>(List.of(post), pageable, 1);
         LocalDateTime now = LocalDateTime.now();
 
-        given(this.postRepositorySupport.findByNicknameAndCenterAndYearMonth(USER_ID, "test", CENTER_ID, now.getYear(), now.getMonthValue(), pageable))
+        given(postRepositorySupport.findByNicknameAndCenterAndYearMonth(USER_ID, "test", CENTER_ID, now.getYear(), now.getMonthValue(), pageable))
                 .willReturn(postPage);
 
         // when
-        Pagination<PostDetailResponseDto> posts = this.postService.findUserPostsByCenterAndYearMonth(USER_ID, "test", CENTER_ID, now.getYear(), now.getMonthValue(), pageable);
+        var posts = postService.findUserPostsByCenterAndYearMonth(USER_ID, "test", CENTER_ID, now.getYear(), now.getMonthValue(), pageable);
 
         // then
         assertThat(posts.getResults())
                 .isNotNull()
                 .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
                 .contains(
-                        tuple("testPostId", post.getContent())
+                        tuple(post.getId(), post.getContent())
                 );
     }
 
@@ -144,19 +143,19 @@ public class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         Page<Post> postPage = new PageImpl<>(List.of(post), pageable, 2);
 
-        given(this.postLikeRepository.countByPost(post)).willReturn(3);
+        given(postLikeRepository.countByPost(post)).willReturn(3);
 
-        given(this.postRepositorySupport.findExceptLaonUserAndBlockUser(USER_ID, pageable)).willReturn(postPage);
+        given(postRepositorySupport.findExceptLaonUserAndBlockUser(USER_ID, pageable)).willReturn(postPage);
 
         // when
-        Pagination<PostDetailResponseDto> posts = this.postService.findPosts(USER_ID, pageable);
+        var posts = postService.findPosts(USER_ID, pageable);
 
         //then
         assertThat(posts.getResults())
                 .isNotNull()
                 .extracting(PostDetailResponseDto::getPostId, PostDetailResponseDto::getContent)
                 .contains(
-                        tuple("testPostId", post.getContent())
+                        tuple(post.getId(), post.getContent())
                 );
     }
 
@@ -164,30 +163,30 @@ public class PostServiceTest {
     @DisplayName("Success case for find post")
     void successFindPost() {
         // given
-        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
-        given(this.postLikeRepository.countByPost(post)).willReturn(2);
+        given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
+        given(postLikeRepository.countByPost(post)).willReturn(2);
 
         // when
-        PostDetailResponseDto postResponseDto = this.postService.findPost(USER_ID, "testPostId");
+        var postResponseDto = postService.findPost(USER_ID, post.getId());
 
         // then
         assertThat(postResponseDto)
                 .isNotNull()
-                .extracting(
-                        post -> post.getContentsList().get(0),
-                        PostDetailResponseDto::getCenterId)
-                .contains(post.getContentList().get(0).getUrl(), CENTER_ID);
+                .extracting(post -> post.getContentsList().get(0), PostDetailResponseDto::getCenterId)
+                .contains(
+                        post.getContentList().get(0).getUrl(), CENTER_ID
+                );
     }
 
 //    @Test
 //    @DisplayName("Success case for find own post")
 //    void successFindOwnPost() {
 //        // given
-//        given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
-//        given(this.postLikeRepository.countByPost(privatePost)).willReturn(2);
+//        given(postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
+//        given(postLikeRepository.countByPost(privatePost)).willReturn(2);
 //
 //        // when
-//        PostDetailResponseDto postResponseDto = this.postService.findPost(privateUser, "privatePostId");
+//        PostDetailResponseDto postResponseDto = postService.findPost(privateUser, "privatePostId");
 //
 //        // then
 //        assertThat(postResponseDto)
@@ -202,12 +201,12 @@ public class PostServiceTest {
 //    @DisplayName("Failure case for find post when private user")
 //    void failFindPostPrivateUser() {
 //        // given
-//        given(this.postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
+//        given(postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
 //
 //        // when
 //        final UnauthorizedException ex = assertThrows(
 //                UnauthorizedException.class,
-//                () -> this.postService.findPost(user, "privatePostId")
+//                () -> postService.findPost(user, "privatePostId")
 //        );
 //
 //        // then
@@ -220,13 +219,13 @@ public class PostServiceTest {
 //    @DisplayName("Failure case for find post when blocked user")
 //    void failFindPostBlockUser() {
 //        // given
-//        given(this.postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
-//        given(this.blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(List.of(blockUser));
+//        given(postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
+//        given(blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(List.of(blockUser));
 //
 //        // when
 //        final UnauthorizedException ex = assertThrows(
 //                UnauthorizedException.class,
-//                () -> this.postService.findPost(user, "blockedPostId")
+//                () -> postService.findPost(user, "blockedPostId")
 //        );
 //
 //        // then
@@ -261,7 +260,7 @@ public class PostServiceTest {
                     USER_ID
             )).thenReturn(post);
 
-            given(this.postRepository.save(post)).willReturn(post);
+            given(postRepository.save(post)).willReturn(post);
 
             mockedClimbingHistory.when(() -> ClimbingHistory.of(
                     post,
@@ -269,10 +268,10 @@ public class PostServiceTest {
                     1
             )).thenReturn(climbingHistory);
 
-            given(this.climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
+            given(climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
 
             // when
-            PostResponseDto postResponseDto = this.postService.createPost(USER_ID, postCreateRequestDto);
+            var postResponseDto = postService.createPost(USER_ID, postCreateRequestDto);
 
             // then
             assertThat(postResponseDto)
@@ -297,8 +296,8 @@ public class PostServiceTest {
                     List.of(new PostContentsDto("test.com/test.png"))
             );
 
-            given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
-            given(this.postRepository.save(post)).willReturn(post);
+            given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
+            given(postRepository.save(post)).willReturn(post);
 
             mockedClimbingHistory.when(() -> ClimbingHistory.of(
                     post,
@@ -306,10 +305,10 @@ public class PostServiceTest {
                     1
             )).thenReturn(climbingHistory);
 
-            given(this.climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
+            given(climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
 
             // when
-            PostResponseDto postResponseDto = this.postService.updatePost(USER_ID, "testPostId", postUpdateRequestDto);
+            var postResponseDto = postService.updatePost(USER_ID, post.getId(), postUpdateRequestDto);
 
             // then
             assertThat(postResponseDto)
@@ -331,12 +330,12 @@ public class PostServiceTest {
                 List.of(new PostContentsDto("test.com/test.png"))
         );
 
-        given(this.postRepository.findByIdAndIsDeletedFalse("testPostId")).willReturn(Optional.of(post));
+        given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
 
         // when
         final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> this.postService.updatePost("wrongId", "testPostId", postUpdateRequestDto)
+                () -> postService.updatePost("wrongId", post.getId(), postUpdateRequestDto)
         );
 
         // then
@@ -349,30 +348,30 @@ public class PostServiceTest {
     @DisplayName("Success case for delete post")
     void successDeletePost() {
         // given
-        given(this.postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
+        given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
 
-        given(this.postRepository.save(post)).willReturn(post);
+        given(postRepository.save(post)).willReturn(post);
 
         // when
-        PostResponseDto postResponseDto = this.postService.deletePost(USER_ID, post.getId());
+        var postResponseDto = postService.deletePost(USER_ID, post.getId());
 
         // then
         assertThat(postResponseDto)
                 .isNotNull()
                 .extracting("postId", "isDeleted")
-                .contains(post.getId(), true);
+                .contains(post.getId(), post.getIsDeleted());
     }
 
     @Test
     @DisplayName("Failure case for post delete when request user is not writer")
     void failureDeletePost() {
         // given
-        given(this.postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
+        given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
 
         // when
         final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> this.postService.deletePost("wrongId", post.getId())
+                () -> postService.deletePost("wrongId", post.getId())
         );
 
         // then
@@ -391,15 +390,15 @@ public class PostServiceTest {
                     "testContent"
             );
 
-            given(this.postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
-            given(this.postReportRepository.findByReporterIdAndPost(USER_ID, post)).willReturn(Optional.empty());
+            given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
+            given(postReportRepository.findByReporterIdAndPost(USER_ID, post)).willReturn(Optional.empty());
 
             mockedPostReport.when(() -> PostReport.of(USER_ID, post, PostReportType.INAPPROPRIATE_POST, "testContent")).thenReturn(postReport);
 
-            given(this.postReportRepository.save(this.postReport)).willReturn(postReport);
+            given(postReportRepository.save(postReport)).willReturn(postReport);
 
             // when
-            PostReportResponseDto postReportResponseDto = this.postService.createReport(USER_ID, post.getId(), postReportRequestDto);
+            var postReportResponseDto = postService.createReport(USER_ID, post.getId(), postReportRequestDto);
 
             // then
             assertThat(postReportResponseDto)

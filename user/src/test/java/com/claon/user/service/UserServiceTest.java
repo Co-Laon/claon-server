@@ -1,6 +1,5 @@
 package com.claon.user.service;
 
-import com.claon.user.common.domain.Pagination;
 import com.claon.user.common.domain.PaginationFactory;
 import com.claon.user.common.exception.ErrorCode;
 import com.claon.user.common.exception.UnauthorizedException;
@@ -25,11 +24,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -62,7 +58,7 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.publicUser = User.of(
+        publicUser = User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -72,9 +68,9 @@ public class UserServiceTest {
                 "",
                 "instagramId"
         );
-        ReflectionTestUtils.setField(this.publicUser, "id", "publicUserId");
+        ReflectionTestUtils.setField(publicUser, "id", "publicUserId");
 
-        this.privateUser = User.of(
+        privateUser = User.of(
                 "test12@gmail.com",
                 "1234567823",
                 "private user",
@@ -84,10 +80,10 @@ public class UserServiceTest {
                 "",
                 "instagramId"
         );
-        this.privateUser.changePublicScope();
-        ReflectionTestUtils.setField(this.privateUser, "id", "privateUserId");
+        privateUser.changePublicScope();
+        ReflectionTestUtils.setField(privateUser, "id", "privateUserId");
 
-        this.user = User.of(
+        user = User.of(
                 "test@gmail.com",
                 "1234567890",
                 "test",
@@ -97,24 +93,24 @@ public class UserServiceTest {
                 "",
                 "instagramId"
         );
-        ReflectionTestUtils.setField(this.user, "id", "userId");
+        ReflectionTestUtils.setField(user, "id", "userId");
 
-        this.blockUser = BlockUser.of(
+        blockUser = BlockUser.of(
                 user,
                 publicUser
         );
-        ReflectionTestUtils.setField(this.blockUser, "id", "block");
+        ReflectionTestUtils.setField(blockUser, "id", "block");
     }
 
     @Test
     @DisplayName("Success case for set public user private account")
     void successSetPrivateAccount() {
         // given
-        given(this.userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
-        given(this.userRepository.save(publicUser)).willReturn(publicUser);
+        given(userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
+        given(userRepository.save(publicUser)).willReturn(publicUser);
 
         // when
-        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope(publicUser.getId());
+        var publicScopeResponseDto = userService.changePublicScope(publicUser.getId());
 
         // then
         assertThat(publicScopeResponseDto.getIsPrivate()).isTrue();
@@ -124,11 +120,11 @@ public class UserServiceTest {
     @DisplayName("Success case for set private user public account")
     void successSetPublicAccount() {
         // given
-        given(this.userRepository.findById(privateUser.getId())).willReturn(Optional.of(privateUser));
-        given(this.userRepository.save(privateUser)).willReturn(privateUser);
+        given(userRepository.findById(privateUser.getId())).willReturn(Optional.of(privateUser));
+        given(userRepository.save(privateUser)).willReturn(privateUser);
 
         // when
-        PublicScopeResponseDto publicScopeResponseDto = this.userService.changePublicScope(privateUser.getId());
+        var publicScopeResponseDto = userService.changePublicScope(privateUser.getId());
 
         // then
         assertThat(publicScopeResponseDto.getIsPrivate()).isFalse();
@@ -138,7 +134,7 @@ public class UserServiceTest {
 //    @DisplayName("Success case for retrieving me")
 //    void successRetrieveMe() {
 //        // when
-//        UserDetailResponseDto userResponseDto = this.userService.retrieveMe(user.getId());
+//        UserDetailResponseDto userResponseDto = userService.retrieveMe(user.getId());
 //
 //        // then
 //        assertThat(userResponseDto)
@@ -151,9 +147,9 @@ public class UserServiceTest {
 //    @DisplayName("Success case for retrieving single other user")
 //    void successRetrieveUser() {
 //        // given
-//        given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(user));
-//        given(this.postPort.selectPostIdsByUserId("userId")).willReturn(postIds);
-//        given(this.laonRepository.getUserIdsByLaonId("userId")).willReturn(List.of("publicUserId"));
+//        given(userRepository.findByNickname("userNickname")).willReturn(Optional.of(user));
+//        given(postPort.selectPostIdsByUserId("userId")).willReturn(postIds);
+//        given(laonRepository.getUserIdsByLaonId("userId")).willReturn(List.of("publicUserId"));
 //
 //        CenterClimbingHistoryResponseDto historyDto = CenterClimbingHistoryResponseDto.from(
 //                UserCenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
@@ -168,10 +164,10 @@ public class UserServiceTest {
 //                ))
 //        );
 //
-//        given(this.postPort.findClimbingHistoryByPostIds((this.postIds))).willReturn(List.of(historyDto));
+//        given(postPort.findClimbingHistoryByPostIds((postIds))).willReturn(List.of(historyDto));
 //
 //        // when
-//        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation(publicUser, "userNickname");
+//        IndividualUserResponseDto userResponseDto = userService.getOtherUserInformation(publicUser, "userNickname");
 //
 //        // then
 //        assertThat(userResponseDto)
@@ -197,9 +193,9 @@ public class UserServiceTest {
 //    @DisplayName("Success case for retrieving single other private user")
 //    void successRetrievePrivateUser() {
 //        // given
-//        given(this.userRepository.findByNickname("userNickname")).willReturn(Optional.of(privateUser));
-//        given(this.postPort.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
-//        given(this.laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(List.of());
+//        given(userRepository.findByNickname("userNickname")).willReturn(Optional.of(privateUser));
+//        given(postPort.selectPostIdsByUserId("privateUserId")).willReturn(postIds);
+//        given(laonRepository.getUserIdsByLaonId("privateUserId")).willReturn(List.of());
 //
 //        CenterClimbingHistoryResponseDto historyDto = CenterClimbingHistoryResponseDto.from(
 //                UserCenterPreviewResponseDto.of(center.getThumbnailUrl(), center.getName()),
@@ -214,10 +210,10 @@ public class UserServiceTest {
 //                ))
 //        );
 //
-//        given(this.postPort.findClimbingHistoryByPostIds((this.postIds))).willReturn(List.of(historyDto));
+//        given(postPort.findClimbingHistoryByPostIds((postIds))).willReturn(List.of(historyDto));
 //
 //        // when
-//        IndividualUserResponseDto userResponseDto = this.userService.getOtherUserInformation(publicUser, "userNickname");
+//        IndividualUserResponseDto userResponseDto = userService.getOtherUserInformation(publicUser, "userNickname");
 //
 //        // then
 //        assertThat(userResponseDto)
@@ -249,8 +245,8 @@ public class UserServiceTest {
 //        ReflectionTestUtils.setField(post, "updatedAt", LocalDateTime.now());
 //
 //        Pageable pageable = PageRequest.of(0, 2);
-//        given(this.userRepository.findByNickname(this.publicUser.getNickname())).willReturn(Optional.of(this.publicUser));
-//        given(this.blockUserRepository.findBlock(this.publicUser.getId(), user.getId())).willReturn(List.of());
+//        given(userRepository.findByNickname(publicUser.getNickname())).willReturn(Optional.of(publicUser));
+//        given(blockUserRepository.findBlock(publicUser.getId(), user.getId())).willReturn(List.of());
 //        Pagination<UserPostThumbnailResponseDto> postPagination = paginationFactory.create(new PageImpl<>(
 //                List.of(UserPostThumbnailResponseDto.from(
 //                        post.getId(),
@@ -268,10 +264,10 @@ public class UserServiceTest {
 //                                .collect(Collectors.toList()))),
 //                pageable,
 //                1));
-//        given(this.postPort.findPostsByUser(this.publicUser, pageable)).willReturn(postPagination);
+//        given(postPort.findPostsByUser(publicUser, pageable)).willReturn(postPagination);
 //
 //        // when
-//        Pagination<UserPostThumbnailResponseDto> dtos = this.userService.findPostsByUser(user, this.publicUser.getNickname(), pageable);
+//        Pagination<UserPostThumbnailResponseDto> dtos = userService.findPostsByUser(user, publicUser.getNickname(), pageable);
 //
 //        //then
 //        assertThat(dtos.getResults())
@@ -287,12 +283,12 @@ public class UserServiceTest {
     void failFindPosts() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
+        given(userRepository.findByNickname(privateUser.getNickname())).willReturn(Optional.of(privateUser));
 
         // when
         final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> this.userService.findPostsByUser(user.getId(), this.privateUser.getNickname(), pageable)
+                () -> userService.findPostsByUser(user.getId(), privateUser.getNickname(), pageable)
         );
 
         // then
@@ -308,11 +304,11 @@ public class UserServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         Page<User> userPage = new PageImpl<>(List.of(privateUser), pageable, 2);
 
-        given(this.userRepositorySupport.searchUser(user.getId(), privateUser.getNickname(), pageable)).willReturn(userPage);
-        given(this.laonRepository.findByLaonIdAndUserId(privateUser.getId(), user.getId())).willReturn(Optional.empty());
+        given(userRepositorySupport.searchUser(user.getId(), privateUser.getNickname(), pageable)).willReturn(userPage);
+        given(laonRepository.findByLaonIdAndUserId(privateUser.getId(), user.getId())).willReturn(Optional.empty());
 
         // when
-        Pagination<UserPreviewResponseDto> userPreviewResponseDtoPagination = this.userService.searchUser(user.getId(), privateUser.getNickname(), pageable);
+        var userPreviewResponseDtoPagination = userService.searchUser(user.getId(), privateUser.getNickname(), pageable);
 
         // then
         assertThat(userPreviewResponseDtoPagination.getResults())
@@ -336,27 +332,27 @@ public class UserServiceTest {
                 "dfdf"
         );
 
-        given(this.userRepository.findById(user.getId())).willReturn(Optional.of(user));
-        given(this.userRepository.save(this.user)).willReturn(this.user);
+        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(userRepository.save(user)).willReturn(user);
 
         // when
-        UserResponseDto userResponseDto = this.userService.modifyUser(user.getId(), dto);
+        UserResponseDto userResponseDto = userService.modifyUser(user.getId(), dto);
 
         // then
         assertThat(userResponseDto)
                 .isNotNull()
                 .extracting("email", "nickname")
-                .contains("test@gmail.com", "nickname");
+                .contains(user.getEmail(), dto.getNickname());
     }
 
     @Test
     @DisplayName("Success case for delete user")
     void successDeleteUser() {
         // given
-        given(this.userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
 
         // when
-        this.userService.delete(this.user.getId());
+        userService.delete(user.getId());
 
         // then
     }
@@ -365,8 +361,8 @@ public class UserServiceTest {
 //    @DisplayName("Success case for find history using center and user")
 //    void successFindByCenterIdAndUserId() {
 //        // given
-//        given(this.userRepository.findByNickname(this.user.getNickname())).willReturn(Optional.of(this.user));
-//        given(this.centerPort.existsByCenterId(this.center.getId())).willReturn(true);
+//        given(userRepository.findByNickname(user.getNickname())).willReturn(Optional.of(user));
+//        given(centerPort.existsByCenterId(center.getId())).willReturn(true);
 //
 //        ClimbingHistoryResponseDto climbingHistoryResponseDto3 = ClimbingHistoryResponseDto.from(
 //                HoldInfoResponseDto.of(
@@ -387,10 +383,10 @@ public class UserServiceTest {
 //
 //        List<HistoryGroupByMonthDto> historyGroup = List.of(HistoryGroupByMonthDto.from(post3.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM")), histories));
 //
-//        given(this.postPort.findByCenterIdAndUserId(center.getId(), user3.getId())).willReturn(historyGroup);
+//        given(postPort.findByCenterIdAndUserId(center.getId(), user3.getId())).willReturn(historyGroup);
 //
 //        // when
-//        List<HistoryGroupByMonthDto> results = this.userService.findHistoryByCenterIdAndUserId(user, user3.getNickname(), center.getId());
+//        List<HistoryGroupByMonthDto> results = userService.findHistoryByCenterIdAndUserId(user, user3.getNickname(), center.getId());
 //
 //        // then
 //        assertThat(results.get(0))
@@ -403,12 +399,12 @@ public class UserServiceTest {
     @DisplayName("failure case for find history using center and user because of block relation")
     void failureFindByCenterIdAndUserId_forPrivateUser() {
         // given
-        given(this.userRepository.findByNickname(this.privateUser.getNickname())).willReturn(Optional.of(this.privateUser));
+        given(userRepository.findByNickname(privateUser.getNickname())).willReturn(Optional.of(privateUser));
 
         // when
         final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> this.userService.findHistoryByCenterIdAndUserId(user.getId(), this.privateUser.getNickname(), CENTER_ID)
+                () -> userService.findHistoryByCenterIdAndUserId(user.getId(), privateUser.getNickname(), CENTER_ID)
         );
 
         // then
@@ -429,11 +425,11 @@ public class UserServiceTest {
 //                        center.getName()
 //                )), pageable, 1);
 //
-//        given(this.userRepository.findByNickname(this.user.getNickname())).willReturn(Optional.of(this.user));
-//        given(this.postPort.selectDistinctCenterByUser(this.user, pageable)).willReturn(postPagination);
+//        given(userRepository.findByNickname(user.getNickname())).willReturn(Optional.of(user));
+//        given(postPort.selectDistinctCenterByUser(user, pageable)).willReturn(postPagination);
 //
 //        // when
-//        Pagination<UserCenterResponseDto> postHistory = this.userService.findCenterHistory(this.user, this.user.getNickname(), pageable);
+//        Pagination<UserCenterResponseDto> postHistory = userService.findCenterHistory(user, user.getNickname(), pageable);
 //        // then
 //        assertThat(postHistory.getResults().size()).isEqualTo(1);
 //    }
@@ -464,11 +460,11 @@ public class UserServiceTest {
 //                centerInfo, histories
 //        );
 //
-//        given(this.userRepository.findByNickname(this.user3.getNickname())).willReturn(Optional.of(this.user3));
-//        given(this.postPort.findHistoryByDate(user3.getId(), LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue())).willReturn(List.of(historyDto));
+//        given(userRepository.findByNickname(user3.getNickname())).willReturn(Optional.of(user3));
+//        given(postPort.findHistoryByDate(user3.getId(), LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue())).willReturn(List.of(historyDto));
 //
 //        // when
-//        List<HistoryByDateFindResponseDto> results = this.userService.findHistoryByDateAndUserId(user, user3.getNickname(), LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue());
+//        List<HistoryByDateFindResponseDto> results = userService.findHistoryByDateAndUserId(user, user3.getNickname(), LocalDateTime.now().getYear(), LocalDateTime.now().getMonthValue());
 //
 //        // then
 //        assertThat(results.get(0))
@@ -481,13 +477,13 @@ public class UserServiceTest {
     @DisplayName("failure case for find history using center and user because of block relation")
     void failureFindHistoryByDate_forBlockUser() {
         // given
-        given(this.userRepository.findByNickname(this.publicUser.getNickname())).willReturn(Optional.of(this.publicUser));
-        given(this.blockUserRepository.findBlock(this.publicUser.getId(), this.user.getId())).willReturn(List.of(this.blockUser));
+        given(userRepository.findByNickname(publicUser.getNickname())).willReturn(Optional.of(publicUser));
+        given(blockUserRepository.findBlock(publicUser.getId(), user.getId())).willReturn(List.of(blockUser));
 
         // when
         final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> this.userService.findHistoryByCenterIdAndUserId(user.getId(), this.publicUser.getNickname(), CENTER_ID)
+                () -> userService.findHistoryByCenterIdAndUserId(user.getId(), publicUser.getNickname(), CENTER_ID)
         );
 
         // then
