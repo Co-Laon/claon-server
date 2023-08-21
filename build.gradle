@@ -24,31 +24,19 @@ subprojects {
 
 	group = 'com.claon'
 
-	dependencies {
-		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-		implementation 'org.springframework.boot:spring-boot-starter-web'
-		implementation 'org.springframework.boot:spring-boot-starter-validation'
-		implementation 'org.springframework.boot:spring-boot-configuration-processor'
-		implementation 'org.jetbrains:annotations:24.0.0'
-		runtimeOnly 'com.h2database:h2'
-		runtimeOnly 'org.postgresql:postgresql'
+	ext {
+		springCloudVersion = "2022.0.3"
+	}
 
+	dependencyManagement {
+		imports {
+			mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		}
+	}
+
+	dependencies {
 		compileOnly 'org.projectlombok:lombok'
 		annotationProcessor 'org.projectlombok:lombok'
-
-		// swagger
-		implementation 'io.springfox:springfox-boot-starter:3.0.0'
-
-		// security
-		implementation 'org.springframework.boot:spring-boot-starter-security'
-
-		// test
-		testRuntimeOnly 'com.h2database:h2'
-		implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
-		implementation 'org.mockito:mockito-junit-jupiter:4.6.1'
-		testImplementation 'org.springframework.boot:spring-boot-starter-test'
-		testImplementation 'org.mockito:mockito-inline:4.6.1'
-		testImplementation 'org.springframework.security:spring-security-test'
 	}
 
 	configurations {
@@ -76,6 +64,28 @@ project(':center') {
 	}
 
 	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter-validation'
+		implementation 'org.springframework.boot:spring-boot-configuration-processor'
+		implementation 'org.jetbrains:annotations:24.0.0'
+		runtimeOnly 'com.h2database:h2'
+		runtimeOnly 'org.postgresql:postgresql'
+
+		// swagger
+		implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+		// security
+		implementation 'org.springframework.boot:spring-boot-starter-security'
+
+		// test
+		testRuntimeOnly 'com.h2database:h2'
+		implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+		implementation 'org.mockito:mockito-junit-jupiter:4.6.1'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testImplementation 'org.mockito:mockito-inline:4.6.1'
+		testImplementation 'org.springframework.security:spring-security-test'
+
 		// querydsl
 		implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 		annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
@@ -98,6 +108,28 @@ project(':post') {
 	}
 
 	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter-validation'
+		implementation 'org.springframework.boot:spring-boot-configuration-processor'
+		implementation 'org.jetbrains:annotations:24.0.0'
+		runtimeOnly 'com.h2database:h2'
+		runtimeOnly 'org.postgresql:postgresql'
+
+		// swagger
+		implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+		// security
+		implementation 'org.springframework.boot:spring-boot-starter-security'
+
+		// test
+		testRuntimeOnly 'com.h2database:h2'
+		implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+		implementation 'org.mockito:mockito-junit-jupiter:4.6.1'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testImplementation 'org.mockito:mockito-inline:4.6.1'
+		testImplementation 'org.springframework.security:spring-security-test'
+
 		// querydsl
 		implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 		annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
@@ -120,6 +152,28 @@ project(':user') {
 	}
 
 	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter-validation'
+		implementation 'org.springframework.boot:spring-boot-configuration-processor'
+		implementation 'org.jetbrains:annotations:24.0.0'
+		runtimeOnly 'com.h2database:h2'
+		runtimeOnly 'org.postgresql:postgresql'
+
+		// swagger
+		implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+		// security
+		implementation 'org.springframework.boot:spring-boot-starter-security'
+
+		// test
+		testRuntimeOnly 'com.h2database:h2'
+		implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+		implementation 'org.mockito:mockito-junit-jupiter:4.6.1'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testImplementation 'org.mockito:mockito-inline:4.6.1'
+		testImplementation 'org.springframework.security:spring-security-test'
+
 		// querydsl
 		implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 		annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
@@ -130,6 +184,28 @@ project(':user') {
 
 project(':gateway') {
 	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter-validation'
+		implementation 'org.springframework.boot:spring-boot-configuration-processor'
+		implementation 'org.jetbrains:annotations:24.0.0'
+		runtimeOnly 'com.h2database:h2'
+		runtimeOnly 'org.postgresql:postgresql'
+
+		// swagger
+		implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+		// security
+		implementation 'org.springframework.boot:spring-boot-starter-security'
+
+		// test
+		testRuntimeOnly 'com.h2database:h2'
+		implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+		implementation 'org.mockito:mockito-junit-jupiter:4.6.1'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testImplementation 'org.mockito:mockito-inline:4.6.1'
+		testImplementation 'org.springframework.security:spring-security-test'
+
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 		implementation 'io.jsonwebtoken:jjwt:0.9.1'
@@ -144,6 +220,9 @@ project(':gateway') {
 
 project(':discovery') {
 	dependencies {
+		implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+		implementation 'org.springframework.boot:spring-boot-starter-security'
 
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	}
 }
