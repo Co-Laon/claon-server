@@ -4,13 +4,6 @@ plugins {
 	id 'java'
 }
 
-group = 'com.claon'
-version = '0.0.1-SNAPSHOT'
-
-java {
-	sourceCompatibility = '17'
-}
-
 allprojects {
 	repositories {
 		mavenCentral()
@@ -23,6 +16,7 @@ subprojects {
 	apply plugin: 'io.spring.dependency-management'
 
 	group = 'com.claon'
+	sourceCompatibility = '17'
 
 	ext {
 		springCloudVersion = "2022.0.3"
@@ -51,6 +45,8 @@ subprojects {
 }
 
 project(':center') {
+	version = '1.0.0'
+
 	ext {
 		querydslDir = file('build/generated/querydsl')
 	}
@@ -99,6 +95,8 @@ project(':center') {
 }
 
 project(':post') {
+	version = '1.0.0'
+
 	ext {
 		querydslDir = file('build/generated/querydsl')
 	}
@@ -147,6 +145,8 @@ project(':post') {
 }
 
 project(':user') {
+	version = '1.0.0'
+
 	ext {
 		querydslDir = file('build/generated/querydsl')
 	}
@@ -195,6 +195,8 @@ project(':user') {
 }
 
 project(':gateway') {
+	version = '1.0.0'
+
 	dependencies {
 		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 		implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -233,6 +235,8 @@ project(':gateway') {
 }
 
 project(':discovery') {
+	version = '1.0.0'
+
 	dependencies {
 		implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
 		implementation 'org.springframework.boot:spring-boot-starter-security'
