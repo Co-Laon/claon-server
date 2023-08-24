@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: member-membership-public-api-service
   security:
     user:
       name: claon
