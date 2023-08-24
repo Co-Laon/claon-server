@@ -47,6 +47,7 @@ public class WebSecurityConfig {
                                 "/api/**/auth/instagram/account",
                                 "/api/**/auth/sign-in/**",
 
+                                "/actuator/**",
                                 "/v2/api-docs", "/v3/api-docs", "/swagger-resources/**",
                                 "/webjars/**", "/swagger/**", "/swagger-ui/**"
                         ).permitAll()

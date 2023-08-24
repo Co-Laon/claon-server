@@ -21,6 +21,17 @@ eureka:
         password: ${spring.security.user.password}
       management.context-path: /actuator
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    logfile:
+      external-file: logs/center/info.log
+    health:
+      show-details: always
+
 ---
 spring:
   config:

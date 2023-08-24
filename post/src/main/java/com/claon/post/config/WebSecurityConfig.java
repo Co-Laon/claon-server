@@ -35,6 +35,7 @@ public class WebSecurityConfig {
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
 
                         .requestMatchers(
+                                "/actuator/**",
                                 "/v2/api-docs", "/v3/api-docs", "/swagger-resources/**",
                                 "/webjars/**", "/swagger/**", "/swagger-ui/**"
                         ).permitAll()
