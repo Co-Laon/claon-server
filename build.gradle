@@ -212,6 +212,7 @@ project(':gateway') {
 
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
+		implementation "org.springframework.cloud:spring-cloud-starter-gateway"
 
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
