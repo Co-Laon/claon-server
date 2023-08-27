@@ -21,7 +21,7 @@ public class HeaderUtil {
         res.addHeader(headerName, value);
     }
 
-    public String getHeader(
+    private String getHeader(
             HttpServletRequest request,
             String headerName
     ) {
@@ -34,20 +34,13 @@ public class HeaderUtil {
     ) {
         this.createHeader(res, this.ACCESS_HEADER_NAME, jwtDto.getAccessToken());
         this.createHeader(res, this.REFRESH_HEADER_NAME, jwtDto.getRefreshToken());
-
-        jwtDto.getIsCompletedSignUp().ifPresent(
-                isCompletedSignUp -> this.createHeader(
-                        res,
-                        "isCompletedSignUp",
-                        isCompletedSignUp.toString()
-                )
-        );
     }
 
-    public JwtDto resolveToken(HttpServletRequest request) {
-        return JwtDto.of(
-                this.getHeader(request, this.ACCESS_HEADER_NAME),
-                this.getHeader(request, this.REFRESH_HEADER_NAME)
-        );
+    public String resolveAccessToken(HttpServletRequest request) {
+        return this.getHeader(request, this.ACCESS_HEADER_NAME);
+    }
+
+    public String resolveRefreshToken(HttpServletRequest request) {
+        return this.getHeader(request, this.REFRESH_HEADER_NAME);
     }
 }

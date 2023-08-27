@@ -1,6 +1,8 @@
 package com.claon.gateway.common.utils;
 
 import com.claon.gateway.common.domain.RefreshToken;
+import com.claon.gateway.common.exception.ErrorCode;
+import com.claon.gateway.common.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,23 +21,28 @@ public class RefreshTokenUtil {
     private Long REFRESH_TOKEN_EXPIRE_TIME;
 
     public void save(RefreshToken refreshToken) {
-        this.redisTemplate.opsForValue().set(refreshToken.getToken(), refreshToken.getUserId());
-        this.redisTemplate.expire(refreshToken.getToken(), REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+        this.redisTemplate.opsForValue().set(refreshToken.getKey(), refreshToken.getUserId());
+        this.redisTemplate.expire(refreshToken.getKey(), REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
     }
 
-    public Optional<RefreshToken> findByToken(String refreshToken) {
-        String userId = this.redisTemplate.opsForValue().get(refreshToken);
+    public Optional<RefreshToken> findByToken(String refreshKey) {
+        String userId = this.redisTemplate.opsForValue().get(refreshKey);
 
         if (Objects.isNull(userId))
             return Optional.empty();
 
-
-        return Optional.of(RefreshToken.of(refreshToken, userId));
+        return Optional.of(RefreshToken.of(refreshKey, userId));
     }
 
-    public void delete(String token) {
-        this.findByToken(token).ifPresent(
-                t -> this.redisTemplate.delete(t.getToken())
-        );
+    public String delete(String token) {
+        return this.findByToken(token).map(
+                t -> {
+                    this.redisTemplate.delete(t.getKey());
+                    return t.getUserId();
+                }
+        ).orElseThrow(() -> new UnauthorizedException(
+                ErrorCode.INVALID_JWT,
+                "Redis 키를 찾을 수 없습니다."
+        ));
     }
 }

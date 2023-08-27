@@ -21,8 +21,6 @@ public class JwtUtil {
 
     @Value("${spring.jwt.access-token.expire-seconds}")
     private Long ACCESS_TOKEN_EXPIRE_TIME;
-    @Value("${spring.jwt.refresh-token.expire-seconds}")
-    private Long REFRESH_TOKEN_EXPIRE_TIME;
 
     @PostConstruct
     protected void init() {
@@ -30,30 +28,26 @@ public class JwtUtil {
     }
 
     public JwtDto createToken(
-            String userPk,
-            Boolean isCompletedSignUp
+            String userPk
     ) {
         Date now = new Date();
         return JwtDto.of(
                 generateAccessToken(userPk, now),
-                generateRefreshToken(userPk, now),
-                isCompletedSignUp);
+                generateRefreshToken(userPk)
+        );
     }
 
     public JwtDto reissueToken(
-            String refreshToken,
-            String userPk
+            String refreshToken
     ) {
-        this.refreshTokenUtil.delete(refreshToken);
+        String userPk = this.refreshTokenUtil.delete(refreshToken);
 
         Date now = new Date();
-        JwtDto newToken = JwtDto.of(
+
+        return JwtDto.of(
                 generateAccessToken(userPk, now),
-                generateRefreshToken(userPk, now));
-
-        this.refreshTokenUtil.save(RefreshToken.of(newToken.getRefreshToken(), userPk));
-
-        return newToken;
+                generateRefreshToken(userPk)
+        );
     }
 
     private String generateAccessToken(String userPk, Date now) {
@@ -67,16 +61,12 @@ public class JwtUtil {
                 .compact();
     }
 
-    private String generateRefreshToken(String userPk, Date now) {
-        String token = Jwts.builder()
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + this.REFRESH_TOKEN_EXPIRE_TIME))
-                .signWith(SignatureAlgorithm.HS256, this.SECRET_KEY)
-                .compact();
+    private String generateRefreshToken(String userPk) {
+        RefreshToken refreshToken = RefreshToken.of(userPk);
 
-        this.refreshTokenUtil.save(RefreshToken.of(token, userPk));
+        this.refreshTokenUtil.save(refreshToken);
 
-        return token;
+        return refreshToken.getKey();
     }
 
     public void deleteRefreshToken(String refreshToken) {

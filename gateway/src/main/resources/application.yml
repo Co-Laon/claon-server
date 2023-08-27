@@ -58,6 +58,22 @@ spring:
       repositories:
         enabled: false
 
+  cloud:
+    gateway:
+      routes:
+        - id: user
+          uri: lb://USER
+          predicates:
+            - Path=/user/**
+        - id: center
+          uri: lb://CENTER
+          predicates:
+            - Path=/center/**
+        - id: post
+          uri: lb:POST
+          predicates:
+            - Path=/post/**
+
 eureka:
   client:
     serviceUrl:
