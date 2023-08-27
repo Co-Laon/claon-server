@@ -7,8 +7,6 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Entity
 @Getter
 @Table(name = "tb_user")
@@ -43,17 +41,6 @@ public class User extends BaseEntity {
 
     private User(
             String email,
-            String nickname,
-            String oAuthId
-    ) {
-        this.email = email;
-        this.nickname = nickname;
-        this.oAuthId = oAuthId;
-        this.isPrivate = false;
-    }
-
-    private User(
-            String email,
             String oAuthId,
             String nickname,
             Float height,
@@ -71,17 +58,6 @@ public class User extends BaseEntity {
         this.instagramOAuthId = instagramOAuthId;
         this.instagramUserName = instagramUserName;
         this.isPrivate = false;
-    }
-
-    public static User createNewUser(
-            String email,
-            String oAuthId
-    ) {
-        return new User(
-                email,
-                UUID.randomUUID().toString(),
-                oAuthId
-        );
     }
 
     public static User of(
@@ -106,7 +82,9 @@ public class User extends BaseEntity {
         );
     }
 
-    public void signUp(
+    public static User signUp(
+            String email,
+            String oAuthId,
             String nickname,
             Float height,
             Float armReach,
@@ -114,22 +92,15 @@ public class User extends BaseEntity {
             String instagramOAuthId,
             String instagramUserName
     ) {
-        this.nickname = nickname;
-        this.height = height;
-        this.armReach = armReach;
-        this.imagePath = imagePath;
-        this.instagramOAuthId = instagramOAuthId;
-        this.instagramUserName = instagramUserName;
-    }
-
-    public Boolean isSignupCompleted() {
-        try {
-            // when nickname is type of UUID,
-            // user is not yet complete Signup
-            UUID.fromString(this.getNickname());
-            return false;
-        } catch (IllegalArgumentException e) {
-            return true;
-        }
+        return new User(
+                email,
+                oAuthId,
+                nickname,
+                height,
+                armReach,
+                imagePath,
+                instagramOAuthId,
+                instagramUserName
+        );
     }
 }

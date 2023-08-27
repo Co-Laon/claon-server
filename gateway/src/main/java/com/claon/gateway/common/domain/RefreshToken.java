@@ -3,18 +3,25 @@ package com.claon.gateway.common.domain;
 import jakarta.persistence.Id;
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
 public class RefreshToken {
     @Id
-    private String token;
-    private String userId;
+    private final String key;
+    private final String userId;
 
-    private RefreshToken(String token, String userId) {
-        this.token = token;
+    private RefreshToken(String key, String userId) {
+        this.key = key;
         this.userId = userId;
     }
 
-    public static RefreshToken of(String token, String userId) {
-        return new RefreshToken(token, userId);
+    public static RefreshToken of(String userId) {
+        String key = UUID.randomUUID().toString();
+        return new RefreshToken(key, userId);
+    }
+
+    public static RefreshToken of(String key, String userId) {
+        return new RefreshToken(key, userId);
     }
 }

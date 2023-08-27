@@ -8,17 +8,6 @@ import java.util.Optional;
 public class JwtDto {
     private final String accessToken;
     private final String refreshToken;
-    private Boolean isCompletedSignUp;
-
-    private JwtDto(
-            String accessToken,
-            String refreshToken,
-            Boolean isCompletedSignUp
-    ) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.isCompletedSignUp = isCompletedSignUp;
-    }
 
     private JwtDto(
             String accessToken,
@@ -26,18 +15,6 @@ public class JwtDto {
     ) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-    }
-
-    public static JwtDto of(
-            String accessToken,
-            String refreshToken,
-            Boolean isCompletedSignUp
-    ) {
-        return new JwtDto(
-                accessToken,
-                refreshToken,
-                isCompletedSignUp
-        );
     }
 
     public static JwtDto of(
@@ -48,9 +25,5 @@ public class JwtDto {
                 accessToken,
                 refreshToken
         );
-    }
-
-    public Optional<Boolean> getIsCompletedSignUp() {
-        return Optional.ofNullable(isCompletedSignUp);
     }
 }

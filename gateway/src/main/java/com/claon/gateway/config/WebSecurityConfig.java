@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
@@ -18,18 +17,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @RequiredArgsConstructor
 public class WebSecurityConfig {
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-
-                .exceptionHandling(handler -> handler
-                        .authenticationEntryPoint(this.jwtAuthenticationEntryPoint)
-                )
 
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -44,17 +36,15 @@ public class WebSecurityConfig {
 
                         .requestMatchers(
                                 "/api/**/auth/nickname/**/duplicate-check",
-                                "/api/**/auth/instagram/account",
                                 "/api/**/auth/sign-in/**",
+                                "/api/**/auth/sign-up/**",
 
                                 "/actuator/**",
                                 "/v2/api-docs", "/v3/api-docs", "/swagger-resources/**",
                                 "/webjars/**", "/swagger/**", "/swagger-ui/**"
                         ).permitAll()
                         .anyRequest().authenticated()
-                )
-
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                );
 
         return http.build();
     }
