@@ -3,6 +3,7 @@ package com.claon.gateway.service;
 import com.claon.gateway.common.domain.JwtDto;
 import com.claon.gateway.common.exception.BadRequestException;
 import com.claon.gateway.common.exception.ErrorCode;
+import com.claon.gateway.common.exception.UnauthorizedException;
 import com.claon.gateway.common.utils.JwtUtil;
 import com.claon.gateway.domain.User;
 import com.claon.gateway.domain.enums.OAuth2Provider;
@@ -35,30 +36,35 @@ public class UserService {
                 .getUserInfo(signInRequestDto.getCode());
 
         User user = this.userRepository.findByEmailAndOAuthId(userInfoDto.getEmail(), userInfoDto.getOAuthId())
-                .orElseGet(() -> this.userRepository.save(User.createNewUser(userInfoDto.getEmail(), userInfoDto.getOAuthId())));
+                .orElseThrow(() -> new UnauthorizedException(
+                        ErrorCode.USER_DOES_NOT_EXIST,
+                        "이용자를 찾을 수 없습니다."
+                ));
 
-        return this.jwtUtil.createToken(
-                user.getId(),
-                user.isSignupCompleted()
-        );
+        return this.jwtUtil.createToken(user.getId());
     }
 
     @Transactional
-    public UserResponseDto signUp(
-            User user,
+    public JwtDto signUp(
+            OAuth2Provider provider,
             SignUpRequestDto signUpRequestDto
     ) {
-        Optional.ofNullable(signUpRequestDto.getInstagramOAuthId()).flatMap(
-                this.userRepository::findByInstagramOAuthId).ifPresent(
-                u -> {
-                    throw new BadRequestException(
-                            ErrorCode.ROW_ALREADY_EXIST,
-                            "이미 가입한 인스타그램 계정입니다."
-                    );
-                }
-        );
+        Optional.ofNullable(signUpRequestDto.getInstagramOAuthId())
+                .flatMap(this.userRepository::findByInstagramOAuthId).ifPresent(
+                        u -> {
+                            throw new BadRequestException(
+                                    ErrorCode.ROW_ALREADY_EXIST,
+                                    "이미 가입한 인스타그램 계정입니다."
+                            );
+                        }
+                );
 
-        user.signUp(
+        OAuth2UserInfoDto userInfoDto = this.oAuth2UserInfoProviderSupplier.getProvider(provider)
+                .getUserInfo(signUpRequestDto.getCode());
+
+        User user = User.signUp(
+                userInfoDto.getEmail(),
+                userInfoDto.getOAuthId(),
                 signUpRequestDto.getNickname(),
                 signUpRequestDto.getHeight() == null ? 0 : signUpRequestDto.getHeight(),
                 signUpRequestDto.getArmReach() == null ? 0 : signUpRequestDto.getArmReach(),
@@ -67,7 +73,11 @@ public class UserService {
                 signUpRequestDto.getInstagramUserName()
         );
 
-        return UserResponseDto.from(userRepository.save(user));
+        return this.jwtUtil.createToken(userRepository.save(user).getId());
+    }
+
+    public JwtDto reissue(String refreshToken) {
+        return this.jwtUtil.reissueToken(refreshToken);
     }
 
     public void signOut(JwtDto jwtDto) {

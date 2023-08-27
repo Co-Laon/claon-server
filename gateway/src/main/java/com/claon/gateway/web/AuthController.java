@@ -2,7 +2,6 @@ package com.claon.gateway.web;
 
 import com.claon.gateway.common.domain.JwtDto;
 import com.claon.gateway.common.utils.HeaderUtil;
-import com.claon.gateway.domain.UserDetails;
 import com.claon.gateway.domain.enums.OAuth2Provider;
 import com.claon.gateway.dto.*;
 import com.claon.gateway.service.UserService;
@@ -11,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -40,17 +38,31 @@ public class AuthController {
         return jwtDto;
     }
 
-    @PostMapping("/sign-up")
+    @PostMapping("/sign-up/{provider}")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public UserResponseDto signUp(
+    public JwtDto signUp(
             HttpServletResponse response,
-            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable OAuth2Provider provider,
             @RequestBody @Valid SignUpRequestDto signUpRequestDto
     ) {
-        UserResponseDto userResponseDto = this.userService.signUp(userDetails.getUser(), signUpRequestDto);
+        JwtDto jwtDto = this.userService.signUp(provider, signUpRequestDto);
 
-        this.headerUtil.createHeader(response, "isCompletedSignUp", Boolean.TRUE.toString());
-        return userResponseDto;
+        this.headerUtil.addToken(response, jwtDto);
+        return jwtDto;
+    }
+
+    @PostMapping("/reissue")
+    @ResponseStatus(value = HttpStatus.OK)
+    public JwtDto reissue(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String refreshToken = this.headerUtil.resolveRefreshToken(request);
+
+        JwtDto newJwtDto = this.userService.reissue(refreshToken);
+
+        this.headerUtil.addToken(response, newJwtDto);
+        return newJwtDto;
     }
 
     @PostMapping("/sign-out")
@@ -58,6 +70,9 @@ public class AuthController {
     public void signOut(
             HttpServletRequest request
     ) {
-        this.userService.signOut(this.headerUtil.resolveToken(request));
+        this.userService.signOut(JwtDto.of(
+                this.headerUtil.resolveAccessToken(request),
+                this.headerUtil.resolveRefreshToken(request)
+        ));
     }
 }

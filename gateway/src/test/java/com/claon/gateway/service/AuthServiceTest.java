@@ -7,7 +7,6 @@ import com.claon.gateway.domain.enums.OAuth2Provider;
 import com.claon.gateway.dto.OAuth2UserInfoDto;
 import com.claon.gateway.dto.SignInRequestDto;
 import com.claon.gateway.dto.SignUpRequestDto;
-import com.claon.gateway.dto.UserResponseDto;
 import com.claon.gateway.infra.OAuth2UserInfoProvider;
 import com.claon.gateway.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +57,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("Success case for sign in for completed user")
+    @DisplayName("Success case for sign in")
     void successSignInForCompletedUser() {
         // given
         SignInRequestDto signInRequestDto = new SignInRequestDto(
@@ -72,15 +71,14 @@ public class AuthServiceTest {
 
         JwtDto jwtDto = JwtDto.of(
                 "access-token",
-                "refresh-token",
-                true
+                "refresh-token"
         );
 
         given(oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(oAuth2UserInfoProvider);
         given(oAuth2UserInfoProvider.getUserInfo(signInRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
 
         given(userRepository.findByEmailAndOAuthId(oAuth2UserInfoDto.getEmail(), oAuth2UserInfoDto.getOAuthId())).willReturn(Optional.of(user));
-        given(jwtUtil.createToken(user.getId(), true)).willReturn(jwtDto);
+        given(jwtUtil.createToken(user.getId())).willReturn(jwtDto);
 
         // when
         var result = userService.signIn(OAuth2Provider.GOOGLE, signInRequestDto);
@@ -93,63 +91,11 @@ public class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("Success case for sign in for first access user")
-    void successSignInForFirstAccessUser() {
-        User firstAccessUser = User.of(
-                "test@gmail.com",
-                "1234567890",
-                "nickname",
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-        ReflectionTestUtils.setField(firstAccessUser, "id", "test");
-
-        try (MockedStatic<User> mockedUser = mockStatic(User.class)) {
-            // given
-            SignInRequestDto signInRequestDto = new SignInRequestDto(
-                    "testCode"
-            );
-
-            OAuth2UserInfoDto oAuth2UserInfoDto = OAuth2UserInfoDto.of(
-                    "1234567890",
-                    "test@gmail.com"
-            );
-
-            JwtDto jwtDto = JwtDto.of(
-                    "access-token",
-                    "refresh-token",
-                    false
-            );
-
-            given(oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(oAuth2UserInfoProvider);
-            given(oAuth2UserInfoProvider.getUserInfo(signInRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
-
-            given(userRepository.findByEmailAndOAuthId(oAuth2UserInfoDto.getEmail(), oAuth2UserInfoDto.getOAuthId())).willReturn(Optional.empty());
-
-            mockedUser.when(() -> User.createNewUser("test@gmail.com", "1234567890")).thenReturn(firstAccessUser);
-            given(userRepository.save(firstAccessUser)).willReturn(firstAccessUser);
-
-            given(jwtUtil.createToken(user.getId(), true)).willReturn(jwtDto);
-
-            // when
-            var result = userService.signIn(OAuth2Provider.GOOGLE, signInRequestDto);
-
-            // then
-            assertThat(result)
-                    .isNotNull()
-                    .extracting("accessToken", "refreshToken")
-                    .contains(result.getAccessToken(), result.getRefreshToken());
-        }
-    }
-
-    @Test
     @DisplayName("Success case for sign up")
     void successSignUp() {
         // given
         SignUpRequestDto signUpRequestDto = new SignUpRequestDto(
+                "testCode",
                 "test",
                 175.0F,
                 178.0F,
@@ -158,15 +104,42 @@ public class AuthServiceTest {
                 "test"
         );
 
-        given(userRepository.save(user)).willReturn(user);
+        OAuth2UserInfoDto oAuth2UserInfoDto = OAuth2UserInfoDto.of(
+                "1234567890",
+                "test@gmail.com"
+        );
 
-        // when
-        var userResponseDto = userService.signUp(user, signUpRequestDto);
+        JwtDto jwtDto = JwtDto.of(
+                "access-token",
+                "refresh-token"
+        );
 
-        // then
-        assertThat(userResponseDto)
-                .isNotNull()
-                .extracting("email", "nickname")
-                .contains("test@gmail.com", "test");
+        try (MockedStatic<User> mockedUser = mockStatic(User.class)) {
+
+            given(oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(oAuth2UserInfoProvider);
+            given(oAuth2UserInfoProvider.getUserInfo(signUpRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
+            mockedUser.when(() -> User.signUp(
+                    "test@gmail.com",
+                    "1234567890",
+                    "test",
+                    175.0F,
+                    178.0F,
+                    "",
+                    "123456",
+                    "test"
+            )).thenReturn(user);
+            given(userRepository.save(user)).willReturn(user);
+
+            given(jwtUtil.createToken(user.getId())).willReturn(jwtDto);
+
+            // when
+            var result = userService.signUp(OAuth2Provider.GOOGLE, signUpRequestDto);
+
+            // then
+            assertThat(result)
+                    .isNotNull()
+                    .extracting("accessToken", "refreshToken")
+                    .contains(result.getAccessToken(), result.getRefreshToken());
+        }
     }
 }
