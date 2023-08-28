@@ -1,8 +1,10 @@
-package com.claon.gateway.common.utils;
+package com.claon.auth.common.utils;
 
-import com.claon.gateway.common.domain.JwtDto;
-import com.claon.gateway.common.domain.RefreshToken;
-import io.jsonwebtoken.*;
+import com.claon.auth.common.domain.JwtDto;
+import com.claon.auth.common.domain.RefreshToken;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

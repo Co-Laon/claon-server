@@ -1,9 +1,9 @@
 server:
-  port: 8000
+  port: 8080
 
 spring:
   application:
-    name: gateway
+    name: auth
   security:
     user:
       name: claon
@@ -28,7 +28,7 @@ management:
         include: "*"
   endpoint:
     logfile:
-      external-file: logs/gateway/info.log
+      external-file: logs/auth/info.log
     health:
       show-details: always
 
@@ -40,25 +40,23 @@ spring:
     import:
       - classpath:auth-config.yml
 
-  cloud:
-    gateway:
-      routes:
-        - id: auth
-          uri: lb://AUTH
-          predicates:
-            - Path=/auth/**
-        - id: user
-          uri: lb://USER
-          predicates:
-            - Path=/user/**
-        - id: center
-          uri: lb://CENTER
-          predicates:
-            - Path=/center/**
-        - id: post
-          uri: lb:POST
-          predicates:
-            - Path=/post/**
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/claon_db
+    username: colaon_user
+    password: colaon_password
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      repositories:
+        enabled: false
 
 eureka:
   client:

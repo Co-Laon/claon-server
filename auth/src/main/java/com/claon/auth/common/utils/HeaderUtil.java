@@ -1,6 +1,6 @@
-package com.claon.gateway.common.utils;
+package com.claon.auth.common.utils;
 
-import com.claon.gateway.common.domain.JwtDto;
+import com.claon.auth.common.domain.JwtDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
