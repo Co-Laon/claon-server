@@ -4,13 +4,13 @@ import com.claon.auth.common.domain.JwtDto;
 import com.claon.auth.common.domain.RefreshToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import jakarta.annotation.PostConstruct;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Base64;
+import java.security.Key;
 import java.util.Date;
 
 @Component
@@ -24,9 +24,9 @@ public class JwtUtil {
     @Value("${spring.jwt.access-token.expire-seconds}")
     private Long ACCESS_TOKEN_EXPIRE_TIME;
 
-    @PostConstruct
-    protected void init() {
-        this.SECRET_KEY = Base64.getEncoder().encodeToString(this.SECRET_KEY.getBytes());
+    private Key getSignedKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public JwtDto createToken(
@@ -59,7 +59,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + this.ACCESS_TOKEN_EXPIRE_TIME))
-                .signWith(SignatureAlgorithm.HS256, this.SECRET_KEY)
+                .signWith(getSignedKey())
                 .compact();
     }
 

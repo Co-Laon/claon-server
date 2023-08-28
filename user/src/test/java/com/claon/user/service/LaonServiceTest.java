@@ -59,25 +59,17 @@ public class LaonServiceTest {
     void setUp() {
         laon = User.of(
                 "test@gmail.com",
-                "1234567890",
                 "laonNickname",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId"
+                178.0F
         );
         ReflectionTestUtils.setField(laon, "id", "laonId");
 
         user = User.of(
                 "test@gmail.com",
-                "1234567222",
                 "userNickname",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId2"
+                178.0F
         );
         ReflectionTestUtils.setField(user, "id", "userId");
 
@@ -149,7 +141,7 @@ public class LaonServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 2);
         Page<LaonFindResponseDto> laonPage = new PageImpl<>(List.of(
-                new LaonFindResponseDto(laonRelation.getLaon().getNickname(), laonRelation.getLaon().getImagePath())
+                new LaonFindResponseDto(laonRelation.getLaon().getNickname())
         ), pageable, 2);
 
         given(laonRepositorySupport.findAllByUserId(user.getId(), pageable)).willReturn(laonPage);
@@ -160,9 +152,9 @@ public class LaonServiceTest {
         // then
         assertThat(laonFindResponseDto.getResults())
                 .isNotNull()
-                .extracting(LaonFindResponseDto::getLaonNickname, LaonFindResponseDto::getLaonProfileImage)
+                .extracting(LaonFindResponseDto::getLaonNickname)
                 .containsExactly(
-                        tuple(laon.getNickname(), laon.getImagePath())
+                        laon.getNickname()
                 );
     }
 

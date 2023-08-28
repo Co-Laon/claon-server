@@ -29,7 +29,7 @@ public class LaonRepositorySupport extends QuerydslRepositorySupport {
 
     public Page<LaonFindResponseDto> findAllByUserId(String userId, Pageable pageable) {
         JPQLQuery<LaonFindResponseDto> query = jpaQueryFactory
-                .select(new QLaonFindResponseDto(laon1.laon.nickname, laon1.laon.imagePath))
+                .select(new QLaonFindResponseDto(laon1.laon.nickname))
                 .from(laon1)
                 .where(laon1.user.id.eq(userId)
                         .and(laon1.laon.id.notIn(

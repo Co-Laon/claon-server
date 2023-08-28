@@ -34,35 +34,23 @@ public class LaonRepositoryTest {
     void setUp() {
         user = userRepository.save(User.of(
                 "test@gmail.com",
-                "1234567890",
                 "test",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId"
+                178.0F
         ));
 
         laonUser = userRepository.save(User.of(
                 "laon@gmail.com",
-                "1234567890",
                 "laon",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId"
+                178.0F
         ));
 
         User blockUser = userRepository.save(User.of(
                 "block@gmail.com",
-                "1234567890",
                 "block",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramBlockId"
+                178.0F
         ));
 
         laonRepository.save(Laon.of(

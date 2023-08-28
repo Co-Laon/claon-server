@@ -2,7 +2,6 @@ package com.claon.auth.web;
 
 import com.claon.auth.common.domain.JwtDto;
 import com.claon.auth.common.utils.HeaderUtil;
-import com.claon.auth.domain.enums.OAuth2Provider;
 import com.claon.auth.dto.DuplicatedCheckResponseDto;
 import com.claon.auth.dto.SignInRequestDto;
 import com.claon.auth.dto.SignUpRequestDto;
@@ -27,27 +26,25 @@ public class AuthController {
         return this.userService.nicknameDuplicatedCheck(nickname);
     }
 
-    @PostMapping("/sign-in/{provider}")
+    @PostMapping("/sign-in")
     @ResponseStatus(value = HttpStatus.OK)
     public JwtDto signIn(
             HttpServletResponse response,
-            @PathVariable OAuth2Provider provider,
             @RequestBody @Valid SignInRequestDto signInRequestDto
     ) {
-        JwtDto jwtDto = this.userService.signIn(provider, signInRequestDto);
+        JwtDto jwtDto = this.userService.signIn(signInRequestDto);
 
         this.headerUtil.addToken(response, jwtDto);
         return jwtDto;
     }
 
-    @PostMapping("/sign-up/{provider}")
+    @PostMapping("/sign-up")
     @ResponseStatus(value = HttpStatus.CREATED)
     public JwtDto signUp(
             HttpServletResponse response,
-            @PathVariable OAuth2Provider provider,
             @RequestBody @Valid SignUpRequestDto signUpRequestDto
     ) {
-        JwtDto jwtDto = this.userService.signUp(provider, signUpRequestDto);
+        JwtDto jwtDto = this.userService.signUp(signUpRequestDto);
 
         this.headerUtil.addToken(response, jwtDto);
         return jwtDto;

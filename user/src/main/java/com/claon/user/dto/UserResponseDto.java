@@ -10,9 +10,6 @@ public class UserResponseDto {
     private Float height;
     private Float armReach;
     private Float apeIndex;
-    private String imagePath;
-    private String instagramOAuthId;
-    private String instagramUserName;
     private Boolean isPrivate;
 
     private UserResponseDto(
@@ -21,9 +18,6 @@ public class UserResponseDto {
             Float height,
             Float armReach,
             Float apeIndex,
-            String imagePath,
-            String instagramOAuthId,
-            String instagramUserName,
             Boolean isPrivate
     ) {
         this.email = email;
@@ -31,9 +25,6 @@ public class UserResponseDto {
         this.height = height;
         this.armReach = armReach;
         this.apeIndex = apeIndex;
-        this.imagePath = imagePath;
-        this.instagramOAuthId = instagramOAuthId;
-        this.instagramUserName = instagramUserName;
         this.isPrivate = isPrivate;
     }
 
@@ -44,9 +35,6 @@ public class UserResponseDto {
                 user.getHeight(),
                 user.getArmReach(),
                 user.getArmReach() - user.getHeight(),
-                user.getImagePath(),
-                user.getInstagramOAuthId(),
-                user.getInstagramUserName(),
                 user.getIsPrivate()
         );
     }

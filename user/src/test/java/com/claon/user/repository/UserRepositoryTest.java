@@ -34,35 +34,23 @@ public class UserRepositoryTest {
     void setUp() {
         user = userRepository.save(User.of(
                 "test@gmail.com",
-                "1234567890",
                 "test",
                 175.0F,
-                178.0F,
-                "",
-                "123456",
-                "instagramId"
+                178.0F
         ));
 
         searchUser = userRepository.save(User.of(
                 "search@gmail.com",
-                "1234567777",
                 "search",
                 175.0F,
-                178.0F,
-                "",
-                "123477",
-                "instagramId"
+                178.0F
         ));
 
         User blockedUser = userRepository.save(User.of(
                 "block@gmail.com",
-                "1234564444",
                 "sear",
                 175.0F,
-                178.0F,
-                "",
-                "123444",
-                "instagramId"
+                178.0F
         ));
 
         laonRepository.save(Laon.of(user, searchUser));
