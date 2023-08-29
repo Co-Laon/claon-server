@@ -28,7 +28,7 @@ public class NoticeController {
     @PostMapping
     @ResponseStatus(value = HttpStatus.OK)
     public NoticeResponseDto createNotice(
-            @RequestHeader(value = "requestUserId") String userId,
+            @RequestHeader(value = "X-USER-ID") String userId,
             @RequestBody @Valid NoticeCreateRequestDto dto
     ) {
         return noticeService.createNotice(userId, dto);

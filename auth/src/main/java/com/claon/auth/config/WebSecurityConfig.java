@@ -35,9 +35,7 @@ public class WebSecurityConfig {
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
 
                         .requestMatchers(
-                                "/api/**/auth/nickname/**/duplicate-check",
-                                "/api/**/auth/sign-in/**",
-                                "/api/**/auth/sign-up/**",
+                                "/api/v1/auth/**",
 
                                 "/actuator/**",
                                 "/v2/api-docs", "/v3/api-docs", "/swagger-resources/**",

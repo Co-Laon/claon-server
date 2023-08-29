@@ -15,14 +15,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query(value = """
             SELECT * 
             FROM TB_USER AS u 
-            WHERE u.email = :email AND u.oauth_id = :oauth_id
+            WHERE u.email = :email
             """, nativeQuery = true)
-    Optional<User> findByEmailAndOAuthId(@Param("email") String email, @Param("oauth_id") String oAuthId);
-
-    @Query(value = """
-            SELECT * 
-            FROM TB_USER AS u 
-            WHERE u.instagram_oauth_id = :oauth_id
-            """, nativeQuery = true)
-    Optional<User> findByInstagramOAuthId(@Param("oauth_id") String oAuthId);
+    Optional<User> findByEmail(@Param("email") String email);
 }

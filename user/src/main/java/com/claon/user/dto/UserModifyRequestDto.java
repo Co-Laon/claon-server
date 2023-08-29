@@ -15,9 +15,6 @@ public class UserModifyRequestDto {
     private String nickname;
     private Float height;
     private Float armReach;
-    private String imagePath;
-    private String instagramUserName;
-    private String instagramOAuthId;
 
     public Optional<Float> getHeight() {
         return Optional.ofNullable(this.height);

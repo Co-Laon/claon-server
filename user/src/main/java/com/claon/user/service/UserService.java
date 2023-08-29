@@ -142,10 +142,7 @@ public class UserService {
         user.modifyUser(
                 dto.getNickname(),
                 dto.getHeight().orElse(0.0f),
-                dto.getArmReach().orElse(0.0f),
-                dto.getImagePath(),
-                dto.getInstagramUserName(),
-                dto.getInstagramOAuthId()
+                dto.getArmReach().orElse(0.0f)
         );
 
         return UserResponseDto.from(this.userRepository.save(user));

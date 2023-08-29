@@ -60,38 +60,26 @@ public class UserServiceTest {
     void setUp() {
         publicUser = User.of(
                 "test@gmail.com",
-                "1234567890",
                 "test",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId"
+                178.0F
         );
         ReflectionTestUtils.setField(publicUser, "id", "publicUserId");
 
         privateUser = User.of(
                 "test12@gmail.com",
-                "1234567823",
                 "private user",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId"
+                178.0F
         );
         privateUser.changePublicScope();
         ReflectionTestUtils.setField(privateUser, "id", "privateUserId");
 
         user = User.of(
                 "test@gmail.com",
-                "1234567890",
                 "test",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId"
+                178.0F
         );
         ReflectionTestUtils.setField(user, "id", "userId");
 
@@ -313,9 +301,9 @@ public class UserServiceTest {
         // then
         assertThat(userPreviewResponseDtoPagination.getResults())
                 .isNotNull()
-                .extracting(UserPreviewResponseDto::getNickname, UserPreviewResponseDto::getImagePath)
+                .extracting(UserPreviewResponseDto::getNickname)
                 .contains(
-                        tuple(privateUser.getNickname(), privateUser.getImagePath())
+                        privateUser.getNickname()
                 );
     }
 
@@ -326,10 +314,7 @@ public class UserServiceTest {
         UserModifyRequestDto dto = new UserModifyRequestDto(
                 "nickname",
                 175.0F,
-                178.0F,
-                "",
-                "hoonki",
-                "dfdf"
+                178.0F
         );
 
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
