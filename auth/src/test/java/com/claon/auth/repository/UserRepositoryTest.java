@@ -22,13 +22,9 @@ public class UserRepositoryTest {
     void setUp() {
         userRepository.save(User.of(
                 "test@gmail.com",
-                "1234567890",
                 "test",
                 175.0F,
-                178.0F,
-                "",
-                "123456",
-                "instagramId"
+                178.0F
         ));
     }
 
@@ -45,25 +41,12 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void successFindByEmailAndOAuthId() {
+    public void successFindByEmail() {
         // given
         String email = "test@gmail.com";
-        String oAuthId = "1234567890";
 
         // when
-        Optional<User> userOptional = userRepository.findByEmailAndOAuthId(email, oAuthId);
-
-        // then
-        assertThat(userOptional.isPresent()).isEqualTo(true);
-    }
-
-    @Test
-    public void successFindByInstagramOAuthId() {
-        // given
-        String instagramOAuthId = "123456";
-
-        // when
-        Optional<User> userOptional = userRepository.findByInstagramOAuthId(instagramOAuthId);
+        Optional<User> userOptional = userRepository.findByEmail(email);
 
         // then
         assertThat(userOptional.isPresent()).isEqualTo(true);

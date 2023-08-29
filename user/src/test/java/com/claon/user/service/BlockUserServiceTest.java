@@ -57,25 +57,17 @@ public class BlockUserServiceTest {
     void setUp() {
         publicUser = User.of(
                 "test@gmail.com",
-                "1234567890",
                 "test",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId"
+                178.0F
         );
         ReflectionTestUtils.setField(publicUser, "id", "publicUserId");
 
         blockUser = User.of(
                 "block@gmail.com",
-                "1264567890",
                 "testBlockNickname",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId2"
+                178.0F
         );
         ReflectionTestUtils.setField(blockUser, "id", "blockUserId");
 
@@ -163,10 +155,10 @@ public class BlockUserServiceTest {
         assertThat(blockUserFindResponseDto.getResults())
                 .isNotNull()
                 .extracting(
-                        BlockUserFindResponseDto::getBlockUserNickName, BlockUserFindResponseDto::getBlockUserProfileImage
+                        BlockUserFindResponseDto::getBlockUserNickName
                 )
-                .containsExactly(
-                        tuple(blockUser.getNickname(), "")
+                .contains(
+                        blockUser.getNickname()
                 );
     }
 }

@@ -6,11 +6,9 @@ import lombok.Data;
 @Data
 public class LaonFindResponseDto {
     private String laonNickname;
-    private String laonProfileImage;
 
     @QueryProjection
-    public LaonFindResponseDto(String laonNickname, String laonProfileImage) {
+    public LaonFindResponseDto(String laonNickname) {
         this.laonNickname = laonNickname;
-        this.laonProfileImage = laonProfileImage;
     }
 }

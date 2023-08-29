@@ -8,6 +8,8 @@ spring:
     user:
       name: claon
       password: 1234
+  main:
+    web-application-type: reactive
 
 eureka:
   client:
@@ -47,18 +49,29 @@ spring:
           uri: lb://AUTH
           predicates:
             - Path=/auth/**
+          filters:
+            - RewritePath=/auth/(?<segment>.*), /$\{segment}
         - id: user
           uri: lb://USER
           predicates:
             - Path=/user/**
+          filters:
+            - RewritePath=/user/(?<segment>.*), /$\{segment}
+            - AuthenticationHeaderFilter
         - id: center
           uri: lb://CENTER
           predicates:
             - Path=/center/**
+          filters:
+            - RewritePath=/center/(?<segment>.*), /$\{segment}
+            - AuthenticationHeaderFilter
         - id: post
           uri: lb:POST
           predicates:
             - Path=/post/**
+          filters:
+            - RewritePath=/post/(?<segment>.*), /$\{segment}
+            - AuthenticationHeaderFilter
 
 eureka:
   client:

@@ -14,8 +14,6 @@ public class IndividualUserResponseDto {
     private Float height;
     private Float armReach;
     private Float apeIndex;
-    private String imagePath;
-    private String instagramUrl;
     private Boolean isLaon;
     private Boolean isPrivate;
     private List<CenterClimbingHistoryResponseDto> centerClimbingHistories;
@@ -32,7 +30,6 @@ public class IndividualUserResponseDto {
         this.postCount = postCount;
         this.laonCount = laonCount;
         this.isPrivate = user.getIsPrivate();
-        this.imagePath = user.getImagePath();
         this.climbCount = histories.stream()
                 .map(CenterClimbingHistoryResponseDto::getClimbingHistories)
                 .mapToLong(history ->
@@ -66,9 +63,6 @@ public class IndividualUserResponseDto {
             this.height = user.getHeight();
             this.armReach = user.getArmReach();
             this.apeIndex = user.getArmReach() - user.getHeight();
-            if (user.getInstagramUserName() != null) {
-                this.instagramUrl = "https://instagram.com/" + user.getInstagramUserName();
-            }
             this.centerClimbingHistories = histories;
         }
     }

@@ -12,14 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class SignUpRequestDto {
-    @NotBlank(message = "로그인 코드를 입력해주세요.")
-    private String code;
-
+    @NotBlank(message = "이메일을 입력해주세요.")
+    private String email;
     @UserNickname
     private String nickname;
     private Float height;
     private Float armReach;
-    private String imagePath;
-    private String instagramOAuthId;
-    private String instagramUserName;
 }

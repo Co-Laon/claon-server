@@ -8,6 +8,9 @@ spring:
     user:
       name: claon
       password: 1234
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 eureka:
   client:
@@ -48,7 +51,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
 
   data:

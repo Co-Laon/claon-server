@@ -3,11 +3,8 @@ package com.claon.auth.service;
 import com.claon.auth.common.domain.JwtDto;
 import com.claon.auth.common.utils.JwtUtil;
 import com.claon.auth.domain.User;
-import com.claon.auth.domain.enums.OAuth2Provider;
-import com.claon.auth.dto.OAuth2UserInfoDto;
 import com.claon.auth.dto.SignInRequestDto;
 import com.claon.auth.dto.SignUpRequestDto;
-import com.claon.auth.infra.OAuth2UserInfoProvider;
 import com.claon.auth.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,11 +27,7 @@ public class AuthServiceTest {
     @Mock
     UserRepository userRepository;
     @Mock
-    OAuth2UserInfoProviderSupplier oAuth2UserInfoProviderSupplier;
-    @Mock
     JwtUtil jwtUtil;
-    @Mock
-    OAuth2UserInfoProvider oAuth2UserInfoProvider;
 
     @InjectMocks
     UserService userService;
@@ -45,13 +38,9 @@ public class AuthServiceTest {
     void setUp() {
         user = User.of(
                 "test@gmail.com",
-                "1234567890",
                 "test",
                 175.0F,
-                178.0F,
-                "",
-                "123456",
-                "test"
+                178.0F
         );
         ReflectionTestUtils.setField(user, "id", "test");
     }
@@ -61,11 +50,6 @@ public class AuthServiceTest {
     void successSignInForCompletedUser() {
         // given
         SignInRequestDto signInRequestDto = new SignInRequestDto(
-                "testCode"
-        );
-
-        OAuth2UserInfoDto oAuth2UserInfoDto = OAuth2UserInfoDto.of(
-                "1234567890",
                 "test@gmail.com"
         );
 
@@ -74,14 +58,11 @@ public class AuthServiceTest {
                 "refresh-token"
         );
 
-        given(oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(oAuth2UserInfoProvider);
-        given(oAuth2UserInfoProvider.getUserInfo(signInRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
-
-        given(userRepository.findByEmailAndOAuthId(oAuth2UserInfoDto.getEmail(), oAuth2UserInfoDto.getOAuthId())).willReturn(Optional.of(user));
+        given(userRepository.findByEmail(signInRequestDto.getEmail())).willReturn(Optional.of(user));
         given(jwtUtil.createToken(user.getId())).willReturn(jwtDto);
 
         // when
-        var result = userService.signIn(OAuth2Provider.GOOGLE, signInRequestDto);
+        var result = userService.signIn(signInRequestDto);
 
         // then
         assertThat(result)
@@ -95,18 +76,10 @@ public class AuthServiceTest {
     void successSignUp() {
         // given
         SignUpRequestDto signUpRequestDto = new SignUpRequestDto(
-                "testCode",
+                "test@gmail.com",
                 "test",
                 175.0F,
-                178.0F,
-                "",
-                "123456",
-                "test"
-        );
-
-        OAuth2UserInfoDto oAuth2UserInfoDto = OAuth2UserInfoDto.of(
-                "1234567890",
-                "test@gmail.com"
+                178.0F
         );
 
         JwtDto jwtDto = JwtDto.of(
@@ -115,25 +88,18 @@ public class AuthServiceTest {
         );
 
         try (MockedStatic<User> mockedUser = mockStatic(User.class)) {
-
-            given(oAuth2UserInfoProviderSupplier.getProvider(OAuth2Provider.GOOGLE)).willReturn(oAuth2UserInfoProvider);
-            given(oAuth2UserInfoProvider.getUserInfo(signUpRequestDto.getCode())).willReturn(oAuth2UserInfoDto);
             mockedUser.when(() -> User.signUp(
                     "test@gmail.com",
-                    "1234567890",
                     "test",
                     175.0F,
-                    178.0F,
-                    "",
-                    "123456",
-                    "test"
+                    178.0F
             )).thenReturn(user);
             given(userRepository.save(user)).willReturn(user);
 
             given(jwtUtil.createToken(user.getId())).willReturn(jwtDto);
 
             // when
-            var result = userService.signUp(OAuth2Provider.GOOGLE, signUpRequestDto);
+            var result = userService.signUp(signUpRequestDto);
 
             // then
             assertThat(result)

@@ -26,24 +26,16 @@ public class BlockUserRepositoryTest {
     void setUp() {
         user = userRepository.save(User.of(
                 "test@gmail.com",
-                "1234567890",
                 "test",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId"
+                178.0F
         ));
 
         blockUser = userRepository.save(User.of(
                 "block@gmail.com",
-                "1264567890",
                 "testBlockNickname",
                 175.0F,
-                178.0F,
-                "",
-                "",
-                "instagramId2"
+                178.0F
         ));
 
         blockUserRepository.save(BlockUser.of(
