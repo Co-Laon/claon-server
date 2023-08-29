@@ -32,16 +32,7 @@ public class WebSecurityConfig {
                 )
 
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-
-                        .requestMatchers(
-                                "/api/v1/auth/**",
-
-                                "/actuator/**",
-                                "/v2/api-docs", "/v3/api-docs", "/swagger-resources/**",
-                                "/webjars/**", "/swagger/**", "/swagger-ui/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 );
 
         return http.build();
