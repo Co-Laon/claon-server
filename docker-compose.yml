@@ -17,3 +17,8 @@ services:
       - "mode=standalone"
     ports:
       - "6379:6379"
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"

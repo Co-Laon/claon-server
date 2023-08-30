@@ -60,6 +60,11 @@ project(':auth') {
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
 
+		// micrometer
+		implementation "io.micrometer:micrometer-tracing"
+		implementation "io.micrometer:micrometer-tracing-bridge-brave"
+		implementation "io.opentelemetry:opentelemetry-exporter-zipkin"
+
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
 		implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
@@ -110,6 +115,11 @@ project(':center') {
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
 
+		// micrometer
+		implementation "io.micrometer:micrometer-tracing"
+		implementation "io.micrometer:micrometer-tracing-bridge-brave"
+		implementation "io.opentelemetry:opentelemetry-exporter-zipkin"
+
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
 
@@ -156,6 +166,11 @@ project(':post') {
 
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
+
+		// micrometer
+		implementation "io.micrometer:micrometer-tracing"
+		implementation "io.micrometer:micrometer-tracing-bridge-brave"
+		implementation "io.opentelemetry:opentelemetry-exporter-zipkin"
 
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -204,6 +219,11 @@ project(':user') {
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
 
+		// micrometer
+		implementation "io.micrometer:micrometer-tracing"
+		implementation "io.micrometer:micrometer-tracing-bridge-brave"
+		implementation "io.opentelemetry:opentelemetry-exporter-zipkin"
+
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
 
@@ -237,6 +257,11 @@ project(':gateway') {
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
 		implementation "org.springframework.cloud:spring-cloud-starter-gateway"
+
+		// micrometer
+		implementation "io.micrometer:micrometer-tracing"
+		implementation "io.micrometer:micrometer-tracing-bridge-brave"
+		implementation "io.opentelemetry:opentelemetry-exporter-zipkin"
 
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
