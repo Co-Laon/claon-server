@@ -63,7 +63,7 @@ project(':auth') {
 		// micrometer
 		implementation "io.micrometer:micrometer-tracing"
 		implementation "io.micrometer:micrometer-tracing-bridge-brave"
-		implementation "io.opentelemetry:opentelemetry-exporter-zipkin"
+		implementation "io.zipkin.reporter2:zipkin-reporter-brave"
 
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -118,7 +118,7 @@ project(':center') {
 		// micrometer
 		implementation "io.micrometer:micrometer-tracing"
 		implementation "io.micrometer:micrometer-tracing-bridge-brave"
-		implementation "io.opentelemetry:opentelemetry-exporter-zipkin"
+		implementation "io.zipkin.reporter2:zipkin-reporter-brave"
 
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -170,7 +170,7 @@ project(':post') {
 		// micrometer
 		implementation "io.micrometer:micrometer-tracing"
 		implementation "io.micrometer:micrometer-tracing-bridge-brave"
-		implementation "io.opentelemetry:opentelemetry-exporter-zipkin"
+		implementation "io.zipkin.reporter2:zipkin-reporter-brave"
 
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -222,7 +222,7 @@ project(':user') {
 		// micrometer
 		implementation "io.micrometer:micrometer-tracing"
 		implementation "io.micrometer:micrometer-tracing-bridge-brave"
-		implementation "io.opentelemetry:opentelemetry-exporter-zipkin"
+		implementation "io.zipkin.reporter2:zipkin-reporter-brave"
 
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -261,7 +261,7 @@ project(':gateway') {
 		// micrometer
 		implementation "io.micrometer:micrometer-tracing"
 		implementation "io.micrometer:micrometer-tracing-bridge-brave"
-		implementation "io.opentelemetry:opentelemetry-exporter-zipkin"
+		implementation "io.zipkin.reporter2:zipkin-reporter-brave"
 
 		// security
 		implementation 'org.springframework.boot:spring-boot-starter-security'
