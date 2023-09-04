@@ -30,6 +30,10 @@ spring:
         cache-templates: false
 
 eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 10
   client:
+    registry-fetch-interval-seconds: 3
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://127.0.0.1:8761/eureka/
