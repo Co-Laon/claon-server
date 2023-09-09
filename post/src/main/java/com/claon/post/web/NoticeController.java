@@ -1,5 +1,6 @@
 package com.claon.post.web;
 
+import com.claon.post.common.annotation.RequestUser;
 import com.claon.post.common.domain.Pagination;
 import com.claon.post.dto.NoticeCreateRequestDto;
 import com.claon.post.dto.NoticeResponseDto;
@@ -28,7 +29,7 @@ public class NoticeController {
     @PostMapping
     @ResponseStatus(value = HttpStatus.OK)
     public NoticeResponseDto createNotice(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @RequestBody @Valid NoticeCreateRequestDto dto
     ) {
         return noticeService.createNotice(userId, dto);
