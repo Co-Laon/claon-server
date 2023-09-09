@@ -1,5 +1,6 @@
 package com.claon.center.web;
 
+import com.claon.center.common.annotation.RequestUser;
 import com.claon.center.domain.enums.CenterSearchOption;
 import com.claon.center.dto.*;
 import com.claon.center.service.CenterBookmarkService;
@@ -28,7 +29,7 @@ public class CenterController {
     @GetMapping(value = "/{centerId}/posts")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<CenterPostThumbnailResponseDto> getCenterPosts(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @PathVariable String centerId,
             @RequestParam(value = "holdId", required = false) Optional<String> holdId,
             @PageableDefault(size = 9, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
@@ -39,7 +40,7 @@ public class CenterController {
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterResponseDto create(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @RequestBody @Valid CenterCreateRequestDto centerCreateRequestDto
     ) {
         return this.centerService.create(userId, centerCreateRequestDto);
@@ -48,7 +49,7 @@ public class CenterController {
     @GetMapping(value = "/{centerId}")
     @ResponseStatus(value = HttpStatus.OK)
     public CenterDetailResponseDto findCenter(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @PathVariable String centerId
     ) {
         return this.centerService.findCenter(userId, centerId);
@@ -57,7 +58,7 @@ public class CenterController {
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<CenterPreviewResponseDto> getCenterList(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @RequestParam("option") CenterSearchOption option,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -83,7 +84,7 @@ public class CenterController {
     @PostMapping("/{centerId}/review")
     @ResponseStatus(value = HttpStatus.CREATED)
     public ReviewResponseDto createReview(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @PathVariable String centerId,
             @RequestBody @Valid ReviewCreateRequestDto reviewCreateRequestDto
     ) {
@@ -93,7 +94,7 @@ public class CenterController {
     @PutMapping(value = "/review/{reviewId}")
     @ResponseStatus(value = HttpStatus.OK)
     public ReviewResponseDto updateReview(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @PathVariable String reviewId,
             @RequestBody @Valid ReviewUpdateRequestDto updateRequestDto
     ) {
@@ -103,7 +104,7 @@ public class CenterController {
     @DeleteMapping(value = "/review/{reviewId}")
     @ResponseStatus(value = HttpStatus.OK)
     public ReviewResponseDto deleteReview(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @PathVariable String reviewId
     ) {
         return this.centerReviewService.deleteReview(userId, reviewId);
@@ -112,7 +113,7 @@ public class CenterController {
     @GetMapping(value = "/{centerId}/review")
     @ResponseStatus(value = HttpStatus.OK)
     public ReviewBundleFindResponseDto findReviewByCenter(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @PathVariable String centerId,
             @PageableDefault(size = 5) final Pageable pageable
     ) {
@@ -122,7 +123,7 @@ public class CenterController {
     @PostMapping(value = "/{centerId}/bookmark")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterBookmarkResponseDto create(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @PathVariable String centerId
     ) {
         return this.centerBookmarkService.create(userId, centerId);
@@ -131,7 +132,7 @@ public class CenterController {
     @DeleteMapping(value = "/{centerId}/bookmark")
     @ResponseStatus(value = HttpStatus.OK)
     public void delete(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @PathVariable String centerId
     ) {
         this.centerBookmarkService.delete(userId, centerId);
@@ -140,7 +141,7 @@ public class CenterController {
     @PostMapping(value = "/{centerId}/report")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterReportResponseDto createReport(
-            @RequestHeader(value = "X-USER-ID") String userId,
+            @RequestUser String userId,
             @PathVariable String centerId,
             @RequestBody @Valid CenterReportCreateRequestDto centerReportCreateRequestDto
     ) {
