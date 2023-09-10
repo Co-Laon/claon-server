@@ -16,9 +16,6 @@ public class PostResponseDto {
     private final String postId;
     private final String centerId;
     private final String userId;
-//    private final String centerName;
-//    private final String userProfile;
-//    private final String userNickname;
     private final Integer likeCount;
     private final String content;
     private final Boolean isDeleted;
@@ -30,9 +27,6 @@ public class PostResponseDto {
             String postId,
             String centerId,
             String userId,
-//            String centerName,
-//            String userProfile,
-//            String userNickname,
             String content,
             String createdAt,
             Boolean isDeleted,
@@ -42,9 +36,6 @@ public class PostResponseDto {
         this.postId = postId;
         this.centerId = centerId;
         this.userId = userId;
-//        this.centerName = centerName;
-//        this.userProfile = userProfile;
-//        this.userNickname = userNickname;
         this.likeCount = null;
         this.content = content;
         this.createdAt = createdAt;
@@ -58,21 +49,13 @@ public class PostResponseDto {
                 post.getId(),
                 post.getCenterId(),
                 post.getWriterId(),
-//                post.getCenter().getName(),
-//                post.getWriter().getImagePath(),
-//                post.getWriter().getNickname(),
                 post.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(post.getCreatedAt(), ZoneOffset.of("+9"))),
                 post.getIsDeleted(),
                 post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
                 post.getClimbingHistoryList().stream().map(
                                 climbingHistory -> ClimbingHistoryResponseDto.from(
-                                        HoldInfoResponseDto.of(
-                                                climbingHistory.getHoldInfoId()
-//                                                climbingHistory.getHoldInfo().getName(),
-//                                                climbingHistory.getHoldInfo().getImg(),
-//                                                climbingHistory.getHoldInfo().getCrayonImageUrl()
-                                        ),
+                                        climbingHistory.getHoldInfoId(),
                                         climbingHistory.getClimbingCount()))
                         .collect(Collectors.toList())
         );
@@ -83,22 +66,14 @@ public class PostResponseDto {
                 post.getId(),
                 post.getCenterId(),
                 post.getWriterId(),
-//                post.getCenter().getName(),
-//                post.getWriter().getImagePath(),
-//                post.getWriter().getNickname(),
                 post.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(post.getCreatedAt(), ZoneOffset.of("+9"))),
                 post.getIsDeleted(),
                 post.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
-                climbingHistoryList.stream().map(
-                        climbingHistory -> ClimbingHistoryResponseDto.from(
-                                HoldInfoResponseDto.of(
-                                climbingHistory.getHoldInfoId()
-//                                climbingHistory.getHoldInfo().getName(),
-//                                climbingHistory.getHoldInfo().getImg(),
-//                                climbingHistory.getHoldInfo().getCrayonImageUrl()
-                        ),
-                        climbingHistory.getClimbingCount()))
+                climbingHistoryList.stream()
+                        .map(climbingHistory -> ClimbingHistoryResponseDto.from(
+                                climbingHistory.getHoldInfoId(),
+                                climbingHistory.getClimbingCount()))
                         .collect(Collectors.toList())
         );
     }

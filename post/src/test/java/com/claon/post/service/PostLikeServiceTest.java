@@ -1,9 +1,14 @@
 package com.claon.post.service;
 
 import com.claon.post.common.domain.PaginationFactory;
+import com.claon.post.common.domain.RequestUserInfo;
+import com.claon.post.common.exception.ErrorCode;
+import com.claon.post.common.exception.UnauthorizedException;
+import com.claon.post.domain.BlockUser;
 import com.claon.post.domain.Post;
 import com.claon.post.domain.PostLike;
 import com.claon.post.dto.LikeFindResponseDto;
+import com.claon.post.repository.BlockUserRepository;
 import com.claon.post.repository.PostLikeRepository;
 import com.claon.post.repository.PostLikeRepositorySupport;
 import com.claon.post.repository.PostRepository;
@@ -27,6 +32,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -38,6 +44,8 @@ public class PostLikeServiceTest {
     PostLikeRepository postLikeRepository;
     @Mock
     PostLikeRepositorySupport postLikeRepositorySupport;
+    @Mock
+    BlockUserRepository blockUserRepository;
 
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
@@ -45,16 +53,17 @@ public class PostLikeServiceTest {
     @InjectMocks
     PostLikeService postLikeService;
 
-    private final String USER_ID = "USER_ID";
+    private final RequestUserInfo USER_INFO = new RequestUserInfo("USER_ID");
     private PostLike postLike;
-    private Post post, blockedPost, privatePost;
+    private Post post, blockedPost;
+    private BlockUser blockUser;
 
     @BeforeEach
     void setUp() {
         post = Post.of(
                 "CENTER_ID",
                 "testContent",
-                USER_ID,
+                USER_INFO.id(),
                 List.of(),
                 List.of()
         );
@@ -63,32 +72,26 @@ public class PostLikeServiceTest {
         ReflectionTestUtils.setField(post, "updatedAt", LocalDateTime.now());
 
         postLike = PostLike.of(
-                USER_ID,
+                USER_INFO.id(),
                 post
         );
         ReflectionTestUtils.setField(postLike, "id", "testPostLikeId");
 
-//        blockedPost = Post.of(
-//                center,
-//                "testContent3",
-//                blockedUser,
-//                List.of(),
-//                List.of()
-//        );
-//        ReflectionTestUtils.setField(blockedPost, "id", "blockedPostId");
-//        ReflectionTestUtils.setField(blockedPost, "createdAt", LocalDateTime.now());
-//        ReflectionTestUtils.setField(blockedPost, "updatedAt", LocalDateTime.now());
-//
-//        privatePost = Post.of(
-//                center,
-//                "testContent4",
-//                privateUser,
-//                List.of(),
-//                List.of()
-//        );
-//        ReflectionTestUtils.setField(privatePost, "id", "privatePostId");
-//        ReflectionTestUtils.setField(privatePost, "createdAt", LocalDateTime.now());
-//        ReflectionTestUtils.setField(privatePost, "updatedAt", LocalDateTime.now());
+        blockUser = BlockUser.of(
+                USER_INFO.id(),
+                "BLOCKED_ID"
+        );
+
+        blockedPost = Post.of(
+                "centerId",
+                "testContent3",
+                "BLOCKED_ID",
+                List.of(),
+                List.of()
+        );
+        ReflectionTestUtils.setField(blockedPost, "id", "blockedPostId");
+        ReflectionTestUtils.setField(blockedPost, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(blockedPost, "updatedAt", LocalDateTime.now());
     }
 
     @Test
@@ -97,15 +100,15 @@ public class PostLikeServiceTest {
         try (MockedStatic<PostLike> mockedPostLike = mockStatic(PostLike.class)) {
             // given
             given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
-            given(postLikeRepository.findByLikerIdAndPost(USER_ID, post)).willReturn(Optional.empty());
+            given(postLikeRepository.findByLikerIdAndPost(USER_INFO.id(), post)).willReturn(Optional.empty());
 
-            mockedPostLike.when(() -> PostLike.of(USER_ID, post)).thenReturn(postLike);
+            mockedPostLike.when(() -> PostLike.of(USER_INFO.id(), post)).thenReturn(postLike);
             given(postLikeRepository.countByPost(post)).willReturn(1);
 
             given(postLikeRepository.save(postLike)).willReturn(postLike);
 
             // when
-            var likeResponseDto = postLikeService.createLike(USER_ID, post.getId());
+            var likeResponseDto = postLikeService.createLike(USER_INFO, post.getId());
 
             // then
             assertThat(likeResponseDto)
@@ -120,10 +123,10 @@ public class PostLikeServiceTest {
     void successDeleteLike() {
         // given
         given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
-        given(postLikeRepository.findByLikerIdAndPost(USER_ID, post)).willReturn(Optional.of(postLike));
+        given(postLikeRepository.findByLikerIdAndPost(USER_INFO.id(), post)).willReturn(Optional.of(postLike));
 
         // when
-        var likeResponseDto = postLikeService.deleteLike(USER_ID, post.getId());
+        var likeResponseDto = postLikeService.deleteLike(USER_INFO, post.getId());
 
         // then
         assertThat(likeResponseDto)
@@ -139,10 +142,10 @@ public class PostLikeServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
 
-        given(postLikeRepositorySupport.findAllByPost(post.getId(), USER_ID, pageable)).willReturn(new PageImpl<>(List.of(postLike), pageable, 2));
+        given(postLikeRepositorySupport.findAllByPost(post.getId(), USER_INFO.id(), pageable)).willReturn(new PageImpl<>(List.of(postLike), pageable, 2));
 
         // when
-        var likeFindResponseDto = postLikeService.findLikeByPost(USER_ID, post.getId(), pageable);
+        var likeFindResponseDto = postLikeService.findLikeByPost(USER_INFO, post.getId(), pageable);
 
         // then
         assertThat(likeFindResponseDto.getResults())
@@ -153,66 +156,23 @@ public class PostLikeServiceTest {
                 );
     }
 
-//    @Test
-//    @DisplayName("Success case for find likes of own post")
-//    void successFindOwnPostLikes() {
-//        // given
-//        Pageable pageable = PageRequest.of(0, 2);
-//        given(postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
-//
-//        Page<PostLike> postLikes = new PageImpl<>(List.of(postLike, postLike2), pageable, 2);
-//
-//        given(postLikeRepositorySupport.findAllByPost(privatePost.getId(), privateUser.getId(), pageable)).willReturn(postLikes);
-//
-//        // when
-//        Pagination<LikeFindResponseDto> likeFindResponseDto = postLikeService.findLikeByPost(privateUser, "privatePostId", pageable);
-//
-//        // then
-//        assertThat(likeFindResponseDto.getResults())
-//                .isNotNull()
-//                .extracting(LikeFindResponseDto::getPostId, LikeFindResponseDto::getLikerNickname)
-//                .contains(
-//                        tuple("testPostId", postLike.getLiker().getNickname()),
-//                        tuple("testPostId", postLike2.getLiker().getNickname())
-//                );
-//    }
+    @Test
+    @DisplayName("Failure case for find likes when blocked user")
+    void failFindLikesBlockedUser() {
+        // given
+        Pageable pageable = PageRequest.of(0, 2);
+        given(postRepository.findByIdAndIsDeletedFalse(blockedPost.getId())).willReturn(Optional.of(blockedPost));
+        given(blockUserRepository.findBlock(USER_INFO.id(), blockUser.getBlockedUserId())).willReturn(List.of(blockUser));
 
-//    @Test
-//    @DisplayName("Failure case for find likes of private post")
-//    void failFindLikesPrivatePost() {
-//        // given
-//        Pageable pageable = PageRequest.of(0, 2);
-//        given(postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
-//
-//        // when
-//        final UnauthorizedException ex = assertThrows(
-//                UnauthorizedException.class,
-//                () -> postLikeService.findLikeByPost(user, "privatePostId", pageable)
-//        );
-//
-//        // then
-//        assertThat(ex)
-//                .extracting("errorCode", "message")
-//                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s은 비공개 상태입니다.", privatePost.getWriter().getNickname()));
-//    }
+        // when
+        final UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
+                () -> postLikeService.findLikeByPost(USER_INFO, "blockedPostId", pageable)
+        );
 
-//    @Test
-//    @DisplayName("Failure case for find likes when blocked user")
-//    void failFindLikesBlockedUser() {
-//        // given
-//        Pageable pageable = PageRequest.of(0, 2);
-//        given(postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
-//        given(blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(List.of(blockUser));
-//
-//        // when
-//        final UnauthorizedException ex = assertThrows(
-//                UnauthorizedException.class,
-//                () -> postLikeService.findLikeByPost(user, "blockedPostId", pageable)
-//        );
-//
-//        // then
-//        assertThat(ex)
-//                .extracting("errorCode", "message")
-//                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s을 찾을 수 없습니다.", blockedPost.getWriter().getNickname()));
-//    }
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s을 찾을 수 없습니다.", blockedPost.getWriterId()));
+    }
 }

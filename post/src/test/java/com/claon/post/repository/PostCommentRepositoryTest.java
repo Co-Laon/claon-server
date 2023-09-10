@@ -1,6 +1,7 @@
 package com.claon.post.repository;
 
 import com.claon.post.config.QueryDslTestConfig;
+import com.claon.post.domain.BlockUser;
 import com.claon.post.domain.Post;
 import com.claon.post.domain.PostComment;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +27,11 @@ public class PostCommentRepositoryTest {
     private PostCommentRepository postCommentRepository;
     @Autowired
     private PostCommentRepositorySupport postCommentRepositorySupport;
+    @Autowired
+    private BlockUserRepository blockUserRepository;
 
     private final String USER_ID = "USER_ID";
+    private final String BLOCKED_ID = "BLOCKED_ID";
     private Post post;
     private PostComment deletedComment;
 
@@ -40,6 +44,8 @@ public class PostCommentRepositoryTest {
                 List.of(),
                 List.of()
         ));
+
+        blockUserRepository.save(BlockUser.of(USER_ID, BLOCKED_ID));
 
         deletedComment = PostComment.of(
                 "testContent1",
@@ -74,12 +80,12 @@ public class PostCommentRepositoryTest {
                 post,
                 null
         ));
-//        postCommentRepository.save(PostComment.of(
-//                "testContent",
-//                blockUser,
-//                post,
-//                null
-//        ));
+        postCommentRepository.save(PostComment.of(
+                "testContent",
+                BLOCKED_ID,
+                post,
+                null
+        ));
 
         // when
         var commentList = postCommentRepositorySupport.findParentCommentByPost(postId, USER_ID, PageRequest.of(0, 2));
@@ -105,12 +111,12 @@ public class PostCommentRepositoryTest {
                 post,
                 parentComment
         ));
-//        postCommentRepository.save(PostComment.of(
-//                "testChildContent",
-//                blockUser,
-//                post,
-//                parentComment
-//        ));
+        postCommentRepository.save(PostComment.of(
+                "testChildContent",
+                BLOCKED_ID,
+                post,
+                parentComment
+        ));
 
         String parentCommentId = parentComment.getId();
 

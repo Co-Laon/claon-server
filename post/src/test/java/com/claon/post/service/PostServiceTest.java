@@ -1,12 +1,10 @@
 package com.claon.post.service;
 
 import com.claon.post.common.domain.PaginationFactory;
+import com.claon.post.common.domain.RequestUserInfo;
 import com.claon.post.common.exception.ErrorCode;
 import com.claon.post.common.exception.UnauthorizedException;
-import com.claon.post.domain.ClimbingHistory;
-import com.claon.post.domain.Post;
-import com.claon.post.domain.PostContents;
-import com.claon.post.domain.PostReport;
+import com.claon.post.domain.*;
 import com.claon.post.domain.enums.PostReportType;
 import com.claon.post.dto.*;
 import com.claon.post.repository.*;
@@ -47,25 +45,28 @@ public class PostServiceTest {
     PostRepositorySupport postRepositorySupport;
     @Mock
     PostReportRepository postReportRepository;
+    @Mock
+    BlockUserRepository blockUserRepository;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     PostService postService;
 
-    private final String USER_ID = "USER_ID";
+    private final RequestUserInfo USER_INFO = new RequestUserInfo("USER_ID");
     private final String HOLD_ID = "HOLD_ID";
     private final String CENTER_ID = "CENTER_ID";
-    private Post post, blockedPost, privatePost;
+    private Post post, blockedPost;
     private ClimbingHistory climbingHistory;
     private PostReport postReport;
+    private BlockUser blockUser;
 
     @BeforeEach
     void setUp() {
         post = Post.of(
                 CENTER_ID,
                 "testContent1",
-                USER_ID,
+                "USER_ID",
                 List.of(PostContents.of(
                         "test.com/test.png"
                 )),
@@ -82,30 +83,24 @@ public class PostServiceTest {
         );
         ReflectionTestUtils.setField(climbingHistory, "id", "climbingId");
 
-//        blockedPost = Post.of(
-//                center,
-//                "testContent3",
-//                blockedUser,
-//                List.of(),
-//                List.of()
-//        );
-//        ReflectionTestUtils.setField(blockedPost, "id", "blockedPostId");
-//        ReflectionTestUtils.setField(blockedPost, "createdAt", LocalDateTime.now());
-//        ReflectionTestUtils.setField(blockedPost, "updatedAt", LocalDateTime.now());
-//
-//        privatePost = Post.of(
-//                center,
-//                "testContent4",
-//                privateUser,
-//                List.of(),
-//                List.of()
-//        );
-//        ReflectionTestUtils.setField(privatePost, "id", "privatePostId");
-//        ReflectionTestUtils.setField(privatePost, "createdAt", LocalDateTime.now());
-//        ReflectionTestUtils.setField(privatePost, "updatedAt", LocalDateTime.now());
+        blockUser = BlockUser.of(
+                USER_INFO.id(),
+                "BLOCKED_ID"
+        );
+
+        blockedPost = Post.of(
+                CENTER_ID,
+                "testContent3",
+                "BLOCKED_ID",
+                List.of(),
+                List.of()
+        );
+        ReflectionTestUtils.setField(blockedPost, "id", "blockedPostId");
+        ReflectionTestUtils.setField(blockedPost, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(blockedPost, "updatedAt", LocalDateTime.now());
 
         postReport = PostReport.of(
-                USER_ID,
+                "USER_ID",
                 post,
                 PostReportType.INAPPROPRIATE_POST,
                 "testContent"
@@ -121,11 +116,11 @@ public class PostServiceTest {
         Page<Post> postPage = new PageImpl<>(List.of(post), pageable, 1);
         LocalDateTime now = LocalDateTime.now();
 
-        given(postRepositorySupport.findByNicknameAndCenterAndYearMonth(USER_ID, "test", CENTER_ID, now.getYear(), now.getMonthValue(), pageable))
+        given(postRepositorySupport.findByCenterAndYearMonth(USER_INFO.id(), CENTER_ID, now.getYear(), now.getMonthValue(), pageable))
                 .willReturn(postPage);
 
         // when
-        var posts = postService.findUserPostsByCenterAndYearMonth(USER_ID, "test", CENTER_ID, now.getYear(), now.getMonthValue(), pageable);
+        var posts = postService.findUserPostsByCenterAndYearMonth(USER_INFO, CENTER_ID, now.getYear(), now.getMonthValue(), pageable);
 
         // then
         assertThat(posts.getResults())
@@ -145,10 +140,10 @@ public class PostServiceTest {
 
         given(postLikeRepository.countByPost(post)).willReturn(3);
 
-        given(postRepositorySupport.findExceptLaonUserAndBlockUser(USER_ID, pageable)).willReturn(postPage);
+        given(postRepositorySupport.findExceptBlockUser(USER_INFO.id(), pageable)).willReturn(postPage);
 
         // when
-        var posts = postService.findPosts(USER_ID, pageable);
+        var posts = postService.findPosts(USER_INFO, pageable);
 
         //then
         assertThat(posts.getResults())
@@ -167,7 +162,7 @@ public class PostServiceTest {
         given(postLikeRepository.countByPost(post)).willReturn(2);
 
         // when
-        var postResponseDto = postService.findPost(USER_ID, post.getId());
+        var postResponseDto = postService.findPost(USER_INFO, post.getId());
 
         // then
         assertThat(postResponseDto)
@@ -178,61 +173,24 @@ public class PostServiceTest {
                 );
     }
 
-//    @Test
-//    @DisplayName("Success case for find own post")
-//    void successFindOwnPost() {
-//        // given
-//        given(postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
-//        given(postLikeRepository.countByPost(privatePost)).willReturn(2);
-//
-//        // when
-//        PostDetailResponseDto postResponseDto = postService.findPost(privateUser, "privatePostId");
-//
-//        // then
-//        assertThat(postResponseDto)
-//                .isNotNull()
-//                .extracting(
-//                        PostDetailResponseDto::getPostId,
-//                        PostDetailResponseDto::getCenterName)
-//                .contains("privatePostId", center.getName());
-//    }
+    @Test
+    @DisplayName("Failure case for find post when blocked user")
+    void failFindPostBlockUser() {
+        // given
+        given(postRepository.findByIdAndIsDeletedFalse(blockedPost.getId())).willReturn(Optional.of(blockedPost));
+        given(blockUserRepository.findBlock(USER_INFO.id(), blockUser.getBlockedUserId())).willReturn(List.of(blockUser));
 
-//    @Test
-//    @DisplayName("Failure case for find post when private user")
-//    void failFindPostPrivateUser() {
-//        // given
-//        given(postRepository.findByIdAndIsDeletedFalse("privatePostId")).willReturn(Optional.of(privatePost));
-//
-//        // when
-//        final UnauthorizedException ex = assertThrows(
-//                UnauthorizedException.class,
-//                () -> postService.findPost(user, "privatePostId")
-//        );
-//
-//        // then
-//        assertThat(ex)
-//                .extracting("errorCode", "message")
-//                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s은 비공개 상태입니다.", privatePost.getWriter().getNickname()));
-//    }
+        // when
+        final UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
+                () -> postService.findPost(USER_INFO, blockedPost.getId())
+        );
 
-//    @Test
-//    @DisplayName("Failure case for find post when blocked user")
-//    void failFindPostBlockUser() {
-//        // given
-//        given(postRepository.findByIdAndIsDeletedFalse("blockedPostId")).willReturn(Optional.of(blockedPost));
-//        given(blockUserRepository.findBlock("testUserId", blockedUser.getId())).willReturn(List.of(blockUser));
-//
-//        // when
-//        final UnauthorizedException ex = assertThrows(
-//                UnauthorizedException.class,
-//                () -> postService.findPost(user, "blockedPostId")
-//        );
-//
-//        // then
-//        assertThat(ex)
-//                .extracting("errorCode", "message")
-//                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s을 찾을 수 없습니다.", blockedPost.getWriter().getNickname()));
-//    }
+        // then
+        assertThat(ex)
+                .extracting("errorCode", "message")
+                .contains(ErrorCode.NOT_ACCESSIBLE, String.format("%s을 찾을 수 없습니다.", blockedPost.getWriterId()));
+    }
 
     @Test
     @DisplayName("Success case for create post")
@@ -257,7 +215,7 @@ public class PostServiceTest {
                     CENTER_ID,
                     postCreateRequestDto.getContent(),
                     List.of(postContents),
-                    USER_ID
+                    USER_INFO.id()
             )).thenReturn(post);
 
             given(postRepository.save(post)).willReturn(post);
@@ -271,7 +229,7 @@ public class PostServiceTest {
             given(climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
 
             // when
-            var postResponseDto = postService.createPost(USER_ID, postCreateRequestDto);
+            var postResponseDto = postService.createPost(USER_INFO, postCreateRequestDto);
 
             // then
             assertThat(postResponseDto)
@@ -308,7 +266,7 @@ public class PostServiceTest {
             given(climbingHistoryRepository.save(climbingHistory)).willReturn(climbingHistory);
 
             // when
-            var postResponseDto = postService.updatePost(USER_ID, post.getId(), postUpdateRequestDto);
+            var postResponseDto = postService.updatePost(USER_INFO, post.getId(), postUpdateRequestDto);
 
             // then
             assertThat(postResponseDto)
@@ -335,7 +293,7 @@ public class PostServiceTest {
         // when
         final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> postService.updatePost("wrongId", post.getId(), postUpdateRequestDto)
+                () -> postService.updatePost(new RequestUserInfo("WRONG_ID"), post.getId(), postUpdateRequestDto)
         );
 
         // then
@@ -353,7 +311,7 @@ public class PostServiceTest {
         given(postRepository.save(post)).willReturn(post);
 
         // when
-        var postResponseDto = postService.deletePost(USER_ID, post.getId());
+        var postResponseDto = postService.deletePost(USER_INFO, post.getId());
 
         // then
         assertThat(postResponseDto)
@@ -371,7 +329,7 @@ public class PostServiceTest {
         // when
         final UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,
-                () -> postService.deletePost("wrongId", post.getId())
+                () -> postService.deletePost(new RequestUserInfo("WRONG_ID"), post.getId())
         );
 
         // then
@@ -391,14 +349,14 @@ public class PostServiceTest {
             );
 
             given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
-            given(postReportRepository.findByReporterIdAndPost(USER_ID, post)).willReturn(Optional.empty());
+            given(postReportRepository.findByReporterIdAndPost(USER_INFO.id(), post)).willReturn(Optional.empty());
 
-            mockedPostReport.when(() -> PostReport.of(USER_ID, post, PostReportType.INAPPROPRIATE_POST, "testContent")).thenReturn(postReport);
+            mockedPostReport.when(() -> PostReport.of(USER_INFO.id(), post, PostReportType.INAPPROPRIATE_POST, "testContent")).thenReturn(postReport);
 
             given(postReportRepository.save(postReport)).willReturn(postReport);
 
             // when
-            var postReportResponseDto = postService.createReport(USER_ID, post.getId(), postReportRequestDto);
+            var postReportResponseDto = postService.createReport(USER_INFO, post.getId(), postReportRequestDto);
 
             // then
             assertThat(postReportResponseDto)

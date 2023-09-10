@@ -2,6 +2,7 @@ package com.claon.user.service;
 
 import com.claon.user.common.domain.Pagination;
 import com.claon.user.common.domain.PaginationFactory;
+import com.claon.user.common.domain.RequestUserInfo;
 import com.claon.user.common.exception.BadRequestException;
 import com.claon.user.common.exception.ErrorCode;
 import com.claon.user.common.exception.NotFoundException;
@@ -27,20 +28,20 @@ public class BlockUserService {
 
     @Transactional
     public void createBlock(
-            String userId,
-            String blockNickname
+            RequestUserInfo userInfo,
+            String blockId
     ) {
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userInfo.id()).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userId)
+                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
                 )
         );
 
-        User blockUser = userRepository.findByNickname(blockNickname).orElseThrow(
+        User blockUser = userRepository.findById(blockId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", blockNickname)
+                        String.format("%s을 찾을 수 없습니다.", blockId)
                 )
         );
 
@@ -62,20 +63,20 @@ public class BlockUserService {
 
     @Transactional
     public void deleteBlock(
-            String userId,
-            String blockNickname
+            RequestUserInfo userInfo,
+            String blockId
     ) {
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userInfo.id()).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userId)
+                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
                 )
         );
 
-        User blockUser = userRepository.findByNickname(blockNickname).orElseThrow(
+        User blockUser = userRepository.findById(blockId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", blockNickname)
+                        String.format("%s을 찾을 수 없습니다.", blockId)
                 )
         );
 
@@ -91,13 +92,13 @@ public class BlockUserService {
 
     @Transactional(readOnly = true)
     public Pagination<BlockUserFindResponseDto> findBlockUser(
-            String userId,
+            RequestUserInfo userInfo,
             Pageable pageable
     ) {
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userInfo.id()).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userId)
+                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
                 )
         );
 

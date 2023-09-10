@@ -2,8 +2,8 @@ package com.claon.user.web;
 
 import com.claon.user.common.annotation.RequestUser;
 import com.claon.user.common.domain.Pagination;
+import com.claon.user.common.domain.RequestUserInfo;
 import com.claon.user.dto.LaonFindResponseDto;
-import com.claon.user.dto.UserPostDetailResponseDto;
 import com.claon.user.service.LaonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -18,39 +18,30 @@ import org.springframework.web.bind.annotation.*;
 public class LaonController {
     private final LaonService laonService;
 
-    @PostMapping(value = "/{laonNickname}")
+    @PostMapping(value = "/{laonId}")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createLaon(
-            @RequestUser String userId,
-            @PathVariable String laonNickname
+            @RequestUser RequestUserInfo userInfo,
+            @PathVariable String laonId
     ) {
-        this.laonService.createLaon(userId, laonNickname);
+        this.laonService.createLaon(userInfo, laonId);
     }
 
-    @DeleteMapping(value = "/{laonNickname}")
+    @DeleteMapping(value = "/{laonId}")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteLaon(
-            @RequestUser String userId,
-            @PathVariable String laonNickname
+            @RequestUser RequestUserInfo userInfo,
+            @PathVariable String laonId
     ) {
-        this.laonService.deleteLaon(userId, laonNickname);
+        this.laonService.deleteLaon(userInfo, laonId);
     }
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<LaonFindResponseDto> findAllLaon(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable
     ) {
-        return this.laonService.findAllLaon(userId, pageable);
-    }
-
-    @GetMapping("/posts")
-    @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<UserPostDetailResponseDto> getLaonPost(
-            @RequestUser String userId,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        return this.laonService.findLaonPost(userId, pageable);
+        return this.laonService.findAllLaon(userInfo, pageable);
     }
 }

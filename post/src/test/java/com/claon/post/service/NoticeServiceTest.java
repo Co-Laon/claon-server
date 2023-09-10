@@ -1,6 +1,7 @@
 package com.claon.post.service;
 
 import com.claon.post.common.domain.PaginationFactory;
+import com.claon.post.common.domain.RequestUserInfo;
 import com.claon.post.domain.Notice;
 import com.claon.post.dto.NoticeCreateRequestDto;
 import com.claon.post.repository.NoticeRepository;
@@ -36,12 +37,12 @@ public class NoticeServiceTest {
     @InjectMocks
     NoticeService noticeService;
 
-    private final String ADMIN_ID = "ADMIN_ID";
+    private final RequestUserInfo USER_INFO = new RequestUserInfo("ADMIN_ID");
     private Notice notice;
 
     @BeforeEach
     void setUp() {
-        notice = Notice.of("title", "content", ADMIN_ID);
+        notice = Notice.of("title", "content", USER_INFO.id());
         ReflectionTestUtils.setField(notice, "createdAt", LocalDateTime.now());
     }
 
@@ -69,13 +70,13 @@ public class NoticeServiceTest {
             mockedNotice.when(() -> Notice.of(
                     dto.getTitle(),
                     dto.getContent(),
-                    ADMIN_ID
+                    USER_INFO.id()
             )).thenReturn(notice);
 
             given(noticeRepository.save(notice)).willReturn(notice);
 
             // when
-            var result = noticeService.createNotice(ADMIN_ID, dto);
+            var result = noticeService.createNotice(USER_INFO, dto);
 
             // then
             assertThat(result)
@@ -83,22 +84,4 @@ public class NoticeServiceTest {
                     .contains(notice.getTitle(), notice.getContent());
         }
     }
-
-//    @Test
-//    @DisplayName("Fail case for create notice")
-//    void failCreateNotice() {
-//        // given
-//        NoticeCreateRequestDto dto = new NoticeCreateRequestDto("title", "content");
-//
-//        // when
-//        final UnauthorizedException ex = Assertions.assertThrows(
-//                UnauthorizedException.class,
-//                () -> noticeService.createNotice(USER_ID, dto)
-//        );
-//
-//        // then
-//        assertThat(ex)
-//                .extracting("errorCode", "message")
-//                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
-//    }
 }

@@ -1,6 +1,7 @@
 package com.claon.user.service;
 
 import com.claon.user.common.domain.PaginationFactory;
+import com.claon.user.common.domain.RequestUserInfo;
 import com.claon.user.common.exception.ErrorCode;
 import com.claon.user.common.exception.UnauthorizedException;
 import com.claon.user.domain.BlockUser;
@@ -30,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -49,6 +49,7 @@ public class BlockUserServiceTest {
     @InjectMocks
     BlockUserService blockUserService;
 
+    private RequestUserInfo PUBLIC_USER_INFO;
     private User publicUser, blockUser;
     private BlockUser blockUserRelation;
     private Laon laonRelation;
@@ -71,6 +72,8 @@ public class BlockUserServiceTest {
         );
         ReflectionTestUtils.setField(blockUser, "id", "blockUserId");
 
+        PUBLIC_USER_INFO = new RequestUserInfo(publicUser.getId());
+
         blockUserRelation = BlockUser.of(
                 publicUser,
                 blockUser
@@ -88,7 +91,7 @@ public class BlockUserServiceTest {
         try (MockedStatic<BlockUser> mockedBlock = mockStatic(BlockUser.class)) {
             // given
             given(userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
-            given(userRepository.findByNickname(blockUser.getNickname())).willReturn(Optional.of(blockUser));
+            given(userRepository.findById(blockUser.getId())).willReturn(Optional.of(blockUser));
             given(blockUserRepository.findByUserIdAndBlockId(publicUser.getId(), blockUser.getId())).willReturn(Optional.empty());
             given(laonRepository.findByLaonIdAndUserId(blockUser.getId(), publicUser.getId())).willReturn(Optional.of(laonRelation));
 
@@ -97,7 +100,7 @@ public class BlockUserServiceTest {
             given(blockUserRepository.save(blockUserRelation)).willReturn(blockUserRelation);
 
             // when
-            blockUserService.createBlock(publicUser.getId(), blockUser.getNickname());
+            blockUserService.createBlock(PUBLIC_USER_INFO, blockUser.getId());
 
             // then
             assertThat(blockUserRepository.findByUserIdAndBlockId(publicUser.getId(), blockUser.getId())).isNotNull();
@@ -109,12 +112,12 @@ public class BlockUserServiceTest {
     void failCreateBlockMyself() {
         //given
         given(userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
-        given(userRepository.findByNickname(publicUser.getNickname())).willReturn(Optional.of(publicUser));
+        given(userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
 
         //when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> blockUserService.createBlock(publicUser.getId(), publicUser.getNickname())
+                () -> blockUserService.createBlock(PUBLIC_USER_INFO, publicUser.getId())
         );
 
         //then
@@ -128,11 +131,11 @@ public class BlockUserServiceTest {
     void successUnblockUser() {
         // given
         given(userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
-        given(userRepository.findByNickname(blockUser.getNickname())).willReturn(Optional.of(blockUser));
+        given(userRepository.findById(blockUser.getId())).willReturn(Optional.of(blockUser));
         given(blockUserRepository.findByUserIdAndBlockId(publicUser.getId(), blockUser.getId())).willReturn(Optional.of(blockUserRelation));
 
         // when
-        blockUserService.deleteBlock(publicUser.getId(), blockUser.getNickname());
+        blockUserService.deleteBlock(PUBLIC_USER_INFO, blockUser.getId());
 
         // then
         assertThat(blockUserRepository.findAll()).isEmpty();
@@ -149,7 +152,7 @@ public class BlockUserServiceTest {
         given(blockUserRepository.findByUser(publicUser, pageable)).willReturn(blockUsers);
 
         // when
-        var blockUserFindResponseDto = blockUserService.findBlockUser(publicUser.getId(), pageable);
+        var blockUserFindResponseDto = blockUserService.findBlockUser(PUBLIC_USER_INFO, pageable);
 
         // then
         assertThat(blockUserFindResponseDto.getResults())

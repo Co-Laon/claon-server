@@ -59,18 +59,6 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void successFindByNickname() {
-        // given
-        String nickname = "test";
-
-        // when
-        var result = userRepository.findByNickname(nickname);
-
-        // then
-        assertThat(result.isPresent()).isEqualTo(true);
-    }
-
-    @Test
     public void successSearchUser() {
         // given
         String nickname = "se";
