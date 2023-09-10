@@ -1,6 +1,7 @@
 package com.claon.user.service;
 
 import com.claon.user.common.domain.PaginationFactory;
+import com.claon.user.common.domain.RequestUserInfo;
 import com.claon.user.common.exception.ErrorCode;
 import com.claon.user.common.exception.UnauthorizedException;
 import com.claon.user.domain.Laon;
@@ -30,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -44,14 +44,13 @@ public class LaonServiceTest {
     BlockUserRepository blockUserRepository;
     @Mock
     LaonRepositorySupport laonRepositorySupport;
-    @Mock
-    PostPort postPort;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     LaonService laonService;
 
+    private RequestUserInfo USER_INFO;
     private User user, laon;
     private Laon laonRelation;
 
@@ -77,6 +76,8 @@ public class LaonServiceTest {
                 user,
                 laon
         );
+
+        USER_INFO = new RequestUserInfo(user.getId());
     }
 
     @Test
@@ -85,7 +86,7 @@ public class LaonServiceTest {
         try (MockedStatic<Laon> mockedLaon = mockStatic(Laon.class)) {
             // given
             given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
-            given(userRepository.findByNickname(laon.getNickname())).willReturn(Optional.of(laon));
+            given(userRepository.findById(laon.getId())).willReturn(Optional.of(laon));
             given(laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId())).willReturn(Optional.empty());
             given(blockUserRepository.findBlock(user.getId(), laon.getId())).willReturn(List.of());
 
@@ -94,7 +95,7 @@ public class LaonServiceTest {
             given(laonRepository.save(laonRelation)).willReturn(laonRelation);
 
             // when
-            laonService.createLaon(user.getId(), laon.getNickname());
+            laonService.createLaon(USER_INFO, laon.getId());
 
             // then
             assertThat(laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId())).isNotNull();
@@ -106,12 +107,12 @@ public class LaonServiceTest {
     void failCreateLaonMyself() {
         //given
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
-        given(userRepository.findByNickname(user.getNickname())).willReturn(Optional.of(user));
+        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
 
         //when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> laonService.createLaon(user.getId(), user.getNickname())
+                () -> laonService.createLaon(USER_INFO, user.getId())
         );
 
         //then
@@ -125,11 +126,11 @@ public class LaonServiceTest {
     void successDeleteLaon() {
         // given
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
-        given(userRepository.findByNickname(laon.getNickname())).willReturn(Optional.of(laon));
+        given(userRepository.findById(laon.getId())).willReturn(Optional.of(laon));
         given(laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId())).willReturn(Optional.of(laonRelation));
 
         // when
-        laonService.deleteLaon(user.getId(), laon.getNickname());
+        laonService.deleteLaon(USER_INFO, laon.getId());
 
         // then
         assertThat(laonRepository.findAll()).isEmpty();
@@ -147,7 +148,7 @@ public class LaonServiceTest {
         given(laonRepositorySupport.findAllByUserId(user.getId(), pageable)).willReturn(laonPage);
 
         // when
-        var laonFindResponseDto = laonService.findAllLaon(user.getId(), pageable);
+        var laonFindResponseDto = laonService.findAllLaon(USER_INFO, pageable);
 
         // then
         assertThat(laonFindResponseDto.getResults())
@@ -157,73 +158,4 @@ public class LaonServiceTest {
                         laon.getNickname()
                 );
     }
-
-//    @Test
-//    @DisplayName("Success case for find laon posts")
-//    void successFindLaonPost() {
-//        // given
-//        Pageable pageable = PageRequest.of(0, 2);
-//
-//        Pagination<UserPostDetailResponseDto> postPagination = paginationFactory.create(
-//                new PageImpl<>(List.of(
-//                        UserPostDetailResponseDto.from(
-//                                post1.getId(),
-//                                post1.getCenter().getId(),
-//                                post1.getCenter().getName(),
-//                                post1.getWriter().getImagePath(),
-//                                post1.getWriter().getNickname(),
-//                                false,
-//                                1,
-//                                post1.getContent(),
-//                                post1.getCreatedAt(),
-//                                post1.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
-//                                post1.getClimbingHistoryList().stream()
-//                                        .map(history -> ClimbingHistoryResponseDto.from(
-//                                                HoldInfoResponseDto.of(
-//                                                        history.getHoldInfo().getId(),
-//                                                        history.getHoldInfo().getName(),
-//                                                        history.getHoldInfo().getImg(),
-//                                                        history.getHoldInfo().getCrayonImageUrl()
-//                                                ),
-//                                                history.getClimbingCount()
-//                                        ))
-//                                        .collect(Collectors.toList())),
-//                        UserPostDetailResponseDto.from(
-//                                post2.getId(),
-//                                post2.getCenter().getId(),
-//                                post2.getCenter().getName(),
-//                                post2.getWriter().getImagePath(),
-//                                post2.getWriter().getNickname(),
-//                                false,
-//                                1,
-//                                post2.getContent(),
-//                                post2.getCreatedAt(),
-//                                post2.getContentList().stream().map(PostContents::getUrl).collect(Collectors.toList()),
-//                                post2.getClimbingHistoryList().stream()
-//                                        .map(history -> ClimbingHistoryResponseDto.from(
-//                                                HoldInfoResponseDto.of(
-//                                                        history.getHoldInfo().getId(),
-//                                                        history.getHoldInfo().getName(),
-//                                                        history.getHoldInfo().getImg(),
-//                                                        history.getHoldInfo().getCrayonImageUrl()
-//                                                ),
-//                                                history.getClimbingCount()
-//                                        ))
-//                                        .collect(Collectors.toList())))
-//                        , pageable, 2)
-//        );
-//        given(postPort.findLaonPost(user, pageable)).willReturn(postPagination);
-//
-//        // when
-//        Pagination<UserPostDetailResponseDto> post = laonService.findLaonPost(user.getId(), pageable);
-//
-//        //then
-//        assertThat(post.getResults())
-//                .isNotNull();
-//                .extracting(UserPostDetailResponseDto::getPostId, UserPostDetailResponseDto::getContent)
-//                .contains(
-//                        tuple("testPostId", post1.getContent()),
-//                        tuple("testPostId2", post2.getContent())
-//                );
-//    }
 }

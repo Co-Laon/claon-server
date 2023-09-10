@@ -1,6 +1,7 @@
 package com.claon.post.repository;
 
 import com.claon.post.config.QueryDslTestConfig;
+import com.claon.post.domain.BlockUser;
 import com.claon.post.domain.ClimbingHistory;
 import com.claon.post.domain.Post;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,9 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +29,8 @@ public class PostRepositoryTest {
     private PostRepositorySupport postRepositorySupport;
     @Autowired
     private ClimbingHistoryRepository climbingHistoryRepository;
+    @Autowired
+    private BlockUserRepository blockUserRepository;
 
     private final String USER_ID = "USER_ID";
     private final String HOLD_ID = "HOLD_ID";
@@ -42,21 +47,18 @@ public class PostRepositoryTest {
                 List.of()
         ));
 
-//        Post blockedPost = postRepository.save(Post.of(
-//                center,
-//                "testContent",
-//                blockUser,
-//                List.of(),
-//                List.of()
-//        ));
-//
-//        Post privatePost = postRepository.save(Post.of(
-//                center,
-//                "testContent",
-//                blockUser,
-//                List.of(),
-//                List.of()
-//        ));
+        BlockUser blockUser = blockUserRepository.save(BlockUser.of(
+                USER_ID,
+                "BLOCKED_ID"
+        ));
+
+        Post blockedPost = postRepository.save(Post.of(
+                CENTER_ID,
+                "testContent",
+                blockUser.getBlockedUserId(),
+                List.of(),
+                List.of()
+        ));
 
         deletedPost = Post.of(
                 CENTER_ID,
@@ -69,8 +71,7 @@ public class PostRepositoryTest {
         postRepository.save(deletedPost);
 
         climbingHistoryRepository.save(ClimbingHistory.of(post, HOLD_ID, 1));
-//        climbingHistoryRepository.save(ClimbingHistory.of(blockedPost, HOLD_ID, 1));
-//        climbingHistoryRepository.save(ClimbingHistory.of(privatePost, HOLD_ID, 1));
+        climbingHistoryRepository.save(ClimbingHistory.of(blockedPost, HOLD_ID, 1));
     }
 
     @Test
@@ -103,14 +104,14 @@ public class PostRepositoryTest {
         assertThat(postList.getContent().size()).isEqualTo(1);
     }
 
-//    @Test
-//    public void findExceptLaonUserAndBlockUser() {
-//        // when
-//        Page<Post> results = postRepositorySupport.findExceptLaonUserAndBlockUser(USER_ID, PageRequest.of(0, 2));
-//
-//        // then
-//        assertThat(results.getContent().size()).isEqualTo(1);
-//    }
+    @Test
+    public void findExceptBlockUser() {
+        // when
+        Page<Post> results = postRepositorySupport.findExceptBlockUser(USER_ID, PageRequest.of(0, 2));
+
+        // then
+        assertThat(results.getContent().size()).isEqualTo(0);
+    }
 
 //    @Test
 //    public void findLaonUserPostsExceptBlockUser() {
@@ -139,41 +140,20 @@ public class PostRepositoryTest {
         assertThat(results.getContent().size()).isEqualTo(1);
     }
 
-//    @Test
-//    public void successFindByNicknameAndCenterAndYearMonth() {
-//        // given
-//        LocalDateTime now = LocalDateTime.now();
-//
-//        // when
-//        Page<Post> results = postRepositorySupport.findByNicknameAndCenterAndYearMonth(USER_ID, "testNickname", CENTER_ID, now.getYear(), now.getMonthValue(), PageRequest.of(0, 3));
-//
-//        // then
-//        assertThat(results.getContent().size()).isEqualTo(1);
-//    }
-
     @Test
-    public void successCountByCenterExceptBlockUser() {
+    public void successFindByCenterAndYearMonth() {
+        // given
+        LocalDateTime now = LocalDateTime.now();
+
         // when
-        var countPost = postRepositorySupport.countByCenterExceptBlockUser(CENTER_ID, USER_ID);
+        Page<Post> results = postRepositorySupport.findByCenterAndYearMonth(USER_ID, CENTER_ID, now.getYear(), now.getMonthValue(), PageRequest.of(0, 3));
 
         // then
-        assertThat(countPost).isEqualTo(1);
-    }
-
-    @Test
-    public void successFindByCenterIdAndUserId() {
-        // when
-         var results = postRepositorySupport.findByCenterIdAndUserId(CENTER_ID, USER_ID);
-
-        // then
-        assertThat(results.size()).isEqualTo(1);
+        assertThat(results.getContent().size()).isEqualTo(1);
     }
 
 //    @Test
 //    public void successFindCenterByUser() {
-//        // given
-//        String userId = user.getId();
-//
 //        // when
 //        Page<Center> results = postRepositorySupport.findCenterByUser(userId, PageRequest.of(0, 2));
 //

@@ -2,10 +2,9 @@ package com.claon.post.service;
 
 import com.claon.post.common.domain.Pagination;
 import com.claon.post.common.domain.PaginationFactory;
+import com.claon.post.common.domain.RequestUserInfo;
 import com.claon.post.common.exception.*;
 import com.claon.post.common.validator.IdEqualValidator;
-import com.claon.post.common.validator.IsExistUrlValidator;
-import com.claon.post.common.validator.IsPrivateValidator;
 import com.claon.post.domain.ClimbingHistory;
 import com.claon.post.domain.Post;
 import com.claon.post.domain.PostContents;
@@ -30,45 +29,46 @@ public class PostService {
     private final ClimbingHistoryRepository climbingHistoryRepository;
     private final PostRepositorySupport postRepositorySupport;
     private final PostReportRepository postReportRepository;
+    private final BlockUserRepository blockUserRepository;
+
     private final PaginationFactory paginationFactory;
 
     @Transactional(readOnly = true)
     public Pagination<PostDetailResponseDto> findUserPostsByCenterAndYearMonth(
-            String userId,
-            String nickname,
+            RequestUserInfo userInfo,
             String centerId,
             Integer year,
             Integer month,
             Pageable pageable
     ) {
         return this.paginationFactory.create(
-                postRepositorySupport.findByNicknameAndCenterAndYearMonth(userId, nickname, centerId, year, month, pageable).map(
+                postRepositorySupport.findByCenterAndYearMonth(userInfo.id(), centerId, year, month, pageable).map(
                         post -> PostDetailResponseDto.from(
                                 post,
-                                post.getWriterId().equals(userId),
-                                postLikeRepository.findByLikerIdAndPost(userId, post).isPresent(),
+                                post.getWriterId().equals(userInfo.id()),
+                                postLikeRepository.findByLikerIdAndPost(userInfo.id(), post).isPresent(),
                                 postLikeRepository.countByPost(post)))
         );
     }
 
     @Transactional(readOnly = true)
     public Pagination<PostDetailResponseDto> findPosts(
-            String userId,
+            RequestUserInfo userInfo,
             Pageable pageable
     ) {
         return this.paginationFactory.create(
-                postRepositorySupport.findExceptLaonUserAndBlockUser(userId, pageable).map(
+                postRepositorySupport.findExceptBlockUser(userInfo.id(), pageable).map(
                         post -> PostDetailResponseDto.from(
                                 post,
-                                post.getWriterId().equals(userId),
-                                postLikeRepository.findByLikerIdAndPost(userId, post).isPresent(),
+                                post.getWriterId().equals(userInfo.id()),
+                                postLikeRepository.findByLikerIdAndPost(userInfo.id(), post).isPresent(),
                                 postLikeRepository.countByPost(post)))
         );
     }
 
     @Transactional(readOnly = true)
     public PostDetailResponseDto findPost(
-            String userId,
+            RequestUserInfo userInfo,
             String postId
     ) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
@@ -78,37 +78,28 @@ public class PostService {
                 )
         );
 
-        if (!post.getWriterId().equals(userId)) {
-//            IsPrivateValidator.of(post.getWriter().getNickname(), post.getWriter().getIsPrivate()).validate();
-//
-//            if (!blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).isEmpty()) {
-//                throw new UnauthorizedException(
-//                        ErrorCode.NOT_ACCESSIBLE,
-//                        String.format("%s을 찾을 수 없습니다.", post.getWriter().getNickname())
-//                );
-//            }
+        if (!post.getWriterId().equals(userInfo.id())) {
+            if (!blockUserRepository.findBlock(userInfo.id(), post.getWriterId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", post.getWriterId())
+                );
+            }
         }
 
         return PostDetailResponseDto.from(
                 post,
-                post.getWriterId().equals(userId),
-                postLikeRepository.findByLikerIdAndPost(userId, post).isPresent(),
+                post.getWriterId().equals(userInfo.id()),
+                postLikeRepository.findByLikerIdAndPost(userInfo.id(), post).isPresent(),
                 postLikeRepository.countByPost(post)
         );
     }
 
     @Transactional
     public PostResponseDto createPost(
-            String userId,
+            RequestUserInfo userInfo,
             PostCreateRequestDto postCreateRequestDto
     ) {
-//        Center center = centerRepository.findById(postCreateRequestDto.getCenterId()).orElseThrow(
-//                () -> new NotFoundException(
-//                        ErrorCode.DATA_DOES_NOT_EXIST,
-//                        "암장을 찾을 수 없습니다."
-//                )
-//        );
-
         Post post = this.postRepository.save(
                 Post.of(
                         postCreateRequestDto.getCenterId(),
@@ -118,7 +109,7 @@ public class PostService {
                                         contents.getUrl()
                                 ))
                                 .collect(Collectors.toList()),
-                        userId
+                        userInfo.id()
                 )
         );
 
@@ -127,11 +118,6 @@ public class PostService {
                 .stream().map(history ->
                         climbingHistoryRepository.save(ClimbingHistory.of(
                                 post,
-//                                holdInfoRepository.findById(history.getHoldId()).orElseThrow(
-//                                        () -> new InternalServerErrorException(
-//                                                ErrorCode.INTERNAL_SERVER_ERROR,
-//                                                "홀드 정보를 찾을 수 없습니다."
-//                                        )),
                                 history.getHoldId(),
                                 history.getClimbingCount())))
                 .collect(Collectors.toList());
@@ -141,7 +127,7 @@ public class PostService {
 
     @Transactional
     public PostResponseDto updatePost(
-            String userId,
+            RequestUserInfo userInfo,
             String postId,
             PostUpdateRequestDto postUpdateRequestDto
     ) {
@@ -152,7 +138,7 @@ public class PostService {
                 )
         );
 
-        IdEqualValidator.of(post.getWriterId(), userId).validate();
+        IdEqualValidator.of(post.getWriterId(), userInfo.id()).validate();
 
         climbingHistoryRepository.deleteAllByPost(postId);
 
@@ -161,11 +147,6 @@ public class PostService {
                 .stream().map(history ->
                         climbingHistoryRepository.save(ClimbingHistory.of(
                                 post,
-//                                holdInfoRepository.findById(history.getHoldId()).orElseThrow(
-//                                        () -> new InternalServerErrorException(
-//                                                ErrorCode.INTERNAL_SERVER_ERROR,
-//                                                "홀드 정보를 찾을 수 없습니다."
-//                                        )),
                                 history.getHoldId(),
                                 history.getClimbingCount())))
                 .collect(Collectors.toList());
@@ -183,7 +164,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto deletePost(String userId, String postId) {
+    public PostResponseDto deletePost(RequestUserInfo userInfo, String postId) {
         Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -191,7 +172,7 @@ public class PostService {
                 )
         );
 
-        IdEqualValidator.of(post.getWriterId(), userId).validate();
+        IdEqualValidator.of(post.getWriterId(), userInfo.id()).validate();
 
         post.delete();
 
@@ -200,7 +181,7 @@ public class PostService {
 
     @Transactional
     public PostReportResponseDto createReport(
-            String userId,
+            RequestUserInfo userInfo,
             String postId,
             PostReportRequestDto postReportRequestDto
     ) {
@@ -211,7 +192,7 @@ public class PostService {
                 )
         );
 
-        postReportRepository.findByReporterIdAndPost(userId, post).ifPresent(
+        postReportRepository.findByReporterIdAndPost(userInfo.id(), post).ifPresent(
                 like -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
@@ -223,12 +204,29 @@ public class PostService {
         return PostReportResponseDto.from(
                 postReportRepository.save(
                         PostReport.of(
-                                userId,
+                                userInfo.id(),
                                 post,
                                 postReportRequestDto.getReportType(),
                                 postReportRequestDto.getContent()
                         )
                 )
+        );
+    }
+
+    @Transactional
+    public Pagination<PostThumbnailResponseDto> findPostThumbnailsByUser(RequestUserInfo userInfo, Pageable pageable) {
+        return this.paginationFactory.create(
+                postRepository.findByWriterAndIsDeletedFalse(userInfo.id(), pageable)
+                        .map(post -> PostThumbnailResponseDto.from(
+                                post.getId(),
+                                post.getThumbnailUrl(),
+                                post.getClimbingHistoryList().stream()
+                                        .map(history -> ClimbingHistoryResponseDto.from(
+                                                history.getHoldInfoId(),
+                                                history.getClimbingCount()
+                                        ))
+                                        .collect(Collectors.toList())
+                        ))
         );
     }
 }

@@ -1,16 +1,16 @@
-package com.claon.user.dto;
+package com.claon.post.dto;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class UserPostThumbnailResponseDto {
+public class PostThumbnailResponseDto {
     private final String postId;
     private final String thumbnailUrl;
     private final List<ClimbingHistoryResponseDto> climbingHistories;
 
-    private UserPostThumbnailResponseDto(
+    private PostThumbnailResponseDto(
             String postId,
             String thumbnailUrl,
             List<ClimbingHistoryResponseDto> climbingHistories
@@ -20,13 +20,13 @@ public class UserPostThumbnailResponseDto {
         this.climbingHistories = climbingHistories;
     }
 
-    public static UserPostThumbnailResponseDto from(
+    public static PostThumbnailResponseDto from(
             String postId,
             String thumbnailUrl,
             List<ClimbingHistoryResponseDto> climbingHistories
 
     ) {
-        return new UserPostThumbnailResponseDto(
+        return new PostThumbnailResponseDto(
                 postId,
                 thumbnailUrl,
                 climbingHistories

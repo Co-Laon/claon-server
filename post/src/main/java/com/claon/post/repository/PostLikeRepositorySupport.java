@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Objects;
 
+import static com.claon.post.domain.QBlockUser.blockUser;
 import static com.claon.post.domain.QPostLike.postLike;
 
 @Repository
@@ -27,19 +28,17 @@ public class PostLikeRepositorySupport extends QuerydslRepositorySupport {
     public Page<PostLike> findAllByPost(String postId, String userId, Pageable pageable) {
         JPQLQuery<PostLike> query = jpaQueryFactory
                 .selectFrom(postLike)
-//                .join(postLike.liker, user)
-//                .fetchJoin()
                 .where(postLike.post.id.eq(postId)
-//                        .and(postLike.liker.id.notIn(
-//                                JPAExpressions
-//                                        .select(blockUser.blockedUser.id)
-//                                        .from(blockUser)
-//                                        .where(blockUser.user.id.eq(userId))))
-//                        .and(postLike.liker.id.notIn(
-//                                JPAExpressions
-//                                        .select(blockUser.user.id)
-//                                        .from(blockUser)
-//                                        .where(blockUser.blockedUser.id.eq(userId))))
+                        .and(postLike.likerId.notIn(
+                                JPAExpressions
+                                        .select(blockUser.blockedUserId)
+                                        .from(blockUser)
+                                        .where(blockUser.userId.eq(userId))))
+                        .and(postLike.likerId.notIn(
+                                JPAExpressions
+                                        .select(blockUser.userId)
+                                        .from(blockUser)
+                                        .where(blockUser.blockedUserId.eq(userId))))
                         );
 
         long totalCount = query.fetchCount();

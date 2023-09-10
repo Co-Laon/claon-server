@@ -15,8 +15,6 @@ public class CommentFindResponseDto {
     private final Boolean isDeleted;
     private final String postId;
     private final String writerId;
-//    private final String writerNickname;
-//    private final String writerProfileImage;
     private final String createdAt;
     private final String updatedAt;
     private final Boolean isOwner;
@@ -33,8 +31,6 @@ public class CommentFindResponseDto {
         this.isDeleted = postComment.getIsDeleted();
         this.postId = postComment.getPost().getId();
         this.writerId = postComment.getWriterId();
-//        this.writerNickname = postComment.getWriter().getNickname();
-//        this.writerProfileImage = postComment.getWriter().getImagePath();
         this.createdAt = RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getCreatedAt(), ZoneOffset.of("+9")));
         this.updatedAt = RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getUpdatedAt(), ZoneOffset.of("+9")));
         this.childrenCommentCount = count;
