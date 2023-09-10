@@ -2,14 +2,15 @@ package com.claon.post.service;
 
 import com.claon.post.common.domain.Pagination;
 import com.claon.post.common.domain.PaginationFactory;
+import com.claon.post.common.domain.RequestUserInfo;
 import com.claon.post.common.exception.ErrorCode;
 import com.claon.post.common.exception.NotFoundException;
 import com.claon.post.common.exception.UnauthorizedException;
 import com.claon.post.common.validator.IdEqualValidator;
-import com.claon.post.common.validator.IsPrivateValidator;
 import com.claon.post.domain.Post;
 import com.claon.post.domain.PostComment;
 import com.claon.post.dto.*;
+import com.claon.post.repository.BlockUserRepository;
 import com.claon.post.repository.PostCommentRepository;
 import com.claon.post.repository.PostCommentRepositorySupport;
 import com.claon.post.repository.PostRepository;
@@ -26,11 +27,13 @@ public class PostCommentService {
     private final PostCommentRepository postCommentRepository;
     private final PostCommentRepositorySupport postCommentRepositorySupport;
     private final PostRepository postRepository;
+    private final BlockUserRepository blockUserRepository;
+
     private final PaginationFactory paginationFactory;
 
     @Transactional
     public CommentResponseDto createComment(
-            String userId,
+            RequestUserInfo userInfo,
             String postId,
             CommentCreateRequestDto commentCreateRequestDto
     ) {
@@ -41,22 +44,20 @@ public class PostCommentService {
                 )
         );
 
-        if (!post.getWriterId().equals(userId)) {
-//            IsPrivateValidator.of(post.getWriterId(), post.getWriter().getIsPrivate()).validate();
-
-//            if (!blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).isEmpty()) {
-//                throw new UnauthorizedException(
-//                        ErrorCode.NOT_ACCESSIBLE,
-//                        String.format("%s을 찾을 수 없습니다.", post.getWriter().getNickname())
-//                );
-//            }
+        if (!post.getWriterId().equals(userInfo.id())) {
+            if (!blockUserRepository.findBlock(userInfo.id(), post.getWriterId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", post.getWriterId())
+                );
+            }
         }
 
         return CommentResponseDto.from(
                 postCommentRepository.save(
                         PostComment.of(
                                 commentCreateRequestDto.getContent(),
-                                userId,
+                                userInfo.id(),
                                 post,
                                 Optional.ofNullable(commentCreateRequestDto.getParentCommentId())
                                         .map(parentCommentId ->
@@ -73,7 +74,7 @@ public class PostCommentService {
 
     @Transactional(readOnly = true)
     public Pagination<CommentFindResponseDto> findCommentsByPost(
-            String userId,
+            RequestUserInfo userInfo,
             String postId,
             Pageable pageable
     ) {
@@ -84,25 +85,23 @@ public class PostCommentService {
                 )
         );
 
-        if (!post.getWriterId().equals(userId)) {
-//            IsPrivateValidator.of(post.getWriter().getNickname(), post.getWriter().getIsPrivate()).validate();
-//
-//            if (!blockUserRepository.findBlock(user.getId(), post.getWriter().getId()).isEmpty()) {
-//                throw new UnauthorizedException(
-//                        ErrorCode.NOT_ACCESSIBLE,
-//                        String.format("%s을 찾을 수 없습니다.", post.getWriter().getNickname())
-//                );
-//            }
+        if (!post.getWriterId().equals(userInfo.id())) {
+            if (!blockUserRepository.findBlock(userInfo.id(), post.getWriterId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", post.getWriterId())
+                );
+            }
         }
 
         return this.paginationFactory.create(
-                postCommentRepositorySupport.findParentCommentByPost(post.getId(), userId, pageable)
+                postCommentRepositorySupport.findParentCommentByPost(post.getId(), userInfo.id(), pageable)
         );
     }
 
     @Transactional(readOnly = true)
     public Pagination<ChildCommentResponseDto> findAllChildCommentsByParent(
-            String userId,
+            RequestUserInfo userInfo,
             String parentId,
             Pageable pageable
     ) {
@@ -113,25 +112,23 @@ public class PostCommentService {
                 )
         );
 
-        if (!postComment.getPost().getWriterId().equals(userId)) {
-//            IsPrivateValidator.of(postComment.getPost().getWriter().getNickname(), postComment.getPost().getWriter().getIsPrivate()).validate();
-//
-//            if (!blockUserRepository.findBlock(user.getId(), postComment.getPost().getWriter().getId()).isEmpty()) {
-//                throw new UnauthorizedException(
-//                        ErrorCode.NOT_ACCESSIBLE,
-//                        String.format("%s을 찾을 수 없습니다.", postComment.getPost().getWriter().getNickname())
-//                );
-//            }
+        if (!postComment.getPost().getWriterId().equals(userInfo.id())) {
+            if (!blockUserRepository.findBlock(userInfo.id(), postComment.getPost().getWriterId()).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", postComment.getPost().getWriterId())
+                );
+            }
         }
 
         return this.paginationFactory.create(
-                postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), userId, pageable)
-                        .map(childComment -> ChildCommentResponseDto.from(childComment, userId))
+                postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), userInfo.id(), pageable)
+                        .map(childComment -> ChildCommentResponseDto.from(childComment, userInfo.id()))
         );
     }
 
     @Transactional
-    public CommentResponseDto deleteComment(String userId, String commentId) {
+    public CommentResponseDto deleteComment(RequestUserInfo userInfo, String commentId) {
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -139,7 +136,7 @@ public class PostCommentService {
                 )
         );
 
-        IdEqualValidator.of(postComment.getWriterId(), userId).validate();
+        IdEqualValidator.of(postComment.getWriterId(), userInfo.id()).validate();
 
         postComment.delete();
 
@@ -148,7 +145,7 @@ public class PostCommentService {
 
     @Transactional
     public CommentResponseDto updateComment(
-            String userId,
+            RequestUserInfo userInfo,
             String commentId,
             CommentUpdateRequestDto commentUpdateRequestDto
     ) {
@@ -159,7 +156,7 @@ public class PostCommentService {
                 )
         );
 
-        IdEqualValidator.of(postComment.getWriterId(), userId).validate();
+        IdEqualValidator.of(postComment.getWriterId(), userInfo.id()).validate();
 
         postComment.updateContent(commentUpdateRequestDto.getContent());
 

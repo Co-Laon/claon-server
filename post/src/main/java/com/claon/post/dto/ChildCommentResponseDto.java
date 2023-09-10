@@ -14,8 +14,6 @@ public class ChildCommentResponseDto {
     private final Boolean isDeleted;
     private final String postId;
     private final String writerId;
-//    private final String writerNickname;
-//    private final String writerProfileImage;
     private final String createdAt;
     private final String updatedAt;
     private final Boolean isOwner;
@@ -26,8 +24,6 @@ public class ChildCommentResponseDto {
             Boolean isDeleted,
             String postId,
             String writerId,
-//            String writerNickname,
-//            String writerProfileImage,
             String createdAt,
             String updatedAt,
             Boolean isOwner
@@ -37,8 +33,6 @@ public class ChildCommentResponseDto {
         this.isDeleted = isDeleted;
         this.postId = postId;
         this.writerId = writerId;
-//        this.writerNickname = writerNickname;
-//        this.writerProfileImage = writerProfileImage;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.isOwner = isOwner;
@@ -51,8 +45,6 @@ public class ChildCommentResponseDto {
                 postComment.getIsDeleted(),
                 postComment.getPost().getId(),
                 postComment.getWriterId(),
-//                postComment.getWriter().getNickname(),
-//                postComment.getWriter().getImagePath(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getCreatedAt(), ZoneOffset.of("+9"))),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(postComment.getUpdatedAt(), ZoneOffset.of("+9"))),
                 postComment.getWriterId().equals(userId)

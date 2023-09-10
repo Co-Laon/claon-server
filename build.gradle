@@ -224,6 +224,7 @@ project(':user') {
 
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
+		implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
 
 		// micrometer
 		implementation "io.micrometer:micrometer-tracing"

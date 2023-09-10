@@ -1,4 +1,4 @@
-package com.claon.user.dto;
+package com.claon.post.dto;
 
 import lombok.Data;
 

@@ -1,6 +1,7 @@
 package com.claon.post.repository;
 
 import com.claon.post.config.QueryDslTestConfig;
+import com.claon.post.domain.BlockUser;
 import com.claon.post.domain.Post;
 import com.claon.post.domain.PostLike;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,8 @@ public class PostLikeRepositoryTest {
     private PostLikeRepository postLikeRepository;
     @Autowired
     private PostLikeRepositorySupport postLikeRepositorySupport;
+    @Autowired
+    private BlockUserRepository blockUserRepository;
 
     private final String USER_ID = "USER_ID";
     private Post post;
@@ -64,25 +67,15 @@ public class PostLikeRepositoryTest {
     }
 
     @Test
-    public void successCountByPostIdIn() {
-        // given
-        List<String> postIds = List.of(post.getId());
-
-        // when
-        var count = postLikeRepository.countByPostIdIn(postIds);
-
-        // then
-        assertThat(count).isEqualTo(1);
-    }
-
-    @Test
     public void successFindAllByPost() {
         // given
         String postId = this.post.getId();
 
-//        postLikeRepository.save(PostLike.of(
-//                this.blockUser, this.post
-//        ));
+        blockUserRepository.save(BlockUser.of(USER_ID, "BLOCKED_ID"));
+
+        postLikeRepository.save(PostLike.of(
+                "BLOCKED_ID", this.post
+        ));
 
         // when
         var likerList = postLikeRepositorySupport.findAllByPost(postId, USER_ID, PageRequest.of(0, 2));

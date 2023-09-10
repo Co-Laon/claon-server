@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Objects;
 
+import static com.claon.post.domain.QBlockUser.blockUser;
 import static com.claon.post.domain.QPostComment.postComment;
 
 @Repository
@@ -38,23 +39,21 @@ public class PostCommentRepositorySupport extends QuerydslRepositorySupport {
                         postComment.childComments.size(),
                         Expressions.as(Expressions.constant(userId), "userId")))
                 .from(postComment)
-//                .join(postComment.writer, user)
-//                .fetchJoin()
                 .where(postComment.post.id.eq(postId)
                         .and(postComment.isDeleted.isFalse())
                         .and(postComment.parentComment.isNull())
-//                        .and(postComment.id.notIn(
-//                                JPAExpressions
-//                                        .select(postComment.id)
-//                                        .from(postComment)
-//                                        .join(blockUser).on(postComment.writer.id.eq(blockUser.blockedUser.id))
-//                                        .where(blockUser.user.id.eq(userId))))
-//                        .and(postComment.id.notIn(
-//                                JPAExpressions
-//                                        .select(postComment.id)
-//                                        .from(postComment)
-//                                        .join(blockUser).on(postComment.writer.id.eq(blockUser.user.id))
-//                                        .where(blockUser.blockedUser.id.eq(userId))))
+                        .and(postComment.id.notIn(
+                                JPAExpressions
+                                        .select(postComment.id)
+                                        .from(postComment)
+                                        .join(blockUser).on(postComment.writerId.eq(blockUser.blockedUserId))
+                                        .where(blockUser.userId.eq(userId))))
+                        .and(postComment.id.notIn(
+                                JPAExpressions
+                                        .select(postComment.id)
+                                        .from(postComment)
+                                        .join(blockUser).on(postComment.writerId.eq(blockUser.userId))
+                                        .where(blockUser.blockedUserId.eq(userId))))
                         );
 
         long totalCount = query.fetchCount();
@@ -66,22 +65,20 @@ public class PostCommentRepositorySupport extends QuerydslRepositorySupport {
     public Page<PostComment> findChildCommentByParentComment(String postCommentId, String userId, Pageable pageable) {
         JPQLQuery<PostComment> query = jpaQueryFactory
                 .selectFrom(postComment)
-//                .join(postComment.writer, user)
-//                .fetchJoin()
                 .where(postComment.parentComment.id.eq(postCommentId)
                         .and(postComment.isDeleted.isFalse())
-//                        .and(postComment.id.notIn(
-//                                JPAExpressions
-//                                        .select(postComment.id)
-//                                        .from(postComment)
-//                                        .join(blockUser).on(postComment.writer.id.eq(blockUser.blockedUser.id))
-//                                        .where(blockUser.user.id.eq(userId))))
-//                        .and(postComment.id.notIn(
-//                                JPAExpressions
-//                                        .select(postComment.id)
-//                                        .from(postComment)
-//                                        .join(blockUser).on(postComment.writer.id.eq(blockUser.user.id))
-//                                        .where(blockUser.blockedUser.id.eq(userId))))
+                        .and(postComment.id.notIn(
+                                JPAExpressions
+                                        .select(postComment.id)
+                                        .from(postComment)
+                                        .join(blockUser).on(postComment.writerId.eq(blockUser.blockedUserId))
+                                        .where(blockUser.userId.eq(userId))))
+                        .and(postComment.id.notIn(
+                                JPAExpressions
+                                        .select(postComment.id)
+                                        .from(postComment)
+                                        .join(blockUser).on(postComment.writerId.eq(blockUser.userId))
+                                        .where(blockUser.blockedUserId.eq(userId))))
                         );
 
         long totalCount = query.fetchCount();

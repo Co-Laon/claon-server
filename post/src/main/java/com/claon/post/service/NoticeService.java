@@ -2,6 +2,7 @@ package com.claon.post.service;
 
 import com.claon.post.common.domain.Pagination;
 import com.claon.post.common.domain.PaginationFactory;
+import com.claon.post.common.domain.RequestUserInfo;
 import com.claon.post.domain.Notice;
 import com.claon.post.dto.NoticeCreateRequestDto;
 import com.claon.post.dto.NoticeResponseDto;
@@ -26,16 +27,14 @@ public class NoticeService {
 
     @Transactional
     public NoticeResponseDto createNotice(
-            String userId, NoticeCreateRequestDto dto
+            RequestUserInfo userInfo, NoticeCreateRequestDto dto
     ) {
-//        IsAdminValidator.of(user.getEmail()).validate();
-
         return NoticeResponseDto.from(
                 noticeRepository.save(
                         Notice.of(
                                 dto.getTitle(),
                                 dto.getContent(),
-                                userId
+                                userInfo.id()
                         )
                 )
         );

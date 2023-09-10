@@ -24,9 +24,6 @@ public class User extends BaseEntity {
     @Column(name = "arm_reach")
     private Float armReach;
 
-    @Column(name = "is_private")
-    private Boolean isPrivate;
-
     private User(
             String email,
             String nickname,
@@ -37,7 +34,6 @@ public class User extends BaseEntity {
         this.nickname = nickname;
         this.height = height;
         this.armReach = armReach;
-        this.isPrivate = false;
     }
 
     public static User of(
@@ -52,10 +48,6 @@ public class User extends BaseEntity {
                 height,
                 armReach
         );
-    }
-
-    public void changePublicScope() {
-        this.isPrivate = !this.isPrivate;
     }
 
     public void modifyUser(
