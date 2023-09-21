@@ -25,8 +25,8 @@ public class CenterDetailResponseDto {
     private String holdInfoImg;
     private List<SectorInfoResponseDto> sectorInfoList;
     private Boolean isBookmarked;
-    private Integer postCount;
-    private Integer reviewCount;
+    private Long postCount;
+    private Long reviewCount;
 
     private CenterDetailResponseDto(
             String id,
@@ -44,8 +44,8 @@ public class CenterDetailResponseDto {
             String holdInfoImg,
             List<SectorInfoResponseDto> sectorInfoList,
             Boolean isBookmarked,
-            Integer postCount,
-            Integer reviewCount
+            Long postCount,
+            Long reviewCount
     ) {
         this.id = id;
         this.name = name;
@@ -71,8 +71,8 @@ public class CenterDetailResponseDto {
             List<HoldInfo> holdInfoList,
             List<SectorInfo> sectorInfoList,
             Boolean isBookmarked,
-            Integer postCount,
-            Integer reviewCount
+            Long postCount,
+            Long reviewCount
     ) {
         return new CenterDetailResponseDto(
                 center.getId(),

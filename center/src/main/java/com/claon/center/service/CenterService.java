@@ -1,5 +1,6 @@
 package com.claon.center.service;
 
+import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.*;
 import com.claon.center.domain.enums.CenterSearchOption;
 import com.claon.center.dto.*;
@@ -8,9 +9,8 @@ import com.claon.center.common.domain.Pagination;
 import com.claon.center.common.domain.PaginationFactory;
 import com.claon.center.common.exception.ErrorCode;
 import com.claon.center.common.exception.NotFoundException;
-import com.claon.center.common.validator.IsAdminValidator;
+import com.claon.center.service.client.PostClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,18 +27,17 @@ public class CenterService {
     private final HoldInfoRepository holdInfoRepository;
     private final SectorInfoRepository sectorInfoRepository;
     private final ReviewRepositorySupport reviewRepositorySupport;
-//    private final PostPort postPort;
     private final CenterBookmarkRepository centerBookmarkRepository;
     private final CenterReportRepository centerReportRepository;
     private final PaginationFactory paginationFactory;
 
+    private final PostClient postClient;
+
     @Transactional
     public CenterResponseDto create(
-            String adminId,
+            RequestUserInfo userInfo,
             CenterCreateRequestDto requestDto
     ) {
-//        IsAdminValidator.of(admin.getEmail()).validate();
-
         Center center = this.centerRepository.save(
                 Center.of(
                         requestDto.getName(),
@@ -92,7 +91,7 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public CenterDetailResponseDto findCenter(String userId, String centerId) {
+    public CenterDetailResponseDto findCenter(RequestUserInfo userInfo, String centerId) {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -100,16 +99,16 @@ public class CenterService {
                 )
         );
 
-        Boolean isBookmarked = centerBookmarkRepository.findByUserIdAndCenterId(userId, centerId).isPresent();
-//        Integer postCount = postPort.countByCenterExceptBlockUser(centerId, userId);
-        Integer reviewCount = reviewRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
+        Boolean isBookmarked = centerBookmarkRepository.findByUserIdAndCenterId(userInfo.id(), centerId).isPresent();
+        Long postCount = postClient.countPostsByCenterId(userInfo.id(), centerId);
+        Long reviewCount = reviewRepositorySupport.countByCenterExceptBlockUser(centerId, userInfo.id());
 
         return CenterDetailResponseDto.from(
                 center,
                 holdInfoRepository.findAllByCenter(center),
                 sectorInfoRepository.findAllByCenter(center),
                 isBookmarked,
-                0,
+                postCount,
                 reviewCount
         );
     }
@@ -141,18 +140,18 @@ public class CenterService {
 
     @Transactional(readOnly = true)
     public Pagination<CenterPreviewResponseDto> findCenterListByOption(
-            String userId,
+            RequestUserInfo userInfo,
             CenterSearchOption option,
             Pageable pageable
     ) {
         return paginationFactory.create(
-                centerRepositorySupport.findCenterByOption(userId, option, pageable)
+                centerRepositorySupport.findCenterByOption(userInfo.id(), option, pageable)
         );
     }
 
     @Transactional
     public CenterReportResponseDto createReport(
-            String userId,
+            RequestUserInfo userInfo,
             String centerId,
             CenterReportCreateRequestDto centerReportCreateRequestDto
     ) {
@@ -168,7 +167,7 @@ public class CenterService {
                         CenterReport.of(
                                 centerReportCreateRequestDto.getContent(),
                                 centerReportCreateRequestDto.getReportType(),
-                                userId,
+                                userInfo.id(),
                                 center
                         )
                 )
@@ -187,7 +186,7 @@ public class CenterService {
 
     @Transactional(readOnly = true)
     public Pagination<CenterPostThumbnailResponseDto> getCenterPosts(
-            String userId,
+            RequestUserInfo userInfo,
             String centerId,
             Optional<String> holdId,
             Pageable pageable
@@ -199,19 +198,13 @@ public class CenterService {
                 )
         );
 
-        if (holdId.isPresent()) {
-            holdInfoRepository.findByIdAndCenter(holdId.get(), center).orElseThrow(
-                    () -> new NotFoundException(
-                            ErrorCode.DATA_DOES_NOT_EXIST,
-                            "홀드를 찾을 수 없습니다."
-                    )
-            );
+        holdId.ifPresent(s -> holdInfoRepository.findByIdAndCenter(s, center).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "홀드를 찾을 수 없습니다."
+                )
+        ));
 
-//            return this.postPort.findByCenterAndHoldExceptBlockUser(center.getId(), holdId.get(), userId, pageable);
-            return paginationFactory.create(new PageImpl<>(List.of(), pageable, 0));
-        }
-
-//        return this.postPort.findByCenterExceptBlockUser(center.getId(), userId, pageable);
-        return paginationFactory.create(new PageImpl<>(List.of(), pageable, 0));
+        return this.postClient.findPostThumbnails(userInfo.id(), centerId, holdId, pageable);
     }
 }

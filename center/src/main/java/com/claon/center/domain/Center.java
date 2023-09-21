@@ -107,11 +107,4 @@ public class Center extends BaseEntity {
                 holdInfoImg
         );
     }
-
-    public String getThumbnailUrl() {
-        if (this.getImgList().isEmpty()) {
-            return null;
-        }
-        return this.getImgList().get(0).getUrl();
-    }
 }

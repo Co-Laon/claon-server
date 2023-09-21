@@ -18,6 +18,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/posts")
@@ -178,5 +180,25 @@ public class PostController {
             @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return this.postService.findPostThumbnailsByUser(userInfo, pageable);
+    }
+
+    @GetMapping("/centers/{centerId}/thumbnails")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Pagination<CenterPostThumbnailResponseDto> findCenterPostThumbnails(
+            @RequestUser RequestUserInfo userInfo,
+            @PathVariable String centerId,
+            @RequestParam(value = "holdId", required = false) Optional<String> holdId,
+            @PageableDefault(size = 9, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return this.postService.findCenterPostThumbnailsByUser(userInfo, centerId, holdId, pageable);
+    }
+
+    @GetMapping("/centers/{centerId}/count")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Long countPostsByCenter(
+            @RequestUser RequestUserInfo userInfo,
+            @PathVariable String centerId
+    ) {
+        return this.postService.countPostByCenter(userInfo, centerId);
     }
 }

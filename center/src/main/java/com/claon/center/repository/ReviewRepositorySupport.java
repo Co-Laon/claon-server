@@ -13,9 +13,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Objects;
 
+import static com.claon.center.domain.QBlockUser.blockUser;
 import static com.claon.center.domain.QCenterReview.centerReview;
-//import static com.claon.user.domain.QBlockUser.blockUser;
-//import static com.claon.user.domain.QUser.user;
 
 @Repository
 public class ReviewRepositorySupport extends QuerydslRepositorySupport {
@@ -29,49 +28,21 @@ public class ReviewRepositorySupport extends QuerydslRepositorySupport {
     public Page<CenterReview> findByCenterExceptBlockUserAndSelf(String centerId, String userId, Pageable pageable) {
         JPQLQuery<CenterReview> query = jpaQueryFactory
                 .selectFrom(centerReview)
-//                .join(centerReview.writer, user)
-//                .fetchJoin()
                 .where(centerReview.center.id.eq(centerId)
                         .and(centerReview.writerId.ne(userId))
-//                        .and(centerReview.id.notIn(
-//                                JPAExpressions
-//                                        .select(centerReview.id)
-//                                        .from(centerReview)
-//                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.blockedUser.id))
-//                                        .where(blockUser.user.id.eq(userId))))
-//                        .and(centerReview.id.notIn(
-//                                JPAExpressions
-//                                        .select(centerReview.id)
-//                                        .from(centerReview)
-//                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.user.id))
-//                                        .where(blockUser.blockedUser.id.eq(userId))))
-                        );
-
-        long totalCount = query.fetchCount();
-        List<CenterReview> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
-
-        return new PageImpl<>(results, pageable, totalCount);
-    }
-
-    public Page<CenterReview> findByCenterExceptBlockUser(String centerId, String userId, Pageable pageable) {
-        JPQLQuery<CenterReview> query = jpaQueryFactory
-                .selectFrom(centerReview)
-//                .join(centerReview.writer, user)
-//                .fetchJoin()
-                .where(centerReview.center.id.eq(centerId)
-//                        .and(centerReview.id.notIn(
-//                                JPAExpressions
-//                                        .select(centerReview.id)
-//                                        .from(centerReview)
-//                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.blockedUser.id))
-//                                        .where(blockUser.user.id.eq(userId))))
-//                        .and(centerReview.id.notIn(
-//                                JPAExpressions
-//                                        .select(centerReview.id)
-//                                        .from(centerReview)
-//                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.user.id))
-//                                        .where(blockUser.blockedUser.id.eq(userId))))
-                        );
+                        .and(centerReview.id.notIn(
+                                JPAExpressions
+                                        .select(centerReview.id)
+                                        .from(centerReview)
+                                        .join(blockUser).on(centerReview.writerId.eq(blockUser.blockedUserId))
+                                        .where(blockUser.userId.eq(userId))))
+                        .and(centerReview.id.notIn(
+                                JPAExpressions
+                                        .select(centerReview.id)
+                                        .from(centerReview)
+                                        .join(blockUser).on(centerReview.writerId.eq(blockUser.userId))
+                                        .where(blockUser.blockedUserId.eq(userId))))
+                );
 
         long totalCount = query.fetchCount();
         List<CenterReview> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
@@ -84,40 +55,41 @@ public class ReviewRepositorySupport extends QuerydslRepositorySupport {
                 .select(centerReview.rank.avg())
                 .from(centerReview)
                 .where(centerReview.center.id.eq(centerId)
-//                        .and(centerReview.id.notIn(
-//                                JPAExpressions
-//                                        .select(centerReview.id)
-//                                        .from(centerReview)
-//                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.blockedUser.id))
-//                                        .where(blockUser.user.id.eq(userId))))
-//                        .and(centerReview.id.notIn(
-//                                JPAExpressions
-//                                        .select(centerReview.id)
-//                                        .from(centerReview)
-//                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.user.id))
-//                                        .where(blockUser.blockedUser.id.eq(userId))))
-                        )
+                        .and(centerReview.id.notIn(
+                                JPAExpressions
+                                        .select(centerReview.id)
+                                        .from(centerReview)
+                                        .join(blockUser).on(centerReview.writerId.eq(blockUser.blockedUserId))
+                                        .where(blockUser.userId.eq(userId))))
+                        .and(centerReview.id.notIn(
+                                JPAExpressions
+                                        .select(centerReview.id)
+                                        .from(centerReview)
+                                        .join(blockUser).on(centerReview.writerId.eq(blockUser.userId))
+                                        .where(blockUser.blockedUserId.eq(userId))))
+                )
                 .fetch()
                 .get(0);
     }
 
-    public Integer countByCenterExceptBlockUser(String centerId, String userId) {
-        return (int) jpaQueryFactory
-                .selectFrom(centerReview)
+    public Long countByCenterExceptBlockUser(String centerId, String userId) {
+        return jpaQueryFactory
+                .select(centerReview.count())
+                .from(centerReview)
                 .where(centerReview.center.id.eq(centerId)
-//                        .and(centerReview.id.notIn(
-//                                JPAExpressions
-//                                        .select(centerReview.id)
-//                                        .from(centerReview)
-//                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.blockedUser.id))
-//                                        .where(blockUser.user.id.eq(userId))))
-//                        .and(centerReview.id.notIn(
-//                                JPAExpressions
-//                                        .select(centerReview.id)
-//                                        .from(centerReview)
-//                                        .join(blockUser).on(centerReview.writer.id.eq(blockUser.user.id))
-//                                        .where(blockUser.blockedUser.id.eq(userId))))
-                        )
-                .fetchCount();
+                        .and(centerReview.id.notIn(
+                                JPAExpressions
+                                        .select(centerReview.id)
+                                        .from(centerReview)
+                                        .join(blockUser).on(centerReview.writerId.eq(blockUser.blockedUserId))
+                                        .where(blockUser.userId.eq(userId))))
+                        .and(centerReview.id.notIn(
+                                JPAExpressions
+                                        .select(centerReview.id)
+                                        .from(centerReview)
+                                        .join(blockUser).on(centerReview.writerId.eq(blockUser.userId))
+                                        .where(blockUser.blockedUserId.eq(userId))))
+                )
+                .fetchOne();
     }
 }

@@ -11,8 +11,8 @@ import java.util.Optional;
 @Repository
 public interface ReviewRepository extends JpaRepository<CenterReview, String> {
     @Query(value = """
-            SELECT * 
-            FROM tb_center_review AS r 
+            SELECT *
+            FROM tb_center_review AS r
             WHERE r.user_id = :userId AND r.center_id = :centerId
             """, nativeQuery = true)
     Optional<CenterReview> findByUserIdAndCenterId(@Param("userId") String userId, @Param("centerId") String centerId);
