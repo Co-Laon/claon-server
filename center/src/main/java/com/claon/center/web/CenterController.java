@@ -1,6 +1,7 @@
 package com.claon.center.web;
 
 import com.claon.center.common.annotation.RequestUser;
+import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.enums.CenterSearchOption;
 import com.claon.center.dto.*;
 import com.claon.center.service.CenterBookmarkService;
@@ -29,40 +30,40 @@ public class CenterController {
     @GetMapping(value = "/{centerId}/posts")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<CenterPostThumbnailResponseDto> getCenterPosts(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId,
             @RequestParam(value = "holdId", required = false) Optional<String> holdId,
             @PageableDefault(size = 9, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return centerService.getCenterPosts(userId, centerId, holdId, pageable);
+        return centerService.getCenterPosts(userInfo, centerId, holdId, pageable);
     }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterResponseDto create(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @RequestBody @Valid CenterCreateRequestDto centerCreateRequestDto
     ) {
-        return this.centerService.create(userId, centerCreateRequestDto);
+        return this.centerService.create(userInfo, centerCreateRequestDto);
     }
 
     @GetMapping(value = "/{centerId}")
     @ResponseStatus(value = HttpStatus.OK)
     public CenterDetailResponseDto findCenter(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId
     ) {
-        return this.centerService.findCenter(userId, centerId);
+        return this.centerService.findCenter(userInfo, centerId);
     }
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<CenterPreviewResponseDto> getCenterList(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @RequestParam("option") CenterSearchOption option,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return this.centerService.findCenterListByOption(userId, option, pageable);
+        return this.centerService.findCenterListByOption(userInfo, option, pageable);
     }
 
     @GetMapping(value = "/name/{keyword}")
@@ -84,68 +85,68 @@ public class CenterController {
     @PostMapping("/{centerId}/review")
     @ResponseStatus(value = HttpStatus.CREATED)
     public ReviewResponseDto createReview(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId,
             @RequestBody @Valid ReviewCreateRequestDto reviewCreateRequestDto
     ) {
-        return this.centerReviewService.createReview(userId, centerId, reviewCreateRequestDto);
+        return this.centerReviewService.createReview(userInfo, centerId, reviewCreateRequestDto);
     }
 
     @PutMapping(value = "/review/{reviewId}")
     @ResponseStatus(value = HttpStatus.OK)
     public ReviewResponseDto updateReview(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @PathVariable String reviewId,
             @RequestBody @Valid ReviewUpdateRequestDto updateRequestDto
     ) {
-        return this.centerReviewService.updateReview(userId, reviewId, updateRequestDto);
+        return this.centerReviewService.updateReview(userInfo, reviewId, updateRequestDto);
     }
 
     @DeleteMapping(value = "/review/{reviewId}")
     @ResponseStatus(value = HttpStatus.OK)
     public ReviewResponseDto deleteReview(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @PathVariable String reviewId
     ) {
-        return this.centerReviewService.deleteReview(userId, reviewId);
+        return this.centerReviewService.deleteReview(userInfo, reviewId);
     }
 
     @GetMapping(value = "/{centerId}/review")
     @ResponseStatus(value = HttpStatus.OK)
     public ReviewBundleFindResponseDto findReviewByCenter(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId,
             @PageableDefault(size = 5) final Pageable pageable
     ) {
-        return this.centerReviewService.findReview(userId, centerId, pageable);
+        return this.centerReviewService.findReview(userInfo, centerId, pageable);
     }
 
     @PostMapping(value = "/{centerId}/bookmark")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterBookmarkResponseDto create(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId
     ) {
-        return this.centerBookmarkService.create(userId, centerId);
+        return this.centerBookmarkService.create(userInfo, centerId);
     }
 
     @DeleteMapping(value = "/{centerId}/bookmark")
     @ResponseStatus(value = HttpStatus.OK)
     public void delete(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId
     ) {
-        this.centerBookmarkService.delete(userId, centerId);
+        this.centerBookmarkService.delete(userInfo, centerId);
     }
 
     @PostMapping(value = "/{centerId}/report")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterReportResponseDto createReport(
-            @RequestUser String userId,
+            @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId,
             @RequestBody @Valid CenterReportCreateRequestDto centerReportCreateRequestDto
     ) {
-        return this.centerService.createReport(userId, centerId, centerReportCreateRequestDto);
+        return this.centerService.createReport(userInfo, centerId, centerReportCreateRequestDto);
     }
 
     @GetMapping(value = "/search")

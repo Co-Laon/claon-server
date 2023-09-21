@@ -1,5 +1,6 @@
 package com.claon.center.service;
 
+import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.Center;
 import com.claon.center.domain.CenterReview;
 import com.claon.center.dto.*;
@@ -26,7 +27,7 @@ public class CenterReviewService {
 
     @Transactional
     public ReviewResponseDto createReview(
-            String userId,
+            RequestUserInfo userInfo,
             String centerId,
             ReviewCreateRequestDto reviewCreateRequestDto
     ) {
@@ -37,7 +38,7 @@ public class CenterReviewService {
                 )
         );
 
-        this.reviewRepository.findByUserIdAndCenterId(userId, center.getId()).ifPresent(
+        this.reviewRepository.findByUserIdAndCenterId(userInfo.id(), center.getId()).ifPresent(
                 review -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
@@ -51,7 +52,7 @@ public class CenterReviewService {
                         CenterReview.of(
                                 reviewCreateRequestDto.getRank(),
                                 reviewCreateRequestDto.getContent(),
-                                userId,
+                                userInfo.id(),
                                 center
                         )
                 )
@@ -60,7 +61,7 @@ public class CenterReviewService {
 
     @Transactional
     public ReviewResponseDto updateReview(
-            String userId,
+            RequestUserInfo userInfo,
             String reviewId,
             ReviewUpdateRequestDto updateRequestDto
     ) {
@@ -71,7 +72,7 @@ public class CenterReviewService {
                 )
         );
 
-        IdEqualValidator.of(review.getWriterId(), userId).validate();
+        IdEqualValidator.of(review.getWriterId(), userInfo.id()).validate();
 
         review.update(updateRequestDto.getRank(), updateRequestDto.getContent());
 
@@ -80,7 +81,7 @@ public class CenterReviewService {
 
     @Transactional
     public ReviewResponseDto deleteReview(
-            String userId,
+            RequestUserInfo userInfo,
             String reviewId
     ) {
         CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
@@ -90,7 +91,7 @@ public class CenterReviewService {
                 )
         );
 
-        IdEqualValidator.of(review.getWriterId(), userId).validate();
+        IdEqualValidator.of(review.getWriterId(), userInfo.id()).validate();
 
         reviewRepository.delete(review);
 
@@ -99,7 +100,7 @@ public class CenterReviewService {
 
     @Transactional
     public ReviewBundleFindResponseDto findReview(
-            String userId,
+            RequestUserInfo userInfo,
             String centerId,
             Pageable pageable
     ) {
@@ -112,12 +113,12 @@ public class CenterReviewService {
 
         return ReviewBundleFindResponseDto.from(
                 center.getId(),
-                reviewRepositorySupport.findRankByCenterExceptBlockUser(center.getId(), userId),
-                reviewRepository.findByUserIdAndCenterId(userId, center.getId())
+                reviewRepositorySupport.findRankByCenterExceptBlockUser(center.getId(), userInfo.id()),
+                reviewRepository.findByUserIdAndCenterId(userInfo.id(), center.getId())
                         .map(ReviewFindResponseDto::from)
                         .orElse(null),
                 this.paginationFactory.create(
-                        reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(center.getId(), userId, pageable)
+                        reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(center.getId(), userInfo.id(), pageable)
                                 .map(ReviewFindResponseDto::from)
                 )
         );

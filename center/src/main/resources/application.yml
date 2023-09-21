@@ -49,6 +49,13 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  cloud:
+    openfeign:
+      client:
+        config:
+          post-service:
+            url: http://localhost:8083
+
 eureka:
   instance:
     leaseRenewalIntervalInSeconds: 5

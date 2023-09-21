@@ -213,7 +213,7 @@ public class PostService {
         );
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Pagination<PostThumbnailResponseDto> findPostThumbnailsByUser(RequestUserInfo userInfo, Pageable pageable) {
         return this.paginationFactory.create(
                 postRepository.findByWriterAndIsDeletedFalse(userInfo.id(), pageable)
@@ -228,5 +228,21 @@ public class PostService {
                                         .collect(Collectors.toList())
                         ))
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Pagination<CenterPostThumbnailResponseDto> findCenterPostThumbnailsByUser(RequestUserInfo userInfo, String centerId, Optional<String> holdId, Pageable pageable) {
+        return this.paginationFactory.create(
+                postRepositorySupport.findByCenterAndHoldExceptBlockUser(centerId, holdId, userInfo.id(), pageable)
+                        .map(post -> CenterPostThumbnailResponseDto.from(
+                                post.getId(),
+                                post.getThumbnailUrl()
+                        ))
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Long countPostByCenter(RequestUserInfo userInfo, String centerId) {
+        return postRepositorySupport.countByCenter(userInfo.id(), centerId);
     }
 }

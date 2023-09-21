@@ -1,5 +1,6 @@
 package com.claon.center.service;
 
+import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.*;
 import com.claon.center.domain.enums.CenterReportType;
 import com.claon.center.dto.*;
@@ -8,8 +9,7 @@ import com.claon.center.common.domain.Pagination;
 import com.claon.center.common.domain.PaginationFactory;
 import com.claon.center.common.exception.ErrorCode;
 import com.claon.center.common.exception.NotFoundException;
-import com.claon.center.common.exception.UnauthorizedException;
-import org.junit.jupiter.api.Assertions;
+import com.claon.center.service.client.PostClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,15 +52,14 @@ public class CenterServiceTest {
     @Mock
     CenterRepositorySupport centerRepositorySupport;
     @Mock
-    PostPort postPort;
+    PostClient postClient;
     @Spy
     PaginationFactory paginationFactory = new PaginationFactory();
 
     @InjectMocks
     CenterService centerService;
 
-    private final String ADMIN_ID = "ADMIN_ID";
-    private final String USER_ID = "USER_ID";
+    private final RequestUserInfo USER_INFO = new RequestUserInfo("USER_ID");
     private Center center;
     private HoldInfo holdInfo;
     private SectorInfo sectorInfo;
@@ -88,7 +87,7 @@ public class CenterServiceTest {
 
         sectorInfo = SectorInfo.of("test sector", LocalDate.of(2022, 1, 1), LocalDate.of(2022, 1, 1), center);
 
-        centerBookmark = CenterBookmark.of(center, USER_ID);
+        centerBookmark = CenterBookmark.of(center, USER_INFO.id());
         ReflectionTestUtils.setField(centerBookmark, "id", "bookMarkId");
     }
 
@@ -97,31 +96,28 @@ public class CenterServiceTest {
     void successFindPostByCenter() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-//        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
 
         given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
 
-//        Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
-//                new PageImpl<>(
-//                        List.of(
-//                                CenterPostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()),
-//                                CenterPostThumbnailResponseDto.from(post2.getId(), post2.getThumbnailUrl())
-//                        ), pageable, 2)
-//        );
-//        given(postPort.findByCenterExceptBlockUser(center.getId(), user.getId(), pageable)).willReturn(postPagination);
+        Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
+                new PageImpl<>(
+                        List.of(
+                                CenterPostThumbnailResponseDto.from("postId", "thumbnailUrl")
+                        ), pageable, 1)
+        );
+        given(postClient.findPostThumbnails(USER_INFO.id(), center.getId(), Optional.empty(), pageable)).willReturn(postPagination);
 
         // when
         var postThumbnailResponseDtoPagination =
-                centerService.getCenterPosts(USER_ID, center.getId(), Optional.empty(), pageable);
+                centerService.getCenterPosts(USER_INFO, center.getId(), Optional.empty(), pageable);
 
         //then
         assertThat(postThumbnailResponseDtoPagination.getResults())
-                .isNotNull();
-//                .extracting(CenterPostThumbnailResponseDto::getPostId, CenterPostThumbnailResponseDto::getThumbnailUrl)
-//                .contains(
-//                        tuple("testPostId", post.getThumbnailUrl()),
-//                        tuple("testPostId2", post2.getThumbnailUrl())
-//                );
+                .isNotNull()
+                .extracting(CenterPostThumbnailResponseDto::getPostId, CenterPostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("postId", "thumbnailUrl")
+                );
     }
 
     @Test
@@ -129,31 +125,29 @@ public class CenterServiceTest {
     void successFindPostByCenterAndHold() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-//        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
 
         given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
         given(holdInfoRepository.findByIdAndCenter(holdInfo.getId(), center)).willReturn(Optional.of(holdInfo));
 
-//        Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
-//                new PageImpl<>(
-//                        List.of(
-//                                CenterPostThumbnailResponseDto.from(post.getId(), post.getThumbnailUrl()),
-//                                CenterPostThumbnailResponseDto.from(post2.getId(), post2.getThumbnailUrl())
-//                        ), pageable, 2)
-//        );
-//        given(postPort.findByCenterAndHoldExceptBlockUser(center.getId(), "holdId1", user.getId(), pageable)).willReturn(postPagination);
+        Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
+                new PageImpl<>(
+                        List.of(
+                                CenterPostThumbnailResponseDto.from("postId", "thumbnailUrl")
+                        ), pageable, 1)
+        );
+        given(postClient.findPostThumbnails(USER_INFO.id(), center.getId(), Optional.of(holdInfo.getId()), pageable)).willReturn(postPagination);
 
         // when
         var postThumbnailResponseDtoPagination =
-                centerService.getCenterPosts(USER_ID, center.getId(), Optional.of(holdInfo.getId()), pageable);
+                centerService.getCenterPosts(USER_INFO, center.getId(), Optional.of(holdInfo.getId()), pageable);
 
         //then
         assertThat(postThumbnailResponseDtoPagination.getResults())
-                .isNotNull();
-//                .extracting(CenterPostThumbnailResponseDto::getPostId, CenterPostThumbnailResponseDto::getThumbnailUrl)
-//                .contains(
-//                        tuple("testPostId", post.getThumbnailUrl())
-//                );
+                .isNotNull()
+                .extracting(CenterPostThumbnailResponseDto::getPostId, CenterPostThumbnailResponseDto::getThumbnailUrl)
+                .contains(
+                        tuple("postId", "thumbnailUrl")
+                );
     }
 
     @Test
@@ -167,7 +161,7 @@ public class CenterServiceTest {
         // when
         final NotFoundException ex = assertThrows(
                 NotFoundException.class,
-                () -> centerService.getCenterPosts(USER_ID, center.getId(), Optional.of("wrongId"), pageable)
+                () -> centerService.getCenterPosts(USER_INFO, center.getId(), Optional.of("wrongId"), pageable)
         );
 
         // then
@@ -243,7 +237,7 @@ public class CenterServiceTest {
             given(sectorInfoRepository.save(sectorInfo)).willReturn(sectorInfo);
 
             // when
-            var responseDto = centerService.create(ADMIN_ID, requestDto);
+            var responseDto = centerService.create(USER_INFO, requestDto);
 
             // then
             assertThat(responseDto)
@@ -253,37 +247,19 @@ public class CenterServiceTest {
         }
     }
 
-//    @Test
-//    @DisplayName("Failure case for create center because create by non-admin")
-//    void failureAuthCreateCenter() {
-//        // given
-//        CenterCreateRequestDto requestDto = new CenterCreateRequestDto();
-//
-//        // when
-//        final UnauthorizedException ex = Assertions.assertThrows(
-//                UnauthorizedException.class,
-//                () -> centerService.create(USER_ID, requestDto)
-//        );
-//
-//        // then
-//        assertThat(ex)
-//                .extracting("errorCode", "message")
-//                .contains(ErrorCode.NOT_ACCESSIBLE, "접근 권한이 없습니다.");
-//    }
-
     @Test
     @DisplayName("Success case for find center")
     void successFindCenter() {
         // given
         given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
-        given(centerBookmarkRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.of(centerBookmark));
-//        given(postPort.countByCenterExceptBlockUser("centerId", USER_ID)).willReturn(0);
-        given(reviewRepositorySupport.countByCenterExceptBlockUser(center.getId(), USER_ID)).willReturn(2);
+        given(centerBookmarkRepository.findByUserIdAndCenterId(USER_INFO.id(), center.getId())).willReturn(Optional.of(centerBookmark));
+        given(postClient.countPostsByCenterId(USER_INFO.id(), center.getId())).willReturn(2L);
+        given(reviewRepositorySupport.countByCenterExceptBlockUser(center.getId(), USER_INFO.id())).willReturn(2L);
         given(holdInfoRepository.findAllByCenter(center)).willReturn(List.of(holdInfo));
         given(sectorInfoRepository.findAllByCenter(center)).willReturn(List.of(sectorInfo));
 
         //when
-        var centerResponseDto = centerService.findCenter(USER_ID, center.getId());
+        var centerResponseDto = centerService.findCenter(USER_INFO, center.getId());
 
         //then
         assertThat(centerResponseDto)
@@ -359,7 +335,7 @@ public class CenterServiceTest {
         CenterReport centerReport = CenterReport.of(
                 "test",
                 CenterReportType.TELEPHONE,
-                USER_ID,
+                USER_INFO.id(),
                 center
         );
         ReflectionTestUtils.setField(centerReport, "id", "reportId");
@@ -376,13 +352,13 @@ public class CenterServiceTest {
             mockedCenterReport.when(() -> CenterReport.of(
                     "test",
                     CenterReportType.TELEPHONE,
-                    USER_ID,
+                    USER_INFO.id(),
                     center
             )).thenReturn(centerReport);
             given(centerReportRepository.save(centerReport)).willReturn(centerReport);
 
             // when
-            var centerReportResponseDto = centerService.createReport(USER_ID, center.getId(), centerReportCreateRequestDto);
+            var centerReportResponseDto = centerService.createReport(USER_INFO, center.getId(), centerReportCreateRequestDto);
 
             // then
             assertThat(centerReportResponseDto)

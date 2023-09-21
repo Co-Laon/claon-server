@@ -3,7 +3,6 @@ package com.claon.user.service;
 import com.claon.user.common.domain.Pagination;
 import com.claon.user.common.domain.PaginationFactory;
 import com.claon.user.common.domain.RequestUserInfo;
-import com.claon.user.domain.BlockUser;
 import com.claon.user.domain.User;
 import com.claon.user.dto.*;
 import com.claon.user.repository.BlockUserRepository;
@@ -54,7 +53,6 @@ public class UserServiceTest {
     private final String CENTER_ID = "CENTER_ID";
     private final String HOLD_ID = "HOLD_ID";
     private User user, publicUser;
-    private BlockUser blockUser;
 
     @BeforeEach
     void setUp() {
@@ -73,12 +71,6 @@ public class UserServiceTest {
                 178.0F
         );
         ReflectionTestUtils.setField(user, "id", "userId");
-
-        blockUser = BlockUser.of(
-                user,
-                publicUser
-        );
-        ReflectionTestUtils.setField(blockUser, "id", "block");
 
         USER_INFO = new RequestUserInfo(user.getId());
         PUBLIC_USER_INFO = new RequestUserInfo(publicUser.getId());

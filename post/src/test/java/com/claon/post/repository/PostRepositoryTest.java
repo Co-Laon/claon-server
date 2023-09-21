@@ -16,6 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -113,28 +114,10 @@ public class PostRepositoryTest {
         assertThat(results.getContent().size()).isEqualTo(0);
     }
 
-//    @Test
-//    public void findLaonUserPostsExceptBlockUser() {
-//        // when
-//        Page<Post> results = postRepositorySupport.findLaonUserPostsExceptBlockUser(USER_ID, PageRequest.of(0, 2));
-//
-//        // then
-//        assertThat(results.getContent().size()).isEqualTo(1);
-//    }
-
-    @Test
-    public void successFindByCenterExceptBlockUser() {
-        // when
-        var results = postRepositorySupport.findByCenterExceptBlockUser(CENTER_ID, USER_ID, PageRequest.of(0, 2));
-
-        // then
-        assertThat(results.getContent().size()).isEqualTo(1);
-    }
-
     @Test
     public void successFindByCenterAndHoldExceptBlockUser() {
         // when
-        var results = postRepositorySupport.findByCenterAndHoldExceptBlockUser(CENTER_ID, HOLD_ID, USER_ID, PageRequest.of(0, 2));
+        var results = postRepositorySupport.findByCenterAndHoldExceptBlockUser(CENTER_ID, Optional.of(HOLD_ID), USER_ID, PageRequest.of(0, 2));
 
         // then
         assertThat(results.getContent().size()).isEqualTo(1);
@@ -151,13 +134,4 @@ public class PostRepositoryTest {
         // then
         assertThat(results.getContent().size()).isEqualTo(1);
     }
-
-//    @Test
-//    public void successFindCenterByUser() {
-//        // when
-//        Page<Center> results = postRepositorySupport.findCenterByUser(userId, PageRequest.of(0, 2));
-//
-//        // then
-//        assertThat(results.getContent().size()).isEqualTo(1);
-//    }
 }

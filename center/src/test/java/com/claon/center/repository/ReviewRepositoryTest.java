@@ -25,9 +25,12 @@ public class ReviewRepositoryTest {
     @Autowired
     private ReviewRepository reviewRepository;
     @Autowired
+    private BlockUserRepository blockUserRepository;
+    @Autowired
     private ReviewRepositorySupport reviewRepositorySupport;
 
     private final String USER_ID = "USER_ID";
+    private final String BLOCK_USER_ID = "BLOCK_USER_ID";
     private Center center;
 
     @BeforeEach
@@ -52,6 +55,8 @@ public class ReviewRepositoryTest {
                 USER_ID,
                 center
         ));
+
+        blockUserRepository.save(BlockUser.of(USER_ID, BLOCK_USER_ID));
     }
 
     @Test
@@ -66,60 +71,39 @@ public class ReviewRepositoryTest {
         assertThat(centerReviewOptional).isPresent();
     }
 
-//    @Test
-//    public void successFindByCenterExceptBlockUser() {
-//        // given
-//        reviewRepository.save(CenterReview.of(
-//                2,
-//                "test",
-//                blockUser,
-//                center
-//        ));
-//        String centerId = center.getId();
-//        String userId = user.getId();
-//
-//        // when
-//        Page<CenterReview> reviewList = reviewRepositorySupport.findByCenterExceptBlockUser(centerId, userId, PageRequest.of(0, 2));
-//
-//        // then
-//        assertThat(reviewList.getContent().size()).isEqualTo(1);
-//    }
+    @Test
+    public void successCountByCenterExceptBlockUser() {
+        // given
+        reviewRepository.save(CenterReview.of(
+                2,
+                "test",
+                BLOCK_USER_ID,
+                center
+        ));
+        String centerId = center.getId();
 
-//    @Test
-//    public void successCountByCenterExceptBlockUser() {
-//        // given
-//        reviewRepository.save(CenterReview.of(
-//                2,
-//                "test",
-//                blockUser,
-//                center
-//        ));
-//        String centerId = center.getId();
-//        String userId = user.getId();
-//
-//        // when
-//        Integer countCenter = reviewRepositorySupport.countByCenterExceptBlockUser(centerId, userId);
-//
-//        // then
-//        assertThat(countCenter).isEqualTo(1);
-//    }
+        // when
+        Long countCenter = reviewRepositorySupport.countByCenterExceptBlockUser(centerId, USER_ID);
 
-//    @Test
-//    public void successFindByCenterExceptBlockUserAndSelf() {
-//        // given
-//        reviewRepository.save(CenterReview.of(
-//                2,
-//                "test",
-//                blockUser,
-//                center
-//        ));
-//        String centerId = center.getId();
-//        String userId = user.getId();
-//
-//        // when
-//        Page<CenterReview> reviewList = reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(centerId, userId, PageRequest.of(0, 2));
-//
-//        // then
-//        assertThat(reviewList.getContent().size()).isEqualTo(0);
-//    }
+        // then
+        assertThat(countCenter).isEqualTo(1L);
+    }
+
+    @Test
+    public void successFindByCenterExceptBlockUserAndSelf() {
+        // given
+        reviewRepository.save(CenterReview.of(
+                2,
+                "test",
+                BLOCK_USER_ID,
+                center
+        ));
+        String centerId = center.getId();
+
+        // when
+        Page<CenterReview> reviewList = reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(centerId, USER_ID, PageRequest.of(0, 2));
+
+        // then
+        assertThat(reviewList.getContent().size()).isEqualTo(0);
+    }
 }

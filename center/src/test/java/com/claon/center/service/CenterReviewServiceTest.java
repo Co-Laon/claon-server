@@ -1,5 +1,6 @@
 package com.claon.center.service;
 
+import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.*;
 import com.claon.center.dto.*;
 import com.claon.center.repository.CenterRepository;
@@ -49,8 +50,8 @@ public class CenterReviewServiceTest {
     @InjectMocks
     CenterReviewService centerReviewService;
 
-    private final String USER_ID = "USER_ID";
-    private final String WRONG_USER_ID = "WRONG_USER_ID";
+    private final RequestUserInfo USER_INFO = new RequestUserInfo("USER_ID");
+    private final RequestUserInfo WRONG_USER_INFO = new RequestUserInfo("WRONG_USER_ID");
     private Center center;
     private CenterReview review;
 
@@ -71,7 +72,7 @@ public class CenterReviewServiceTest {
         );
         ReflectionTestUtils.setField(center, "id", "center id");
 
-        review = CenterReview.of(5, "testContent", USER_ID, center);
+        review = CenterReview.of(5, "testContent", USER_INFO.id(), center);
         ReflectionTestUtils.setField(review, "id", "reviewId");
         ReflectionTestUtils.setField(review, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(review, "updatedAt", LocalDateTime.now());
@@ -86,12 +87,12 @@ public class CenterReviewServiceTest {
 
             given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
 
-            reviewMockedStatic.when(() -> CenterReview.of(5, "testContent", USER_ID, center)).thenReturn(review);
+            reviewMockedStatic.when(() -> CenterReview.of(5, "testContent", USER_INFO.id(), center)).thenReturn(review);
 
             given(reviewRepository.save(review)).willReturn(review);
 
             // when
-            var reviewResponseDto = centerReviewService.createReview(USER_ID, center.getId(), reviewCreateRequestDto);
+            var reviewResponseDto = centerReviewService.createReview(USER_INFO, center.getId(), reviewCreateRequestDto);
 
             // then
             assertThat(reviewResponseDto)
@@ -107,12 +108,12 @@ public class CenterReviewServiceTest {
         ReviewCreateRequestDto reviewCreateRequestDto = new ReviewCreateRequestDto(5, "testContent");
 
         given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
-        given(reviewRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.of(review));
+        given(reviewRepository.findByUserIdAndCenterId(USER_INFO.id(), center.getId())).willReturn(Optional.of(review));
 
         // when
         final BadRequestException ex = Assertions.assertThrows(
                 BadRequestException.class,
-                () -> centerReviewService.createReview(USER_ID, center.getId(), reviewCreateRequestDto)
+                () -> centerReviewService.createReview(USER_INFO, center.getId(), reviewCreateRequestDto)
         );
 
         // then
@@ -131,7 +132,7 @@ public class CenterReviewServiceTest {
         given(reviewRepository.save(review)).willReturn(review);
 
         // when
-        var reviewResponseDto = centerReviewService.updateReview(USER_ID, review.getId(), reviewUpdateRequestDto);
+        var reviewResponseDto = centerReviewService.updateReview(USER_INFO, review.getId(), reviewUpdateRequestDto);
 
         // then
         assertThat(reviewResponseDto)
@@ -151,7 +152,7 @@ public class CenterReviewServiceTest {
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> centerReviewService.updateReview(WRONG_USER_ID, review.getId(), reviewUpdateRequestDto)
+                () -> centerReviewService.updateReview(WRONG_USER_INFO, review.getId(), reviewUpdateRequestDto)
         );
 
         // then
@@ -167,7 +168,7 @@ public class CenterReviewServiceTest {
         given(reviewRepository.findById(review.getId())).willReturn(Optional.of(review));
 
         // when
-        centerReviewService.deleteReview(USER_ID, review.getId());
+        centerReviewService.deleteReview(USER_INFO, review.getId());
 
         // then
         assertThat(reviewRepository.findAll()).isEmpty();
@@ -182,7 +183,7 @@ public class CenterReviewServiceTest {
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> centerReviewService.deleteReview(WRONG_USER_ID, review.getId())
+                () -> centerReviewService.deleteReview(WRONG_USER_INFO, review.getId())
         );
 
         // then
@@ -199,11 +200,11 @@ public class CenterReviewServiceTest {
         Page<CenterReview> centerReviewPage = new PageImpl<>(List.of(review), pageable, 2);
 
         given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
-        given(reviewRepository.findByUserIdAndCenterId(USER_ID, center.getId())).willReturn(Optional.of(review));
-        given(reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(center.getId(), USER_ID, pageable)).willReturn(centerReviewPage);
+        given(reviewRepository.findByUserIdAndCenterId(USER_INFO.id(), center.getId())).willReturn(Optional.of(review));
+        given(reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(center.getId(), USER_INFO.id(), pageable)).willReturn(centerReviewPage);
 
         //when
-        var reviewBundleFindResponseDto = centerReviewService.findReview(USER_ID, center.getId(), pageable);
+        var reviewBundleFindResponseDto = centerReviewService.findReview(USER_INFO, center.getId(), pageable);
 
         // then
         assertThat(reviewBundleFindResponseDto.getOtherReviewsPagination().getResults())

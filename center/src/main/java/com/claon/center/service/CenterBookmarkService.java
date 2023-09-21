@@ -1,5 +1,6 @@
 package com.claon.center.service;
 
+import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.Center;
 import com.claon.center.domain.CenterBookmark;
 import com.claon.center.dto.CenterBookmarkResponseDto;
@@ -20,7 +21,7 @@ public class CenterBookmarkService {
 
     @Transactional
     public CenterBookmarkResponseDto create(
-            String userId,
+            RequestUserInfo userInfo,
             String centerId
     ) {
         Center center = this.centerRepository.findById(centerId).orElseThrow(
@@ -30,7 +31,7 @@ public class CenterBookmarkService {
                 )
         );
 
-        this.centerBookmarkRepository.findByUserIdAndCenterId(userId, center.getId()).ifPresent(
+        this.centerBookmarkRepository.findByUserIdAndCenterId(userInfo.id(), center.getId()).ifPresent(
                 bookmarkCenter -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
@@ -43,7 +44,7 @@ public class CenterBookmarkService {
                 this.centerBookmarkRepository.save(
                         CenterBookmark.of(
                                 center,
-                                userId
+                                userInfo.id()
                         )
                 ),
                 true
@@ -52,7 +53,7 @@ public class CenterBookmarkService {
 
     @Transactional
     public CenterBookmarkResponseDto delete(
-            String userId,
+            RequestUserInfo userInfo,
             String centerId
     ) {
         Center center = this.centerRepository.findById(centerId).orElseThrow(
@@ -62,7 +63,7 @@ public class CenterBookmarkService {
                 )
         );
 
-        CenterBookmark bookmarkCenter = this.centerBookmarkRepository.findByUserIdAndCenterId(userId, center.getId()).orElseThrow(
+        CenterBookmark bookmarkCenter = this.centerBookmarkRepository.findByUserIdAndCenterId(userInfo.id(), center.getId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
                         "아직 즐겨찾기에 등록되지 않았습니다."
@@ -74,7 +75,7 @@ public class CenterBookmarkService {
         return CenterBookmarkResponseDto.from(
                 CenterBookmark.of(
                         center,
-                        userId
+                        userInfo.id()
                 ),
                 false
         );
