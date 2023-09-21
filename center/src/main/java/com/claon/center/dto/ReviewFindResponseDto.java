@@ -11,8 +11,6 @@ import java.time.ZoneOffset;
 public class ReviewFindResponseDto {
     private final String reviewId;
     private final String reviewerId;
-//    private final String reviewerNickname;
-//    private final String reviewerProfileImage;
     private final Integer rank;
     private final String content;
     private final String createdAt;
@@ -21,8 +19,6 @@ public class ReviewFindResponseDto {
     private ReviewFindResponseDto(
             String reviewId,
             String reviewerId,
-//            String reviewerNickname,
-//            String reviewerProfileImage,
             Integer rank,
             String content,
             String createdAt,
@@ -30,8 +26,6 @@ public class ReviewFindResponseDto {
     ) {
         this.reviewId = reviewId;
         this.reviewerId = reviewerId;
-//        this.reviewerNickname = reviewerNickname;
-//        this.reviewerProfileImage = reviewerProfileImage;
         this.rank = rank;
         this.content = content;
         this.createdAt = createdAt;
@@ -42,8 +36,6 @@ public class ReviewFindResponseDto {
         return new ReviewFindResponseDto(
                 centerReview.getId(),
                 centerReview.getWriterId(),
-//                centerReview.getWriter().getNickname(),
-//                centerReview.getWriter().getImagePath(),
                 centerReview.getRank(),
                 centerReview.getContent(),
                 RelativeTimeUtil.convertNow(OffsetDateTime.of(centerReview.getCreatedAt(), ZoneOffset.ofHours(9))),

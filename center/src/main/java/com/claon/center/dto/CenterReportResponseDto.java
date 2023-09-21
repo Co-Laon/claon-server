@@ -10,8 +10,6 @@ public class CenterReportResponseDto {
     private String content;
     private CenterReportType reportType;
     private String reporterId;
-//    private String reporterNickname;
-//    private String reporterProfileImage;
     private String centerId;
     private String centerName;
 
@@ -20,8 +18,6 @@ public class CenterReportResponseDto {
             String content,
             CenterReportType reportType,
             String reporterId,
-//            String reporterNickname,
-//            String reporterProfileImage,
             String centerId,
             String centerName
     ) {
@@ -29,8 +25,6 @@ public class CenterReportResponseDto {
         this.content = content;
         this.reportType = reportType;
         this.reporterId = reporterId;
-//        this.reporterNickname = reporterNickname;
-//        this.reporterProfileImage = reporterProfileImage;
         this.centerId = centerId;
         this.centerName = centerName;
     }
@@ -43,8 +37,6 @@ public class CenterReportResponseDto {
                 centerReport.getContent(),
                 centerReport.getReportType(),
                 centerReport.getReporterId(),
-//                centerReport.getReporter().getNickname(),
-//                centerReport.getReporter().getImagePath(),
                 centerReport.getCenter().getId(),
                 centerReport.getCenter().getName()
         );
