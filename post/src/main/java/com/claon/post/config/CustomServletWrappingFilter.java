@@ -29,13 +29,15 @@ public class CustomServletWrappingFilter extends OncePerRequestFilter {
 
         chain.doFilter(wrappingRequest, wrappingResponse);
 
-        log.info("request : {} {}", request.getMethod(), request.getRequestURI());
-        if (request.getMethod().equals("POST") || request.getMethod().equals("PUT")) {
-            if (!Optional.ofNullable(request.getHeader("Content-Type"))
-                    .map(header -> header.contains("multipart/form-data"))
-                    .orElse(false)) {
-                ObjectMapper om = new ObjectMapper();
-                log.info("request body : {}", om.readTree(wrappingRequest.getContentAsByteArray()));
+        if (!request.getRequestURI().contains("actuator")) {
+            log.info("request : {} {}", request.getMethod(), request.getRequestURI());
+            if (request.getMethod().equals("POST") || request.getMethod().equals("PUT")) {
+                if (!Optional.ofNullable(request.getHeader("Content-Type"))
+                        .map(header -> header.contains("multipart/form-data"))
+                        .orElse(false)) {
+                    ObjectMapper om = new ObjectMapper();
+                    log.info("request body : {}", om.readTree(wrappingRequest.getContentAsByteArray()));
+                }
             }
         }
 
