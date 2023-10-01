@@ -1,19 +1,24 @@
 package com.claon.user.dto;
 
 import com.claon.user.domain.User;
-import lombok.Data;
+import com.claon.user.service.client.dto.ClimbingHistoryResponse;
+import com.claon.user.service.client.dto.UserPostInfoResponse;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.util.List;
 
-@Data
+@Getter
+@ToString
 public class UserDetailResponseDto {
-    private String nickname;
-    private Long laonCount;
-    private Long climbCount;
-    private Float height;
-    private Float armReach;
-    private Float apeIndex;
-    private List<CenterClimbingHistoryResponseDto> centerClimbingHistories;
+    private final String nickname;
+    private final Long laonCount;
+    private final Long climbingCount;
+    private final Float height;
+    private final Float armReach;
+    private final Float apeIndex;
+    private final Boolean isLaon;
+    private final List<UserPostInfoResponse> postInfoList;
 
     private UserDetailResponseDto(
             String nickname,
@@ -21,22 +26,24 @@ public class UserDetailResponseDto {
             Float armReach,
             Float apeIndex,
             Long laonCount,
-            Long climbCount,
-            List<CenterClimbingHistoryResponseDto> histories
+            Long climbingCount,
+            Boolean isLaon,
+            List<UserPostInfoResponse> postInfoList
     ) {
         this.nickname = nickname;
         this.laonCount = laonCount;
-        this.climbCount = climbCount;
+        this.climbingCount = climbingCount;
         this.height = height;
         this.armReach = armReach;
         this.apeIndex = apeIndex;
-        this.centerClimbingHistories = histories;
+        this.isLaon = isLaon;
+        this.postInfoList = postInfoList;
     }
 
     public static UserDetailResponseDto from(
             User user,
             Long laonCount,
-            List<CenterClimbingHistoryResponseDto> histories
+            List<UserPostInfoResponse> postInfoList
     ) {
         return new UserDetailResponseDto(
                 user.getNickname(),
@@ -44,14 +51,39 @@ public class UserDetailResponseDto {
                 user.getArmReach(),
                 user.getArmReach() - user.getHeight(),
                 laonCount,
-                histories.stream()
-                        .map(CenterClimbingHistoryResponseDto::getClimbingHistories)
+                postInfoList.stream()
+                        .map(UserPostInfoResponse::climbingHistories)
                         .mapToLong(history ->
                                 history.stream()
-                                        .mapToLong(ClimbingHistoryResponseDto::getClimbingCount)
+                                        .mapToLong(ClimbingHistoryResponse::climbingCount)
                                         .sum())
                         .sum(),
-                histories
+                true,
+                postInfoList
+        );
+    }
+
+    public static UserDetailResponseDto from(
+            User user,
+            Long laonCount,
+            Boolean isLaon,
+            List<UserPostInfoResponse> postInfoList
+    ) {
+        return new UserDetailResponseDto(
+                user.getNickname(),
+                user.getHeight(),
+                user.getArmReach(),
+                user.getArmReach() - user.getHeight(),
+                laonCount,
+                postInfoList.stream()
+                        .map(UserPostInfoResponse::climbingHistories)
+                        .mapToLong(history ->
+                                history.stream()
+                                        .mapToLong(ClimbingHistoryResponse::climbingCount)
+                                        .sum())
+                        .sum(),
+                isLaon,
+                postInfoList
         );
     }
 }

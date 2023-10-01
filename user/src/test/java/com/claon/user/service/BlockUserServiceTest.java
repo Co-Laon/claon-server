@@ -7,7 +7,7 @@ import com.claon.user.common.exception.UnauthorizedException;
 import com.claon.user.domain.BlockUser;
 import com.claon.user.domain.Laon;
 import com.claon.user.domain.User;
-import com.claon.user.dto.BlockUserFindResponseDto;
+import com.claon.user.dto.BlockUserResponseDto;
 import com.claon.user.repository.BlockUserRepository;
 import com.claon.user.repository.LaonRepository;
 import com.claon.user.repository.UserRepository;
@@ -158,7 +158,7 @@ public class BlockUserServiceTest {
         assertThat(blockUserFindResponseDto.getResults())
                 .isNotNull()
                 .extracting(
-                        BlockUserFindResponseDto::getBlockUserNickName
+                        BlockUserResponseDto::getBlockUserNickName
                 )
                 .contains(
                         blockUser.getNickname()

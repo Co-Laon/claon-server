@@ -10,6 +10,8 @@ import com.claon.post.common.validator.IdEqualValidator;
 import com.claon.post.domain.Post;
 import com.claon.post.domain.PostComment;
 import com.claon.post.dto.*;
+import com.claon.post.dto.request.CommentCreateRequestDto;
+import com.claon.post.dto.request.CommentUpdateRequestDto;
 import com.claon.post.repository.BlockUserRepository;
 import com.claon.post.repository.PostCommentRepository;
 import com.claon.post.repository.PostCommentRepositorySupport;
@@ -56,12 +58,12 @@ public class PostCommentService {
         return CommentResponseDto.from(
                 postCommentRepository.save(
                         PostComment.of(
-                                commentCreateRequestDto.getContent(),
+                                commentCreateRequestDto.content(),
                                 userInfo.id(),
                                 post,
-                                Optional.ofNullable(commentCreateRequestDto.getParentCommentId())
+                                Optional.ofNullable(commentCreateRequestDto.parentCommentId())
                                         .map(parentCommentId ->
-                                                postCommentRepository.findById(commentCreateRequestDto.getParentCommentId())
+                                                postCommentRepository.findById(commentCreateRequestDto.parentCommentId())
                                                         .orElseThrow(
                                                                 () -> new NotFoundException(
                                                                         ErrorCode.DATA_DOES_NOT_EXIST,
@@ -73,7 +75,7 @@ public class PostCommentService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<CommentFindResponseDto> findCommentsByPost(
+    public Pagination<CommentDetailResponseDto> findCommentsByPost(
             RequestUserInfo userInfo,
             String postId,
             Pageable pageable
@@ -158,7 +160,7 @@ public class PostCommentService {
 
         IdEqualValidator.of(postComment.getWriterId(), userInfo.id()).validate();
 
-        postComment.updateContent(commentUpdateRequestDto.getContent());
+        postComment.updateContent(commentUpdateRequestDto.content());
 
         return CommentResponseDto.from(postCommentRepository.save(postComment));
     }

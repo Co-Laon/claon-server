@@ -4,12 +4,17 @@ import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.*;
 import com.claon.center.domain.enums.CenterReportType;
 import com.claon.center.dto.*;
+import com.claon.center.dto.request.CenterRequestDto;
+import com.claon.center.dto.request.CenterReportRequestDto;
+import com.claon.center.dto.request.HoldInfoRequestDto;
+import com.claon.center.dto.request.SectorInfoRequestDto;
 import com.claon.center.repository.*;
 import com.claon.center.common.domain.Pagination;
 import com.claon.center.common.domain.PaginationFactory;
 import com.claon.center.common.exception.ErrorCode;
 import com.claon.center.common.exception.NotFoundException;
 import com.claon.center.service.client.PostClient;
+import com.claon.center.service.client.dto.PostThumbnailResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -99,10 +104,10 @@ public class CenterServiceTest {
 
         given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
 
-        Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
+        Pagination<PostThumbnailResponse> postPagination = paginationFactory.create(
                 new PageImpl<>(
                         List.of(
-                                CenterPostThumbnailResponseDto.from("postId", "thumbnailUrl")
+                                new PostThumbnailResponse("postId", "thumbnailUrl")
                         ), pageable, 1)
         );
         given(postClient.findPostThumbnails(USER_INFO.id(), center.getId(), Optional.empty(), pageable)).willReturn(postPagination);
@@ -114,7 +119,7 @@ public class CenterServiceTest {
         //then
         assertThat(postThumbnailResponseDtoPagination.getResults())
                 .isNotNull()
-                .extracting(CenterPostThumbnailResponseDto::getPostId, CenterPostThumbnailResponseDto::getThumbnailUrl)
+                .extracting(PostThumbnailResponse::postId, PostThumbnailResponse::thumbnailUrl)
                 .contains(
                         tuple("postId", "thumbnailUrl")
                 );
@@ -129,10 +134,10 @@ public class CenterServiceTest {
         given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
         given(holdInfoRepository.findByIdAndCenter(holdInfo.getId(), center)).willReturn(Optional.of(holdInfo));
 
-        Pagination<CenterPostThumbnailResponseDto> postPagination = paginationFactory.create(
+        Pagination<PostThumbnailResponse> postPagination = paginationFactory.create(
                 new PageImpl<>(
                         List.of(
-                                CenterPostThumbnailResponseDto.from("postId", "thumbnailUrl")
+                                new PostThumbnailResponse("postId", "thumbnailUrl")
                         ), pageable, 1)
         );
         given(postClient.findPostThumbnails(USER_INFO.id(), center.getId(), Optional.of(holdInfo.getId()), pageable)).willReturn(postPagination);
@@ -144,7 +149,7 @@ public class CenterServiceTest {
         //then
         assertThat(postThumbnailResponseDtoPagination.getResults())
                 .isNotNull()
-                .extracting(CenterPostThumbnailResponseDto::getPostId, CenterPostThumbnailResponseDto::getThumbnailUrl)
+                .extracting(PostThumbnailResponse::postId, PostThumbnailResponse::thumbnailUrl)
                 .contains(
                         tuple("postId", "thumbnailUrl")
                 );
@@ -188,17 +193,17 @@ public class CenterServiceTest {
                 MockedStatic<SectorInfo> mockedSectorInfo = mockStatic(SectorInfo.class)
         ) {
             // given
-            CenterCreateRequestDto requestDto = new CenterCreateRequestDto(
+            CenterRequestDto requestDto = new CenterRequestDto(
                     "test",
                     "test",
                     "010-1234-1234",
                     "https://test.com",
                     "https://instagram.com/test",
                     "https://youtube.com/channel/test",
-                    List.of(new CenterImgDto("img test")),
-                    List.of(new OperatingTimeDto("매일", "10:00", "23:00")),
+                    List.of(new CenterImg("img test")),
+                    List.of(new OperatingTime("매일", "10:00", "23:00")),
                     "facilities test",
-                    List.of(new ChargeDto(List.of(new ChargeElementDto("자유 패키지", "330,000")), "charge image")),
+                    List.of(new Charge(List.of(new ChargeElement("자유 패키지", "330,000")), "charge image")),
                     List.of(new HoldInfoRequestDto("test hold", "hold img test")),
                     "hold info img test",
                     List.of(new SectorInfoRequestDto("test sector", "2022/1/1", "2022/1/2"))
@@ -281,7 +286,7 @@ public class CenterServiceTest {
         // then
         assertThat(holdInfoResponseDto)
                 .isNotNull()
-                .extracting(CenterHoldInfoResponseDto::getName, CenterHoldInfoResponseDto::getImage)
+                .extracting(HoldInfoResponseDto::getName, HoldInfoResponseDto::getImage)
                 .containsExactly(
                         tuple(holdInfo.getName(), holdInfo.getImg())
                 );
@@ -342,7 +347,7 @@ public class CenterServiceTest {
 
         try (MockedStatic<CenterReport> mockedCenterReport = mockStatic(CenterReport.class)) {
             // given
-            CenterReportCreateRequestDto centerReportCreateRequestDto = new CenterReportCreateRequestDto(
+            CenterReportRequestDto centerReportRequestDto = new CenterReportRequestDto(
                     "test",
                     CenterReportType.TELEPHONE
             );
@@ -358,7 +363,7 @@ public class CenterServiceTest {
             given(centerReportRepository.save(centerReport)).willReturn(centerReport);
 
             // when
-            var centerReportResponseDto = centerService.createReport(USER_INFO, center.getId(), centerReportCreateRequestDto);
+            var centerReportResponseDto = centerService.createReport(USER_INFO, center.getId(), centerReportRequestDto);
 
             // then
             assertThat(centerReportResponseDto)

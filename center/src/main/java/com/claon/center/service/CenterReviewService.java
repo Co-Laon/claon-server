@@ -4,6 +4,7 @@ import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.Center;
 import com.claon.center.domain.CenterReview;
 import com.claon.center.dto.*;
+import com.claon.center.dto.request.ReviewRequestDto;
 import com.claon.center.repository.CenterRepository;
 import com.claon.center.repository.ReviewRepository;
 import com.claon.center.repository.ReviewRepositorySupport;
@@ -29,7 +30,7 @@ public class CenterReviewService {
     public ReviewResponseDto createReview(
             RequestUserInfo userInfo,
             String centerId,
-            ReviewCreateRequestDto reviewCreateRequestDto
+            ReviewRequestDto reviewRequestDto
     ) {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
@@ -50,8 +51,8 @@ public class CenterReviewService {
         return ReviewResponseDto.from(
                 reviewRepository.save(
                         CenterReview.of(
-                                reviewCreateRequestDto.getRank(),
-                                reviewCreateRequestDto.getContent(),
+                                reviewRequestDto.rank(),
+                                reviewRequestDto.content(),
                                 userInfo.id(),
                                 center
                         )
@@ -63,7 +64,7 @@ public class CenterReviewService {
     public ReviewResponseDto updateReview(
             RequestUserInfo userInfo,
             String reviewId,
-            ReviewUpdateRequestDto updateRequestDto
+            ReviewRequestDto requestDto
     ) {
         CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
                 () -> new NotFoundException(
@@ -74,7 +75,7 @@ public class CenterReviewService {
 
         IdEqualValidator.of(review.getWriterId(), userInfo.id()).validate();
 
-        review.update(updateRequestDto.getRank(), updateRequestDto.getContent());
+        review.update(requestDto.rank(), requestDto.content());
 
         return ReviewResponseDto.from(reviewRepository.save(review));
     }
@@ -99,7 +100,7 @@ public class CenterReviewService {
     }
 
     @Transactional
-    public ReviewBundleFindResponseDto findReview(
+    public CenterReviewResponseDto findReview(
             RequestUserInfo userInfo,
             String centerId,
             Pageable pageable
@@ -111,15 +112,15 @@ public class CenterReviewService {
                 )
         );
 
-        return ReviewBundleFindResponseDto.from(
+        return CenterReviewResponseDto.from(
                 center.getId(),
                 reviewRepositorySupport.findRankByCenterExceptBlockUser(center.getId(), userInfo.id()),
                 reviewRepository.findByUserIdAndCenterId(userInfo.id(), center.getId())
-                        .map(ReviewFindResponseDto::from)
+                        .map(ReviewDetailResponseDto::from)
                         .orElse(null),
                 this.paginationFactory.create(
                         reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(center.getId(), userInfo.id(), pageable)
-                                .map(ReviewFindResponseDto::from)
+                                .map(ReviewDetailResponseDto::from)
                 )
         );
     }

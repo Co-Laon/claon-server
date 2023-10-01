@@ -1,6 +1,6 @@
 package com.claon.post.web;
 
-import com.claon.post.dto.CenterClimbingHistoryResponseDto;
+import com.claon.post.dto.UserPostInfoResponseDto;
 import com.claon.post.service.ClimbingHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class ClimbingHistoryController {
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
-    public List<CenterClimbingHistoryResponseDto> findClimbingHistory(@RequestParam String userId) {
+    public List<UserPostInfoResponseDto> findClimbingHistory(@RequestParam String userId) {
         return climbingHistoryService.findClimbingHistory(userId);
     }
 }

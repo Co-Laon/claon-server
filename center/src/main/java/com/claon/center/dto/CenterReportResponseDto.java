@@ -2,16 +2,18 @@ package com.claon.center.dto;
 
 import com.claon.center.domain.CenterReport;
 import com.claon.center.domain.enums.CenterReportType;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class CenterReportResponseDto {
-    private String id;
-    private String content;
-    private CenterReportType reportType;
-    private String reporterId;
-    private String centerId;
-    private String centerName;
+    private final String id;
+    private final String content;
+    private final CenterReportType reportType;
+    private final String reporterId;
+    private final String centerId;
+    private final String centerName;
 
     private CenterReportResponseDto(
             String id,

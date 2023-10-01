@@ -1,12 +1,14 @@
 package com.claon.post.dto;
 
 import com.claon.post.domain.PostLike;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class LikeResponseDto {
-    private String postId;
-    private Integer likeCount;
+    private final String postId;
+    private final Integer likeCount;
 
     private LikeResponseDto(
             String postId,

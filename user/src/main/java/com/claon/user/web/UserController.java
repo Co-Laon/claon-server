@@ -4,8 +4,10 @@ import com.claon.user.common.annotation.RequestUser;
 import com.claon.user.common.domain.Pagination;
 import com.claon.user.common.domain.RequestUserInfo;
 import com.claon.user.dto.*;
+import com.claon.user.dto.request.UserModifyRequestDto;
 import com.claon.user.service.BlockUserService;
 import com.claon.user.service.UserService;
+import com.claon.user.service.client.dto.PostThumbnailResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -48,7 +50,7 @@ public class UserController {
 
     @GetMapping("/name/{targetId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public IndividualUserResponseDto getPublicUser(
+    public UserDetailResponseDto getPublicUser(
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String targetId
     ) {
@@ -57,7 +59,7 @@ public class UserController {
 
     @GetMapping("/name/{targetId}/posts")
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<UserPostThumbnailResponseDto> findPostsByUser(
+    public Pagination<PostThumbnailResponse> findPostsByUser(
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String targetId,
             @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
@@ -85,7 +87,7 @@ public class UserController {
 
     @GetMapping("/block")
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<BlockUserFindResponseDto> findBlockUser(
+    public Pagination<BlockUserResponseDto> findBlockUser(
             @RequestUser RequestUserInfo userInfo,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {

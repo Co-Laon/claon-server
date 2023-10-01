@@ -1,16 +1,18 @@
 package com.claon.center.dto;
 
 import com.claon.center.domain.SectorInfo;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.format.DateTimeFormatter;
 
-@Data
+@Getter
+@ToString
 public class SectorInfoResponseDto {
-    private String id;
-    private String name;
-    private String start;
-    private String end;
+    private final String id;
+    private final String name;
+    private final String start;
+    private final String end;
 
     private SectorInfoResponseDto(
             String id,

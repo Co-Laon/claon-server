@@ -1,9 +1,11 @@
 package com.claon.center.dto;
 
 import com.claon.center.domain.CenterReview;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class ReviewResponseDto {
     private final String reviewId;
     private final Integer rank;

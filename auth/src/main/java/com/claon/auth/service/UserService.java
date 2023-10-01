@@ -6,8 +6,8 @@ import com.claon.auth.common.exception.UnauthorizedException;
 import com.claon.auth.common.utils.JwtUtil;
 import com.claon.auth.domain.User;
 import com.claon.auth.dto.DuplicatedCheckResponseDto;
-import com.claon.auth.dto.SignInRequestDto;
-import com.claon.auth.dto.SignUpRequestDto;
+import com.claon.auth.dto.request.SignInRequestDto;
+import com.claon.auth.dto.request.SignUpRequestDto;
 import com.claon.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class UserService {
     public JwtDto signIn(
             SignInRequestDto signInRequestDto
     ) {
-        User user = this.userRepository.findByEmail(signInRequestDto.getEmail())
+        User user = this.userRepository.findByEmail(signInRequestDto.email())
                 .orElseThrow(() -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
@@ -42,10 +42,10 @@ public class UserService {
             SignUpRequestDto signUpRequestDto
     ) {
         User user = User.signUp(
-                signUpRequestDto.getEmail(),
-                signUpRequestDto.getNickname(),
-                signUpRequestDto.getHeight() == null ? 0 : signUpRequestDto.getHeight(),
-                signUpRequestDto.getArmReach() == null ? 0 : signUpRequestDto.getArmReach()
+                signUpRequestDto.email(),
+                signUpRequestDto.nickname(),
+                signUpRequestDto.height() == null ? 0 : signUpRequestDto.height(),
+                signUpRequestDto.armReach() == null ? 0 : signUpRequestDto.armReach()
         );
 
         return this.jwtUtil.createToken(userRepository.save(user).getId());

@@ -4,10 +4,14 @@ import com.claon.center.common.annotation.RequestUser;
 import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.enums.CenterSearchOption;
 import com.claon.center.dto.*;
+import com.claon.center.dto.request.CenterRequestDto;
+import com.claon.center.dto.request.CenterReportRequestDto;
+import com.claon.center.dto.request.ReviewRequestDto;
 import com.claon.center.service.CenterBookmarkService;
 import com.claon.center.service.CenterReviewService;
 import com.claon.center.service.CenterService;
 import com.claon.center.common.domain.Pagination;
+import com.claon.center.service.client.dto.PostThumbnailResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +33,7 @@ public class CenterController {
 
     @GetMapping(value = "/{centerId}/posts")
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<CenterPostThumbnailResponseDto> getCenterPosts(
+    public Pagination<PostThumbnailResponse> getCenterPosts(
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId,
             @RequestParam(value = "holdId", required = false) Optional<String> holdId,
@@ -42,9 +46,9 @@ public class CenterController {
     @ResponseStatus(value = HttpStatus.CREATED)
     public CenterResponseDto create(
             @RequestUser RequestUserInfo userInfo,
-            @RequestBody @Valid CenterCreateRequestDto centerCreateRequestDto
+            @RequestBody @Valid CenterRequestDto centerRequestDto
     ) {
-        return this.centerService.create(userInfo, centerCreateRequestDto);
+        return this.centerService.create(userInfo, centerRequestDto);
     }
 
     @GetMapping(value = "/{centerId}")
@@ -76,7 +80,7 @@ public class CenterController {
 
     @GetMapping(value = "/{centerId}/hold")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<CenterHoldInfoResponseDto> findHoldInfoByCenter(
+    public List<HoldInfoResponseDto> findHoldInfoByCenter(
             @PathVariable String centerId
     ) {
         return this.centerService.findHoldInfoByCenterId(centerId);
@@ -87,9 +91,9 @@ public class CenterController {
     public ReviewResponseDto createReview(
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId,
-            @RequestBody @Valid ReviewCreateRequestDto reviewCreateRequestDto
+            @RequestBody @Valid ReviewRequestDto reviewRequestDto
     ) {
-        return this.centerReviewService.createReview(userInfo, centerId, reviewCreateRequestDto);
+        return this.centerReviewService.createReview(userInfo, centerId, reviewRequestDto);
     }
 
     @PutMapping(value = "/review/{reviewId}")
@@ -97,9 +101,9 @@ public class CenterController {
     public ReviewResponseDto updateReview(
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String reviewId,
-            @RequestBody @Valid ReviewUpdateRequestDto updateRequestDto
+            @RequestBody @Valid ReviewRequestDto requestDto
     ) {
-        return this.centerReviewService.updateReview(userInfo, reviewId, updateRequestDto);
+        return this.centerReviewService.updateReview(userInfo, reviewId, requestDto);
     }
 
     @DeleteMapping(value = "/review/{reviewId}")
@@ -113,7 +117,7 @@ public class CenterController {
 
     @GetMapping(value = "/{centerId}/review")
     @ResponseStatus(value = HttpStatus.OK)
-    public ReviewBundleFindResponseDto findReviewByCenter(
+    public CenterReviewResponseDto findReviewByCenter(
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId,
             @PageableDefault(size = 5) final Pageable pageable
@@ -144,9 +148,9 @@ public class CenterController {
     public CenterReportResponseDto createReport(
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId,
-            @RequestBody @Valid CenterReportCreateRequestDto centerReportCreateRequestDto
+            @RequestBody @Valid CenterReportRequestDto centerReportRequestDto
     ) {
-        return this.centerService.createReport(userInfo, centerId, centerReportCreateRequestDto);
+        return this.centerService.createReport(userInfo, centerId, centerReportRequestDto);
     }
 
     @GetMapping(value = "/search")
