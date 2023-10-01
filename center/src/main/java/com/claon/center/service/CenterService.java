@@ -4,12 +4,15 @@ import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.*;
 import com.claon.center.domain.enums.CenterSearchOption;
 import com.claon.center.dto.*;
+import com.claon.center.dto.request.CenterRequestDto;
+import com.claon.center.dto.request.CenterReportRequestDto;
 import com.claon.center.repository.*;
 import com.claon.center.common.domain.Pagination;
 import com.claon.center.common.domain.PaginationFactory;
 import com.claon.center.common.exception.ErrorCode;
 import com.claon.center.common.exception.NotFoundException;
 import com.claon.center.service.client.PostClient;
+import com.claon.center.service.client.dto.PostThumbnailResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,54 +39,42 @@ public class CenterService {
     @Transactional
     public CenterResponseDto create(
             RequestUserInfo userInfo,
-            CenterCreateRequestDto requestDto
+            CenterRequestDto requestDto
     ) {
         Center center = this.centerRepository.save(
                 Center.of(
-                        requestDto.getName(),
-                        requestDto.getAddress(),
-                        requestDto.getTel(),
-                        requestDto.getWebUrl(),
-                        requestDto.getInstagramUrl(),
-                        requestDto.getYoutubeUrl(),
-                        requestDto.getImgList()
-                                .stream().map(dto -> CenterImg.of(dto.getUrl()))
-                                .collect(Collectors.toList()),
-                        requestDto.getOperatingTimeList()
-                                .stream().map(dto -> OperatingTime.of(dto.getDay(), dto.getStart(), dto.getEnd()))
-                                .collect(Collectors.toList()),
-                        requestDto.getFacilities(),
-                        requestDto.getChargeList()
-                                .stream()
-                                .map(dto -> Charge.of(dto.getChargeList().stream()
-                                                .map(chargeElement -> ChargeElement.of(
-                                                        chargeElement.getName(),
-                                                        chargeElement.getFee()))
-                                                .collect(Collectors.toList()),
-                                        dto.getImage()))
-                                .collect(Collectors.toList()),
-                        requestDto.getHoldInfoImg()
+                        requestDto.name(),
+                        requestDto.address(),
+                        requestDto.tel(),
+                        requestDto.webUrl(),
+                        requestDto.instagramUrl(),
+                        requestDto.youtubeUrl(),
+                        requestDto.imgList(),
+                        requestDto.operatingTimeList(),
+                        requestDto.facilities(),
+                        requestDto.chargeList(),
+                        requestDto.holdInfoImg()
                 )
         );
 
         return CenterResponseDto.from(
                 center,
-                requestDto.getHoldInfoList()
+                requestDto.holdInfoList()
                         .stream()
                         .map(holdInfo -> this.holdInfoRepository.save(
                                 HoldInfo.of(
-                                        holdInfo.getName(),
-                                        holdInfo.getImg(),
+                                        holdInfo.name(),
+                                        holdInfo.img(),
                                         center
                                 )))
                         .collect(Collectors.toList()),
-                requestDto.getSectorInfoList()
+                requestDto.sectorInfoList()
                         .stream()
                         .map(dto -> this.sectorInfoRepository.save(
                                 SectorInfo.of(
-                                        dto.getName(),
-                                        dto.getStart(),
-                                        dto.getEnd(),
+                                        dto.name(),
+                                        dto.start(),
+                                        dto.end(),
                                         center
                                 )))
                         .collect(Collectors.toList())
@@ -114,7 +105,7 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public List<CenterHoldInfoResponseDto> findHoldInfoByCenterId(
+    public List<HoldInfoResponseDto> findHoldInfoByCenterId(
             String centerId
     ) {
         Center center = centerRepository.findById(centerId).orElseThrow(
@@ -126,7 +117,7 @@ public class CenterService {
 
         return holdInfoRepository.findAllByCenter(center)
                 .stream()
-                .map(CenterHoldInfoResponseDto::from)
+                .map(HoldInfoResponseDto::from)
                 .collect(Collectors.toList());
     }
 
@@ -153,7 +144,7 @@ public class CenterService {
     public CenterReportResponseDto createReport(
             RequestUserInfo userInfo,
             String centerId,
-            CenterReportCreateRequestDto centerReportCreateRequestDto
+            CenterReportRequestDto centerReportRequestDto
     ) {
         Center center = centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
@@ -165,8 +156,8 @@ public class CenterService {
         return CenterReportResponseDto.from(
                 this.centerReportRepository.save(
                         CenterReport.of(
-                                centerReportCreateRequestDto.getContent(),
-                                centerReportCreateRequestDto.getReportType(),
+                                centerReportRequestDto.content(),
+                                centerReportRequestDto.reportType(),
                                 userInfo.id(),
                                 center
                         )
@@ -185,7 +176,7 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<CenterPostThumbnailResponseDto> getCenterPosts(
+    public Pagination<PostThumbnailResponse> getCenterPosts(
             RequestUserInfo userInfo,
             String centerId,
             Optional<String> holdId,

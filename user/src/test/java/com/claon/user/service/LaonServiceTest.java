@@ -6,7 +6,7 @@ import com.claon.user.common.exception.ErrorCode;
 import com.claon.user.common.exception.UnauthorizedException;
 import com.claon.user.domain.Laon;
 import com.claon.user.domain.User;
-import com.claon.user.dto.LaonFindResponseDto;
+import com.claon.user.dto.LaonResponseDto;
 import com.claon.user.repository.BlockUserRepository;
 import com.claon.user.repository.LaonRepository;
 import com.claon.user.repository.LaonRepositorySupport;
@@ -141,8 +141,8 @@ public class LaonServiceTest {
     void successFindLikes() {
         // given
         Pageable pageable = PageRequest.of(0, 2);
-        Page<LaonFindResponseDto> laonPage = new PageImpl<>(List.of(
-                new LaonFindResponseDto(laonRelation.getLaon().getNickname())
+        Page<LaonResponseDto> laonPage = new PageImpl<>(List.of(
+                new LaonResponseDto(laonRelation.getLaon().getNickname())
         ), pageable, 2);
 
         given(laonRepositorySupport.findAllByUserId(user.getId(), pageable)).willReturn(laonPage);
@@ -153,7 +153,7 @@ public class LaonServiceTest {
         // then
         assertThat(laonFindResponseDto.getResults())
                 .isNotNull()
-                .extracting(LaonFindResponseDto::getLaonNickname)
+                .extracting(LaonResponseDto::getLaonNickname)
                 .containsExactly(
                         laon.getNickname()
                 );

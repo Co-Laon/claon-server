@@ -3,7 +3,7 @@ package com.claon.post.web;
 import com.claon.post.common.annotation.RequestUser;
 import com.claon.post.common.domain.Pagination;
 import com.claon.post.common.domain.RequestUserInfo;
-import com.claon.post.dto.NoticeCreateRequestDto;
+import com.claon.post.dto.request.NoticeRequestDto;
 import com.claon.post.dto.NoticeResponseDto;
 import com.claon.post.service.NoticeService;
 import jakarta.validation.Valid;
@@ -31,7 +31,7 @@ public class NoticeController {
     @ResponseStatus(value = HttpStatus.OK)
     public NoticeResponseDto createNotice(
             @RequestUser RequestUserInfo userInfo,
-            @RequestBody @Valid NoticeCreateRequestDto dto
+            @RequestBody @Valid NoticeRequestDto dto
     ) {
         return noticeService.createNotice(userInfo, dto);
     }

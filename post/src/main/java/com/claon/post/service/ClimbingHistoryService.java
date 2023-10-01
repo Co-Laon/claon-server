@@ -1,7 +1,7 @@
 package com.claon.post.service;
 
 import com.claon.post.domain.ClimbingHistory;
-import com.claon.post.dto.CenterClimbingHistoryResponseDto;
+import com.claon.post.dto.UserPostInfoResponseDto;
 import com.claon.post.dto.ClimbingHistoryResponseDto;
 import com.claon.post.repository.ClimbingHistoryRepository;
 import com.claon.post.repository.PostRepository;
@@ -20,7 +20,7 @@ public class ClimbingHistoryService {
     private final ClimbingHistoryRepository climbingHistoryRepository;
 
     @Transactional(readOnly = true)
-    public List<CenterClimbingHistoryResponseDto> findClimbingHistory(String userId) {
+    public List<UserPostInfoResponseDto> findClimbingHistory(String userId) {
         List<String> postIds = this.postRepository.selectPostIdsByUserId(userId);
 
         List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
@@ -36,7 +36,7 @@ public class ClimbingHistoryService {
 
         return historyMap.entrySet()
                 .stream()
-                .map(entry -> CenterClimbingHistoryResponseDto.from(
+                .map(entry -> UserPostInfoResponseDto.from(
                         entry.getKey(),
                         postIds.size(),
                         entry.getValue().entrySet()

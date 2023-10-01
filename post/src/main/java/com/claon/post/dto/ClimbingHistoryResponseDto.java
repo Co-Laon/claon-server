@@ -1,11 +1,13 @@
 package com.claon.post.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class ClimbingHistoryResponseDto {
-    private String holdId;
-    private Integer climbingCount;
+    private final String holdId;
+    private final Integer climbingCount;
 
     private ClimbingHistoryResponseDto(
             String holdId,

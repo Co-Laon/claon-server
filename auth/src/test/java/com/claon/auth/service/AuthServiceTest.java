@@ -3,8 +3,8 @@ package com.claon.auth.service;
 import com.claon.auth.common.domain.JwtDto;
 import com.claon.auth.common.utils.JwtUtil;
 import com.claon.auth.domain.User;
-import com.claon.auth.dto.SignInRequestDto;
-import com.claon.auth.dto.SignUpRequestDto;
+import com.claon.auth.dto.request.SignInRequestDto;
+import com.claon.auth.dto.request.SignUpRequestDto;
 import com.claon.auth.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,7 +58,7 @@ public class AuthServiceTest {
                 "refresh-token"
         );
 
-        given(userRepository.findByEmail(signInRequestDto.getEmail())).willReturn(Optional.of(user));
+        given(userRepository.findByEmail(signInRequestDto.email())).willReturn(Optional.of(user));
         given(jwtUtil.createToken(user.getId())).willReturn(jwtDto);
 
         // when

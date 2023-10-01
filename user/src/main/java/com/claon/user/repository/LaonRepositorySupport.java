@@ -1,8 +1,8 @@
 package com.claon.user.repository;
 
 import com.claon.user.domain.Laon;
-import com.claon.user.dto.LaonFindResponseDto;
-import com.claon.user.dto.QLaonFindResponseDto;
+import com.claon.user.dto.LaonResponseDto;
+import com.claon.user.dto.QLaonResponseDto;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -27,9 +27,9 @@ public class LaonRepositorySupport extends QuerydslRepositorySupport {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
-    public Page<LaonFindResponseDto> findAllByUserId(String userId, Pageable pageable) {
-        JPQLQuery<LaonFindResponseDto> query = jpaQueryFactory
-                .select(new QLaonFindResponseDto(laon1.laon.nickname))
+    public Page<LaonResponseDto> findAllByUserId(String userId, Pageable pageable) {
+        JPQLQuery<LaonResponseDto> query = jpaQueryFactory
+                .select(new QLaonResponseDto(laon1.laon.nickname))
                 .from(laon1)
                 .where(laon1.user.id.eq(userId)
                         .and(laon1.laon.id.notIn(
@@ -41,7 +41,7 @@ public class LaonRepositorySupport extends QuerydslRepositorySupport {
                 );
 
         long totalCount = query.fetchCount();
-        List<LaonFindResponseDto> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
+        List<LaonResponseDto> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
 
         return new PageImpl<>(results, pageable, totalCount);
     }

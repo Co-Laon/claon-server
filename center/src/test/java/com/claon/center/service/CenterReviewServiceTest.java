@@ -3,6 +3,7 @@ package com.claon.center.service;
 import com.claon.center.common.domain.RequestUserInfo;
 import com.claon.center.domain.*;
 import com.claon.center.dto.*;
+import com.claon.center.dto.request.ReviewRequestDto;
 import com.claon.center.repository.CenterRepository;
 import com.claon.center.repository.ReviewRepository;
 import com.claon.center.repository.ReviewRepositorySupport;
@@ -83,7 +84,7 @@ public class CenterReviewServiceTest {
     void successCreateReview() {
         try (MockedStatic<CenterReview> reviewMockedStatic = mockStatic(CenterReview.class)) {
             // given
-            ReviewCreateRequestDto reviewCreateRequestDto = new ReviewCreateRequestDto(5, "testContent");
+            ReviewRequestDto reviewRequestDto = new ReviewRequestDto(5, "testContent");
 
             given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
 
@@ -92,7 +93,7 @@ public class CenterReviewServiceTest {
             given(reviewRepository.save(review)).willReturn(review);
 
             // when
-            var reviewResponseDto = centerReviewService.createReview(USER_INFO, center.getId(), reviewCreateRequestDto);
+            var reviewResponseDto = centerReviewService.createReview(USER_INFO, center.getId(), reviewRequestDto);
 
             // then
             assertThat(reviewResponseDto)
@@ -105,7 +106,7 @@ public class CenterReviewServiceTest {
     @Test
     @DisplayName("Failure case for create center review for existing own review in center")
     void failureCreateReview_alreadyExist() {
-        ReviewCreateRequestDto reviewCreateRequestDto = new ReviewCreateRequestDto(5, "testContent");
+        ReviewRequestDto reviewRequestDto = new ReviewRequestDto(5, "testContent");
 
         given(centerRepository.findById(center.getId())).willReturn(Optional.of(center));
         given(reviewRepository.findByUserIdAndCenterId(USER_INFO.id(), center.getId())).willReturn(Optional.of(review));
@@ -113,7 +114,7 @@ public class CenterReviewServiceTest {
         // when
         final BadRequestException ex = Assertions.assertThrows(
                 BadRequestException.class,
-                () -> centerReviewService.createReview(USER_INFO, center.getId(), reviewCreateRequestDto)
+                () -> centerReviewService.createReview(USER_INFO, center.getId(), reviewRequestDto)
         );
 
         // then
@@ -126,33 +127,33 @@ public class CenterReviewServiceTest {
     @DisplayName("Success case for update review")
     void successUpdateReview() {
         // given
-        ReviewUpdateRequestDto reviewUpdateRequestDto = new ReviewUpdateRequestDto(1, "updateContent");
+        ReviewRequestDto reviewRequestDto = new ReviewRequestDto(1, "updateContent");
 
         given(reviewRepository.findById(review.getId())).willReturn(Optional.of(review));
         given(reviewRepository.save(review)).willReturn(review);
 
         // when
-        var reviewResponseDto = centerReviewService.updateReview(USER_INFO, review.getId(), reviewUpdateRequestDto);
+        var reviewResponseDto = centerReviewService.updateReview(USER_INFO, review.getId(), reviewRequestDto);
 
         // then
         assertThat(reviewResponseDto)
                 .isNotNull()
                 .extracting("content", "reviewId")
-                .contains(reviewUpdateRequestDto.getContent(), review.getId());
+                .contains(reviewRequestDto.content(), review.getId());
     }
 
     @Test
     @DisplayName("Failure case for update review because update by other user")
     void failUpdateReview_Unauthorized() {
         // given
-        ReviewUpdateRequestDto reviewUpdateRequestDto = new ReviewUpdateRequestDto(1, "updateContent");
+        ReviewRequestDto reviewRequestDto = new ReviewRequestDto(1, "updateContent");
 
         given(reviewRepository.findById(review.getId())).willReturn(Optional.of(review));
 
         // when
         final UnauthorizedException ex = Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> centerReviewService.updateReview(WRONG_USER_INFO, review.getId(), reviewUpdateRequestDto)
+                () -> centerReviewService.updateReview(WRONG_USER_INFO, review.getId(), reviewRequestDto)
         );
 
         // then
@@ -209,7 +210,7 @@ public class CenterReviewServiceTest {
         // then
         assertThat(reviewBundleFindResponseDto.getOtherReviewsPagination().getResults())
                 .isNotNull()
-                .extracting(ReviewFindResponseDto::getReviewId, ReviewFindResponseDto::getRank)
+                .extracting(ReviewDetailResponseDto::getReviewId, ReviewDetailResponseDto::getRank)
                 .contains(
                         tuple(review.getId(), review.getRank())
                 );

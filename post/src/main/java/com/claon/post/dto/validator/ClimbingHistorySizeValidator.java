@@ -1,6 +1,6 @@
 package com.claon.post.dto.validator;
 
-import com.claon.post.dto.ClimbingHistoryRequestDto;
+import com.claon.post.dto.request.ClimbingHistoryRequestDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -13,7 +13,7 @@ public class ClimbingHistorySizeValidator implements ConstraintValidator<Climbin
             ConstraintValidatorContext context
     ) {
         if (value == null) return true;
-        int size = value.stream().map(ClimbingHistoryRequestDto::getClimbingCount).reduce(0, Integer::sum);
+        int size = value.stream().map(ClimbingHistoryRequestDto::climbingCount).reduce(0, Integer::sum);
         return size <= 10 && size > 0;
     }
 }

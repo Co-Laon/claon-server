@@ -2,16 +2,18 @@ package com.claon.post.dto;
 
 import com.claon.post.common.utils.RelativeTimeUtil;
 import com.claon.post.domain.Notice;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-@Data
+@Getter
+@ToString
 public class NoticeResponseDto {
-    private String title;
-    private String content;
-    private String createdAt;
+    private final String title;
+    private final String content;
+    private final String createdAt;
 
     private NoticeResponseDto(String title, String content, String createdAt) {
         this.title = title;

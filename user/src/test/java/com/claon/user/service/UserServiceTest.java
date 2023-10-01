@@ -5,11 +5,15 @@ import com.claon.user.common.domain.PaginationFactory;
 import com.claon.user.common.domain.RequestUserInfo;
 import com.claon.user.domain.User;
 import com.claon.user.dto.*;
+import com.claon.user.dto.request.UserModifyRequestDto;
 import com.claon.user.repository.BlockUserRepository;
 import com.claon.user.repository.LaonRepository;
 import com.claon.user.repository.UserRepository;
 import com.claon.user.repository.UserRepositorySupport;
 import com.claon.user.service.client.PostClient;
+import com.claon.user.service.client.dto.ClimbingHistoryResponse;
+import com.claon.user.service.client.dto.PostThumbnailResponse;
+import com.claon.user.service.client.dto.UserPostInfoResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -82,16 +86,16 @@ public class UserServiceTest {
         given(userRepository.findById(USER_INFO.id())).willReturn(Optional.of(user));
         given(laonRepository.getUserIdsByLaonId(USER_INFO.id())).willReturn(List.of(PUBLIC_USER_INFO.id()));
 
-        CenterClimbingHistoryResponseDto historyDto = CenterClimbingHistoryResponseDto.from(
+        UserPostInfoResponse postInfo = new UserPostInfoResponse(
                 CENTER_ID,
                 0,
-                List.of(ClimbingHistoryResponseDto.from(
+                List.of(new ClimbingHistoryResponse(
                         HOLD_ID,
                         0
                 ))
         );
 
-        given(postClient.findHistoriesByUserId(USER_INFO.id())).willReturn(List.of(historyDto));
+        given(postClient.findHistoriesByUserId(USER_INFO.id())).willReturn(List.of(postInfo));
 
         // when
         UserDetailResponseDto userResponseDto = userService.retrieveMe(USER_INFO);
@@ -110,33 +114,33 @@ public class UserServiceTest {
         given(userRepository.findById(USER_INFO.id())).willReturn(Optional.of(user));
         given(laonRepository.getUserIdsByLaonId(USER_INFO.id())).willReturn(List.of(PUBLIC_USER_INFO.id()));
 
-        CenterClimbingHistoryResponseDto historyDto = CenterClimbingHistoryResponseDto.from(
+        UserPostInfoResponse postInfo = new UserPostInfoResponse(
                 CENTER_ID,
                 0,
-                List.of(ClimbingHistoryResponseDto.from(
+                List.of(new ClimbingHistoryResponse(
                         HOLD_ID,
                         0
                 ))
         );
 
-        given(postClient.findHistoriesByUserId(USER_INFO.id())).willReturn(List.of(historyDto));
+        given(postClient.findHistoriesByUserId(USER_INFO.id())).willReturn(List.of(postInfo));
 
         // when
-        IndividualUserResponseDto userResponseDto = userService.getOtherUserInformation(PUBLIC_USER_INFO, USER_INFO.id());
+        UserDetailResponseDto userResponseDto = userService.getOtherUserInformation(PUBLIC_USER_INFO, USER_INFO.id());
 
         // then
         assertThat(userResponseDto)
                 .isNotNull()
                 .extracting(
-                        IndividualUserResponseDto::getHeight,
-                        IndividualUserResponseDto::getLaonCount,
-                        IndividualUserResponseDto::getIsLaon)
+                        UserDetailResponseDto::getHeight,
+                        UserDetailResponseDto::getLaonCount,
+                        UserDetailResponseDto::getIsLaon)
                 .contains(user.getHeight(), 1L, true);
-        assertThat(userResponseDto.getCenterClimbingHistories())
+        assertThat(userResponseDto.getPostInfoList())
                 .isNotNull()
                 .extracting(
-                        CenterClimbingHistoryResponseDto::getCenterId,
-                        history -> history.getClimbingHistories().get(0).getClimbingCount())
+                        UserPostInfoResponse::centerId,
+                        history -> history.climbingHistories().get(0).climbingCount())
                 .containsExactly(
                         tuple(CENTER_ID, 0)
                 );
@@ -147,15 +151,16 @@ public class UserServiceTest {
     void successFindPosts() {
         // given
         String POST_ID = "POST_ID";
-
         Pageable pageable = PageRequest.of(0, 2);
+
         given(userRepository.findById(publicUser.getId())).willReturn(Optional.of(publicUser));
         given(blockUserRepository.findBlock(publicUser.getId(), user.getId())).willReturn(List.of());
-        Pagination<UserPostThumbnailResponseDto> postPagination = paginationFactory.create(new PageImpl<>(
-                List.of(UserPostThumbnailResponseDto.from(
+
+        Pagination<PostThumbnailResponse> postPagination = paginationFactory.create(new PageImpl<>(
+                List.of(new PostThumbnailResponse(
                         POST_ID,
                         "",
-                        List.of(ClimbingHistoryResponseDto.from(
+                        List.of(new ClimbingHistoryResponse(
                                 HOLD_ID,
                                 0
                         )))),
@@ -164,12 +169,12 @@ public class UserServiceTest {
         given(postClient.findPostThumbnails(publicUser.getId(), pageable)).willReturn(postPagination);
 
         // when
-        Pagination<UserPostThumbnailResponseDto> dtos = userService.findPostsByUser(USER_INFO, publicUser.getId(), pageable);
+        Pagination<PostThumbnailResponse> dtos = userService.findPostsByUser(USER_INFO, publicUser.getId(), pageable);
 
         //then
         assertThat(dtos.getResults())
                 .isNotNull()
-                .extracting(UserPostThumbnailResponseDto::getPostId, UserPostThumbnailResponseDto::getThumbnailUrl)
+                .extracting(PostThumbnailResponse::postId, PostThumbnailResponse::thumbnailUrl)
                 .contains(
                         tuple(POST_ID, "")
                 );
@@ -217,7 +222,7 @@ public class UserServiceTest {
         assertThat(userResponseDto)
                 .isNotNull()
                 .extracting("email", "nickname")
-                .contains(user.getEmail(), dto.getNickname());
+                .contains(user.getEmail(), dto.nickname());
     }
 
     @Test

@@ -10,6 +10,8 @@ import com.claon.post.domain.Post;
 import com.claon.post.domain.PostComment;
 import com.claon.post.domain.PostContents;
 import com.claon.post.dto.*;
+import com.claon.post.dto.request.CommentCreateRequestDto;
+import com.claon.post.dto.request.CommentUpdateRequestDto;
 import com.claon.post.repository.BlockUserRepository;
 import com.claon.post.repository.PostCommentRepository;
 import com.claon.post.repository.PostCommentRepositorySupport;
@@ -200,8 +202,8 @@ public class PostCommentServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         given(postRepository.findByIdAndIsDeletedFalse(post.getId())).willReturn(Optional.of(post));
 
-        Page<CommentFindResponseDto> parents = new PageImpl<>(
-                List.of(new CommentFindResponseDto(postComment, 0, USER_INFO.id())),
+        Page<CommentDetailResponseDto> parents = new PageImpl<>(
+                List.of(new CommentDetailResponseDto(postComment, 0, USER_INFO.id())),
                 pageable,
                 2
         );
@@ -209,12 +211,12 @@ public class PostCommentServiceTest {
         given(postCommentRepositorySupport.findParentCommentByPost(post.getId(), USER_INFO.id(), pageable)).willReturn(parents);
 
         // when
-        Pagination<CommentFindResponseDto> commentFindResponseDto = postCommentService.findCommentsByPost(USER_INFO, post.getId(), pageable);
+        Pagination<CommentDetailResponseDto> commentFindResponseDto = postCommentService.findCommentsByPost(USER_INFO, post.getId(), pageable);
 
         // then
         assertThat(commentFindResponseDto.getResults())
                 .isNotNull()
-                .extracting(CommentFindResponseDto::getContent, CommentFindResponseDto::getCommentId)
+                .extracting(CommentDetailResponseDto::getContent, CommentDetailResponseDto::getCommentId)
                 .containsExactly(
                         tuple(postComment.getContent(), postComment.getId())
                 );
@@ -315,7 +317,7 @@ public class PostCommentServiceTest {
         assertThat(commentResponseDto)
                 .isNotNull()
                 .extracting("commentId", "content")
-                .contains(postComment.getId(), commentUpdateRequestDto.getContent());
+                .contains(postComment.getId(), commentUpdateRequestDto.content());
     }
 
     @Test

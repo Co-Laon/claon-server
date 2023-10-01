@@ -3,7 +3,7 @@ package com.claon.post.service;
 import com.claon.post.common.domain.PaginationFactory;
 import com.claon.post.common.domain.RequestUserInfo;
 import com.claon.post.domain.Notice;
-import com.claon.post.dto.NoticeCreateRequestDto;
+import com.claon.post.dto.request.NoticeRequestDto;
 import com.claon.post.repository.NoticeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,13 +63,13 @@ public class NoticeServiceTest {
     @Test
     @DisplayName("Success case for create notice")
     void successCreateNotice() {
-        NoticeCreateRequestDto dto = new NoticeCreateRequestDto("title", "content");
+        NoticeRequestDto dto = new NoticeRequestDto("title", "content");
 
         try (MockedStatic<Notice> mockedNotice = mockStatic(Notice.class)) {
             // given
             mockedNotice.when(() -> Notice.of(
-                    dto.getTitle(),
-                    dto.getContent(),
+                    dto.title(),
+                    dto.content(),
                     USER_INFO.id()
             )).thenReturn(notice);
 

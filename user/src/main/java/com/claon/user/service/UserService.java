@@ -8,17 +8,21 @@ import com.claon.user.common.exception.NotFoundException;
 import com.claon.user.common.exception.UnauthorizedException;
 import com.claon.user.domain.User;
 import com.claon.user.dto.*;
+import com.claon.user.dto.request.UserModifyRequestDto;
 import com.claon.user.repository.BlockUserRepository;
 import com.claon.user.repository.LaonRepository;
 import com.claon.user.repository.UserRepository;
 import com.claon.user.repository.UserRepositorySupport;
 import com.claon.user.service.client.PostClient;
+import com.claon.user.service.client.dto.PostThumbnailResponse;
+import com.claon.user.service.client.dto.UserPostInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,13 +45,13 @@ public class UserService {
         List<String> userIds = this.laonRepository.getUserIdsByLaonId(userInfo.id());
         Long laonCount = (long) userIds.size();
 
-        List<CenterClimbingHistoryResponseDto> climbingHistories = postClient.findHistoriesByUserId(userInfo.id());
+        List<UserPostInfoResponse> postInfoList = postClient.findHistoriesByUserId(userInfo.id());
 
-        return UserDetailResponseDto.from(requestUser, laonCount, climbingHistories);
+        return UserDetailResponseDto.from(requestUser, laonCount, postInfoList);
     }
 
     @Transactional(readOnly = true)
-    public IndividualUserResponseDto getOtherUserInformation(
+    public UserDetailResponseDto getOtherUserInformation(
             RequestUserInfo userInfo,
             String targetId
     ) {
@@ -62,13 +66,13 @@ public class UserService {
 
         boolean isLaon = userIds.contains(userInfo.id());
 
-        List<CenterClimbingHistoryResponseDto> climbingHistories = postClient.findHistoriesByUserId(targetUser.getId());
+        List<UserPostInfoResponse> postInfoList = postClient.findHistoriesByUserId(targetUser.getId());
 
-        return IndividualUserResponseDto.from(targetUser, isLaon, laonCount, climbingHistories);
+        return UserDetailResponseDto.from(targetUser, laonCount, isLaon, postInfoList);
     }
 
     @Transactional
-    public Pagination<UserPostThumbnailResponseDto> findPostsByUser(
+    public Pagination<PostThumbnailResponse> findPostsByUser(
             RequestUserInfo userInfo,
             String targetId,
             Pageable pageable
@@ -120,9 +124,9 @@ public class UserService {
         );
 
         user.modifyUser(
-                dto.getNickname(),
-                dto.getHeight().orElse(0.0f),
-                dto.getArmReach().orElse(0.0f)
+                dto.nickname(),
+                Optional.ofNullable(dto.height()).orElse(0.0f),
+                Optional.ofNullable(dto.armReach()).orElse(0.0f)
         );
 
         return UserResponseDto.from(this.userRepository.save(user));

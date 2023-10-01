@@ -9,7 +9,7 @@ import com.claon.user.common.exception.NotFoundException;
 import com.claon.user.common.validator.NotIdEqualValidator;
 import com.claon.user.domain.BlockUser;
 import com.claon.user.domain.User;
-import com.claon.user.dto.BlockUserFindResponseDto;
+import com.claon.user.dto.BlockUserResponseDto;
 import com.claon.user.repository.BlockUserRepository;
 import com.claon.user.repository.LaonRepository;
 import com.claon.user.repository.UserRepository;
@@ -91,7 +91,7 @@ public class BlockUserService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<BlockUserFindResponseDto> findBlockUser(
+    public Pagination<BlockUserResponseDto> findBlockUser(
             RequestUserInfo userInfo,
             Pageable pageable
     ) {
@@ -104,7 +104,7 @@ public class BlockUserService {
 
         return this.paginationFactory.create(
                 this.blockUserRepository.findByUser(user, pageable)
-                        .map(BlockUserFindResponseDto::from)
+                        .map(BlockUserResponseDto::from)
         );
     }
 }

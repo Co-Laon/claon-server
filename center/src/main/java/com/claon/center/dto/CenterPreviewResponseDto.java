@@ -2,13 +2,15 @@ package com.claon.center.dto;
 
 import com.claon.center.domain.CenterImg;
 import com.querydsl.core.annotations.QueryProjection;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
-@Data
+@Getter
+@ToString
 @NoArgsConstructor
 public class CenterPreviewResponseDto {
     private String id;
@@ -26,7 +28,7 @@ public class CenterPreviewResponseDto {
         this.id = id;
         this.name = name;
         this.thumbnailUrl = imgList.get(0).getUrl();
-        this.reviewRank = Objects.requireNonNullElse(reviewRank, 0.0);
+        this.reviewRank = Optional.ofNullable(reviewRank).orElse(0.0);
     }
 }
 

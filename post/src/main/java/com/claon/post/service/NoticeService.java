@@ -4,7 +4,7 @@ import com.claon.post.common.domain.Pagination;
 import com.claon.post.common.domain.PaginationFactory;
 import com.claon.post.common.domain.RequestUserInfo;
 import com.claon.post.domain.Notice;
-import com.claon.post.dto.NoticeCreateRequestDto;
+import com.claon.post.dto.request.NoticeRequestDto;
 import com.claon.post.dto.NoticeResponseDto;
 import com.claon.post.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +27,13 @@ public class NoticeService {
 
     @Transactional
     public NoticeResponseDto createNotice(
-            RequestUserInfo userInfo, NoticeCreateRequestDto dto
+            RequestUserInfo userInfo, NoticeRequestDto dto
     ) {
         return NoticeResponseDto.from(
                 noticeRepository.save(
                         Notice.of(
-                                dto.getTitle(),
-                                dto.getContent(),
+                                dto.title(),
+                                dto.content(),
                                 userInfo.id()
                         )
                 )

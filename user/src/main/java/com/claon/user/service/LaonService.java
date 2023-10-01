@@ -10,7 +10,7 @@ import com.claon.user.common.exception.UnauthorizedException;
 import com.claon.user.common.validator.NotIdEqualValidator;
 import com.claon.user.domain.Laon;
 import com.claon.user.domain.User;
-import com.claon.user.dto.LaonFindResponseDto;
+import com.claon.user.dto.LaonResponseDto;
 import com.claon.user.repository.BlockUserRepository;
 import com.claon.user.repository.LaonRepository;
 import com.claon.user.repository.LaonRepositorySupport;
@@ -93,7 +93,7 @@ public class LaonService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<LaonFindResponseDto> findAllLaon(RequestUserInfo userInfo, Pageable pageable) {
+    public Pagination<LaonResponseDto> findAllLaon(RequestUserInfo userInfo, Pageable pageable) {
         return this.paginationFactory.create(
                 laonRepositorySupport.findAllByUserId(userInfo.id(), pageable)
         );
