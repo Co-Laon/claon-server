@@ -1,12 +1,14 @@
 package com.claon.user.dto;
 
 import com.claon.user.domain.User;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class UserPreviewResponseDto {
-    private String nickname;
-    private Boolean isLaon;
+    private final String nickname;
+    private final Boolean isLaon;
 
     private UserPreviewResponseDto(
             String nickname,

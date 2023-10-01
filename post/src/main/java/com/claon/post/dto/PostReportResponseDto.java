@@ -2,9 +2,11 @@ package com.claon.post.dto;
 
 import com.claon.post.domain.PostReport;
 import com.claon.post.domain.enums.PostReportType;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class PostReportResponseDto {
     private final String postId;
     private final PostReportType reportType;

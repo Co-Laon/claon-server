@@ -1,32 +1,32 @@
 package com.claon.center.dto;
 
-import com.claon.center.domain.Center;
-import com.claon.center.domain.HoldInfo;
-import com.claon.center.domain.SectorInfo;
-import lombok.Data;
+import com.claon.center.domain.*;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
+@ToString
 public class CenterDetailResponseDto {
-    private String id;
-    private String name;
-    private String address;
-    private String tel;
-    private String webUrl;
-    private String instagramUrl;
-    private String youtubeUrl;
-    private List<CenterImgDto> imgList;
-    private List<OperatingTimeDto> operatingTimeList;
-    private String facilities;
-    private List<ChargeDto> chargeList;
-    private List<CenterHoldInfoResponseDto> holdInfoList;
-    private String holdInfoImg;
-    private List<SectorInfoResponseDto> sectorInfoList;
-    private Boolean isBookmarked;
-    private Long postCount;
-    private Long reviewCount;
+    private final String id;
+    private final String name;
+    private final String address;
+    private final String tel;
+    private final String webUrl;
+    private final String instagramUrl;
+    private final String youtubeUrl;
+    private final List<CenterImg> imgList;
+    private final List<OperatingTime> operatingTimeList;
+    private final String facilities;
+    private final List<Charge> chargeList;
+    private final List<HoldInfoResponseDto> holdInfoList;
+    private final String holdInfoImg;
+    private final List<SectorInfoResponseDto> sectorInfoList;
+    private final Boolean isBookmarked;
+    private final Long postCount;
+    private final Long reviewCount;
 
     private CenterDetailResponseDto(
             String id,
@@ -36,11 +36,11 @@ public class CenterDetailResponseDto {
             String webUrl,
             String instagramUrl,
             String youtubeUrl,
-            List<CenterImgDto> imgList,
-            List<OperatingTimeDto> operatingTimeList,
+            List<CenterImg> imgList,
+            List<OperatingTime> operatingTimeList,
             String facilities,
-            List<ChargeDto> chargeList,
-            List<CenterHoldInfoResponseDto> holdInfoList,
+            List<Charge> chargeList,
+            List<HoldInfoResponseDto> holdInfoList,
             String holdInfoImg,
             List<SectorInfoResponseDto> sectorInfoList,
             Boolean isBookmarked,
@@ -82,11 +82,11 @@ public class CenterDetailResponseDto {
                 center.getWebUrl(),
                 center.getInstagramUrl(),
                 center.getYoutubeUrl(),
-                center.getImgList().stream().map(CenterImgDto::from).collect(Collectors.toList()),
-                center.getOperatingTime().stream().map(OperatingTimeDto::from).collect(Collectors.toList()),
+                center.getImgList(),
+                center.getOperatingTime(),
                 center.getFacilities(),
-                center.getCharge().stream().map(ChargeDto::from).collect(Collectors.toList()),
-                holdInfoList.stream().map(CenterHoldInfoResponseDto::from).collect(Collectors.toList()),
+                center.getCharge(),
+                holdInfoList.stream().map(HoldInfoResponseDto::from).collect(Collectors.toList()),
                 center.getHoldInfoImg(),
                 sectorInfoList.stream().map(SectorInfoResponseDto::from).collect(Collectors.toList()),
                 isBookmarked,

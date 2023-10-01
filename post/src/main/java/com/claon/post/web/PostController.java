@@ -4,6 +4,7 @@ import com.claon.post.common.annotation.RequestUser;
 import com.claon.post.common.domain.Pagination;
 import com.claon.post.common.domain.RequestUserInfo;
 import com.claon.post.dto.*;
+import com.claon.post.dto.request.*;
 import com.claon.post.service.PostCommentService;
 import com.claon.post.service.PostLikeService;
 import com.claon.post.service.PostService;
@@ -95,7 +96,7 @@ public class PostController {
 
     @GetMapping(value = "/{postId}/like")
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<LikeFindResponseDto> findAllLike(
+    public Pagination<LikerResponseDto> findAllLike(
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String postId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable
@@ -115,7 +116,7 @@ public class PostController {
 
     @GetMapping(value = "/{postId}/comment")
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<CommentFindResponseDto> findAllParentComment(
+    public Pagination<CommentDetailResponseDto> findAllParentComment(
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String postId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.ASC) final Pageable pageable
@@ -184,7 +185,7 @@ public class PostController {
 
     @GetMapping("/centers/{centerId}/thumbnails")
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<CenterPostThumbnailResponseDto> findCenterPostThumbnails(
+    public Pagination<PostThumbnailResponseDto> findCenterPostThumbnails(
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String centerId,
             @RequestParam(value = "holdId", required = false) Optional<String> holdId,

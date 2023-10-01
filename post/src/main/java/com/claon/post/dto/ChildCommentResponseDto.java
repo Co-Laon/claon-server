@@ -2,12 +2,14 @@ package com.claon.post.dto;
 
 import com.claon.post.common.utils.RelativeTimeUtil;
 import com.claon.post.domain.PostComment;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-@Data
+@Getter
+@ToString
 public class ChildCommentResponseDto {
     private final String commentId;
     private final String content;

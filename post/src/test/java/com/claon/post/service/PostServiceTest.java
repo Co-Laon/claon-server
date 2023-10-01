@@ -7,6 +7,7 @@ import com.claon.post.common.exception.UnauthorizedException;
 import com.claon.post.domain.*;
 import com.claon.post.domain.enums.PostReportType;
 import com.claon.post.dto.*;
+import com.claon.post.dto.request.*;
 import com.claon.post.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -213,7 +214,7 @@ public class PostServiceTest {
 
             mockedPost.when(() -> Post.of(
                     CENTER_ID,
-                    postCreateRequestDto.getContent(),
+                    postCreateRequestDto.content(),
                     List.of(postContents),
                     USER_INFO.id()
             )).thenReturn(post);

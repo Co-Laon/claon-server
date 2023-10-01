@@ -9,7 +9,7 @@ import com.claon.post.common.exception.NotFoundException;
 import com.claon.post.common.exception.UnauthorizedException;
 import com.claon.post.domain.Post;
 import com.claon.post.domain.PostLike;
-import com.claon.post.dto.LikeFindResponseDto;
+import com.claon.post.dto.LikerResponseDto;
 import com.claon.post.dto.LikeResponseDto;
 import com.claon.post.repository.BlockUserRepository;
 import com.claon.post.repository.PostLikeRepository;
@@ -78,7 +78,7 @@ public class PostLikeService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<LikeFindResponseDto> findLikeByPost(
+    public Pagination<LikerResponseDto> findLikeByPost(
             RequestUserInfo userInfo,
             String postId,
             Pageable pageable
@@ -101,7 +101,7 @@ public class PostLikeService {
 
         return this.paginationFactory.create(
                 postLikeRepositorySupport.findAllByPost(post.getId(), userInfo.id(), pageable)
-                        .map(LikeFindResponseDto::from)
+                        .map(LikerResponseDto::from)
         );
     }
 }

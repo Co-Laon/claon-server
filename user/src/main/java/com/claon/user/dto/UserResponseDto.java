@@ -1,15 +1,17 @@
 package com.claon.user.dto;
 
 import com.claon.user.domain.User;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class UserResponseDto {
-    private String email;
-    private String nickname;
-    private Float height;
-    private Float armReach;
-    private Float apeIndex;
+    private final String email;
+    private final String nickname;
+    private final Float height;
+    private final Float armReach;
+    private final Float apeIndex;
 
     private UserResponseDto(
             String email,

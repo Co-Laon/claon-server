@@ -1,9 +1,11 @@
 package com.claon.post.dto;
 
 import com.claon.post.domain.PostComment;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class CommentResponseDto {
     private final String commentId;
     private final String content;

@@ -1,10 +1,12 @@
 package com.claon.auth.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class DuplicatedCheckResponseDto {
-    private Boolean result;
+    private final boolean result;
 
     private DuplicatedCheckResponseDto(boolean result) {
         this.result = result;

@@ -4,14 +4,16 @@ import com.claon.post.common.utils.RelativeTimeUtil;
 import com.claon.post.domain.ClimbingHistory;
 import com.claon.post.domain.Post;
 import com.claon.post.domain.PostContents;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
+@ToString
 public class PostResponseDto {
     private final String postId;
     private final String centerId;

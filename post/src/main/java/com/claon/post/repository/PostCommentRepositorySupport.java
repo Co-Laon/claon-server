@@ -1,8 +1,8 @@
 package com.claon.post.repository;
 
 import com.claon.post.domain.PostComment;
-import com.claon.post.dto.CommentFindResponseDto;
-import com.claon.post.dto.QCommentFindResponseDto;
+import com.claon.post.dto.CommentDetailResponseDto;
+import com.claon.post.dto.QCommentDetailResponseDto;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -28,13 +28,13 @@ public class PostCommentRepositorySupport extends QuerydslRepositorySupport {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
-    public Page<CommentFindResponseDto> findParentCommentByPost(
+    public Page<CommentDetailResponseDto> findParentCommentByPost(
             String postId,
             String userId,
             Pageable pageable
     ) {
-        JPQLQuery<CommentFindResponseDto> query = jpaQueryFactory
-                .select(new QCommentFindResponseDto(
+        JPQLQuery<CommentDetailResponseDto> query = jpaQueryFactory
+                .select(new QCommentDetailResponseDto(
                         postComment,
                         postComment.childComments.size(),
                         Expressions.as(Expressions.constant(userId), "userId")))
@@ -57,7 +57,7 @@ public class PostCommentRepositorySupport extends QuerydslRepositorySupport {
                         );
 
         long totalCount = query.fetchCount();
-        List<CommentFindResponseDto> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
+        List<CommentDetailResponseDto> results = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
 
         return new PageImpl<>(results, pageable, totalCount);
     }

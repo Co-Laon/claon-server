@@ -3,7 +3,7 @@ package com.claon.user.web;
 import com.claon.user.common.annotation.RequestUser;
 import com.claon.user.common.domain.Pagination;
 import com.claon.user.common.domain.RequestUserInfo;
-import com.claon.user.dto.LaonFindResponseDto;
+import com.claon.user.dto.LaonResponseDto;
 import com.claon.user.service.LaonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +38,7 @@ public class LaonController {
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
-    public Pagination<LaonFindResponseDto> findAllLaon(
+    public Pagination<LaonResponseDto> findAllLaon(
             @RequestUser RequestUserInfo userInfo,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable
     ) {

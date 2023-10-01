@@ -1,27 +1,30 @@
 package com.claon.center.dto;
 
 import com.claon.center.domain.CenterBookmark;
-import lombok.Data;
+import com.claon.center.domain.CenterImg;
+import com.claon.center.domain.Charge;
+import com.claon.center.domain.OperatingTime;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Data
+@Getter
+@ToString
 public class CenterBookmarkResponseDto {
-    private String centerId;
-    private String name;
-    private String address;
-    private String tel;
-    private String webUrl;
-    private String instagramUrl;
-    private String youtubeUrl;
-    private List<CenterImgDto> imgList;
-    private List<OperatingTimeDto> operatingTimeList;
-    private String facilities;
-    private List<ChargeDto> chargeList;
-    private String holdInfoImg;
-    private List<SectorInfoResponseDto> sectorInfoList;
-    private Boolean isBookmarked;
+    private final String centerId;
+    private final String name;
+    private final String address;
+    private final String tel;
+    private final String webUrl;
+    private final String instagramUrl;
+    private final String youtubeUrl;
+    private final List<CenterImg> imgList;
+    private final List<OperatingTime> operatingTimeList;
+    private final String facilities;
+    private final List<Charge> chargeList;
+    private final String holdInfoImg;
+    private final Boolean isBookmarked;
 
     private CenterBookmarkResponseDto(
             String centerId,
@@ -31,10 +34,10 @@ public class CenterBookmarkResponseDto {
             String webUrl,
             String instagramUrl,
             String youtubeUrl,
-            List<CenterImgDto> imgList,
-            List<OperatingTimeDto> operatingTimeList,
+            List<CenterImg> imgList,
+            List<OperatingTime> operatingTimeList,
             String facilities,
-            List<ChargeDto> chargeList,
+            List<Charge> chargeList,
             String holdInfoImg,
             Boolean isBookmarked
     ) {
@@ -62,10 +65,10 @@ public class CenterBookmarkResponseDto {
                 bookmarkCenter.getCenter().getWebUrl(),
                 bookmarkCenter.getCenter().getInstagramUrl(),
                 bookmarkCenter.getCenter().getYoutubeUrl(),
-                bookmarkCenter.getCenter().getImgList().stream().map(CenterImgDto::from).collect(Collectors.toList()),
-                bookmarkCenter.getCenter().getOperatingTime().stream().map(OperatingTimeDto::from).collect(Collectors.toList()),
+                bookmarkCenter.getCenter().getImgList(),
+                bookmarkCenter.getCenter().getOperatingTime(),
                 bookmarkCenter.getCenter().getFacilities(),
-                bookmarkCenter.getCenter().getCharge().stream().map(ChargeDto::from).collect(Collectors.toList()),
+                bookmarkCenter.getCenter().getCharge(),
                 bookmarkCenter.getCenter().getHoldInfoImg(),
                 isBookmarked
         );

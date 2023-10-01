@@ -10,6 +10,9 @@ import com.claon.post.domain.Post;
 import com.claon.post.domain.PostContents;
 import com.claon.post.domain.PostReport;
 import com.claon.post.dto.*;
+import com.claon.post.dto.request.PostCreateRequestDto;
+import com.claon.post.dto.request.PostReportRequestDto;
+import com.claon.post.dto.request.PostUpdateRequestDto;
 import com.claon.post.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -102,24 +105,24 @@ public class PostService {
     ) {
         Post post = this.postRepository.save(
                 Post.of(
-                        postCreateRequestDto.getCenterId(),
-                        postCreateRequestDto.getContent(),
-                        postCreateRequestDto.getContentsList().stream()
+                        postCreateRequestDto.centerId(),
+                        postCreateRequestDto.content(),
+                        postCreateRequestDto.contentsList().stream()
                                 .map(contents -> PostContents.of(
-                                        contents.getUrl()
+                                        contents.url()
                                 ))
                                 .collect(Collectors.toList()),
                         userInfo.id()
                 )
         );
 
-        List<ClimbingHistory> climbingHistoryList = Optional.ofNullable(postCreateRequestDto.getClimbingHistories())
+        List<ClimbingHistory> climbingHistoryList = Optional.ofNullable(postCreateRequestDto.climbingHistories())
                 .orElse(Collections.emptyList())
                 .stream().map(history ->
                         climbingHistoryRepository.save(ClimbingHistory.of(
                                 post,
-                                history.getHoldId(),
-                                history.getClimbingCount())))
+                                history.holdId(),
+                                history.climbingCount())))
                 .collect(Collectors.toList());
 
         return PostResponseDto.from(post, climbingHistoryList);
@@ -142,20 +145,20 @@ public class PostService {
 
         climbingHistoryRepository.deleteAllByPost(postId);
 
-        List<ClimbingHistory> climbingHistoryList = Optional.ofNullable(postUpdateRequestDto.getClimbingHistories())
+        List<ClimbingHistory> climbingHistoryList = Optional.ofNullable(postUpdateRequestDto.climbingHistories())
                 .orElse(Collections.emptyList())
                 .stream().map(history ->
                         climbingHistoryRepository.save(ClimbingHistory.of(
                                 post,
-                                history.getHoldId(),
-                                history.getClimbingCount())))
+                                history.holdId(),
+                                history.climbingCount())))
                 .collect(Collectors.toList());
 
         post.update(
-                postUpdateRequestDto.getContent(),
-                postUpdateRequestDto.getContentsList().stream()
+                postUpdateRequestDto.content(),
+                postUpdateRequestDto.contentsList().stream()
                         .map(contents -> PostContents.of(
-                                contents.getUrl()
+                                contents.url()
                         ))
                         .collect(Collectors.toList())
         );
@@ -206,8 +209,8 @@ public class PostService {
                         PostReport.of(
                                 userInfo.id(),
                                 post,
-                                postReportRequestDto.getReportType(),
-                                postReportRequestDto.getContent()
+                                postReportRequestDto.reportType(),
+                                postReportRequestDto.content()
                         )
                 )
         );
@@ -231,10 +234,10 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Pagination<CenterPostThumbnailResponseDto> findCenterPostThumbnailsByUser(RequestUserInfo userInfo, String centerId, Optional<String> holdId, Pageable pageable) {
+    public Pagination<PostThumbnailResponseDto> findCenterPostThumbnailsByUser(RequestUserInfo userInfo, String centerId, Optional<String> holdId, Pageable pageable) {
         return this.paginationFactory.create(
                 postRepositorySupport.findByCenterAndHoldExceptBlockUser(centerId, holdId, userInfo.id(), pageable)
-                        .map(post -> CenterPostThumbnailResponseDto.from(
+                        .map(post -> PostThumbnailResponseDto.from(
                                 post.getId(),
                                 post.getThumbnailUrl()
                         ))

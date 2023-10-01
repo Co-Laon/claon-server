@@ -7,7 +7,7 @@ import com.claon.post.common.exception.UnauthorizedException;
 import com.claon.post.domain.BlockUser;
 import com.claon.post.domain.Post;
 import com.claon.post.domain.PostLike;
-import com.claon.post.dto.LikeFindResponseDto;
+import com.claon.post.dto.LikerResponseDto;
 import com.claon.post.repository.BlockUserRepository;
 import com.claon.post.repository.PostLikeRepository;
 import com.claon.post.repository.PostLikeRepositorySupport;
@@ -150,7 +150,7 @@ public class PostLikeServiceTest {
         // then
         assertThat(likeFindResponseDto.getResults())
                 .isNotNull()
-                .extracting(LikeFindResponseDto::getPostId, LikeFindResponseDto::getLikerId)
+                .extracting(LikerResponseDto::getPostId, LikerResponseDto::getLikerId)
                 .contains(
                         tuple(post.getId(), postLike.getLikerId())
                 );
