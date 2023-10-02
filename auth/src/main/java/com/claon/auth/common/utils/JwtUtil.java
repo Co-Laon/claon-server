@@ -74,8 +74,4 @@ public class JwtUtil {
     public void deleteRefreshToken(String refreshToken) {
         this.refreshTokenUtil.delete(refreshToken);
     }
-
-    public String getUserId(String token) {
-        return Jwts.parser().setSigningKey(this.SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
-    }
 }

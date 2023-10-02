@@ -99,7 +99,6 @@ public class UserController {
     public void deleteUser(
             @RequestUser RequestUserInfo userInfo
     ) {
-//        this.userService.signOut(this.headerUtil.resolveToken(request));
         this.userService.delete(userInfo);
     }
 
