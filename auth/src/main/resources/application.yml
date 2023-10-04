@@ -26,7 +26,7 @@ eureka:
 
 logging:
   file:
-    name: center/logs/info.log
+    name: auth/logs/info.log
 
 management:
   endpoint:
