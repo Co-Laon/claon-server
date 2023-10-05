@@ -42,8 +42,6 @@ spring:
   config:
     activate:
       on-profile: local
-    import:
-      - classpath:auth-config.yml
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -62,6 +60,15 @@ spring:
       port: 6379
       repositories:
         enabled: false
+
+  jwt:
+    secret-key: "claon-secret-key"
+    access-token:
+      name: "access-token"
+      expire-seconds: 2592000000
+    refresh-token:
+      name: "refresh-token"
+      expire-seconds: 7776000000
 
 eureka:
   instance:
