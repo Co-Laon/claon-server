@@ -48,8 +48,13 @@ spring:
   config:
     activate:
       on-profile: local
-    import:
-      - classpath:auth-config.yml
+
+  jwt:
+    secret-key: "claon-secret-key"
+    access-token:
+      name: "access-token"
+    refresh-token:
+      name: "refresh-token"
 
   cloud:
     discovery:
