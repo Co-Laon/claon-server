@@ -42,6 +42,32 @@ management:
   zipkin:
     tracing:
       endpoint: http://localhost:9411/api/v2/spans
+  health:
+    circuitbreakers:
+      enabled: true
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      minimum-number-of-calls: 5
+      slidingWindowSize: 10
+      permittedNumberOfCallsInHalfOpenState: 5
+      waitDurationInOpenState: 10000
+      registerHealthIndicator: true
+      record-exceptions:
+        - java.lang.Exception
+  instances:
+    CB-GATEWAY:
+      base-config: default
+
+resilience4j.timelimiter:
+  configs:
+    default:
+      timeoutDuration: 5s
+      cancelRunningFuture: true
+  instances:
+    CB-GATEWAY:
+      base-config: default
 
 ---
 spring:
@@ -59,12 +85,15 @@ spring:
   cloud:
     discovery:
       enabled: true
-    loadbalancer:
-      configurations: health-check
     gateway:
       discovery:
         locator:
           enabled: true
+      default-filters:
+        - name: CircuitBreaker
+          args:
+              name: CB-GATEWAY
+              fallbackUri: forward:/fallback
       routes:
         - id: auth
           uri: lb://AUTH
