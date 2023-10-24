@@ -15,4 +15,10 @@ public class ExceptionDto {
         this.message = message;
         this.timeStamp = LocalDateTime.now();
     }
+
+    public ExceptionDto(Integer errorCode, String message) {
+        this.errorCode = errorCode;
+        this.message = message;
+        this.timeStamp = LocalDateTime.now();
+    }
 }
