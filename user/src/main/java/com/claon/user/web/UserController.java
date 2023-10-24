@@ -48,7 +48,7 @@ public class UserController {
         return userService.modifyUser(userInfo, dto);
     }
 
-    @GetMapping("/name/{targetId}")
+    @GetMapping("/{targetId}/public")
     @ResponseStatus(value = HttpStatus.OK)
     public UserDetailResponseDto getPublicUser(
             @RequestUser RequestUserInfo userInfo,
@@ -57,7 +57,7 @@ public class UserController {
         return userService.getOtherUserInformation(userInfo, targetId);
     }
 
-    @GetMapping("/name/{targetId}/posts")
+    @GetMapping("/{targetId}/posts")
     @ResponseStatus(value = HttpStatus.OK)
     public Pagination<PostThumbnailResponse> findPostsByUser(
             @RequestUser RequestUserInfo userInfo,
@@ -67,7 +67,7 @@ public class UserController {
         return userService.findPostsByUser(userInfo, targetId, pageable);
     }
 
-    @PostMapping(value = "/name/{blockId}/block")
+    @PostMapping(value = "/{blockId}/block")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createBlock(
             @RequestUser RequestUserInfo userInfo,
@@ -76,7 +76,7 @@ public class UserController {
         this.blockUserService.createBlock(userInfo, blockId);
     }
 
-    @DeleteMapping(value = "/name/{blockId}/block")
+    @DeleteMapping(value = "/{blockId}/block")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteBlock(
             @RequestUser RequestUserInfo userInfo,

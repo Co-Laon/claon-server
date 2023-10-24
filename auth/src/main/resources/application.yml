@@ -62,7 +62,7 @@ spring:
         enabled: false
 
   jwt:
-    secret-key: "claon-secret-key"
+    secret-key: "claonjwtsecretkeyclaonjwtsecretkeyclaonjwtsecretkey"
     access-token:
       name: "access-token"
       expire-seconds: 2592000000

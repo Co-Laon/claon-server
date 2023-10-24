@@ -76,7 +76,7 @@ spring:
       on-profile: local
 
   jwt:
-    secret-key: "claon-secret-key"
+    secret-key: "claonjwtsecretkeyclaonjwtsecretkeyclaonjwtsecretkey"
     access-token:
       name: "access-token"
     refresh-token:
