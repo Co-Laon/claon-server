@@ -63,6 +63,9 @@ project(":auth") {
 		runtimeOnly "com.h2database:h2"
 		runtimeOnly "org.postgresql:postgresql"
 
+		// swagger
+		implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
 
@@ -118,6 +121,9 @@ project(":center") {
 		runtimeOnly "com.h2database:h2"
 		runtimeOnly "org.postgresql:postgresql"
 
+		// swagger
+		implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
 		implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
@@ -171,6 +177,9 @@ project(":post") {
 		runtimeOnly "com.h2database:h2"
 		runtimeOnly "org.postgresql:postgresql"
 
+		// swagger
+		implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
 
@@ -222,6 +231,9 @@ project(":user") {
 		implementation "org.jetbrains:annotations:24.0.0"
 		runtimeOnly "com.h2database:h2"
 		runtimeOnly "org.postgresql:postgresql"
+
+		// swagger
+		implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 
 		// cloud
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
