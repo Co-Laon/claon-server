@@ -94,6 +94,8 @@ spring:
           args:
               name: CB-GATEWAY
               fallbackUri: forward:/fallback
+              statusCodes:
+                - 500
       routes:
         - id: auth
           uri: lb://AUTH
