@@ -9,7 +9,11 @@ services:
       POSTGRES_DB: "claon_db"
       POSTGRES_USER: "colaon_user"
       POSTGRES_PASSWORD: "colaon_password"
-  redis:
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "colaon_user", "-d", "claon_db" ]
+      interval: 5s
+      retries: 5
+  claon-auth-redis:
     image: redis:6.0.5
     container_name: claon_redis
     labels:
@@ -17,8 +21,143 @@ services:
       - "mode=standalone"
     ports:
       - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 30s
+      retries: 50
   zipkin:
     image: openzipkin/zipkin
     container_name: zipkin
     ports:
       - "9411:9411"
+
+# Spring Service
+  discovery:
+    container_name: claon_discovery
+    build:
+      context: ./discovery
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - "eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka"
+    healthcheck:
+      test: "curl --fail --silent localhost:8761/actuator/health | grep UP || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 10s
+  monitor:
+    container_name: claon_monitor
+    build:
+      context: ./monitor
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - "eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka"
+    depends_on:
+      discovery:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8090/actuator/health | grep UP || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 10s
+  gateway:
+    container_name: claon_gateway
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - "eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka"
+      - "management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans"
+    depends_on:
+      discovery:
+        condition: service_healthy
+      monitor:
+        condition: service_healthy
+  auth:
+    container_name: claon_auth
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - "spring.datasource.url=jdbc:postgresql://claon_database:5432/claon_db"
+      - "spring.data.redis.host=claon-auth-redis"
+      - "eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka"
+      - "management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans"
+    depends_on:
+      claon_database:
+        condition: service_healthy
+      claon-auth-redis:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      monitor:
+        condition: service_healthy
+  user:
+    container_name: claon_user
+    build:
+      context: ./user
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - "spring.datasource.url=jdbc:postgresql://claon_database:5432/claon_db"
+      - "eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka"
+      - "management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans"
+    depends_on:
+      claon_database:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      monitor:
+        condition: service_healthy
+  center:
+    container_name: claon_center
+    build:
+      context: ./center
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - "spring.datasource.url=jdbc:postgresql://claon_database:5432/claon_db"
+      - "eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka"
+      - "management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans"
+    depends_on:
+      claon_database:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      monitor:
+        condition: service_healthy
+  post:
+    container_name: claon_post
+    build:
+      context: ./post
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - "spring.datasource.url=jdbc:postgresql://claon_database:5432/claon_db"
+      - "eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka"
+      - "management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans"
+    depends_on:
+      claon_database:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      monitor:
+        condition: service_healthy
