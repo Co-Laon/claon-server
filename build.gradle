@@ -312,3 +312,15 @@ project(":monitor") {
 		implementation "de.codecentric:spring-boot-admin-starter-server:3.1.0"
 	}
 }
+
+tasks.register('cleanAll') {
+	subprojects.forEach {
+		dependsOn(it.tasks.named("clean"))
+	}
+}
+
+tasks.register('buildAll') {
+	subprojects.forEach {
+		dependsOn(it.tasks.named("build"))
+	}
+}

@@ -1,7 +1,20 @@
 # CLAON
 
+[![Java 17.0.8](https://img.shields.io/badge/java-17.0.8-blue")](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+[![SpringBoot 3.1.2](https://img.shields.io/badge/spring_boot-3.1.2-blue")](https://spring.io/projects/spring-boot)
 [![CI](https://github.com/Co-Laon/claon-server/actions/workflows/ci.yml/badge.svg)](https://github.com/Co-Laon/claon-server/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/Co-Laon/claon-server/branch/develop/graph/badge.svg?token=38I8Q2IHG1)](https://codecov.io/gh/Co-Laon/claon-server)
+
+## Build
+
+1. Build all projects with gradle
+```bash
+./gradlew cleanAll buildAll
+```
+
+2. Create docker images
+```bash
+docker-compose -f docker-compose.yml up -d
+```
 
 ## Index
 - [Spring Cloud Eureka](./docs/SpringCloudEureka.md)
