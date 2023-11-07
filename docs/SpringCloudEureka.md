@@ -31,21 +31,22 @@
 | Update metadata                                               | PUT /eureka/v2/apps/{appID}/{instanceID}/metadata?key=value                                                                                                               | HTTP Code:* 200 on success * 500 on failure                                           |
 | Query for all instances under a particular vip address        | GET /eureka/v2/vips/vipAddress                                                                                                                                            | * HTTP Code: 200 on success Output: JSON/XML * 404 if the vipAddress does not exist.  |
 | Query for all instances under a particular secure vip address | GET /eureka/v2/svips/svipAddres                                                                                                                                           | * HTTP Code: 200 on success Output: JSON/XML * 404 if the svipAddress does not exist. |
+[참고 자료](https://github.com/Netflix/eureka/wiki/Eureka-REST-operations)
 
 ### 4. Eureka Server Setting
 - Server Config
   - enable-self-preservation
-    - client가 자신의 상태를 제 시간에 갱신하지 않는 수가 일정 수가 넘게 되면 등록 만료를 멈춤
+    - client가 자신의 상태를 정해진 시간내에 갱신하지 않는 수가 일정 수가 넘을 경우 등록 만료를 중지
     - 네트워크 장애가 발생 시 등록된 모든 서비스가 해제되는 것을 방지
-    - 활성화 시 registry에서 해당 instance 를 정해진 기간동안 제거하지 않음
-    - 활성화 여부는 Expected heartbeats 와 actual heartbeats 수를 비교하여 결정
+    - 활성화시 registry에서 해당 instance를 정해진 기간동안 제거되지 않도록 방지
+    - 활성화 여부는 Expected heartbeats와 actual heartbeats의 수를 비교하여 결정
     - default = true
   - eviction-interval-time-in-ms
     - client로 부터 heartbeat가 없으면 제거하는 시간
     - default = 60 * 1000ms (60s)
   - response-cache-update-interval-ms
     - Eureka REST API에서 응답을 캐시하는 시간
-    - 해당 시간이 지나야만 REST API에서 client 등록 정보가 바뀐 것을 표시
+    - 해당 시간을 초과한 경우만 REST API에서 client 등록 정보가 바뀐 것을 표시
     - default = 30 * 1000ms (30s)
 - Gradle 의존성 추가
 ```
@@ -64,7 +65,7 @@ public class DiscoveryApplication {
 }
 ```
 
-- 해당 application에 대한 Port 설정
+- 해당 application에 대한 Port를 설정한다.
 ```yaml
 server:
   port: {port}
@@ -106,7 +107,7 @@ public class DemoApplication {
     }
 }
 ```
-- 해당 application에 대한 Port 설정
+- 해당 application에 대한 Port를 설정한다.
 ``` yaml
 spring:
   application:
@@ -131,10 +132,10 @@ eureka:
   - 해당시간동안 Server에서 heartbeat가 수신되지 않으면 eureka 에서 해당 instance 제거
   - default = 90s
 - prefer-ip-address
-  - 유레카 등록 시 host name 대신 ip 주소 사용
-  - 컨테이너 기반 배포에서 컨테이너는 DNS 엔트리가 없는 임의의 생성된 host name을 부여받아 시작하므로 해당 값이 false 인 경우에는 hostname 위치를 얻지 못함
-    - 이 때, 한 서버에 2개 이상의 네트워크 인터페이스가 있는 경우 문제 발생
-    - 이럴 때는 네트워크 인터페이스를 선택하거나 원하는 네트워크 주소를 정의
+  - 유레카 등록 시 hostname 대신 ip 주소 사용
+  - 컨테이너 기반 배포에서 컨테이너는 DNS 엔트리가 없는 임의의 생성된 hostname을 부여받아 시작하므로 해당 값이 false인 경우에는 hostname 위치를 얻지 못함
+    - 해당 상황에서 한 서버에 2개 이상의 네트워크 인터페이스가 있는 경우 문제가 발생
+    - 이 경우, 임의의 네트워크 인터페이스를 선택하거나 원하는 네트워크 주소를 정의하여 문제를 해결
   - default = false
 
 ### 7. Eureka Dashboard 출력
