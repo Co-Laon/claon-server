@@ -114,6 +114,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - "spring.datasource.url=jdbc:postgresql://claon_database:5432/claon_db"
+      - "spring.cloud.openfeign.client.config.post-service.url=http://post:8083"
       - "eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka"
       - "management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans"
     depends_on:
@@ -133,6 +134,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - "spring.datasource.url=jdbc:postgresql://claon_database:5432/claon_db"
+      - "spring.cloud.openfeign.client.config.post-service.url=http://post:8083"
       - "eureka.client.serviceUrl.defaultZone=http://discovery:8761/eureka"
       - "management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans"
     depends_on:
