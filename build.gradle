@@ -51,7 +51,7 @@ subprojects {
 }
 
 project(":auth") {
-	version = "1.0.0"
+	version = "2.0.0"
 
 	dependencies {
 		implementation "org.springframework.boot:spring-boot-starter-data-jpa"
@@ -95,7 +95,7 @@ project(":auth") {
 }
 
 project(":center") {
-	version = "1.0.0"
+	version = "2.0.0"
 
 	ext {
 		querydslDir = file("build/generated/querydsl")
@@ -149,7 +149,7 @@ project(":center") {
 }
 
 project(":post") {
-	version = "1.0.0"
+	version = "2.0.0"
 
 	ext {
 		querydslDir = file("build/generated/querydsl")
@@ -202,7 +202,7 @@ project(":post") {
 }
 
 project(":user") {
-	version = "1.0.0"
+	version = "2.0.0"
 
 	ext {
 		querydslDir = file("build/generated/querydsl")
@@ -256,7 +256,7 @@ project(":user") {
 }
 
 project(":gateway") {
-	version = "1.0.0"
+	version = "2.0.0"
 
 	dependencies {
 		implementation "org.springframework.boot:spring-boot-starter-webflux"
@@ -292,7 +292,7 @@ project(":gateway") {
 }
 
 project(":discovery") {
-	version = "1.0.0"
+	version = "2.0.0"
 
 	dependencies {
 		implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-server"
@@ -303,7 +303,7 @@ project(":discovery") {
 }
 
 project(":monitor") {
-	version = "1.0.0"
+	version = "2.0.0"
 
 	dependencies {
 		implementation "org.springframework.boot:spring-boot-starter-web"

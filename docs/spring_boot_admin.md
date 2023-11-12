@@ -5,16 +5,16 @@
 Spring Application의 중앙 집권화된 관리를 심플하게 만들어주는 오픈소스로, Application에서 Monitoring,
 Managing 및 Insight를 얻기위한 web interface를 제공한다.
 
- 
+
 이는 Spring Boot Actuator에서 제공하는 정보를 보기 좋게 접근 가능한 방식으로 시각화하는 것을 목표로 하는 모니터링 도구라는 의미와 같다.
 
 ### 2. 장점
-- <span style="color: green">**Centralized Monitoring.**</span> 
-Health, Metrics, Logs Check를 더 쉽게 해줌
-- <span style="color: green">**Simplified Management.**</span> 
-필요할 때, Application을 시작, 정지, 재시작해서 Lifecycle을 컨트롤할 수 있음
-- <span style="color: green">**Built-in Security.**</span> 
-Spring Security와 쉽게 통합될 수 있으며, 인가된 Admin User만 접근 가능하게 할 수 있음
+- <span style="color: green">**Centralized Monitoring.**</span>
+  Health, Metrics, Logs Check를 더 쉽게 해줌
+- <span style="color: green">**Simplified Management.**</span>
+  필요할 때, Application을 시작, 정지, 재시작해서 Lifecycle을 컨트롤할 수 있음
+- <span style="color: green">**Built-in Security.**</span>
+  Spring Security와 쉽게 통합될 수 있으며, 인가된 Admin User만 접근 가능하게 할 수 있음
 
 ### 3. Setting
 - build.gradle 파일에 spring admin에 관한 Dependency를 추가.
@@ -83,7 +83,7 @@ eureka:
 
 
 - spring boot admin의 log는 로그파일 페이지에 들어가면 1초마다 ```/actuator/logfile```을 요청해서 로그를 갱신해주는데,
-기본값은 1000ms이다. 이를 변경하고싶을 때, 아래와 같이 설정하면 갱신 시간을 변경할 수 있다.
+  기본값은 1000ms이다. 이를 변경하고싶을 때, 아래와 같이 설정하면 갱신 시간을 변경할 수 있다.
 
 ```yml
   boot:
@@ -108,11 +108,11 @@ management:
 ```
 
 - 보통 asterisk를 통해 actuator의 모든 관리 부문을 추가하지만, 특정 포인트만 관리하고 싶을 경우, 따로 명시를 하면 된다 (```include: env.. ```)
-  - asterisk는 쌍 따옴표를 붙여야 한다.
+    - asterisk는 쌍 따옴표를 붙여야 한다.
 
 - SpringBoot는 기본적으로 log file을 생성해주지 않는데, 이는 별도로 설정을 해주어야 한다.
-  - 본 claon 프로젝트에서는 gateway filter, global exception handler 등에 ```@Slf4j```를 이용하여 logging을 구현하였다.
-  - 해당 log file을 생성하기 위해 각 client application마다 아래와 같은 설정을 해주면 된다.
+    - 본 claon 프로젝트에서는 gateway filter, global exception handler 등에 ```@Slf4j```를 이용하여 logging을 구현하였다.
+    - 해당 log file을 생성하기 위해 각 client application마다 아래와 같은 설정을 해주면 된다.
 
 ```yml
 logging:
@@ -184,7 +184,7 @@ public class WebSecurityConfig {
 <img src="./images/SpringBootAdmin/web-access.png" width="1000" height="400">
 
 - 위 화면에서, 좌측 상단에 대시보드(WallBoard), 애플리케이션, 일지(Journal)를 볼 수 있는데, 대시보드를 누르면, 아래와 같은 화면을 볼 수 있으며, 이는
-각 client instance가 작동된지 얼마나 됐는지를 확인할 수 있다.
+  각 client instance가 작동된지 얼마나 됐는지를 확인할 수 있다.
 - 또한, 인스턴스를 각각 눌러보면 해당 인스턴스에 대한 정보를 얻을 수 있다.
 - 아래 화면은 테스트를 위해 discovery, center, gateway, monitor만 실행하였기 때문에, client server만 보이는 것을 확인할 수 있다.
 
