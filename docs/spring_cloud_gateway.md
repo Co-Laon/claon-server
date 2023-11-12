@@ -10,6 +10,11 @@
 - Gateway Handler Mapping에서 Request 매핑, Gateway Web Handler(Predicates)로 전달
 - Gateway Web Handler는 매핑되는 요청을 Filter Chain으로 전달, 서비스로 요청 전달
 
+- 의존성 추가
+  ```groovy
+  implementation "org.springframework.cloud:spring-cloud-starter-gateway"
+  ```
+
 ### Spring Cloud Netflix Zuul
 - Spring Boot 2.4 이상에서 [Maintenance Mode](https://spring.io/blog/2018/12/12/spring-cloud-greenwich-rc1-available-now#spring-cloud-netflix-projects-entering-maintenance-mode) 인입
 - Spring Boot 3.0 이상에서 동작하지 않음

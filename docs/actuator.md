@@ -1,13 +1,11 @@
 ## Actuator
 
-- SpringBoot Actuator는 애플리케이션의 상태를 모니터링, Metric 수집을 위한 Endpoint 제공
+- 애플리케이션의 상태를 모니터링, Metric 수집을 위한 Endpoint 제공
 
 ### Example
 - 의존성 추가
-  ```
-  dependencies {
-      implementation 'org.springframework.boot:spring-boot-starter-actuator'
-  }
+  ```groovy
+  implementation "org.springframework.boot:spring-boot-starter-actuator"
   ```
 - Config
   - 모든 Endpoint 노출
@@ -73,10 +71,8 @@
 ### Security
 - Spring Security를 사용하여 Actuator Endpoint에 대한 인증 구현
 - 의존성 추가
-  ```
-  dependencies {
-      implementation 'org.springframework.boot:spring-boot-starter-security'
-  }
+  ```groovy
+  implementation "org.springframework.boot:spring-boot-starter-security"
   ```
 - Example
   ```java

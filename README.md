@@ -22,7 +22,7 @@ docker-compose -f docker-compose.yml up -d
   - [actuator](./docs/actuator.md)
 - [monitor](./docs/monitor.md)
   - [spring_boot_admin](./docs/spring_boot_admin.md)
-  - [micrometer](./docs/micrometer.md)
+  - [micrometer](./docs/micrometer_zipkin.md)
   - [zipkin](./docs/zipkin.md)
 - [gateway](./docs/gateway.md)
   - [spring cloud gateway](./docs/spring_cloud_gateway.md)

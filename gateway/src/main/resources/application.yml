@@ -28,6 +28,8 @@ logging:
 
 management:
   endpoint:
+    health:
+      show-details: always
     logfile:
       external-file: ${logging.file.name}
   endpoints:
