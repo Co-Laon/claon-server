@@ -54,7 +54,7 @@ public class UserController {
             @RequestUser RequestUserInfo userInfo,
             @PathVariable String targetId
     ) {
-        return userService.getOtherUserInformation(userInfo, targetId);
+        return userService.findUserById(userInfo, targetId);
     }
 
     @GetMapping("/{targetId}/posts")

@@ -24,12 +24,7 @@ public class CenterBookmarkService {
             RequestUserInfo userInfo,
             String centerId
     ) {
-        Center center = this.centerRepository.findById(centerId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장을 찾을 수 없습니다."
-                )
-        );
+        Center center = findCenterById(centerId);
 
         this.centerBookmarkRepository.findByUserIdAndCenterId(userInfo.id(), center.getId()).ifPresent(
                 bookmarkCenter -> {
@@ -41,12 +36,7 @@ public class CenterBookmarkService {
         );
 
         return CenterBookmarkResponseDto.from(
-                this.centerBookmarkRepository.save(
-                        CenterBookmark.of(
-                                center,
-                                userInfo.id()
-                        )
-                ),
+                this.centerBookmarkRepository.save(CenterBookmark.of(center, userInfo.id())),
                 true
         );
     }
@@ -56,12 +46,7 @@ public class CenterBookmarkService {
             RequestUserInfo userInfo,
             String centerId
     ) {
-        Center center = this.centerRepository.findById(centerId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장을 찾을 수 없습니다."
-                )
-        );
+        Center center = findCenterById(centerId);
 
         CenterBookmark bookmarkCenter = this.centerBookmarkRepository.findByUserIdAndCenterId(userInfo.id(), center.getId()).orElseThrow(
                 () -> new BadRequestException(
@@ -73,11 +58,17 @@ public class CenterBookmarkService {
         this.centerBookmarkRepository.delete(bookmarkCenter);
 
         return CenterBookmarkResponseDto.from(
-                CenterBookmark.of(
-                        center,
-                        userInfo.id()
-                ),
+                CenterBookmark.of(center, userInfo.id()),
                 false
+        );
+    }
+
+    private Center findCenterById(String centerId) {
+        return this.centerRepository.findById(centerId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "암장을 찾을 수 없습니다."
+                )
         );
     }
 }

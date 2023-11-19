@@ -45,8 +45,8 @@ public class PostService {
             Pageable pageable
     ) {
         return this.paginationFactory.create(
-                postRepositorySupport.findByCenterAndYearMonth(userInfo.id(), centerId, year, month, pageable).map(
-                        post -> PostDetailResponseDto.from(
+                postRepositorySupport.findByCenterAndYearMonth(userInfo.id(), centerId, year, month, pageable)
+                        .map(post -> PostDetailResponseDto.from(
                                 post,
                                 post.getWriterId().equals(userInfo.id()),
                                 postLikeRepository.findByLikerIdAndPost(userInfo.id(), post).isPresent(),
@@ -60,8 +60,8 @@ public class PostService {
             Pageable pageable
     ) {
         return this.paginationFactory.create(
-                postRepositorySupport.findExceptBlockUser(userInfo.id(), pageable).map(
-                        post -> PostDetailResponseDto.from(
+                postRepositorySupport.findExceptBlockUser(userInfo.id(), pageable)
+                        .map(post -> PostDetailResponseDto.from(
                                 post,
                                 post.getWriterId().equals(userInfo.id()),
                                 postLikeRepository.findByLikerIdAndPost(userInfo.id(), post).isPresent(),
@@ -74,21 +74,9 @@ public class PostService {
             RequestUserInfo userInfo,
             String postId
     ) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
+        Post post = findPostById(postId);
 
-        if (!post.getWriterId().equals(userInfo.id())) {
-            if (!blockUserRepository.findBlock(userInfo.id(), post.getWriterId()).isEmpty()) {
-                throw new UnauthorizedException(
-                        ErrorCode.NOT_ACCESSIBLE,
-                        String.format("%s을 찾을 수 없습니다.", post.getWriterId())
-                );
-            }
-        }
+        validateBlockedUser(userInfo, post.getWriterId());
 
         return PostDetailResponseDto.from(
                 post,
@@ -107,10 +95,9 @@ public class PostService {
                 Post.of(
                         postCreateRequestDto.centerId(),
                         postCreateRequestDto.content(),
-                        postCreateRequestDto.contentsList().stream()
-                                .map(contents -> PostContents.of(
-                                        contents.url()
-                                ))
+                        postCreateRequestDto.contentsList()
+                                .stream().map(contents -> PostContents.of(
+                                        contents.url()))
                                 .collect(Collectors.toList()),
                         userInfo.id()
                 )
@@ -118,11 +105,10 @@ public class PostService {
 
         List<ClimbingHistory> climbingHistoryList = Optional.ofNullable(postCreateRequestDto.climbingHistories())
                 .orElse(Collections.emptyList())
-                .stream().map(history ->
-                        climbingHistoryRepository.save(ClimbingHistory.of(
-                                post,
-                                history.holdId(),
-                                history.climbingCount())))
+                .stream().map(history -> climbingHistoryRepository.save(ClimbingHistory.of(
+                        post,
+                        history.holdId(),
+                        history.climbingCount())))
                 .collect(Collectors.toList());
 
         return PostResponseDto.from(post, climbingHistoryList);
@@ -134,12 +120,7 @@ public class PostService {
             String postId,
             PostUpdateRequestDto postUpdateRequestDto
     ) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
+        Post post = findPostById(postId);
 
         IdEqualValidator.of(post.getWriterId(), userInfo.id()).validate();
 
@@ -147,11 +128,10 @@ public class PostService {
 
         List<ClimbingHistory> climbingHistoryList = Optional.ofNullable(postUpdateRequestDto.climbingHistories())
                 .orElse(Collections.emptyList())
-                .stream().map(history ->
-                        climbingHistoryRepository.save(ClimbingHistory.of(
-                                post,
-                                history.holdId(),
-                                history.climbingCount())))
+                .stream().map(history -> climbingHistoryRepository.save(ClimbingHistory.of(
+                        post,
+                        history.holdId(),
+                        history.climbingCount())))
                 .collect(Collectors.toList());
 
         post.update(
@@ -168,12 +148,7 @@ public class PostService {
 
     @Transactional
     public PostResponseDto deletePost(RequestUserInfo userInfo, String postId) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
+        Post post = findPostById(postId);
 
         IdEqualValidator.of(post.getWriterId(), userInfo.id()).validate();
 
@@ -188,15 +163,10 @@ public class PostService {
             String postId,
             PostReportRequestDto postReportRequestDto
     ) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
+        Post post = findPostById(postId);
 
         postReportRepository.findByReporterIdAndPost(userInfo.id(), post).ifPresent(
-                like -> {
+                report -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
                             "이미 신고한 게시글입니다."
@@ -226,26 +196,48 @@ public class PostService {
                                 post.getClimbingHistoryList().stream()
                                         .map(history -> ClimbingHistoryResponseDto.from(
                                                 history.getHoldInfoId(),
-                                                history.getClimbingCount()
-                                        ))
-                                        .collect(Collectors.toList())
-                        ))
+                                                history.getClimbingCount()))
+                                        .collect(Collectors.toList())))
         );
     }
 
     @Transactional(readOnly = true)
-    public Pagination<PostThumbnailResponseDto> findCenterPostThumbnailsByUser(RequestUserInfo userInfo, String centerId, Optional<String> holdId, Pageable pageable) {
+    public Pagination<PostThumbnailResponseDto> findCenterPostThumbnailsByUser(
+            RequestUserInfo userInfo,
+            String centerId,
+            Optional<String> holdId,
+            Pageable pageable
+    ) {
         return this.paginationFactory.create(
                 postRepositorySupport.findByCenterAndHoldExceptBlockUser(centerId, holdId, userInfo.id(), pageable)
                         .map(post -> PostThumbnailResponseDto.from(
                                 post.getId(),
-                                post.getThumbnailUrl()
-                        ))
+                                post.getThumbnailUrl()))
         );
     }
 
     @Transactional(readOnly = true)
     public Long countPostByCenter(RequestUserInfo userInfo, String centerId) {
         return postRepositorySupport.countByCenter(userInfo.id(), centerId);
+    }
+
+    private Post findPostById(String postId) {
+        return postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "게시글을 찾을 수 없습니다."
+                )
+        );
+    }
+
+    private void validateBlockedUser(RequestUserInfo userInfo, String writerId) {
+        if (!userInfo.id().equals(writerId)) {
+            if (!blockUserRepository.findBlock(userInfo.id(), writerId).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", writerId)
+                );
+            }
+        }
     }
 }

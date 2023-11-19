@@ -84,7 +84,7 @@ public class UserServiceTest {
     @DisplayName("Success case for retrieving me")
     void successRetrieveMe() {
         given(userRepository.findById(USER_INFO.id())).willReturn(Optional.of(user));
-        given(laonRepository.getUserIdsByLaonId(USER_INFO.id())).willReturn(List.of(PUBLIC_USER_INFO.id()));
+        given(laonRepository.findUserIdsByLaonId(USER_INFO.id())).willReturn(List.of(PUBLIC_USER_INFO.id()));
 
         UserPostInfoResponse postInfo = new UserPostInfoResponse(
                 CENTER_ID,
@@ -112,7 +112,7 @@ public class UserServiceTest {
     void successRetrieveUser() {
         // given
         given(userRepository.findById(USER_INFO.id())).willReturn(Optional.of(user));
-        given(laonRepository.getUserIdsByLaonId(USER_INFO.id())).willReturn(List.of(PUBLIC_USER_INFO.id()));
+        given(laonRepository.findUserIdsByLaonId(USER_INFO.id())).willReturn(List.of(PUBLIC_USER_INFO.id()));
 
         UserPostInfoResponse postInfo = new UserPostInfoResponse(
                 CENTER_ID,
@@ -126,7 +126,7 @@ public class UserServiceTest {
         given(postClient.findHistoriesByUserId(USER_INFO.id())).willReturn(List.of(postInfo));
 
         // when
-        UserDetailResponseDto userResponseDto = userService.getOtherUserInformation(PUBLIC_USER_INFO, USER_INFO.id());
+        UserDetailResponseDto userResponseDto = userService.findUserById(PUBLIC_USER_INFO, USER_INFO.id());
 
         // then
         assertThat(userResponseDto)

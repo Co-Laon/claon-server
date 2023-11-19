@@ -268,7 +268,7 @@ public class PostCommentServiceTest {
     @DisplayName("Success case for delete comment")
     void successDeleteComment() {
         // given
-        given(postCommentRepository.findById(childPostComment.getId())).willReturn(Optional.of(childPostComment));
+        given(postCommentRepository.findByIdAndIsDeletedFalse(childPostComment.getId())).willReturn(Optional.of(childPostComment));
 
         given(postCommentRepository.save(childPostComment)).willReturn(childPostComment);
 
@@ -286,7 +286,7 @@ public class PostCommentServiceTest {
     @DisplayName("Failure case for delete comment because delete by other user")
     void failDeleteComment_Unauthorized() {
         // given
-        given(postCommentRepository.findById(postComment.getId())).willReturn(Optional.of(postComment));
+        given(postCommentRepository.findByIdAndIsDeletedFalse(postComment.getId())).willReturn(Optional.of(postComment));
 
         // when
         final UnauthorizedException ex = assertThrows(
@@ -306,7 +306,7 @@ public class PostCommentServiceTest {
         // given
         CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent");
 
-        given(postCommentRepository.findById(postComment.getId())).willReturn(Optional.of(postComment));
+        given(postCommentRepository.findByIdAndIsDeletedFalse(postComment.getId())).willReturn(Optional.of(postComment));
 
         given(postCommentRepository.save(postComment)).willReturn(postComment);
 
@@ -326,7 +326,7 @@ public class PostCommentServiceTest {
         // given
         CommentUpdateRequestDto commentUpdateRequestDto = new CommentUpdateRequestDto("updateContent");
 
-        given(postCommentRepository.findById(postComment.getId())).willReturn(Optional.of(postComment));
+        given(postCommentRepository.findByIdAndIsDeletedFalse(postComment.getId())).willReturn(Optional.of(postComment));
 
         // when
         final UnauthorizedException ex = assertThrows(

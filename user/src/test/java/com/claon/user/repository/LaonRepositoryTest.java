@@ -97,7 +97,7 @@ public class LaonRepositoryTest {
         String userId = laonUser.getId();
 
         // when
-        var userIdList = laonRepository.getUserIdsByLaonId(userId);
+        var userIdList = laonRepository.findUserIdsByLaonId(userId);
 
         // then
         assertThat(userIdList.size()).isEqualTo(1);

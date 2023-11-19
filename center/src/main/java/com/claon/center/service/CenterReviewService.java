@@ -32,12 +32,7 @@ public class CenterReviewService {
             String centerId,
             ReviewRequestDto reviewRequestDto
     ) {
-        Center center = centerRepository.findById(centerId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장을 찾을 수 없습니다."
-                )
-        );
+        Center center = findCenterById(centerId);
 
         this.reviewRepository.findByUserIdAndCenterId(userInfo.id(), center.getId()).ifPresent(
                 review -> {
@@ -66,12 +61,7 @@ public class CenterReviewService {
             String reviewId,
             ReviewRequestDto requestDto
     ) {
-        CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "리뷰를 찾을 수 없습니다."
-                )
-        );
+        CenterReview review = findReviewById(reviewId);
 
         IdEqualValidator.of(review.getWriterId(), userInfo.id()).validate();
 
@@ -85,12 +75,7 @@ public class CenterReviewService {
             RequestUserInfo userInfo,
             String reviewId
     ) {
-        CenterReview review = reviewRepository.findById(reviewId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "리뷰를 찾을 수 없습니다."
-                )
-        );
+        CenterReview review = findReviewById(reviewId);
 
         IdEqualValidator.of(review.getWriterId(), userInfo.id()).validate();
 
@@ -105,12 +90,7 @@ public class CenterReviewService {
             String centerId,
             Pageable pageable
     ) {
-        Center center = centerRepository.findById(centerId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장을 찾을 수 없습니다."
-                )
-        );
+        Center center = findCenterById(centerId);
 
         return CenterReviewResponseDto.from(
                 center.getId(),
@@ -121,6 +101,24 @@ public class CenterReviewService {
                 this.paginationFactory.create(
                         reviewRepositorySupport.findByCenterExceptBlockUserAndSelf(center.getId(), userInfo.id(), pageable)
                                 .map(ReviewDetailResponseDto::from)
+                )
+        );
+    }
+
+    private Center findCenterById(String centerId) {
+        return this.centerRepository.findById(centerId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "암장을 찾을 수 없습니다."
+                )
+        );
+    }
+
+    private CenterReview findReviewById(String reviewId) {
+        return this.reviewRepository.findById(reviewId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "리뷰를 찾을 수 없습니다."
                 )
         );
     }

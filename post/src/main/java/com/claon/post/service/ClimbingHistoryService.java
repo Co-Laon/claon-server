@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,24 +22,19 @@ public class ClimbingHistoryService {
     public List<UserPostInfoResponseDto> findClimbingHistory(String userId) {
         List<String> postIds = this.postRepository.selectPostIdsByUserId(userId);
 
-        List<ClimbingHistory> climbingHistories = climbingHistoryRepository.findByPostIds(postIds);
-
-        Map<String, Map<String, Integer>> historyMap = climbingHistories.stream().collect(
-                Collectors.groupingBy(history -> history.getPost().getCenterId(),
+        return climbingHistoryRepository.findByPostIds(postIds)
+                .stream().collect(Collectors.groupingBy(history -> history.getPost().getCenterId(),
                         Collectors.toMap(
                                 ClimbingHistory::getHoldInfoId,
                                 ClimbingHistory::getClimbingCount,
                                 Integer::sum
-                        )
-                ));
-
-        return historyMap.entrySet()
-                .stream()
+                        )))
+                .entrySet().stream()
                 .map(entry -> UserPostInfoResponseDto.from(
                         entry.getKey(),
                         postIds.size(),
-                        entry.getValue().entrySet()
-                                .stream()
+                        entry.getValue()
+                                .entrySet().stream()
                                 .map(en -> ClimbingHistoryResponseDto.from(en.getKey(), en.getValue()))
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());

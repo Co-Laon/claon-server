@@ -23,5 +23,5 @@ public interface LaonRepository extends JpaRepository<Laon, String> {
             FROM TB_LAON AS l
             WHERE l.laon_id = :userId
             """, nativeQuery = true)
-    List<String> getUserIdsByLaonId(@Param("userId") String userId);
+    List<String> findUserIdsByLaonId(@Param("userId") String userId);
 }

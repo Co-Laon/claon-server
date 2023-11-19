@@ -28,19 +28,26 @@ public class UserService {
     public JwtDto signIn(
             SignInRequestDto signInRequestDto
     ) {
-        User user = this.userRepository.findByEmail(signInRequestDto.email())
+        return this.userRepository.findByEmail(signInRequestDto.email())
+                .map(user -> this.jwtUtil.createToken(user.getId()))
                 .orElseThrow(() -> new UnauthorizedException(
                         ErrorCode.USER_DOES_NOT_EXIST,
                         "이용자를 찾을 수 없습니다."
                 ));
-
-        return this.jwtUtil.createToken(user.getId());
     }
 
     @Transactional
     public JwtDto signUp(
             SignUpRequestDto signUpRequestDto
     ) {
+        userRepository.findByNickname(signUpRequestDto.nickname())
+                .ifPresent(user -> {
+                    throw new UnauthorizedException(
+                            ErrorCode.ROW_ALREADY_EXIST,
+                            "이미 존재하는 닉네임입니다."
+                    );
+                });
+
         User user = User.signUp(
                 signUpRequestDto.email(),
                 signUpRequestDto.nickname(),

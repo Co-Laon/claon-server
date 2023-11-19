@@ -31,12 +31,7 @@ public class PostLikeService {
 
     @Transactional
     public LikeResponseDto createLike(RequestUserInfo userInfo, String postId) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
+        Post post = findPostById(postId);
 
         postLikeRepository.findByLikerIdAndPost(userInfo.id(), post).ifPresent(
                 like -> {
@@ -55,12 +50,7 @@ public class PostLikeService {
 
     @Transactional
     public LikeResponseDto deleteLike(RequestUserInfo userInfo, String postId) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
+        Post post = findPostById(postId);
 
         PostLike like = postLikeRepository.findByLikerIdAndPost(userInfo.id(), post).orElseThrow(
                 () -> new BadRequestException(
@@ -83,25 +73,33 @@ public class PostLikeService {
             String postId,
             Pageable pageable
     ) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
+        Post post = findPostById(postId);
 
-        if (!post.getWriterId().equals(userInfo.id())) {
-            if (!blockUserRepository.findBlock(userInfo.id(), post.getWriterId()).isEmpty()) {
-                throw new UnauthorizedException(
-                        ErrorCode.NOT_ACCESSIBLE,
-                        String.format("%s을 찾을 수 없습니다.", post.getWriterId())
-                );
-            }
-        }
+        validateBlockedUser(userInfo, post.getWriterId());
 
         return this.paginationFactory.create(
                 postLikeRepositorySupport.findAllByPost(post.getId(), userInfo.id(), pageable)
                         .map(LikerResponseDto::from)
         );
+    }
+
+    private Post findPostById(String postId) {
+        return postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "게시글을 찾을 수 없습니다."
+                )
+        );
+    }
+
+    private void validateBlockedUser(RequestUserInfo userInfo, String writerId) {
+        if (!userInfo.id().equals(writerId)) {
+            if (!blockUserRepository.findBlock(userInfo.id(), writerId).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", writerId)
+                );
+            }
+        }
     }
 }

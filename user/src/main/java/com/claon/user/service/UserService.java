@@ -15,7 +15,6 @@ import com.claon.user.repository.UserRepository;
 import com.claon.user.repository.UserRepositorySupport;
 import com.claon.user.service.client.PostClient;
 import com.claon.user.service.client.dto.PostThumbnailResponse;
-import com.claon.user.service.client.dto.UserPostInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,39 +35,30 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserDetailResponseDto retrieveMe(RequestUserInfo userInfo) {
-        User requestUser = userRepository.findById(userInfo.id())
-                .orElseThrow(() -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
-                ));
+        User requestUser = findUserById(userInfo.id());
 
-        List<String> userIds = this.laonRepository.getUserIdsByLaonId(userInfo.id());
-        Long laonCount = (long) userIds.size();
-
-        List<UserPostInfoResponse> postInfoList = postClient.findHistoriesByUserId(userInfo.id());
-
-        return UserDetailResponseDto.from(requestUser, laonCount, postInfoList);
+        return UserDetailResponseDto.from(
+                requestUser,
+                (long) laonRepository.findUserIdsByLaonId(userInfo.id()).size(),
+                postClient.findHistoriesByUserId(userInfo.id())
+        );
     }
 
     @Transactional(readOnly = true)
-    public UserDetailResponseDto getOtherUserInformation(
+    public UserDetailResponseDto findUserById(
             RequestUserInfo userInfo,
             String targetId
     ) {
-        User targetUser = this.userRepository.findById(targetId)
-                .orElseThrow(() -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", targetId)
-                ));
+        User targetUser = findUserById(targetId);
 
-        List<String> userIds = this.laonRepository.getUserIdsByLaonId(targetUser.getId());
-        Long laonCount = (long) userIds.size();
+        List<String> userIds = laonRepository.findUserIdsByLaonId(targetUser.getId());
 
-        boolean isLaon = userIds.contains(userInfo.id());
-
-        List<UserPostInfoResponse> postInfoList = postClient.findHistoriesByUserId(targetUser.getId());
-
-        return UserDetailResponseDto.from(targetUser, laonCount, isLaon, postInfoList);
+        return UserDetailResponseDto.from(
+                targetUser,
+                (long) userIds.size(),
+                userIds.contains(userInfo.id()),
+                postClient.findHistoriesByUserId(targetUser.getId())
+        );
     }
 
     @Transactional
@@ -77,12 +67,7 @@ public class UserService {
             String targetId,
             Pageable pageable
     ) {
-        User targetUser = userRepository.findById(targetId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", targetId)
-                )
-        );
+        User targetUser = findUserById(targetId);
 
         // individual user page
         if (!userInfo.id().equals(targetUser.getId())) {
@@ -104,10 +89,10 @@ public class UserService {
             Pageable pageable
     ) {
         return paginationFactory.create(
-                this.userRepositorySupport.searchUser(userInfo.id(), nickname, pageable).map(
-                        u -> UserPreviewResponseDto.from(
-                                u,
-                                laonRepository.findByLaonIdAndUserId(u.getId(), userInfo.id()).isPresent()))
+                this.userRepositorySupport.searchUser(userInfo.id(), nickname, pageable)
+                        .map(user -> UserPreviewResponseDto.from(
+                                user,
+                                laonRepository.findByLaonIdAndUserId(user.getId(), userInfo.id()).isPresent()))
         );
     }
 
@@ -116,12 +101,15 @@ public class UserService {
             RequestUserInfo userInfo,
             UserModifyRequestDto dto
     ) {
-        User user = userRepository.findById(userInfo.id()).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
-                )
-        );
+        User user = findUserById(userInfo.id());
+
+        userRepository.findByNickname(dto.nickname())
+                .ifPresent(u -> {
+                    throw new UnauthorizedException(
+                            ErrorCode.ROW_ALREADY_EXIST,
+                            "이미 존재하는 닉네임입니다."
+                    );
+                });
 
         user.modifyUser(
                 dto.nickname(),
@@ -134,25 +122,24 @@ public class UserService {
 
     @Transactional
     public void delete(RequestUserInfo userInfo) {
-        User user = userRepository.findById(userInfo.id()).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
-                )
-        );
+        User user = findUserById(userInfo.id());
 
         this.userRepository.delete(user);
     }
 
     @Transactional(readOnly = true)
     public UserResponseDto retrieveMyAccount(RequestUserInfo userInfo) {
-        User user = userRepository.findById(userInfo.id()).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
-                )
-        );
+        User user = findUserById(userInfo.id());
 
         return UserResponseDto.from(user);
+    }
+
+    private User findUserById(String id) {
+        return userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        String.format("%s을 찾을 수 없습니다.", id)
+                )
+        );
     }
 }

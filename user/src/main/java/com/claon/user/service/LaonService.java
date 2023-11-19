@@ -31,34 +31,19 @@ public class LaonService {
 
     @Transactional
     public void createLaon(RequestUserInfo userInfo, String laonId) {
-        User user = userRepository.findById(userInfo.id()).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
-                )
-        );
+        User user = findUserById(userInfo.id());
 
-        User laon = userRepository.findById(laonId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", laonId)
-                )
-        );
+        User laon = findUserById(laonId);
 
         NotIdEqualValidator.of(user.getId(), laon.getId(), Laon.domain).validate();
 
-        if (!blockUserRepository.findBlock(user.getId(), laon.getId()).isEmpty()) {
-            throw new UnauthorizedException(
-                    ErrorCode.NOT_ACCESSIBLE,
-                    String.format("%s을 찾을 수 없습니다.", laonId)
-            );
-        }
+        validateBlockUser(userInfo, laonId);
 
         laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId()).ifPresent(
                 l -> {
                     throw new BadRequestException(
                             ErrorCode.ROW_ALREADY_EXIST,
-                            String.format("%s을 이미 라온했습니다.", laon)
+                            String.format("%s을 이미 라온했습니다.", l.getId())
                     );
                 }
         );
@@ -68,24 +53,14 @@ public class LaonService {
 
     @Transactional
     public void deleteLaon(RequestUserInfo userInfo, String laonId) {
-        User user = userRepository.findById(userInfo.id()).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
-                )
-        );
+        User user = findUserById(userInfo.id());
 
-        User laon = userRepository.findById(laonId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", laonId)
-                )
-        );
+        User laon = findUserById(laonId);
 
         Laon laonRelation = laonRepository.findByLaonIdAndUserId(laon.getId(), user.getId()).orElseThrow(
                 () -> new BadRequestException(
                         ErrorCode.ROW_DOES_NOT_EXIST,
-                        String.format("%s을 아직 라온하지 않았습니다.", laon)
+                        String.format("%s을 아직 라온하지 않았습니다.", laonId)
                 )
         );
 
@@ -97,5 +72,23 @@ public class LaonService {
         return this.paginationFactory.create(
                 laonRepositorySupport.findAllByUserId(userInfo.id(), pageable)
         );
+    }
+
+    private User findUserById(String id) {
+        return userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        String.format("%s을 찾을 수 없습니다.", id)
+                )
+        );
+    }
+
+    private void validateBlockUser(RequestUserInfo userInfo, String laonId) {
+        if (!blockUserRepository.findBlock(userInfo.id(), laonId).isEmpty()) {
+            throw new UnauthorizedException(
+                    ErrorCode.NOT_ACCESSIBLE,
+                    String.format("%s을 찾을 수 없습니다.", laonId)
+            );
+        }
     }
 }

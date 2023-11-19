@@ -31,19 +31,9 @@ public class BlockUserService {
             RequestUserInfo userInfo,
             String blockId
     ) {
-        User user = userRepository.findById(userInfo.id()).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
-                )
-        );
+        User user = findUserById(userInfo.id());
 
-        User blockUser = userRepository.findById(blockId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", blockId)
-                )
-        );
+        User blockUser = findUserById(blockId);
 
         NotIdEqualValidator.of(user.getId(), blockUser.getId(), BlockUser.domain).validate();
 
@@ -66,19 +56,9 @@ public class BlockUserService {
             RequestUserInfo userInfo,
             String blockId
     ) {
-        User user = userRepository.findById(userInfo.id()).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
-                )
-        );
+        User user = findUserById(userInfo.id());
 
-        User blockUser = userRepository.findById(blockId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", blockId)
-                )
-        );
+        User blockUser = findUserById(blockId);
 
         BlockUser blockedRelation = blockUserRepository.findByUserIdAndBlockId(user.getId(), blockUser.getId()).orElseThrow(
                 () -> new BadRequestException(
@@ -95,16 +75,20 @@ public class BlockUserService {
             RequestUserInfo userInfo,
             Pageable pageable
     ) {
-        User user = userRepository.findById(userInfo.id()).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        String.format("%s을 찾을 수 없습니다.", userInfo.id())
-                )
-        );
+        User user = findUserById(userInfo.id());
 
         return this.paginationFactory.create(
                 this.blockUserRepository.findByUser(user, pageable)
                         .map(BlockUserResponseDto::from)
+        );
+    }
+
+    private User findUserById(String id) {
+        return userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        String.format("%s을 찾을 수 없습니다.", id)
+                )
         );
     }
 }

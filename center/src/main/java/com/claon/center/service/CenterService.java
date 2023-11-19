@@ -83,12 +83,7 @@ public class CenterService {
 
     @Transactional(readOnly = true)
     public CenterDetailResponseDto findCenter(RequestUserInfo userInfo, String centerId) {
-        Center center = centerRepository.findById(centerId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장을 찾을 수 없습니다."
-                )
-        );
+        Center center = findCenterById(centerId);
 
         Boolean isBookmarked = centerBookmarkRepository.findByUserIdAndCenterId(userInfo.id(), centerId).isPresent();
         Long postCount = postClient.countPostsByCenterId(userInfo.id(), centerId);
@@ -105,15 +100,8 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
-    public List<HoldInfoResponseDto> findHoldInfoByCenterId(
-            String centerId
-    ) {
-        Center center = centerRepository.findById(centerId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장을 찾을 수 없습니다."
-                )
-        );
+    public List<HoldInfoResponseDto> findHoldInfoByCenterId(String centerId) {
+        Center center = findCenterById(centerId);
 
         return holdInfoRepository.findAllByCenter(center)
                 .stream()
@@ -146,12 +134,7 @@ public class CenterService {
             String centerId,
             CenterReportRequestDto centerReportRequestDto
     ) {
-        Center center = centerRepository.findById(centerId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "암장을 찾을 수 없습니다."
-                )
-        );
+        Center center = findCenterById(centerId);
 
         return CenterReportResponseDto.from(
                 this.centerReportRepository.save(
@@ -182,20 +165,25 @@ public class CenterService {
             Optional<String> holdId,
             Pageable pageable
     ) {
-        Center center = centerRepository.findById(centerId).orElseThrow(
+        Center center = findCenterById(centerId);
+
+        holdId.ifPresent(s -> holdInfoRepository.findByIdAndCenter(s, center)
+                .orElseThrow(
+                        () -> new NotFoundException(
+                                ErrorCode.DATA_DOES_NOT_EXIST,
+                                "홀드를 찾을 수 없습니다."
+                        )
+                ));
+
+        return this.postClient.findPostThumbnails(userInfo.id(), centerId, holdId, pageable);
+    }
+
+    private Center findCenterById(String centerId) {
+        return this.centerRepository.findById(centerId).orElseThrow(
                 () -> new NotFoundException(
                         ErrorCode.DATA_DOES_NOT_EXIST,
                         "암장을 찾을 수 없습니다."
                 )
         );
-
-        holdId.ifPresent(s -> holdInfoRepository.findByIdAndCenter(s, center).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "홀드를 찾을 수 없습니다."
-                )
-        ));
-
-        return this.postClient.findPostThumbnails(userInfo.id(), centerId, holdId, pageable);
     }
 }

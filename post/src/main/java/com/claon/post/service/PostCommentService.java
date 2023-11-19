@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -39,21 +40,17 @@ public class PostCommentService {
             String postId,
             CommentCreateRequestDto commentCreateRequestDto
     ) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
+        Post post = findPostById(postId);
 
-        if (!post.getWriterId().equals(userInfo.id())) {
-            if (!blockUserRepository.findBlock(userInfo.id(), post.getWriterId()).isEmpty()) {
-                throw new UnauthorizedException(
-                        ErrorCode.NOT_ACCESSIBLE,
-                        String.format("%s을 찾을 수 없습니다.", post.getWriterId())
+        validateBlockedUser(userInfo, post.getWriterId());
+
+        Function<String, PostComment> findParentComment = commentId -> postCommentRepository.findById(commentId)
+                .orElseThrow(
+                        () -> new NotFoundException(
+                                ErrorCode.DATA_DOES_NOT_EXIST,
+                                "상위 댓글을 찾을 수 없습니다."
+                        )
                 );
-            }
-        }
 
         return CommentResponseDto.from(
                 postCommentRepository.save(
@@ -62,16 +59,11 @@ public class PostCommentService {
                                 userInfo.id(),
                                 post,
                                 Optional.ofNullable(commentCreateRequestDto.parentCommentId())
-                                        .map(parentCommentId ->
-                                                postCommentRepository.findById(commentCreateRequestDto.parentCommentId())
-                                                        .orElseThrow(
-                                                                () -> new NotFoundException(
-                                                                        ErrorCode.DATA_DOES_NOT_EXIST,
-                                                                        "상위 댓글을 찾을 수 없습니다."
-                                                                )))
+                                        .map(findParentComment)
                                         .orElse(null)
                         )
-                ));
+                )
+        );
     }
 
     @Transactional(readOnly = true)
@@ -80,21 +72,9 @@ public class PostCommentService {
             String postId,
             Pageable pageable
     ) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "게시글을 찾을 수 없습니다."
-                )
-        );
+        Post post = findPostById(postId);
 
-        if (!post.getWriterId().equals(userInfo.id())) {
-            if (!blockUserRepository.findBlock(userInfo.id(), post.getWriterId()).isEmpty()) {
-                throw new UnauthorizedException(
-                        ErrorCode.NOT_ACCESSIBLE,
-                        String.format("%s을 찾을 수 없습니다.", post.getWriterId())
-                );
-            }
-        }
+        validateBlockedUser(userInfo, post.getWriterId());
 
         return this.paginationFactory.create(
                 postCommentRepositorySupport.findParentCommentByPost(post.getId(), userInfo.id(), pageable)
@@ -107,21 +87,10 @@ public class PostCommentService {
             String parentId,
             Pageable pageable
     ) {
-        PostComment postComment = postCommentRepository.findByIdAndIsDeletedFalse(parentId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "댓글을 찾을 수 없습니다."
-                )
-        );
+        PostComment postComment = findPostCommentById(parentId);
 
-        if (!postComment.getPost().getWriterId().equals(userInfo.id())) {
-            if (!blockUserRepository.findBlock(userInfo.id(), postComment.getPost().getWriterId()).isEmpty()) {
-                throw new UnauthorizedException(
-                        ErrorCode.NOT_ACCESSIBLE,
-                        String.format("%s을 찾을 수 없습니다.", postComment.getPost().getWriterId())
-                );
-            }
-        }
+
+        validateBlockedUser(userInfo, postComment.getWriterId());
 
         return this.paginationFactory.create(
                 postCommentRepositorySupport.findChildCommentByParentComment(postComment.getId(), userInfo.id(), pageable)
@@ -131,12 +100,7 @@ public class PostCommentService {
 
     @Transactional
     public CommentResponseDto deleteComment(RequestUserInfo userInfo, String commentId) {
-        PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "댓글을 찾을 수 없습니다."
-                )
-        );
+        PostComment postComment = findPostCommentById(commentId);
 
         IdEqualValidator.of(postComment.getWriterId(), userInfo.id()).validate();
 
@@ -151,17 +115,41 @@ public class PostCommentService {
             String commentId,
             CommentUpdateRequestDto commentUpdateRequestDto
     ) {
-        PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(
-                () -> new NotFoundException(
-                        ErrorCode.DATA_DOES_NOT_EXIST,
-                        "댓글을 찾을 수 없습니다."
-                )
-        );
+        PostComment postComment = findPostCommentById(commentId);
 
         IdEqualValidator.of(postComment.getWriterId(), userInfo.id()).validate();
 
         postComment.updateContent(commentUpdateRequestDto.content());
 
         return CommentResponseDto.from(postCommentRepository.save(postComment));
+    }
+
+    private Post findPostById(String postId) {
+        return postRepository.findByIdAndIsDeletedFalse(postId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "게시글을 찾을 수 없습니다."
+                )
+        );
+    }
+
+    private PostComment findPostCommentById(String commentId) {
+        return postCommentRepository.findByIdAndIsDeletedFalse(commentId).orElseThrow(
+                () -> new NotFoundException(
+                        ErrorCode.DATA_DOES_NOT_EXIST,
+                        "댓글을 찾을 수 없습니다."
+                )
+        );
+    }
+
+    private void validateBlockedUser(RequestUserInfo userInfo, String writerId) {
+        if (!userInfo.id().equals(writerId)) {
+            if (!blockUserRepository.findBlock(userInfo.id(), writerId).isEmpty()) {
+                throw new UnauthorizedException(
+                        ErrorCode.NOT_ACCESSIBLE,
+                        String.format("%s을 찾을 수 없습니다.", writerId)
+                );
+            }
+        }
     }
 }
